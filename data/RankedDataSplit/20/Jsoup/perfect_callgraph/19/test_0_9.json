@@ -1,0 +1,69 @@
+{
+    "bug_id": 19,
+    "test_id": 0,
+    "test_name": "org.jsoup.safety.CleanerTest.handlesCustomProtocols",
+    "test_body": "117: @Test public void handlesCustomProtocols() {\n118: String html = \"<img src='cid:12345' /> <img src='data:gzzt' />\";\n119: String dropped = Jsoup.clean(html, Whitelist.basicWithImages());\n120: assertEquals(\"<img /> \\n<img />\", dropped);\n121: 122: String preserved = Jsoup.clean(html, Whitelist.basicWithImages().addProtocols(\"img\", \"src\", \"cid\", \"data\"));\n123: assertEquals(\"<img src=\\\"cid:12345\\\" /> \\n<img src=\\\"data:gzzt\\\" />\", preserved);\n124: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Node$OuterHtmlVisitor:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(Node node, int depth) {\nnode.outerHtmlHead(accum, depth, out);\n}",
+            "method_id": 180
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node$OuterHtmlVisitor:tail(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void tail(Node node, int depth) {\nif (!node.nodeName().equals(\"#text\")) // saves a void hit.\nnode.outerHtmlTail(accum, depth, out);\n}",
+            "method_id": 181
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:isSafeAttribute(Ljava/lang/String;Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Attribute;)Z",
+            "method_body": "boolean isSafeAttribute(String tagName, Element el, Attribute attr) {\nTagName tag = TagName.valueOf(tagName);\nAttributeKey key = AttributeKey.valueOf(attr.getKey());\nif (attributes.containsKey(tag)) {\nif (attributes.get(tag).contains(key)) {\nif (protocols.containsKey(tag)) {\nMap<AttributeKey, Set<Protocol>> attrProts = protocols.get(tag);\nreturn !attrProts.containsKey(key) || testValidProtocol(el, attr, attrProts.get(key));\n}",
+            "method_id": 182
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:getEnforcedAttributes(Ljava/lang/String;)Lorg/jsoup/nodes/Attributes;",
+            "method_body": "Attributes getEnforcedAttributes(String tagName) {\nAttributes attrs = new Attributes();\nTagName tag = TagName.valueOf(tagName);\nif (enforcedAttributes.containsKey(tag)) {\nreturn attrs;\n}",
+            "method_id": 183
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$TypedValue:hashCode()I",
+            "method_body": "public int hashCode() {\nfinal int prime = 31;\nint result = 1;\nresult = prime * result + ((value == null) ? 0 : value.hashCode());\nreturn result;\n}",
+            "method_id": 184
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$TypedValue:equals(Ljava/lang/Object;)Z",
+            "method_body": "public boolean equals(Object obj) {\nif (this == obj) return true;\nif (obj == null) return false;\nif (getClass() != obj.getClass()) return false;\nTypedValue other = (TypedValue) obj;\nif (value == null) {\n} else if (!value.equals(other.value)) return false;\nreturn true;\n}",
+            "method_id": 185
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$TypedValue:toString()Ljava/lang/String;",
+            "method_body": "public String toString() {\nreturn value;\n}",
+            "method_id": 186
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:<init>(Lorg/jsoup/safety/Whitelist;)V",
+            "method_body": "public Cleaner(Whitelist whitelist) {\nValidate.notNull(whitelist);\nthis.whitelist = whitelist;\n}",
+            "method_id": 187
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:clean(Lorg/jsoup/nodes/Document;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document clean(Document dirtyDocument) {\nValidate.notNull(dirtyDocument);\nDocument clean = Document.createShell(dirtyDocument.baseUri());\ncopySafeNodes(dirtyDocument.body(), clean.body());\nreturn clean;\n}",
+            "method_id": 188
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:copySafeNodes(Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Element;)I",
+            "method_body": "private int copySafeNodes(Element source, Element dest) {\nList<Node> sourceChildren = source.childNodes();\nint numDiscarded = 0;\nfor (Node sourceChild : sourceChildren) {\nif (sourceChild instanceof Element) {\nElement sourceEl = (Element) sourceChild;\nif (whitelist.isSafeTag(sourceEl.tagName())) { // safe, clone and copy safe attrs\nElementMeta meta = createSafeElement(sourceEl);\nElement destChild = meta.el;\ndest.appendChild(destChild);\nnumDiscarded += meta.numAttribsDiscarded;\nnumDiscarded += copySafeNodes(sourceEl, destChild); // recurs\n} else { // not a safe tag, but it may have children (els or text) that are, so recurse\n} else if (sourceChild instanceof TextNode) {\nTextNode sourceText = (TextNode) sourceChild;\nTextNode destText = new TextNode(sourceText.getWholeText(), sourceChild.baseUri());\ndest.appendChild(destText);\n}\nreturn numDiscarded;\n}",
+            "method_id": 189
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:createSafeElement(Lorg/jsoup/nodes/Element;)Lorg/jsoup/safety/Cleaner$ElementMeta;",
+            "method_body": "private ElementMeta createSafeElement(Element sourceEl) {\nString sourceTag = sourceEl.tagName();\nAttributes destAttrs = new Attributes();\nElement dest = new Element(Tag.valueOf(sourceTag), sourceEl.baseUri(), destAttrs);\nint numDiscarded = 0;\nAttributes sourceAttrs = sourceEl.attributes();\nfor (Attribute sourceAttr : sourceAttrs) {\nif (whitelist.isSafeAttribute(sourceTag, sourceEl, sourceAttr))\nnumDiscarded++;\n}\nAttributes enforcedAttrs = whitelist.getEnforcedAttributes(sourceTag);\ndestAttrs.addAll(enforcedAttrs);\nreturn new ElementMeta(dest, numDiscarded);\n}",
+            "method_id": 190
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner$ElementMeta:<init>(Lorg/jsoup/nodes/Element;I)V",
+            "method_body": "ElementMeta(Element el, int numAttribsDiscarded) {\nthis.el = el;\nthis.numAttribsDiscarded = numAttribsDiscarded;\n}",
+            "method_id": 191
+        }
+    ]
+}

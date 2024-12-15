@@ -1,0 +1,109 @@
+{
+    "bug_id": 74,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.ElementTest.testNormalizesInvisiblesInText",
+    "test_body": "1204: @Test public void testNormalizesInvisiblesInText() {\n1205: // return Character.getType(c) == 16 && (c == 8203 || c == 8204 || c == 8205 || c == 173);\n1206: String escaped = \"This&shy;is&#x200b;one&#x200c;long&#x200d;word\";\n1207: String decoded = \"This\\u00ADis\\u200Bone\\u200Clong\\u200Dword\"; // browser would not display those soft hyphens / other chars, so we don't want them in the text\n1208: 1209: Document doc = Jsoup.parse(\"<p>\" + escaped);\n1210: Element p = doc.select(\"p\").first();\n1211: doc.outputSettings().charset(\"ascii\"); // so that the outer html is easier to see with escaped invisibles\n1212: assertEquals(\"Thisisonelongword\", p.text()); // text is normalized\n1213: assertEquals(\"<p>\" + escaped + \"</p>\", p.outerHtml()); // html / whole text keeps &shy etc;\n1214: assertEquals(decoded, p.textNodes().get(0).getWholeText());\n1215: 1216: Element matched = doc.select(\"p:contains(Thisisonelongword)\").first(); // really just oneloneword, no invisibles\n1217: assertEquals(\"p\", matched.nodeName());\n1218: assertTrue(matched.is(\":containsOwn(Thisisonelongword)\"));\n1219: 1220: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$4:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.normalName();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\n} else if (name.equals(\"head\")) {\nreturn anythingElse(t, tb);\nToken.EndTag end = t.asEndTag();\nname = end.normalName();\nif (name.equals(\"head\")) {\ntb.pop();\ntb.transition(AfterHead);\nreturn true;\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.jsoup.parser.ParseSettings:<clinit>()V",
+            "method_body": "public static final ParseSettings htmlDefault;\nhtmlDefault = new ParseSettings(false, false);\npreserveCase = new ParseSettings(true, true);\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:nodeName()Ljava/lang/String;",
+            "method_body": "public String nodeName() {\nreturn \"#text\";\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.jsoup.helper.ChangeNotifyingArrayList:add(Ljava/lang/Object;)Z",
+            "method_body": "public boolean add(E e) {\nonContentsChanged();\nreturn super.add(e);\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:register(Lorg/jsoup/parser/Tag;)V",
+            "method_body": "private static void register(Tag tag) {\ntags.put(tag.tagName, tag);\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$6:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\n} else if (t.isComment()) {\n} else if (t.isDoctype()) {\n} else if (t.isStartTag()) {\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.normalName();\nif (name.equals(\"html\")) {\n} else if (name.equals(\"body\")) {\ntb.insert(startTag);\ntb.framesetOk(false);\ntb.transition(InBody);\n} else if (name.equals(\"frameset\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"link\", \"meta\", \"noframes\", \"script\", \"style\", \"title\")) {\n} else if (name.equals(\"head\")) {\nanythingElse(t, tb);\n} else if (t.isEndTag()) {\nreturn true;\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities$EscapeMode:codepointForName(Ljava/lang/String;)I",
+            "method_body": "int codepointForName(final String name) {\nint index = Arrays.binarySearch(nameKeys, name);\nreturn index >= 0 ? codeVals[index] : empty;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:bufferUp()V",
+            "method_body": "private void bufferUp() {\nif (bufPos < bufSplitPoint)\nreturn;\nreaderPos += bufPos;\nreader.skip(bufPos);\nreader.mark(maxBufferLen);\nbufLength = reader.read(charBuf);\nreader.reset();\nbufPos = 0;\nbufMark = 0;\nbufSplitPoint = bufLength > readAheadLimit ? readAheadLimit : bufLength;\n}\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:runParser()V",
+            "method_body": "protected void runParser() {\nToken token = tokeniser.read();\nprocess(token);\ntoken.reset();\nif (token.type == Token.TokenType.EOF)\nbreak;\n}\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:tagName()Ljava/lang/String;",
+            "method_body": "public String tagName() {\nreturn tag.getName();\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchChomp(Ljava/lang/String;)Z",
+            "method_body": "public boolean matchChomp(String seq) {\nif (matches(seq)) {\nreturn false;\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:appendNormalisedWhitespace(Ljava/lang/StringBuilder;Ljava/lang/String;Z)V",
+            "method_body": "public static void appendNormalisedWhitespace(StringBuilder accum, String string, boolean stripLeading) {\nboolean lastWasWhite = false;\nboolean reachedNonWhite = false;\nint len = string.length();\nfor (int i = 0; i < len; i+= Character.charCount(c)) {\nc = string.codePointAt(i);\nif (isActuallyWhitespace(c)) {\naccum.appendCodePoint(c);\nlastWasWhite = false;\nreachedNonWhite = true;\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matches(C)Z",
+            "method_body": "boolean matches(char c) {\nreturn !isEmpty() && charBuf[bufPos] == c;\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.jsoup.select.Evaluator$Tag:<init>(Ljava/lang/String;)V",
+            "method_body": "public abstract boolean matches(Element root, Element element);\npublic Tag(String tagName) {\nthis.tagName = tagName;\n}\nreturn (element.tagName().equalsIgnoreCase(tagName));\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:<clinit>()V",
+            "method_body": "private static final int MaxCachedBuilderSize = 8 * 1024;\nprivate static final ThreadLocal<StringBuilder> stringLocal = new ThreadLocal<StringBuilder>(){\n};",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:in(Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "public static boolean in(final String needle, final String... haystack) {\nfinal int len = haystack.length;\nfor (int i = 0; i < len; i++) {\nif (haystack[i].equals(needle))\nreturn false;\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:findElements()V",
+            "method_body": "private void findElements() {\nif (tq.matchChomp(\"#\"))\nelse if (tq.matchChomp(\".\"))\nelse if (tq.matchesWord() || tq.matches(\"*|\"))\nbyTag();\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matches(Ljava/lang/String;)Z",
+            "method_body": "boolean matches(String seq) {\nbufferUp();\nint scanLength = seq.length();\nif (scanLength > bufLength - bufPos)\nfor (int offset = 0; offset < scanLength; offset++)\nif (seq.charAt(offset) != charBuf[bufPos +offset])\nreturn false;\nreturn true;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token:isDoctype()Z",
+            "method_body": "final boolean isDoctype() {\nreturn type == TokenType.Doctype;\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:inScope(Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "boolean inScope(String targetName, String[] extras) {\nreturn inSpecificScope(targetName, TagsSearchInScope, extras);\n}",
+            "method_id": 79
+        }
+    ]
+}

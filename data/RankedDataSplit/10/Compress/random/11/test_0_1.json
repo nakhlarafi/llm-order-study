@@ -1,0 +1,59 @@
+{
+    "bug_id": 11,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.shortTextFilesAreNoTARs",
+    "test_body": "32: public void shortTextFilesAreNoTARs() throws Exception {\n33: try {\n34: new ArchiveStreamFactory()\n35: .createArchiveInputStream(new ByteArrayInputStream(\"This certainly is not a tar archive, really, no kidding\".getBytes()));\n36: fail(\"created an input stream for a non-archive\");\n37: } catch (ArchiveException ae) {\n38: assertTrue(ae.getMessage().startsWith(\"No Archiver found\"));\n39: }\n40: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:getNextTarEntry()Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;",
+            "method_body": "public TarArchiveEntry getNextTarEntry() throws IOException {\nif (hasHitEOF) {\nif (currEntry != null) {\nbyte[] headerBuf = getRecord();\nif (hasHitEOF) {\ncurrEntry = new TarArchiveEntry(headerBuf);\nentryOffset = 0;\nentrySize = currEntry.getSize();\nif (currEntry.isGNULongNameEntry()) {\nif (currEntry.isPaxHeader()){ // Process Pax headers\nif (currEntry.isGNUSparse()){ // Process sparse files\nentrySize = currEntry.getSize();\nreturn currEntry;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ar.ArArchiveInputStream:<clinit>()V",
+            "method_body": "static final String BSD_LONGNAME_PREFIX = \"#1/\";\nprivate static final int BSD_LONGNAME_PREFIX_LEN =\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:initialize(II)V",
+            "method_body": "private void initialize(int blockSize, int recordSize) {\nthis.blockSize = blockSize;\nthis.recordSize = recordSize;\nthis.recsPerBlock = (this.blockSize / this.recordSize);\nthis.blockBuffer = new byte[this.blockSize];\nif (this.inStream != null) {\nthis.currBlkIdx = -1;\nthis.currRecIdx = this.recsPerBlock;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.jar.JarArchiveInputStream:matches([BI)Z",
+            "method_body": "public static boolean matches(byte[] signature, int length ) {\nreturn ZipArchiveInputStream.matches(signature, length);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream:matches([BI)Z",
+            "method_body": "public static boolean matches(byte[] signature, int length) {\nif (length < 6) {\nif (signature[0] == 0x71 && (signature[1] & 0xFF) == 0xc7) {\nif (signature[1] == 0x71 && (signature[0] & 0xFF) == 0xc7) {\nif (signature[0] != 0x30) {\nreturn false;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:getRecord()[B",
+            "method_body": "private byte[] getRecord() throws IOException {\nif (hasHitEOF) {\nbyte[] headerBuf = buffer.readRecord();\nif (headerBuf == null) {\n} else if (buffer.isEOFRecord(headerBuf)) {\nreturn hasHitEOF ? null : headerBuf;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:getNextEntry()Lorg/apache/commons/compress/archivers/ArchiveEntry;",
+            "method_body": "public ArchiveEntry getNextEntry() throws IOException {\nreturn getNextTarEntry();\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctalOrBinary([BII)J",
+            "method_body": "public static long parseOctalOrBinary(final byte[] buffer, final int offset,\nif ((buffer[offset] & 0x80) == 0) {\nreturn parseOctal(buffer, offset, length);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:<clinit>()V",
+            "method_body": "private static final int BYTE_1 = 1;\npublic static final ZipLong CFH_SIG = new ZipLong(0X02014B50L);\npublic static final ZipLong LFH_SIG = new ZipLong(0X04034B50L);\npublic static final ZipLong DD_SIG = new ZipLong(0X08074B50L);\nstatic final ZipLong ZIP64_MAGIC = new ZipLong(ZipConstants.ZIP64_MAGIC);\npublic ZipLong(long value) {\nthis.value = value;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveStreamFactory:createArchiveInputStream(Ljava/io/InputStream;)Lorg/apache/commons/compress/archivers/ArchiveInputStream;",
+            "method_body": "public ArchiveInputStream createArchiveInputStream(final InputStream in)\nif (in == null) {\nif (!in.markSupported()) {\nfinal byte[] signature = new byte[12];\nin.mark(signature.length);\nint signatureLength = in.read(signature);\nin.reset();\nif (ZipArchiveInputStream.matches(signature, signatureLength)) {\n} else if (JarArchiveInputStream.matches(signature, signatureLength)) {\n} else if (ArArchiveInputStream.matches(signature, signatureLength)) {\n} else if (CpioArchiveInputStream.matches(signature, signatureLength)) {\nfinal byte[] dumpsig = new byte[32];\nin.mark(dumpsig.length);\nsignatureLength = in.read(dumpsig);\nin.reset();\nif (DumpArchiveInputStream.matches(dumpsig, signatureLength)) {\nfinal byte[] tarheader = new byte[512];\nin.mark(tarheader.length);\nsignatureLength = in.read(tarheader);\nin.reset();\nif (TarArchiveInputStream.matches(tarheader, signatureLength)) {\nTarArchiveInputStream tais = new TarArchiveInputStream(new ByteArrayInputStream(tarheader));\ntais.getNextEntry();\nreturn new TarArchiveInputStream(in);\n}",
+            "method_id": 19
+        }
+    ]
+}

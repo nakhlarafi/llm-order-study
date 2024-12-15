@@ -1,0 +1,59 @@
+{
+    "bug_id": 26,
+    "test_id": 7,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testWithMinuteOfHourInDstChange_mockZone",
+    "test_body": "public void testWithMinuteOfHourInDstChange_mockZone() {\nDateTime cutover = new DateTime(2010, 10, 31, 1, 15, DateTimeZone.forOffsetHoursMinutes(0, 30));\nassertEquals(\"2010-10-31T01:15:00.000+00:30\", cutover.toString());\nDateTimeZone halfHourZone = new MockZone(cutover.getMillis(), 3600000, -1800);\nDateTime pre = new DateTime(2010, 10, 31, 1, 0, halfHourZone);\nassertEquals(\"2010-10-31T01:00:00.000+01:00\", pre.toString());\nDateTime post = new DateTime(2010, 10, 31, 1, 59, halfHourZone);\nassertEquals(\"2010-10-31T01:59:00.000+00:30\", post.toString());\n1072: DateTime testPre1 = pre.withMinuteOfHour(30);\nassertEquals(\"2010-10-31T01:30:00.000+01:00\", testPre1.toString());  // retain offset\nDateTime testPre2 = pre.withMinuteOfHour(50);",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<...10-31T01:30:00.000+0[1:0]0> but was:<...10-31T01:30:00.000+0[0:3]0>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat junit.framework.TestCase.assertEquals(TestCase.java:269)\nat org.joda.time.TestDateTimeZoneCutover.testWithMinuteOfHourInDstChange_mockZone(TestDateTimeZoneCutover.java:1073)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDateTimeField:set(JI)J",
+            "method_body": "public long set(long instant, int value) {\nlong localInstant = iZone.convertUTCToLocal(instant);\nlocalInstant = iField.set(localInstant, value);\nlong result = iZone.convertLocalToUTC(localInstant, false);\nif (get(result) != value) {\nreturn result;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:forOffsetHoursMinutes(II)Lorg/joda/time/DateTimeZone;",
+            "method_body": "public static DateTimeZone forOffsetHoursMinutes(int hoursOffset, int minutesOffset) throws IllegalArgumentException {\nif (hoursOffset == 0 && minutesOffset == 0) {\nif (minutesOffset < 0 || minutesOffset > 59) {\nint offset = 0;\nint hoursInMinutes = FieldUtils.safeMultiply(hoursOffset, 60);\nif (hoursInMinutes < 0) {\nminutesOffset = FieldUtils.safeAdd(hoursInMinutes, minutesOffset);\noffset = FieldUtils.safeMultiply(minutesOffset, DateTimeConstants.MILLIS_PER_MINUTE);\n}\nreturn forOffsetMillis(offset);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.joda.time.field.FieldUtils:safeMultiply(II)I",
+            "method_body": "public static int safeMultiply(int val1, int val2) {\nlong total = (long) val1 * (long) val2;\nif (total < Integer.MIN_VALUE || total > Integer.MAX_VALUE) {\nreturn (int) total;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.joda.time.field.FieldUtils:safeAdd(II)I",
+            "method_body": "public static int safeAdd(int val1, int val2) {\nint sum = val1 + val2;\nif ((val1 ^ sum) < 0 && (val1 ^ val2) >= 0) {\nreturn sum;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:forOffsetMillis(I)Lorg/joda/time/DateTimeZone;",
+            "method_body": "public static DateTimeZone forOffsetMillis(int millisOffset) {\nString id = printOffset(millisOffset);\nreturn fixedOffsetZone(id, millisOffset);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:printOffset(I)Ljava/lang/String;",
+            "method_body": "private static String printOffset(int offset) {\nStringBuffer buf = new StringBuffer();\nif (offset >= 0) {\nbuf.append('+');\nint hours = offset / DateTimeConstants.MILLIS_PER_HOUR;\nFormatUtils.appendPaddedInteger(buf, hours, 2);\noffset -= hours * (int) DateTimeConstants.MILLIS_PER_HOUR;\nint minutes = offset / DateTimeConstants.MILLIS_PER_MINUTE;\nbuf.append(':');\nFormatUtils.appendPaddedInteger(buf, minutes, 2);\noffset -= minutes * DateTimeConstants.MILLIS_PER_MINUTE;\nif (offset == 0) {\nreturn buf.toString();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:fixedOffsetZone(Ljava/lang/String;I)Lorg/joda/time/DateTimeZone;",
+            "method_body": "private static synchronized DateTimeZone fixedOffsetZone(String id, int offset) {\nif (offset == 0) {\nif (iFixedOffsetCache == null) {\nReference<DateTimeZone> ref = iFixedOffsetCache.get(id);\nif (ref != null) {\nzone = ref.get();\nif (zone != null) {\nreturn zone;\nzone = new FixedDateTimeZone(id, null, offset, offset);\niFixedOffsetCache.put(id, new SoftReference<DateTimeZone>(zone));\nreturn zone;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.joda.time.tz.FixedDateTimeZone:<init>(Ljava/lang/String;Ljava/lang/String;II)V",
+            "method_body": "public FixedDateTimeZone(String id, String nameKey,\nsuper(id);\niNameKey = nameKey;\niWallOffset = wallOffset;\niStandardOffset = standardOffset;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:<init>(Ljava/lang/String;)V",
+            "method_body": "protected DateTimeZone(String id) {\nif (id == null) {\niID = id;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractDateTime:<init>()V",
+            "method_body": "protected AbstractDateTime() {\nsuper();\n}",
+            "method_id": 9
+        }
+    ]
+}

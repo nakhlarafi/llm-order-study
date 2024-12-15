@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207",
+    "test_body": "public void testIssue207() throws Exception\n{\nByteQuadsCanonicalizer nc = ByteQuadsCanonicalizer.createRoot(-523743345);\nField byteSymbolCanonicalizerField = JsonFactory.class.getDeclaredField(\"_byteSymbolCanonicalizer\");\nbyteSymbolCanonicalizerField.setAccessible(true);\nJsonFactory jsonF = new JsonFactory();\nbyteSymbolCanonicalizerField.set(jsonF, nc);\n110: StringBuilder stringBuilder = new StringBuilder();\nstringBuilder.append(\"{\\n\");\nstringBuilder.append(\"    \\\"expectedGCperPosition\\\": null\");\nfor (int i = 0; i < 60; ++i) {\nstringBuilder.append(\",\\n    \\\"\").append(i + 1).append(\"\\\": null\");\n}\nstringBuilder.append(\"\\n}\");\n118: JsonParser p = jsonF.createParser(stringBuilder.toString().getBytes(\"UTF-8\"));\nwhile (p.nextToken() != null) { }\np.close();",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 256\nat com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer.addName(ByteQuadsCanonicalizer.java:853)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.addName(UTF8StreamJsonParser.java:2340)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.parseEscapedName(UTF8StreamJsonParser.java:1980)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.slowParseName(UTF8StreamJsonParser.java:1867)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._parseName(UTF8StreamJsonParser.java:1651)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:740)\nat com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207(TestByteBasedSymbols.java:119)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.base.ParserMinimalBase:<init>(I)V",
+            "method_body": "protected ParserMinimalBase(int features) { super(features); }\nprotected ParserMinimalBase(int features) { super(features); }",
+            "method_id": 100
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:findName(I)Ljava/lang/String;",
+            "method_body": "public String findName(int q1)\nint offset = _calcOffset(calcHash(q1));\nfinal int[] hashArea = _hashArea;\nint len = hashArea[offset+3];\nif (len == 1) {\nif (hashArea[offset] == q1) {\n} else if (len == 0) { // empty slot; unlikely but avoid further lookups if so\nreturn null;\nint offset2 = _secondaryStart + ((offset >> 3) << 2);\nlen = hashArea[offset2+3];\nif (len == 1) {\nif (hashArea[offset2] == q1) {\n} else if (len == 0) { // empty slot; unlikely but avoid further lookups if so\nreturn null;\nreturn _findSecondary(offset, q1);\n}",
+            "method_id": 101
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.TextBuffer:<clinit>()V",
+            "method_body": "final static char[] NO_CHARS = new char[0];\nprivate boolean _hasSegments = false;\n* Amount of characters in segments in {@link _segments}",
+            "method_id": 102
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.UTF8StreamJsonParser:_skipColon()I",
+            "method_body": "private final int _skipColon() throws IOException\nif ((_inputPtr + 4) >= _inputEnd) {\nint i = _inputBuffer[_inputPtr];\nif (i == INT_COLON) { // common case, no leading space\ni = _inputBuffer[++_inputPtr];\nif (i > INT_SPACE) { // nor trailing\nif (i == INT_SPACE || i == INT_TAB) {\ni = (int) _inputBuffer[++_inputPtr];\nif (i > INT_SPACE) {\nif (i == INT_SLASH || i == INT_HASH) {\n++_inputPtr;\nreturn i;\n}",
+            "method_id": 103
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.UTF8StreamJsonParser:_skipWS()I",
+            "method_body": "private final int _skipWS() throws IOException\nwhile (_inputPtr < _inputEnd) {\nint i = _inputBuffer[_inputPtr++] & 0xFF;\nif (i > INT_SPACE) {\nif (i == INT_SLASH || i == INT_HASH) {\nreturn i;\nif (i != INT_SPACE) {\nif (i == INT_LF) {\n++_currInputRow;\n_currInputRowStart = _inputPtr;\n}\n}",
+            "method_id": 104
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:<init>()V",
+            "method_body": "public BufferRecycler() {\nthis(4, 4);\n}",
+            "method_id": 105
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:initTables(I)V",
+            "method_body": "private void initTables(int initialSize)\n_symbols = new String[initialSize];\n_buckets = new Bucket[initialSize >> 1];\n_indexMask = initialSize - 1;\n_size = 0;\n_longestCollisionList = 0;\n_sizeThreshold = _thresholdSize(initialSize);\n}",
+            "method_id": 106
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_appendLongName([II)I",
+            "method_body": "private int _appendLongName(int[] quads, int qlen)\nint start = _longNameOffset;\nif ((start + qlen) > _hashArea.length) {\nint toAdd = (start + qlen) - _hashArea.length;\nint minAdd = Math.min(4096, _hashSize);\nint newSize = _hashArea.length + Math.max(toAdd, minAdd);\n_hashArea = Arrays.copyOf(_hashArea, newSize);\nSystem.arraycopy(quads, 0, _hashArea, start, qlen);\n_longNameOffset += qlen;\nreturn start;\n}",
+            "method_id": 107
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.BytesToNameCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/BytesToNameCanonicalizer;",
+            "method_body": "public static BytesToNameCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 108
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.BytesToNameCanonicalizer$TableInfo:<init>(II[I[Lcom/fasterxml/jackson/core/sym/Name;[Lcom/fasterxml/jackson/core/sym/BytesToNameCanonicalizer$Bucket;III)V",
+            "method_body": "public TableInfo(int count, int mainHashMask, int[] mainHash, Name[] mainNames,\n{\nthis.count = count;\nthis.mainHashMask = mainHashMask;\nthis.mainHash = mainHash;\nthis.mainNames = mainNames;\nthis.collList = collList;\nthis.collCount = collCount;\nthis.collEnd = collEnd;\nthis.longestCollisionList = longestCollisionList;\n}",
+            "method_id": 109
+        }
+    ]
+}

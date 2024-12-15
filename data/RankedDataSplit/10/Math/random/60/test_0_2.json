@@ -1,0 +1,19 @@
+{
+    "bug_id": 60,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.distribution.NormalDistributionTest.testExtremeValues",
+    "test_body": "public void testExtremeValues() throws Exception {\nNormalDistribution distribution = new NormalDistributionImpl(0, 1);\nfor (int i = 0; i < 100; i++) { // make sure no convergence exception\ndouble lowerTail = distribution.cumulativeProbability(-i);\ndouble upperTail = distribution.cumulativeProbability(i);\nif (i < 9) { // make sure not top-coded \n// For i = 10, due to bad tail precision in erf (MATH-364), 1 is returned\n// TODO: once MATH-364 is resolved, replace 9 with 30\nassertTrue(lowerTail > 0.0d);\nassertTrue(upperTail < 1.0d);\n}\nelse { // make sure top coding not reversed\nassertTrue(lowerTail < 0.00001);\nassertTrue(upperTail > 0.99999);\n}\n}\n174: assertEquals(distribution.cumulativeProbability(Double.MAX_VALUE), 1, 0);\nassertEquals(distribution.cumulativeProbability(-Double.MAX_VALUE), 0, 0);",
+    "stack_trace": "org.apache.commons.math.ConvergenceException: Continued fraction diverged to NaN for value \u221e\nat org.apache.commons.math.util.ContinuedFraction.evaluate(ContinuedFraction.java:186)\nat org.apache.commons.math.special.Gamma.regularizedGammaQ(Gamma.java:266)\nat org.apache.commons.math.special.Gamma.regularizedGammaP(Gamma.java:173)\nat org.apache.commons.math.special.Erf.erf(Erf.java:51)\nat org.apache.commons.math.distribution.NormalDistributionImpl.cumulativeProbability(NormalDistributionImpl.java:127)\nat org.apache.commons.math.distribution.NormalDistributionTest.testExtremeValues(NormalDistributionTest.java:174)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:exp(D)D",
+            "method_body": "public static double exp(double x) {\nreturn exp(x, 0.0, null);\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.ContinuedFraction:evaluate(DDI)D",
+            "method_body": "public double evaluate(double x, double epsilon, int maxIterations)\ndouble p0 = 1.0;\ndouble p1 = getA(0, x);\ndouble q0 = 0.0;\ndouble q1 = 1.0;\ndouble c = p1 / q1;\nint n = 0;\ndouble relativeError = Double.MAX_VALUE;\nwhile (n < maxIterations && relativeError > epsilon) {\n++n;\ndouble a = getA(n, x);\ndouble b = getB(n, x);\ndouble p2 = a * p1 + b * p0;\ndouble q2 = a * q1 + b * q0;\nboolean infinite = false;\nif (Double.isInfinite(p2) || Double.isInfinite(q2)) {\ndouble scaleFactor = 1d;\ndouble lastScaleFactor = 1d;\nfinal int maxPower = 5;\nfinal double scale = FastMath.max(a,b);\nif (scale <= 0) {  // Can't scale\ninfinite = true;\nfor (int i = 0; i < maxPower; i++) {\nlastScaleFactor = scaleFactor;\nscaleFactor *= scale;\nif (a != 0.0 && a > b) {\np2 = p1 / lastScaleFactor + (b / scaleFactor * p0);\nq2 = q1 / lastScaleFactor + (b / scaleFactor * q0);\ninfinite = Double.isInfinite(p2) || Double.isInfinite(q2);\nif (!infinite) {\nbreak;\nif (infinite) {\ndouble r = p2 / q2;\nif (Double.isNaN(r)) {\nthrow new ConvergenceException(\nrelativeError = FastMath.abs(r / c - 1.0);\nc = p2 / q2;\np0 = p1;\np1 = p2;\nq0 = q1;\nq1 = q2;\n}\nif (n >= maxIterations) {\nreturn c;\n}",
+            "method_id": 21
+        }
+    ]
+}

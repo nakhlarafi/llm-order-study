@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 1,
+    "test_name": "com.fasterxml.jackson.core.sym.TestSymbolTables.testSyntheticWithBytesNew",
+    "test_body": "public void testSyntheticWithBytesNew() throws IOException\n{\n// pass seed, to keep results consistent:\nfinal int SEED = 33333;\nByteQuadsCanonicalizer symbols =\nByteQuadsCanonicalizer.createRoot(SEED).makeChild(JsonFactory.Feature.collectDefaults());\n71: final int COUNT = 12000;\nfor (int i = 0; i < COUNT; ++i) {\nString id = fieldNameFor(i);\nint[] quads = calcQuads(id.getBytes(\"UTF-8\"));\nsymbols.addName(id, quads, quads.length);\n}\nassertEquals(COUNT, symbols.size());\nassertEquals(16384, symbols.bucketCount());\n80: // fragile, but essential to verify low collision counts;\n// anywhere between 70-80% primary matches\nassertEquals(8534, symbols.primaryCount());\n// secondary between 10-20%",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<8534> but was:<8524>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:234)\nat junit.framework.Assert.assertEquals(Assert.java:241)\nat junit.framework.TestCase.assertEquals(TestCase.java:409)\nat com.fasterxml.jackson.core.sym.TestSymbolTables.testSyntheticWithBytesNew(TestSymbolTables.java:82)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_findOffsetForAdd(I)I",
+            "method_body": "private int _findOffsetForAdd(int hash)\nint offset = _calcOffset(hash);\nfinal int[] hashArea = _hashArea;\nif (hashArea[offset+3] == 0) {\nreturn offset;\nint offset2 = _secondaryStart + ((offset >> 3) << 2);\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset2 = _tertiaryStart + ((offset >> (_tertiaryShift + 2)) << _tertiaryShift);\nfinal int bucketSize = (1 << _tertiaryShift);\nfor (int end = offset2 + bucketSize; offset2 < end; offset2 += 4) {\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset = _spilloverEnd;\n_spilloverEnd += 4;\nif (_spilloverEnd >= hashArea.length) {\nif (_failOnDoS) {\n_reportTooManyCollisions();\n_needRehash = true;\nreturn offset;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(I)I",
+            "method_body": "public int calcHash(int q1)\nint hash = q1 ^ _seed;\nhash += (hash >>> 16); // to xor hi- and low- 16-bits\nhash ^= (hash >>> 12);\nreturn hash;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "protected static ByteQuadsCanonicalizer createRoot(int seed) {\nreturn new ByteQuadsCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:createInitial(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;",
+            "method_body": "public static TableInfo createInitial(int sz) {\nint hashAreaSize = sz << 3;\nint tertShift = _calcTertiaryShift(sz);\nreturn new TableInfo(sz, // hashSize\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:collectDefaults()I",
+            "method_body": "public static int collectDefaults() {\nint flags = 0;\nfor (Feature f : values()) {\nif (f.enabledByDefault()) { flags |= f.getMask(); }\nreturn flags;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:getMask()I",
+            "method_body": "public int getMask() { return (1 << ordinal()); }\npublic int getMask() { return (1 << ordinal()); }",
+            "method_id": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:makeChild(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public ByteQuadsCanonicalizer makeChild(int flags) {\nreturn new ByteQuadsCanonicalizer(this,\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledIn(I)Z",
+            "method_body": "public boolean enabledIn(int flags) { return (flags & getMask()) != 0; }\npublic boolean enabledIn(int flags) { return (flags & getMask()) != 0; }",
+            "method_id": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifySharing()V",
+            "method_body": "private void _verifySharing()\nif (_hashShared) {\n_hashArea = Arrays.copyOf(_hashArea, _hashArea.length);\n_names = Arrays.copyOf(_names, _names.length);\n_hashShared = false;\nif (_needRehash) {\nrehash();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:rehash()V",
+            "method_body": "private void rehash()\n_needRehash = false;\n_hashShared = false;\nfinal int[] oldHashArea = _hashArea;\nfinal String[] oldNames = _names;\nfinal int oldSize = _hashSize;\nfinal int oldCount = _count;\nfinal int newSize = oldSize + oldSize;\nfinal int oldEnd = _spilloverEnd;\nif (newSize > MAX_T_SIZE) {\n_hashArea = new int[oldHashArea.length + (oldSize<<3)];\n_hashSize = newSize;\n_secondaryStart = (newSize << 2); // 4 ints per entry\n_tertiaryStart = _secondaryStart + (_secondaryStart >> 1); // right after secondary\n_tertiaryShift = _calcTertiaryShift(newSize);\n_names = new String[oldNames.length << 1];\nnukeSymbols(false);\nint copyCount = 0;\nint[] q = new int[16];\nfor (int offset = 0, end = oldEnd; offset < end; offset += 4) {\nint len = oldHashArea[offset+3];\nif (len == 0) { // empty slot, skip\ncontinue;\n++copyCount;\nString name = oldNames[offset>>2];\nswitch (len) {\nq[0] = oldHashArea[offset];\naddName(name, q, 1);\nbreak;\nq[0] = oldHashArea[offset];\nq[1] = oldHashArea[offset+1];\naddName(name, q, 2);\nbreak;\nq[0] = oldHashArea[offset];\nq[1] = oldHashArea[offset+1];\nq[2] = oldHashArea[offset+2];\naddName(name, q, 3);\nbreak;\nif (len > q.length) {\nint qoff = oldHashArea[offset+1];\nSystem.arraycopy(oldHashArea, qoff, q, 0, len);\naddName(name, q, len);\nif (copyCount != oldCount) {\n}",
+            "method_id": 9
+        }
+    ]
+}

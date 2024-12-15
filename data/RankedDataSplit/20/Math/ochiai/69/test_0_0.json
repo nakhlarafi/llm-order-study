@@ -1,0 +1,109 @@
+{
+    "bug_id": 69,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.stat.correlation.SpearmansRankCorrelationTest.testPValueNearZero",
+    "test_body": null,
+    "stack_trace": "junit.framework.AssertionFailedError\nat junit.framework.Assert.fail(Assert.java:55)\nat junit.framework.Assert.assertTrue(Assert.java:22)\nat junit.framework.Assert.assertTrue(Assert.java:31)\nat junit.framework.TestCase.assertTrue(TestCase.java:201)\nat org.apache.commons.math.stat.correlation.PearsonsCorrelationTest.testPValueNearZero(PearsonsCorrelationTest.java:181)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:<init>([[D)V",
+            "method_body": "public PearsonsCorrelation(double[][] data) {\nthis(new BlockRealMatrix(data));\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:getCorrelationPValues()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getCorrelationPValues() throws MathException {\nTDistribution tDistribution = new TDistributionImpl(nObs - 2);\nint nVars = correlationMatrix.getColumnDimension();\ndouble[][] out = new double[nVars][nVars];\nfor (int i = 0; i < nVars; i++) {\nfor (int j = 0; j < nVars; j++) {\nif (i == j) {\nout[i][j] = 0d;\ndouble r = correlationMatrix.getEntry(i, j);\ndouble t = Math.abs(r * Math.sqrt((nObs - 2)/(1 - r * r)));\nout[i][j] = 2 * (1 - tDistribution.cumulativeProbability(t));\nreturn new BlockRealMatrix(out);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:computeCorrelationMatrix(Lorg/apache/commons/math/linear/RealMatrix;)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix computeCorrelationMatrix(RealMatrix matrix) {\nint nVars = matrix.getColumnDimension();\nRealMatrix outMatrix = new BlockRealMatrix(nVars, nVars);\nfor (int i = 0; i < nVars; i++) {\nfor (int j = 0; j < i; j++) {\ndouble corr = correlation(matrix.getColumn(i), matrix.getColumn(j));\noutMatrix.setEntry(i, j, corr);\noutMatrix.setEntry(j, i, corr);\noutMatrix.setEntry(i, i, 1d);\nreturn outMatrix;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:<init>(Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "public PearsonsCorrelation(RealMatrix matrix) {\ncheckSufficientData(matrix);\nnObs = matrix.getRowDimension();\ncorrelationMatrix = computeCorrelationMatrix(matrix);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:checkSufficientData(Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "private void checkSufficientData(final RealMatrix matrix) {\nint nRows = matrix.getRowDimension();\nint nCols = matrix.getColumnDimension();\nif (nRows < 2 || nCols < 2) {\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:correlation([D[D)D",
+            "method_body": "public double correlation(final double[] xArray, final double[] yArray) throws IllegalArgumentException {\nSimpleRegression regression = new SimpleRegression();\nif(xArray.length == yArray.length && xArray.length > 1) {\nfor(int i=0; i<xArray.length; i++) {\nregression.addData(xArray[i], yArray[i]);\nreturn regression.getR();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:getR()D",
+            "method_body": "public double getR() {\ndouble b1 = getSlope();\ndouble result = Math.sqrt(getRSquare());\nif (b1 < 0) {\nreturn result;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:getTotalSumSquares()D",
+            "method_body": "public double getTotalSumSquares() {\nif (n < 2) {\nreturn sumYY;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:getRSquare()D",
+            "method_body": "public double getRSquare() {\ndouble ssto = getTotalSumSquares();\nreturn (ssto - getSumSquaredErrors()) / ssto;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BlockRealMatrix:getColumn(I)[D",
+            "method_body": "public double[] getColumn(final int column)\nMatrixUtils.checkColumnIndex(this, column);\nfinal double[] out = new double[rows];\nfinal int jBlock  = column / BLOCK_SIZE;\nfinal int jColumn = column - jBlock * BLOCK_SIZE;\nfinal int jWidth  = blockWidth(jBlock);\nint outIndex      = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int iHeight = blockHeight(iBlock);\nfinal double[] block = blocks[iBlock * blockColumns + jBlock];\nfor (int i = 0; i < iHeight; ++i) {\nout[outIndex++] = block[i * jWidth + jColumn];\nreturn out;\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:getSlope()D",
+            "method_body": "public double getSlope() {\nif (n < 2) {\nif (Math.abs(sumXX) < 10 * Double.MIN_VALUE) {\nreturn sumXY / sumXX;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:getSumSquaredErrors()D",
+            "method_body": "public double getSumSquaredErrors() {\nreturn Math.max(0d, sumYY - sumXY * sumXY / sumXX);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BlockRealMatrix:setEntry(IID)V",
+            "method_body": "public void setEntry(final int row, final int column, final double value)\nfinal int iBlock = row    / BLOCK_SIZE;\nfinal int jBlock = column / BLOCK_SIZE;\nfinal int k      = (row    - iBlock * BLOCK_SIZE) * blockWidth(jBlock) +\nblocks[iBlock * blockColumns + jBlock][k] = value;\n}\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:addData(DD)V",
+            "method_body": "public void addData(double x, double y) {\nif (n == 0) {\nxbar = x;\nybar = y;\ndouble dx = x - xbar;\ndouble dy = y - ybar;\nsumXX += dx * dx * (double) n / (n + 1d);\nsumYY += dy * dy * (double) n / (n + 1d);\nsumXY += dx * dy * (double) n / (n + 1d);\nxbar += dx / (n + 1.0);\nybar += dy / (n + 1.0);\nsumX += x;\nsumY += y;\nn++;\nif (n > 2) {\ndistribution.setDegreesOfFreedom(n - 2);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:<init>()V",
+            "method_body": "public SimpleRegression() {\nthis(new TDistributionImpl(1.0));\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:<init>(Lorg/apache/commons/math/distribution/TDistribution;)V",
+            "method_body": "public SimpleRegression(TDistribution t) {\nsuper();\nsetDistribution(t);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:setDistribution(Lorg/apache/commons/math/distribution/TDistribution;)V",
+            "method_body": "public void setDistribution(TDistribution value) {\ndistribution = value;\nif (n > 2) {\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.distribution.TDistributionImpl:cumulativeProbability(D)D",
+            "method_body": "public double cumulativeProbability(double x) throws MathException{\nif (x == 0.0) {\ndouble t =\nif (x < 0.0) {\nret = 1.0 - 0.5 * t;\nreturn ret;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BlockRealMatrix:getEntry(II)D",
+            "method_body": "public double getEntry(final int row, final int column)\nfinal int iBlock = row    / BLOCK_SIZE;\nfinal int jBlock = column / BLOCK_SIZE;\nfinal int k      = (row    - iBlock * BLOCK_SIZE) * blockWidth(jBlock) +\nreturn blocks[iBlock * blockColumns + jBlock][k];\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.distribution.TDistributionImpl:setDegreesOfFreedom(D)V",
+            "method_body": "public void setDegreesOfFreedom(double degreesOfFreedom) {\nsetDegreesOfFreedomInternal(degreesOfFreedom);\n}",
+            "method_id": 19
+        }
+    ]
+}

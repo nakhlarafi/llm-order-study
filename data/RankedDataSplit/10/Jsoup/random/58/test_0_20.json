@@ -1,0 +1,59 @@
+{
+    "bug_id": 58,
+    "test_id": 0,
+    "test_name": "org.jsoup.safety.CleanerTest.testIsValidBodyHtml",
+    "test_body": "145: @Test public void testIsValidBodyHtml() {\n146: String ok = \"<p>Test <b><a href='http://example.com/' rel='nofollow'>OK</a></b></p>\";\n147: String ok1 = \"<p>Test <b><a href='http://example.com/'>OK</a></b></p>\"; // missing enforced is OK because still needs run thru cleaner\n148: String nok1 = \"<p><script></script>Not <b>OK</b></p>\";\n149: String nok2 = \"<p align=right>Test Not <b>OK</b></p>\";\n150: String nok3 = \"<!-- comment --><p>Not OK</p>\"; // comments and the like will be cleaned\n151: String nok4 = \"<html><head>Foo</head><body><b>OK</b></body></html>\"; // not body html\n152: String nok5 = \"<p>Test <b><a href='http://example.com/' rel='nofollowme'>OK</a></b></p>\";\n153: String nok6 = \"<p>Test <b><a href='http://example.com/'>OK</b></p>\"; // missing close tag\n154: String nok7 = \"</div>What\";\n155: assertTrue(Jsoup.isValid(ok, Whitelist.basic()));\n156: assertTrue(Jsoup.isValid(ok1, Whitelist.basic()));\n157: assertFalse(Jsoup.isValid(nok1, Whitelist.basic()));\n158: assertFalse(Jsoup.isValid(nok2, Whitelist.basic()));\n159: assertFalse(Jsoup.isValid(nok3, Whitelist.basic()));\n160: assertFalse(Jsoup.isValid(nok4, Whitelist.basic()));\n161: assertFalse(Jsoup.isValid(nok5, Whitelist.basic()));\n162: assertFalse(Jsoup.isValid(nok6, Whitelist.basic()));\n163: assertFalse(Jsoup.isValid(ok, Whitelist.none()));\n164: assertFalse(Jsoup.isValid(nok7, Whitelist.basic()));\n165: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:initialiseParse(Ljava/lang/String;Ljava/lang/String;Lorg/jsoup/parser/ParseErrorList;Lorg/jsoup/parser/ParseSettings;)V",
+            "method_body": "abstract ParseSettings defaultSettings();\nValidate.notNull(input, \"String input must not be null\");\nValidate.notNull(baseUri, \"BaseURI must not be null\");\ndoc = new Document(baseUri);\nthis.settings = settings;\nreader = new CharacterReader(input);\nthis.errors = errors;\ntokeniser = new Tokeniser(reader, errors);\nstack = new ArrayList<Element>(32);\nthis.baseUri = baseUri;\n}",
+            "method_id": 200
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:handleDataEndTag(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void handleDataEndTag(Tokeniser t, CharacterReader r, TokeniserState elseTransition) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.tagPending.appendTagName(name);\nt.dataBuffer.append(name);\nreturn;\nboolean needsExitTransition = false;\nif (t.isAppropriateEndTagToken() && !r.isEmpty()) {\nchar c = r.consume();\nswitch (c) {\nt.emitTagPending();\nt.transition(Data);\nbreak;\n} else {\nif (needsExitTransition) {\n}",
+            "method_id": 201
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:childNodes()Ljava/util/List;",
+            "method_body": "public List<Node> childNodes() {\nreturn Collections.unmodifiableList(childNodes);\n}",
+            "method_id": 202
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insert(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void insert(Element el) {\ninsertNode(el);\nstack.add(el);\n}",
+            "method_id": 203
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:pushActiveFormattingElements(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void pushActiveFormattingElements(Element in) {\nint numSeen = 0;\nfor (int pos = formattingElements.size() -1; pos >= 0; pos--) {\nElement el = formattingElements.get(pos);\nif (el == null) // marker\nif (isSameFormattingElement(in, el))\nif (numSeen == 3) {\nformattingElements.add(in);\n}",
+            "method_id": 204
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:createSafeElement(Lorg/jsoup/nodes/Element;)Lorg/jsoup/safety/Cleaner$ElementMeta;",
+            "method_body": "private ElementMeta createSafeElement(Element sourceEl) {\nString sourceTag = sourceEl.tagName();\nAttributes destAttrs = new Attributes();\nElement dest = new Element(Tag.valueOf(sourceTag), sourceEl.baseUri(), destAttrs);\nint numDiscarded = 0;\nAttributes sourceAttrs = sourceEl.attributes();\nfor (Attribute sourceAttr : sourceAttrs) {\nif (whitelist.isSafeAttribute(sourceTag, sourceEl, sourceAttr))\ndestAttrs.put(sourceAttr);\nnumDiscarded++;\n}\nAttributes enforcedAttrs = whitelist.getEnforcedAttributes(sourceTag);\ndestAttrs.addAll(enforcedAttrs);\nreturn new ElementMeta(dest, numDiscarded);\n}",
+            "method_id": 205
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:isSafeTag(Ljava/lang/String;)Z",
+            "method_body": "protected boolean isSafeTag(String tag) {\nreturn tagNames.contains(TagName.valueOf(tag));\n}",
+            "method_id": 206
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Comment:getData()Ljava/lang/String;",
+            "method_body": "String getData() {\nreturn data.toString();\n}",
+            "method_id": 207
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:process(Lorg/jsoup/parser/Token;)Z",
+            "method_body": "protected boolean process(Token token) {\ncurrentToken = token;\nreturn this.state.process(token, this);\n}",
+            "method_id": 208
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:generateImpliedEndTags(Ljava/lang/String;)V",
+            "method_body": "void generateImpliedEndTags(String excludeTag) {\nwhile ((excludeTag != null && !currentElement().nodeName().equals(excludeTag)) &&\n}",
+            "method_id": 209
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 52,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.XmlTreeBuilderTest.testDetectCharsetEncodingDeclaration",
+    "test_body": "137: public void testDetectCharsetEncodingDeclaration() throws IOException, URISyntaxException {\n138: File xmlFile = new File(XmlTreeBuilder.class.getResource(\"/htmltests/xml-charset.xml\").toURI());\n139: InputStream inStream = new FileInputStream(xmlFile);\n140: Document doc = Jsoup.parse(inStream, null, \"http://example.com/\", Parser.xmlParser());\n141: assertEquals(\"ISO-8859-1\", doc.charset().name());\n142: assertEquals(\"<?xml version=\\\"1.0\\\" encoding=\\\"ISO-8859-1\\\"?> <data>\u00c3\u00a4\u00c3\u00b6\u00c3\u00a5\u00c3\u00a9\u00c3\u00bc</data>\",\n143: TextUtil.stripNewlines(doc.html()));\n144: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:insert(Lorg/jsoup/parser/Token$Comment;)V",
+            "method_body": "void insert(Token.Comment commentToken) {\nComment comment = new Comment(commentToken.getData(), baseUri);\nNode insert = comment;\nif (commentToken.bogus) { // xml declarations are emitted as bogus comments (which is right for html, but not xml)\nString data = comment.getData();\nif (data.length() > 1 && (data.startsWith(\"!\") || data.startsWith(\"?\"))) {\nString declaration = data.substring(1);\ninsert = new XmlDeclaration(declaration, comment.baseUri(), data.startsWith(\"!\"));\ninsertNode(insert);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:parseByteData(Ljava/nio/ByteBuffer;Ljava/lang/String;Ljava/lang/String;Lorg/jsoup/parser/Parser;)Lorg/jsoup/nodes/Document;",
+            "method_body": "static Document parseByteData(ByteBuffer byteData, String charsetName, String baseUri, Parser parser) {\nDocument doc = null;\ncharsetName = detectCharsetFromBom(byteData, charsetName);\nif (charsetName == null) { // determine from meta. safe first parse as UTF-8\ndocData = Charset.forName(defaultCharset).decode(byteData).toString();\ndoc = parser.parseInput(docData, baseUri);\nElement meta = doc.select(\"meta[http-equiv=content-type], meta[charset]\").first();\nString foundCharset = null; // if not found, will keep utf-8 as best attempt\nif (meta != null) {\nif (foundCharset == null && doc.childNode(0) instanceof XmlDeclaration) {\nXmlDeclaration prolog = (XmlDeclaration) doc.childNode(0);\nif (prolog.name().equals(\"xml\")) {\nfoundCharset = validateCharset(foundCharset);\nif (foundCharset != null && !foundCharset.equals(defaultCharset)) { // need to re-decode\n} else { // specified by content type header (or by user on file load)\nif (doc == null) {\nreturn doc;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:xmlParser()Lorg/jsoup/parser/Parser;",
+            "method_body": "public static Parser xmlParser() {\nreturn new Parser(new XmlTreeBuilder());\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:<init>()V",
+            "method_body": "CharacterReader reader;\nprivate Token.StartTag start = new Token.StartTag(); // start tag to process\nprivate Token.EndTag end  = new Token.EndTag();\nValidate.notNull(input, \"String input must not be null\");\nValidate.notNull(baseUri, \"BaseURI must not be null\");\ndoc = new Document(baseUri);\nreader = new CharacterReader(input);\nthis.errors = errors;\ntokeniser = new Tokeniser(reader, errors);\nstack = new ArrayList<Element>(32);\nthis.baseUri = baseUri;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$StartTag:<init>()V",
+            "method_body": "StartTag() {\nsuper();\nattributes = new Attributes();\ntype = TokenType.StartTag;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Tag:<init>()V",
+            "method_body": "protected String tagName;\nprivate StringBuilder pendingAttributeValue = new StringBuilder(); // but values are accumulated, from e.g. & in hrefs\nprivate boolean hasEmptyAttributeValue = false; // distinguish boolean attribute from empty string value\nprivate boolean hasPendingAttributeValue = false;\nboolean selfClosing = false;\ntagName = null;\npendingAttributeName = null;\nreset(pendingAttributeValue);\npendingAttributeValueS = null;\nhasEmptyAttributeValue = false;\nhasPendingAttributeValue = false;\nselfClosing = false;\nattributes = null;\nreturn this;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$EndTag:<init>()V",
+            "method_body": "EndTag() {\nsuper();\ntype = TokenType.EndTag;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseInput(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document parseInput(String html, String baseUri) {\nerrors = isTrackErrors() ? ParseErrorList.tracking(maxErrors) : ParseErrorList.noTracking();\nreturn treeBuilder.parse(html, baseUri, errors);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.ParseErrorList:noTracking()Lorg/jsoup/parser/ParseErrorList;",
+            "method_body": "static ParseErrorList noTracking() {\nreturn new ParseErrorList(0, 0);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.select.Elements:first()Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element first() {\nreturn isEmpty() ? null : get(0);\n}",
+            "method_id": 9
+        }
+    ]
+}

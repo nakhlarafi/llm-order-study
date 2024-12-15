@@ -1,0 +1,109 @@
+{
+    "bug_id": 46,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.DocumentTest.testShiftJisRoundtrip",
+    "test_body": "public void testShiftJisRoundtrip() throws Exception {\nString input =\n\"<html>\"\n+   \"<head>\"\n+     \"<meta http-equiv=\\\"content-type\\\" content=\\\"text/html; charset=Shift_JIS\\\" />\"\n+   \"</head>\"\n+   \"<body>\"\n+     \"before&nbsp;after\"\n+   \"</body>\"\n+ \"</html>\";\nInputStream is = new ByteArrayInputStream(input.getBytes(Charset.forName(\"ASCII\")));\n401: Document doc = Jsoup.parse(is, null, \"http://example.com\");\ndoc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);\n404: String output = new String(doc.html().getBytes(doc.outputSettings().charset()), doc.outputSettings().charset());\n406: assertFalse(\"Should not have contained a '?'.\", output.contains(\"?\"));\nassertTrue(\"Should have contained a '&#xa0;' or a '&nbsp;'.\",",
+    "stack_trace": "junit.framework.AssertionFailedError: Should not have contained a '?'.\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertFalse(Assert.java:64)\nat org.jsoup.nodes.DocumentTest.testShiftJisRoundtrip(DocumentTest.java:406)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:isBlank()Z",
+            "method_body": "public boolean isBlank() {\nreturn StringUtil.isBlank(getWholeText());\n}",
+            "method_id": 200
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:outerHtmlHead(Ljava/lang/StringBuilder;ILorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void outerHtmlHead(StringBuilder accum, int depth, Document.OutputSettings out) {\nif (out.prettyPrint() && ((siblingIndex() == 0 && parentNode instanceof Element && ((Element) parentNode).tag().formatAsBlock() && !isBlank()) || (out.outline() && siblingNodes().size()>0 && !isBlank()) ))\nindent(accum, depth, out);\nboolean normaliseWhite = out.prettyPrint() && parent() instanceof Element\nEntities.escape(accum, getWholeText(), out, false, normaliseWhite, false);\n}",
+            "method_id": 201
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$EOF:<init>()V",
+            "method_body": "EOF() {\ntype = Token.TokenType.EOF;\n}",
+            "method_id": 202
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$EOF:reset()Lorg/jsoup/parser/Token;",
+            "method_body": "Token reset() {\nreturn this;\n}",
+            "method_id": 203
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:<init>(Ljava/lang/String;Lorg/jsoup/nodes/Element;)V",
+            "method_body": "private Selector(String query, Element root) {\nValidate.notNull(query);\nquery = query.trim();\nValidate.notEmpty(query);\nValidate.notNull(root);\nthis.evaluator = QueryParser.parse(query);\nthis.root = root;\n}",
+            "method_id": 204
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select(Ljava/lang/String;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements select(String query, Element root) {\nreturn new Selector(query, root).select();\n}",
+            "method_id": 205
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements select() {\nreturn Collector.collect(evaluator, root);\n}",
+            "method_id": 206
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:<init>(Ljava/lang/String;)V",
+            "method_body": "private QueryParser(String query) {\nthis.query = query;\nthis.tq = new TokenQueue(query);\n}",
+            "method_id": 207
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:<clinit>()V",
+            "method_body": "private final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};\nprivate final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};",
+            "method_id": 208
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:parse(Ljava/lang/String;)Lorg/jsoup/select/Evaluator;",
+            "method_body": "public static Evaluator parse(String query) {\nQueryParser p = new QueryParser(query);\nreturn p.parse();\n}",
+            "method_id": 209
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:parse()Lorg/jsoup/select/Evaluator;",
+            "method_body": "Evaluator parse() {\ntq.consumeWhitespace();\nif (tq.matchesAny(combinators)) { // if starts with a combinator, use root as elements\nfindElements();\nwhile (!tq.isEmpty()) {\nboolean seenWhite = tq.consumeWhitespace();\nif (tq.matchesAny(combinators)) {\ncombinator(tq.consume());\n} else if (seenWhite) {\nfindElements(); // take next el, #. etc off queue\n}\nif (evals.size() == 1)\nreturn evals.get(0);\nreturn new CombiningEvaluator.And(evals);\n}",
+            "method_id": 210
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:combinator(C)V",
+            "method_body": "private void combinator(char combinator) {\ntq.consumeWhitespace();\nString subQuery = consumeSubQuery(); // support multi > childs\nEvaluator newEval = parse(subQuery); // the evaluator to add into target evaluator\nboolean replaceRightMost = false;\nif (evals.size() == 1) {\nrootEval = currentEval = new CombiningEvaluator.And(evals);\nevals.clear();\nif (combinator == '>')\nelse if (combinator == ' ')\nelse if (combinator == '+')\nelse if (combinator == '~')\nelse if (combinator == ',') { // group or.\nif (currentEval instanceof CombiningEvaluator.Or) {\nor = new CombiningEvaluator.Or();\nor.add(currentEval);\nor.add(newEval);\ncurrentEval = or;\n}\nif (replaceRightMost)\nelse rootEval = currentEval;\nevals.add(rootEval);\n}",
+            "method_id": 211
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:consumeSubQuery()Ljava/lang/String;",
+            "method_body": "private String consumeSubQuery() {\nStringBuilder sq = new StringBuilder();\nwhile (!tq.isEmpty()) {\nif (tq.matches(\"(\"))\nelse if (tq.matches(\"[\"))\nsq.append(\"[\").append(tq.chompBalanced('[', ']')).append(\"]\");\nelse if (tq.matchesAny(combinators))\nsq.append(tq.consume());\nreturn sq.toString();\n}",
+            "method_id": 212
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:findElements()V",
+            "method_body": "private void findElements() {\nif (tq.matchChomp(\"#\"))\nelse if (tq.matchChomp(\".\"))\nelse if (tq.matchesWord())\nbyTag();\nelse if (tq.matches(\"[\"))\nbyAttribute();\n}",
+            "method_id": 213
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byTag()V",
+            "method_body": "private void byTag() {\nString tagName = tq.consumeElementSelector();\nValidate.notEmpty(tagName);\nif (tagName.contains(\"|\"))\nevals.add(new Evaluator.Tag(tagName.trim().toLowerCase()));\n}",
+            "method_id": 214
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byAttribute()V",
+            "method_body": "private void byAttribute() {\nTokenQueue cq = new TokenQueue(tq.chompBalanced('[', ']')); // content queue\nString key = cq.consumeToAny(AttributeEvals); // eq, not, start, end, contain, match, (no val)\nValidate.notEmpty(key);\ncq.consumeWhitespace();\nif (cq.isEmpty()) {\nif (key.startsWith(\"^\"))\nevals.add(new Evaluator.Attribute(key));\nif (cq.matchChomp(\"=\"))\nevals.add(new Evaluator.AttributeWithValue(key, cq.remainder()));\n}",
+            "method_id": 215
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:<init>(Ljava/lang/String;)V",
+            "method_body": "public TokenQueue(String data) {\nValidate.notNull(data);\nqueue = data;\n}",
+            "method_id": 216
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nreturn remainingLength() == 0;\n}",
+            "method_id": 217
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:remainingLength()I",
+            "method_body": "private int remainingLength() {\nreturn queue.length() - pos;\n}",
+            "method_id": 218
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matches(Ljava/lang/String;)Z",
+            "method_body": "public boolean matches(String seq) {\nreturn queue.regionMatches(true, pos, seq, 0, seq.length());\n}",
+            "method_id": 219
+        }
+    ]
+}

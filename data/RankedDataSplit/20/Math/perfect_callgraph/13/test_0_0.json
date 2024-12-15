@@ -1,0 +1,109 @@
+{
+    "bug_id": 13,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.optimization.fitting.PolynomialFitterTest.testLargeSample",
+    "test_body": "public void testLargeSample() {\nRandom randomizer = new Random(0x5551480dca5b369bl);\ndouble maxError = 0;\nfor (int degree = 0; degree < 10; ++degree) {\nPolynomialFunction p = buildRandomPolynomial(degree, randomizer);\n233: PolynomialFitter fitter = new PolynomialFitter(new LevenbergMarquardtOptimizer());\nfor (int i = 0; i < 40000; ++i) {\ndouble x = -1.0 + i / 20000.0;\nfitter.addObservedPoint(1.0, x,\np.value(x) + 0.1 * randomizer.nextGaussian());\n}\n240: final double[] init = new double[degree + 1];\nPolynomialFunction fitted = new PolynomialFunction(fitter.fit(init));\n243: for (double x = -1.0; x < 1.0; x += 0.01) {\ndouble error = FastMath.abs(p.value(x) - fitted.value(x)) /\n(1.0 + FastMath.abs(p.value(x)));\nmaxError = FastMath.max(maxError, error);\nAssert.assertTrue(FastMath.abs(error) < 0.01);\n}\n}\nAssert.assertTrue(maxError > 0.001);\n}\n",
+    "stack_trace": "java.lang.OutOfMemoryError: Java heap space\nat org.apache.commons.math3.linear.DiagonalMatrix.getData(DiagonalMatrix.java:204)\nat org.apache.commons.math3.linear.TriDiagonalTransformer.<init>(TriDiagonalTransformer.java:69)\nat org.apache.commons.math3.linear.EigenDecomposition.transformToTridiagonal(EigenDecomposition.java:561)\nat org.apache.commons.math3.linear.EigenDecomposition.<init>(EigenDecomposition.java:122)\nat org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer.squareRoot(AbstractLeastSquaresOptimizer.java:562)\nat org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer.setUp(AbstractLeastSquaresOptimizer.java:508)\nat org.apache.commons.math3.optimization.direct.BaseAbstractMultivariateVectorOptimizer.optimizeInternal(BaseAbstractMultivariateVectorOptimizer.java:239)\nat org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer.optimizeInternal(AbstractLeastSquaresOptimizer.java:496)\nat org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer.optimize(AbstractLeastSquaresOptimizer.java:423)\nat org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer.optimize(AbstractLeastSquaresOptimizer.java:62)\nat org.apache.commons.math3.optimization.fitting.CurveFitter.fit(CurveFitter.java:189)\nat org.apache.commons.math3.optimization.fitting.CurveFitter.fit(CurveFitter.java:153)\nat org.apache.commons.math3.optimization.fitting.PolynomialFitter.fit(PolynomialFitter.java:110)\nat org.apache.commons.math3.optimization.fitting.PolynomialFitterTest.testLargeSample(PolynomialFitterTest.java:241)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer:squareRoot(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private RealMatrix squareRoot(RealMatrix m) {\nfinal EigenDecomposition dec = new EigenDecomposition(m);\nreturn dec.getSquareRoot();\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.polynomials.PolynomialFunction:<init>([D)V",
+            "method_body": "public PolynomialFunction(double c[])\nsuper();\nMathUtils.checkNotNull(c);\nint n = c.length;\nif (n == 0) {\nwhile ((n > 1) && (c[n - 1] == 0)) {\nthis.coefficients = new double[n];\nSystem.arraycopy(c, 0, this.coefficients, 0, n);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.MathUtils:checkNotNull(Ljava/lang/Object;)V",
+            "method_body": "public static void checkNotNull(Object o)\nif (o == null) {\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer:<init>()V",
+            "method_body": "public LevenbergMarquardtOptimizer() {\nthis(100, 1e-10, 1e-10, 1e-10, Precision.SAFE_MIN);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer:<init>(DDDDD)V",
+            "method_body": "public LevenbergMarquardtOptimizer(double initialStepBoundFactor,\nsuper(null); // No custom convergence criterion.\nthis.initialStepBoundFactor = initialStepBoundFactor;\nthis.costRelativeTolerance = costRelativeTolerance;\nthis.parRelativeTolerance = parRelativeTolerance;\nthis.orthoTolerance = orthoTolerance;\nthis.qrRankingThreshold = threshold;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:<init>()V",
+            "method_body": "public Incrementor() {\nthis(0);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.polynomials.PolynomialFunction:value(D)D",
+            "method_body": "public double value(double x) {\nreturn evaluate(coefficients, x);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.fitting.PolynomialFitter:fit([D)[D",
+            "method_body": "public double[] fit(double[] guess) {\nreturn fit(new PolynomialFunction.Parametric(), guess);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:max(DD)D",
+            "method_body": "public static double max(final double a, final double b) {\nif (a > b) {\nif (a < b) {\nif (a != b) {\nlong bits = Double.doubleToRawLongBits(a);\nif (bits == 0x8000000000000000L) {\nreturn a;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.TriDiagonalTransformer:getQT()Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix getQT() {\nif (cachedQt == null) {\nfinal int m = householderVectors.length;\ndouble[][] qta = new double[m][m];\nfor (int k = m - 1; k >= 1; --k) {\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:getRowDimension()I",
+            "method_body": "public int getRowDimension() {\nreturn data == null ? 0 : data.length;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.TriDiagonalTransformer:getQ()Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix getQ() {\nif (cachedQ == null) {\ncachedQ = getQT().transpose();\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.direct.BaseAbstractMultivariateVectorOptimizer:getWeight()Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix getWeight() {\nreturn weightMatrix.copy();\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.fitting.WeightedObservedPoint:<init>(DDD)V",
+            "method_body": "public WeightedObservedPoint(final double weight, final double x, final double y) {\nthis.weight = weight;\nthis.x      = x;\nthis.y      = y;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer:setUp()V",
+            "method_body": "protected void setUp() {\nsuper.setUp();\njacobianEvaluations = 0;\nweightMatrixSqrt = squareRoot(getWeight());\njF = FunctionUtils.toMultivariateDifferentiableVectorFunction((DifferentiableMultivariateVectorFunction) getObjectiveFunction());\npoint = getStartPoint();\nrows = getTarget().length;\ncols = point.length;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.direct.BaseAbstractMultivariateVectorOptimizer:<init>(Lorg/apache/commons/math3/optimization/ConvergenceChecker;)V",
+            "method_body": "protected BaseAbstractMultivariateVectorOptimizer(ConvergenceChecker<PointVectorValuePair> checker) {\nthis.checker = checker;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.fitting.WeightedObservedPoint:getWeight()D",
+            "method_body": "public double getWeight() {\nreturn weight;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.EigenDecomposition:transformToTridiagonal(Lorg/apache/commons/math3/linear/RealMatrix;)V",
+            "method_body": "private void transformToTridiagonal(final RealMatrix matrix) {\ntransformer = new TriDiagonalTransformer(matrix);\nmain = transformer.getMainDiagonalRef();\nsecondary = transformer.getSecondaryDiagonalRef();\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.AbstractRealMatrix:isSquare()Z",
+            "method_body": "public boolean isSquare() {\nreturn getColumnDimension() == getRowDimension();\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.general.AbstractLeastSquaresOptimizer:<init>(Lorg/apache/commons/math3/optimization/ConvergenceChecker;)V",
+            "method_body": "protected AbstractLeastSquaresOptimizer(ConvergenceChecker<PointVectorValuePair> checker) {\nsuper(checker);\n}",
+            "method_id": 19
+        }
+    ]
+}

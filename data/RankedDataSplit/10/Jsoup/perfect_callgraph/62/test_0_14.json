@@ -1,0 +1,59 @@
+{
+    "bug_id": 62,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.caseSensitiveParseTree",
+    "test_body": "950: @Test public void caseSensitiveParseTree() {\n951: String html = \"<r><X>A</X><y>B</y></r>\";\n952: Parser parser = Parser.htmlParser();\n953: parser.settings(ParseSettings.preserveCase);\n954: Document doc = parser.parseInput(html, \"\");\n955: assertEquals(\"<r> <X> A </X> <y> B </y> </r>\", StringUtil.normaliseWhitespace(doc.body().html()));\n956: 957: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Entities:<clinit>()V",
+            "method_body": "private static final HashMap<String, String> multipoints = new HashMap<String, String>(); // name -> multiple character references\n}",
+            "method_id": 140
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/Appendable;Ljava/lang/String;Lorg/jsoup/nodes/Document$OutputSettings;ZZZ)V",
+            "method_body": "static void escape(Appendable accum, String string, Document.OutputSettings out,\nboolean lastWasWhite = false;\nboolean reachedNonWhite = false;\nfinal EscapeMode escapeMode = out.escapeMode();\nfinal CharsetEncoder encoder = out.encoder();\nfinal CoreCharset coreCharset = CoreCharset.byName(encoder.charset().name());\nfinal int length = string.length();\nfor (int offset = 0; offset < length; offset += Character.charCount(codePoint)) {\ncodePoint = string.codePointAt(offset);\nif (normaliseWhite) {\nif (StringUtil.isWhitespace(codePoint)) {\nlastWasWhite = false;\nreachedNonWhite = true;\nif (codePoint < Character.MIN_SUPPLEMENTARY_CODE_POINT) {\nfinal char c = (char) codePoint;\nswitch (c) {\nif (canEncode(coreCharset, c, encoder))\naccum.append(c);\n} else {\n}",
+            "method_id": 141
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:canEncode(Lorg/jsoup/nodes/Entities$CoreCharset;CLjava/nio/charset/CharsetEncoder;)Z",
+            "method_body": "private static boolean canEncode(final CoreCharset charset, final char c, final CharsetEncoder fallback) {\nswitch (charset) {\nreturn true; // real is:!(Character.isLowSurrogate(c) || Character.isHighSurrogate(c)); - but already check above\n}",
+            "method_id": 142
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:load(Lorg/jsoup/nodes/Entities$EscapeMode;Ljava/lang/String;I)V",
+            "method_body": "private static void load(EscapeMode e, String file, int size) {\ne.nameKeys = new String[size];\ne.codeVals = new int[size];\ne.codeKeys = new int[size];\ne.nameVals = new String[size];\nInputStream stream = Entities.class.getResourceAsStream(file);\nif (stream == null)\nint i = 0;\nByteBuffer bytes = DataUtil.readToByteBuffer(stream, 0);\nString contents = Charset.forName(\"ascii\").decode(bytes).toString();\nCharacterReader reader = new CharacterReader(contents);\nwhile (!reader.isEmpty()) {\nfinal String name = reader.consumeTo('=');\nreader.advance();\nfinal int cp1 = Integer.parseInt(reader.consumeToAny(codeDelims), codepointRadix);\nfinal char codeDelim = reader.current();\nreader.advance();\nif (codeDelim == ',') {\ncp2 = Integer.parseInt(reader.consumeTo(';'), codepointRadix);\nreader.advance();\ncp2 = empty;\nString indexS = reader.consumeTo('\\n');\nif (indexS.charAt(indexS.length() - 1) == '\\r') {\nfinal int index = Integer.parseInt(indexS, codepointRadix);\nreader.advance();\ne.nameKeys[i] = name;\ne.codeVals[i] = cp1;\ne.codeKeys[index] = cp1;\ne.nameVals[index] = name;\nif (cp2 != empty) {\nmultipoints.put(name, new String(new int[]{cp1, cp2}, 0, 2));\ni++;\n}\n}\n}",
+            "method_id": 143
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:<clinit>()V",
+            "method_body": "private static final Pattern charsetPattern = Pattern.compile(\"(?i)\\\\bcharset=\\\\s*(?:\\\"|')?([^\\\\s,;\\\"']*)\");\nprivate static final char[] mimeBoundaryChars =\nprivate DataUtil() {}",
+            "method_id": 144
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:readToByteBuffer(Ljava/io/InputStream;I)Ljava/nio/ByteBuffer;",
+            "method_body": "public static ByteBuffer readToByteBuffer(InputStream inStream, int maxSize) throws IOException {\nValidate.isTrue(maxSize >= 0, \"maxSize must be 0 (unlimited) or larger\");\nfinal boolean capped = maxSize > 0;\nbyte[] buffer = new byte[capped && maxSize < bufferSize ? maxSize : bufferSize];\nByteArrayOutputStream outStream = new ByteArrayOutputStream(capped ? maxSize : bufferSize);\nint remaining = maxSize;\nwhile (!Thread.interrupted()) {\nread = inStream.read(buffer);\nif (read == -1) break;\nif (capped) {\noutStream.write(buffer, 0, read);\nreturn ByteBuffer.wrap(outStream.toByteArray());\n}",
+            "method_id": 145
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nreturn pos >= length;\n}",
+            "method_id": 146
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:current()C",
+            "method_body": "public char current() {\nreturn pos >= length ? EOF : input[pos];\n}",
+            "method_id": 147
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consume()C",
+            "method_body": "char consume() {\nchar val = pos >= length ? EOF : input[pos];\npos++;\nreturn val;\n}",
+            "method_id": 148
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:advance()V",
+            "method_body": "public void advance() {\npos++;\n}",
+            "method_id": 149
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 21,
+    "test_id": 5,
+    "test_name": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFileTest.testEightFilesSomeNotEmpty",
+    "test_body": "194: public void testEightFilesSomeNotEmpty() throws Exception {\n195: testCompress252(8, 2);\n196: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:<clinit>()V",
+            "method_body": "static final int SIGNATURE_HEADER_SIZE = 32;\nprivate int currentEntryIndex = -1;\nprivate int currentFolderIndex = -1;\nprivate InputStream currentFolderInputStream = null;\nprivate InputStream currentEntryInputStream = null;\nstatic final byte[] sevenZSignature = {\n};",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileATimes(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileATimes(final DataOutput header) throws IOException {\nint numAccessDates = 0;\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.getHasAccessDate()) {\n}\nif (numAccessDates > 0) {\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile$OutputStreamWrapper:write(I)V",
+            "method_body": "public void write(final int b) throws IOException {\nfile.write(b);\ncompressedCrc32.update(b);\nfileBytesWritten++;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileEmptyFiles(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileEmptyFiles(final DataOutput header) throws IOException {\nboolean hasEmptyFiles = false;\nint emptyStreamCounter = 0;\nfinal BitSet emptyFiles = new BitSet(0);\nfor (int i = 0; i < files.size(); i++) {\nif (!files.get(i).hasStream()) {\nboolean isDir = files.get(i).isDirectory();\nemptyFiles.set(emptyStreamCounter++, !isDir);\nhasEmptyFiles |= !isDir;\nif (hasEmptyFiles) {\nheader.write(NID.kEmptyFile);\nfinal ByteArrayOutputStream baos = new ByteArrayOutputStream();\nfinal DataOutputStream out = new DataOutputStream(baos);\nwriteBits(out, emptyFiles, emptyStreamCounter);\nout.flush();\nfinal byte[] contents = baos.toByteArray();\nwriteUint64(header, contents.length);\nheader.write(contents);\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:write([B)V",
+            "method_body": "public void write(final byte[] b) throws IOException {\nwrite(b, 0, b.length);\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:getCompressedCrcValue()J",
+            "method_body": "long getCompressedCrcValue() {\nreturn compressedCrc;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeStreamsInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeStreamsInfo(final DataOutput header) throws IOException {\nif (numNonEmptyStreams > 0) {\nwritePackInfo(header);\nwriteUnpackInfo(header);\nwriteSubStreamsInfo(header);\nheader.write(NID.kEnd);\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:calculateStreamMap(Lorg/apache/commons/compress/archivers/sevenz/Archive;)V",
+            "method_body": "private void calculateStreamMap(final Archive archive) throws IOException {\nfinal StreamMap streamMap = new StreamMap();\nint nextFolderPackStreamIndex = 0;\nfinal int numFolders = (archive.folders != null) ? archive.folders.length : 0;\nstreamMap.folderFirstPackStreamIndex = new int[numFolders];\nfor (int i = 0; i < numFolders; i++) {\nstreamMap.folderFirstPackStreamIndex[i] = nextFolderPackStreamIndex;\nnextFolderPackStreamIndex += archive.folders[i].packedStreams.length;\nlong nextPackStreamOffset = 0;\nfinal int numPackSizes = (archive.packSizes != null) ? archive.packSizes.length : 0;\nstreamMap.packStreamOffsets = new long[numPackSizes];\nfor (int i = 0; i < numPackSizes; i++) {\nstreamMap.packStreamOffsets[i] = nextPackStreamOffset;\nnextPackStreamOffset += archive.packSizes[i];\nstreamMap.folderFirstFileIndex = new int[numFolders];\nstreamMap.fileFolderIndex = new int[archive.files.length];\nint nextFolderIndex = 0;\nint nextFolderUnpackStreamIndex = 0;\nfor (int i = 0; i < archive.files.length; i++) {\nif (!archive.files[i].hasStream() && nextFolderUnpackStreamIndex == 0) {\nstreamMap.fileFolderIndex[i] = -1;\ncontinue;\nif (nextFolderUnpackStreamIndex == 0) {\nfor (; nextFolderIndex < archive.folders.length; ++nextFolderIndex) {\nstreamMap.folderFirstFileIndex[nextFolderIndex] = i;\nif (archive.folders[nextFolderIndex].numUnpackSubStreams > 0) {\nbreak;\nif (nextFolderIndex >= archive.folders.length) {\nstreamMap.fileFolderIndex[i] = nextFolderIndex;\nif (!archive.files[i].hasStream()) {\n++nextFolderUnpackStreamIndex;\nif (nextFolderUnpackStreamIndex >= archive.folders[nextFolderIndex].numUnpackSubStreams) {\n++nextFolderIndex;\nnextFolderUnpackStreamIndex = 0;\narchive.streamMap = streamMap;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileAntiItems(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileAntiItems(final DataOutput header) throws IOException {\nboolean hasAntiItems = false;\nfinal BitSet antiItems = new BitSet(0);\nint antiItemCounter = 0;\nfor (int i = 0; i < files.size(); i++) {\nif (!files.get(i).hasStream()) {\nboolean isAnti = files.get(i).isAntiItem();\nantiItems.set(antiItemCounter++, isAnti);\nhasAntiItems |= isAnti;\nif (hasAntiItems) {\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:isDirectory()Z",
+            "method_body": "public boolean isDirectory() {\nreturn isDirectory;\n}",
+            "method_id": 59
+        }
+    ]
+}

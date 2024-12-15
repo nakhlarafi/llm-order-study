@@ -1,0 +1,109 @@
+{
+    "bug_id": 43,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.zip.DataDescriptorTest.doesntWriteDataDescriptorWhenAddingRawEntries",
+    "test_body": "135: public void doesntWriteDataDescriptorWhenAddingRawEntries() throws IOException {\n136: ByteArrayOutputStream init = new ByteArrayOutputStream();\n137: try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(init)) {\n138: zos.putArchiveEntry(new ZipArchiveEntry(\"test1.txt\"));\n139: zos.write(\"foo\".getBytes(\"UTF-8\"));\n140: zos.closeArchiveEntry();\n141: }\n142: 143: File f = new File(dir, \"test.zip\");\n144: try (FileOutputStream fos = new FileOutputStream(f)) {\n145: fos.write(init.toByteArray());\n146: }\n147: 148: ByteArrayOutputStream o = new ByteArrayOutputStream();\n149: ZipArchiveEntry zae;\n150: try (ZipFile zf = new ZipFile(f);\n151: ZipArchiveOutputStream zos = new ZipArchiveOutputStream(o)) {\n152: zae = zf.getEntry(\"test1.txt\");\n153: zos.addRawArchiveEntry(zae, zf.getRawInputStream(zae));\n154: }\n155: 156: byte[] data = o.toByteArray();\n157: byte[] versionInLFH = Arrays.copyOfRange(data, 4, 6);\n158: // still 2.0 because of Deflate\n159: assertArrayEquals(new byte[] { 20, 0 }, versionInLFH);\n160: byte[] gpbInLFH = Arrays.copyOfRange(data, 6, 8);\n161: // no DD but EFS flag\n162: assertArrayEquals(new byte[] { 0, 8 }, gpbInLFH);\n163: 164: int cdhStart = findCentralDirectory(data);\n165: byte[] versionInCDH = Arrays.copyOfRange(data, cdhStart + 6, cdhStart + 8);\n166: assertArrayEquals(new byte[] { 20, 0 }, versionInCDH);\n167: byte[] gpbInCDH = Arrays.copyOfRange(data, cdhStart + 8, cdhStart + 10);\n168: assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);\n169: 170: int ddStart = cdhStart - 16;\n171: assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));\n172: long crcFromLFH = ZipLong.getValue(data, 14);\n173: long cSizeFromLFH = ZipLong.getValue(data, 18);\n174: long sizeFromLFH = ZipLong.getValue(data, 22);\n175: assertEquals(3, sizeFromLFH);\n176: 177: long crcFromCDH = ZipLong.getValue(data, cdhStart + 16);\n178: assertEquals(crcFromLFH, crcFromCDH);\n179: long cSizeFromCDH = ZipLong.getValue(data, cdhStart + 20);\n180: assertEquals(cSizeFromLFH, cSizeFromCDH);\n181: long sizeFromCDH = ZipLong.getValue(data, cdhStart + 24);\n182: assertEquals(sizeFromLFH, sizeFromCDH);\n183: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: arrays first differed at element [0]; expected:<0> but was:<8>\nat org.junit.internal.ComparisonCriteria.arrayEquals(ComparisonCriteria.java:50)\nat org.junit.Assert.internalArrayEquals(Assert.java:473)\nat org.junit.Assert.assertArrayEquals(Assert.java:294)\nat org.junit.Assert.assertArrayEquals(Assert.java:305)\nat org.apache.commons.compress.archivers.zip.DataDescriptorTest.doesntWriteDataDescriptorWhenAddingRawEntries(DataDescriptorTest.java:162)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:getLocalHeaderOffset()J",
+            "method_body": "protected long getLocalHeaderOffset() {\nreturn this.localHeaderOffset;\n}",
+            "method_id": 140
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:populateFromCentralDirectory()Ljava/util/Map;",
+            "method_body": "private Map<ZipArchiveEntry, NameAndComment> populateFromCentralDirectory()\nfinal HashMap<ZipArchiveEntry, NameAndComment> noUTF8Flag =\npositionAtCentralDirectory();\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nlong sig = ZipLong.getValue(wordBuf);\nif (sig != CFH_SIG && startsWithLocalFileHeader()) {\nwhile (sig == CFH_SIG) {\nreadCentralDirectoryEntry(noUTF8Flag);\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nsig = ZipLong.getValue(wordBuf);\nreturn noUTF8Flag;\n}",
+            "method_id": 141
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:positionAtCentralDirectory()V",
+            "method_body": "private void positionAtCentralDirectory()\npositionAtEndOfCentralDirectoryRecord();\nboolean found = false;\nfinal boolean searchedForZip64EOCD =\nif (searchedForZip64EOCD) {\narchive.position(archive.position() - ZIP64_EOCDL_LENGTH);\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nfound = Arrays.equals(ZipArchiveOutputStream.ZIP64_EOCD_LOC_SIG,\nif (!found) {\nif (searchedForZip64EOCD) {\nskipBytes(ZIP64_EOCDL_LENGTH - WORD);\npositionAtCentralDirectory32();\n}",
+            "method_id": 142
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:positionAtEndOfCentralDirectoryRecord()V",
+            "method_body": "private void positionAtEndOfCentralDirectoryRecord()\nfinal boolean found = tryToLocateSignature(MIN_EOCD_SIZE, MAX_EOCD_SIZE,\nif (!found) {\n}",
+            "method_id": 143
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:tryToLocateSignature(JJ[B)Z",
+            "method_body": "private boolean tryToLocateSignature(final long minDistanceFromEnd,\nboolean found = false;\nlong off = archive.size() - minDistanceFromEnd;\nfinal long stopSearching =\nif (off >= 0) {\nfor (; off >= stopSearching; off--) {\narchive.position(off);\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nwordBbuf.flip();\n}\nint curr = wordBbuf.get();\nif (curr == sig[POS_0]) {\ncurr = wordBbuf.get();\nif (curr == sig[POS_1]) {\ncurr = wordBbuf.get();\nif (curr == sig[POS_2]) {\ncurr = wordBbuf.get();\nif (curr == sig[POS_3]) {\nfound = true;\nbreak;\nif (found) {\narchive.position(off);\nreturn found;\n}",
+            "method_id": 144
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:<clinit>()V",
+            "method_body": "private static final int CFH_LEN =\nprivate static final long CFH_SIG =\nfinal HashMap<ZipArchiveEntry, NameAndComment> noUTF8Flag =\npositionAtCentralDirectory();\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nlong sig = ZipLong.getValue(wordBuf);\nif (sig != CFH_SIG && startsWithLocalFileHeader()) {\nwhile (sig == CFH_SIG) {\nreadCentralDirectoryEntry(noUTF8Flag);\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nsig = ZipLong.getValue(wordBuf);\nreturn noUTF8Flag;\n}",
+            "method_id": 145
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setInternalAttributes(I)V",
+            "method_body": "public void setInternalAttributes(final int value) {\ninternalAttributes = value;\n}",
+            "method_id": 146
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setExternalAttributes(J)V",
+            "method_body": "public void setExternalAttributes(final long value) {\nexternalAttributes = value;\n}",
+            "method_id": 147
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.FallbackZipEncoding:canEncode(Ljava/lang/String;)Z",
+            "method_body": "public boolean canEncode(final String name) {\nreturn true;\n}",
+            "method_id": 148
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setName(Ljava/lang/String;[B)V",
+            "method_body": "protected void setName(final String name, final byte[] rawName) {\nsetName(name);\nthis.rawName = rawName;\n}",
+            "method_id": 149
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setLocalHeaderOffset(J)V",
+            "method_body": "protected void setLocalHeaderOffset(long localHeaderOffset) {\nthis.localHeaderOffset = localHeaderOffset;\n}",
+            "method_id": 150
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setDataOffset(J)V",
+            "method_body": "protected void setDataOffset(long dataOffset) {\nthis.dataOffset = dataOffset;\n}",
+            "method_id": 151
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setStreamContiguous(Z)V",
+            "method_body": "protected void setStreamContiguous(boolean isStreamContiguous) {\nthis.isStreamContiguous = isStreamContiguous;\n}",
+            "method_id": 152
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setPlatform(I)V",
+            "method_body": "protected void setPlatform(final int platform) {\nthis.platform = platform;\n}",
+            "method_id": 153
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setGeneralPurposeBit(Lorg/apache/commons/compress/archivers/zip/GeneralPurposeBit;)V",
+            "method_body": "public void setGeneralPurposeBit(final GeneralPurposeBit b) {\ngpb = b;\n}",
+            "method_id": 154
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipUtil:dosToJavaTime(J)J",
+            "method_body": "public static long dosToJavaTime(final long dosTime) {\nfinal Calendar cal = Calendar.getInstance();\ncal.set(Calendar.YEAR, (int) ((dosTime >> 25) & 0x7f) + 1980);\ncal.set(Calendar.MONTH, (int) ((dosTime >> 21) & 0x0f) - 1);\ncal.set(Calendar.DATE, (int) (dosTime >> 16) & 0x1f);\ncal.set(Calendar.HOUR_OF_DAY, (int) (dosTime >> 11) & 0x1f);\ncal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);\ncal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);\ncal.set(Calendar.MILLISECOND, 0);\nreturn cal.getTime().getTime();\n}",
+            "method_id": 155
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.GeneralPurposeBit:usesUTF8ForNames()Z",
+            "method_body": "public boolean usesUTF8ForNames() {\nreturn languageEncodingFlag;\n}",
+            "method_id": 156
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ExtraFieldUtils$UnparseableExtraField:<init>(I)V",
+            "method_body": "private UnparseableExtraField(final int k) {\nkey = k;\n}",
+            "method_id": 157
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ExtraFieldUtils$UnparseableExtraField:<clinit>()V",
+            "method_body": "public static final int THROW_KEY = 0;\npublic static final UnparseableExtraField THROW\npublic static final UnparseableExtraField SKIP\n* UnparseableExtraFieldData UnparseableExtraFieldData}.",
+            "method_id": 158
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.GeneralPurposeBit:parse([BI)Lorg/apache/commons/compress/archivers/zip/GeneralPurposeBit;",
+            "method_body": "public static GeneralPurposeBit parse(final byte[] data, final int offset) {\nfinal int generalPurposeFlag = ZipShort.getValue(data, offset);\nfinal GeneralPurposeBit b = new GeneralPurposeBit();\nb.useDataDescriptor((generalPurposeFlag & DATA_DESCRIPTOR_FLAG) != 0);\nb.useUTF8ForNames((generalPurposeFlag & UFT8_NAMES_FLAG) != 0);\nb.useStrongEncryption((generalPurposeFlag & STRONG_ENCRYPTION_FLAG) != 0);\nb.useEncryption((generalPurposeFlag & ENCRYPTION_FLAG) != 0);\nb.slidingDictionarySize = (generalPurposeFlag & SLIDING_DICTIONARY_SIZE_FLAG) != 0 ? 8192 : 4096;\nb.numberOfShannonFanoTrees = (generalPurposeFlag & NUMBER_OF_SHANNON_FANO_TREES_FLAG) != 0 ? 3 : 2;\nreturn b;\n}",
+            "method_id": 159
+        }
+    ]
+}

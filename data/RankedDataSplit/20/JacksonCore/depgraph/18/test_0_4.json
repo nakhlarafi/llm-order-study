@@ -1,0 +1,34 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal",
+    "test_body": "111: public void testTooBigBigDecimal() throws Exception\n112: {\n113: JsonFactory f = new JsonFactory();\n114: f.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);\n115: 116: // 24-Aug-2016, tatu: Initial check limits scale to [-9999,+9999]\n117: BigDecimal BIG = new BigDecimal(\"1E+9999\");\n118: BigDecimal TOO_BIG = new BigDecimal(\"1E+10000\");\n119: BigDecimal SMALL = new BigDecimal(\"1E-9999\");\n120: BigDecimal TOO_SMALL = new BigDecimal(\"1E-10000\");\n121: 122: for (boolean useBytes : new boolean[] { false, true } ) {\n123: for (boolean asString : new boolean[] { false, true } ) {\n124: JsonGenerator g;\n125: 126: if (useBytes) {\n127: g = f.createGenerator(new ByteArrayOutputStream());\n128: } else {\n129: g = f.createGenerator(new StringWriter());\n130: }\n131: if (asString) {\n132: g.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n133: }\n134: 135: // first, ok cases:\n136: g.writeStartArray();\n137: g.writeNumber(BIG);\n138: g.writeNumber(SMALL);\n139: g.writeEndArray();\n140: g.close();\n141: 142: // then invalid\n143: for (BigDecimal input : new BigDecimal[] { TOO_BIG, TOO_SMALL }) {\n144: if (useBytes) {\n145: g = f.createGenerator(new ByteArrayOutputStream());\n146: } else {\n147: g = f.createGenerator(new StringWriter());\n148: }\n149: if (asString) {\n150: g.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n151: }\n152: try {\n153: g.writeNumber(input);\n154: fail(\"Should not have written without exception: \"+input);\n155: } catch (JsonGenerationException e) {",
+    "stack_trace": "junit.framework.AssertionFailedError: Should not have written without exception: 1E+10000\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.TestCase.fail(TestCase.java:227)\nat com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal(TestJsonGeneratorFeatures.java:154)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonWriteContext:<init>(ILcom/fasterxml/jackson/core/json/JsonWriteContext;Lcom/fasterxml/jackson/core/json/DupDetector;)V",
+            "method_body": "protected JsonWriteContext(int type, JsonWriteContext parent, DupDetector dups) {\nsuper();\n_type = type;\n_parent = parent;\n_dups = dups;\n_index = -1;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonWriteContext:createRootContext(Lcom/fasterxml/jackson/core/json/DupDetector;)Lcom/fasterxml/jackson/core/json/JsonWriteContext;",
+            "method_body": "public static JsonWriteContext createRootContext(DupDetector dd) {\nreturn new JsonWriteContext(TYPE_ROOT, null, dd);\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonWriteContext:createChildArrayContext()Lcom/fasterxml/jackson/core/json/JsonWriteContext;",
+            "method_body": "public JsonWriteContext createChildArrayContext() {\nJsonWriteContext ctxt = _child;\nif (ctxt == null) {\n_child = ctxt = new JsonWriteContext(TYPE_ARRAY, this, (_dups == null) ? null : _dups.child());\nreturn ctxt;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonWriteContext:clearAndGetParent()Lcom/fasterxml/jackson/core/json/JsonWriteContext;",
+            "method_body": "public JsonWriteContext clearAndGetParent() {\n_currentValue = null;\nreturn _parent;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonWriteContext:writeValue()I",
+            "method_body": "public int writeValue() {\nif (_type == TYPE_OBJECT) {\nif (_type == TYPE_ARRAY) {\nint ix = _index;\n++_index;\nreturn (ix < 0) ? STATUS_OK_AS_IS : STATUS_OK_AFTER_COMMA;\n++_index;\nreturn (_index == 0) ? STATUS_OK_AS_IS : STATUS_OK_AFTER_SPACE;\n}",
+            "method_id": 84
+        }
+    ]
+}

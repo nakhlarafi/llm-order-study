@@ -1,0 +1,109 @@
+{
+    "bug_id": 1,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.dataformat.xml.lists.NestedUnwrappedLists180Test.testNestedUnwrappedLists180",
+    "test_body": "38: public void testNestedUnwrappedLists180() throws Exception\n39: {\n40: /*\n41: Records recs = new Records();\n42: recs.records.add(new Record());\n43: recs.records.add(new Record());\n44: recs.records.add(new Record());\n45: recs.records.get(0).fields.add(new Field(\"a\"));\n46: recs.records.get(2).fields.add(new Field(\"b\"));\n47: 48: String xml = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(recs);\n49: */\n50: 51: String xml =\n52: \"<Records>\\n\"\n53: // Important: it's the empty CDATA here that causes breakage -- empty element alone would be fine\n54: //+\"<records>\\n</records>\\n\"\n55: +\"<records></records>\\n\"\n56: +\"  <records>\\n\"\n57: +\"   <fields name='b'/>\\n\"\n58: +\"  </records>\\n\"\n59: +\"</Records>\\n\"\n60: ;\n61: 62: //System.out.println(\"XML: \"+xml);\n63: 64: Records result = MAPPER.readValue(xml, Records.class);\n65: assertNotNull(result.records);\n66: assertEquals(2, result.records.size());\n67: assertNotNull(result.records.get(1));\n68: assertEquals(1, result.records.get(1).fields.size());\n69: assertEquals(\"b\", result.records.get(1).fields.get(0).name);\n70: 71: // also, first one ought not be null should it? Ideally not...\n72: assertNotNull(result.records.get(0));\n73: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat junit.framework.Assert.fail(Assert.java:55)\nat junit.framework.Assert.assertTrue(Assert.java:22)\nat junit.framework.Assert.assertNotNull(Assert.java:256)\nat junit.framework.Assert.assertNotNull(Assert.java:248)\nat junit.framework.TestCase.assertNotNull(TestCase.java:417)\nat com.fasterxml.jackson.dataformat.xml.lists.NestedUnwrappedLists180Test.testNestedUnwrappedLists180(NestedUnwrappedLists180Test.java:72)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser$1:<clinit>()V",
+            "method_body": "public JsonToken nextToken() throws IOException\n_binaryValue = null;\nif (_nextToken != null) {\nJsonToken t = _nextToken;\n_currToken = t;\n_nextToken = null;\nswitch (t) {\n_parsingContext = _parsingContext.createChildObjectContext(-1, -1);\nbreak;\n_parsingContext.setCurrentName(_xmlTokens.getLocalName());\nbreak;\nreturn t;\nint token = _xmlTokens.next();\nwhile (token == XmlTokenStream.XML_START_ELEMENT) {\nif (_mayBeLeaf) {\n_nextToken = JsonToken.FIELD_NAME;\n_parsingContext = _parsingContext.createChildObjectContext(-1, -1);\nreturn (_currToken = JsonToken.START_OBJECT);\nif (_parsingContext.inArray()) {\ntoken = _xmlTokens.next();\n_mayBeLeaf = true;\ncontinue;\nString name = _xmlTokens.getLocalName();\n_parsingContext.setCurrentName(name);\nif (_namesToWrap != null && _namesToWrap.contains(name)) {\n_xmlTokens.repeatStartElement();\n_mayBeLeaf = true;\nreturn (_currToken = JsonToken.FIELD_NAME);\nswitch (token) {\nif (_mayBeLeaf) {\n_mayBeLeaf = false;\nreturn (_currToken = JsonToken.VALUE_NULL);\n_currToken = _parsingContext.inArray() ? JsonToken.END_ARRAY : JsonToken.END_OBJECT;\n_parsingContext = _parsingContext.getParent();\n_namesToWrap = _parsingContext.getNamesToWrap();\nreturn _currToken;\nif (_mayBeLeaf) {\n_mayBeLeaf = false;\n_nextToken = JsonToken.FIELD_NAME;\n_currText = _xmlTokens.getText();\n_parsingContext = _parsingContext.createChildObjectContext(-1, -1);\nreturn (_currToken = JsonToken.START_OBJECT);\n_currText = _xmlTokens.getText();\nreturn (_currToken = JsonToken.VALUE_STRING);\n_currText = _xmlTokens.getText();\nif (_mayBeLeaf) {\n_mayBeLeaf = false;\n_xmlTokens.skipEndElement();\nif (_parsingContext.inArray()) {\nif (_isEmpty(_currText)) {\n_currToken = JsonToken.END_ARRAY;\n_parsingContext = _parsingContext.getParent();\n_namesToWrap = _parsingContext.getNamesToWrap();\nreturn _currToken;\nreturn (_currToken = JsonToken.VALUE_STRING);\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:<init>(Lcom/fasterxml/jackson/dataformat/xml/deser/ElementWrapper;Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "private ElementWrapper(ElementWrapper parent,\n{\n_parent = parent;\n_wrapperName = wrapperLocalName;\n_wrapperNamespace = (wrapperNamespace == null) ? \"\" : wrapperNamespace;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:matchingWrapper(Lcom/fasterxml/jackson/dataformat/xml/deser/ElementWrapper;Ljava/lang/String;Ljava/lang/String;)Lcom/fasterxml/jackson/dataformat/xml/deser/ElementWrapper;",
+            "method_body": "public static ElementWrapper matchingWrapper(ElementWrapper parent,\nreturn new ElementWrapper(parent, wrapperLocalName, wrapperNamespace);\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:intermediateWrapper()Lcom/fasterxml/jackson/dataformat/xml/deser/ElementWrapper;",
+            "method_body": "public ElementWrapper intermediateWrapper() {\nreturn new ElementWrapper(this, null, null);\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlBeanDeserializerModifier:updateProperties(Lcom/fasterxml/jackson/databind/DeserializationConfig;Lcom/fasterxml/jackson/databind/BeanDescription;Ljava/util/List;)Ljava/util/List;",
+            "method_body": "public List<BeanPropertyDefinition> updateProperties(DeserializationConfig config,\nfinal AnnotationIntrospector intr = config.getAnnotationIntrospector();\nint changed = 0;\nfor (int i = 0, propCount = propDefs.size(); i < propCount; ++i) {\nBeanPropertyDefinition prop = propDefs.get(i);\nAnnotatedMember acc = prop.getPrimaryMember();\nif (acc == null) {\nBoolean b = AnnotationUtil.findIsTextAnnotation(intr, acc);\nif (b != null && b.booleanValue()) {\nPropertyName wrapperName = prop.getWrapperName();\nif (wrapperName != null && wrapperName != PropertyName.NO_NAME) {\nString localName = wrapperName.getSimpleName();\nif ((localName != null && localName.length() > 0)\nreturn propDefs;\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlTokenStream:<init>(Ljavax/xml/stream/XMLStreamReader;Ljava/lang/Object;)V",
+            "method_body": "public XmlTokenStream(XMLStreamReader xmlReader, Object sourceRef)\n{\n_sourceReference = sourceRef;\nif (xmlReader.getEventType() != XMLStreamConstants.START_ELEMENT) {\n_xmlReader = Stax2ReaderAdapter.wrapIfNecessary(xmlReader);\n_currentState = XML_START_ELEMENT;\n_localName = _xmlReader.getLocalName();\n_namespaceURI = _xmlReader.getNamespaceURI();\n_attributeCount = _xmlReader.getAttributeCount();\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.WrapperHandlingDeserializer:deserialize(Lcom/fasterxml/jackson/core/JsonParser;Lcom/fasterxml/jackson/databind/DeserializationContext;)Ljava/lang/Object;",
+            "method_body": "public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException\n_configureParser(jp);\nreturn _delegatee.deserialize(jp,  ctxt);\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.WrapperHandlingDeserializer:_configureParser(Lcom/fasterxml/jackson/core/JsonParser;)V",
+            "method_body": "protected final void _configureParser(JsonParser jp) throws IOException\nif (jp instanceof FromXmlParser) {\n((FromXmlParser) jp).addVirtualWrapping(_namesToWrap);\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlTokenStream:_initStartElement()I",
+            "method_body": "private final int _initStartElement() throws XMLStreamException\nfinal String ns = _xmlReader.getNamespaceURI();\nfinal String localName = _xmlReader.getLocalName();\n_attributeCount = _xmlReader.getAttributeCount();\n_nextAttributeIndex = 0;\nif (_currentWrapper != null) {\nif (_currentWrapper.matchesWrapper(localName, ns)) {\n_currentWrapper = _currentWrapper.intermediateWrapper();\n_localName = localName;\n_namespaceURI = ns;\nreturn (_currentState = XML_START_ELEMENT);\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlBeanDeserializerModifier:modifyDeserializer(Lcom/fasterxml/jackson/databind/DeserializationConfig;Lcom/fasterxml/jackson/databind/BeanDescription;Lcom/fasterxml/jackson/databind/JsonDeserializer;)Lcom/fasterxml/jackson/databind/JsonDeserializer;",
+            "method_body": "public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config,\nif (!(deser0 instanceof BeanDeserializerBase)) {\nreturn deser0;\nBeanDeserializerBase deser = (BeanDeserializerBase) deser0;\nif (!deser.getValueInstantiator().canCreateFromString()) {\nSettableBeanProperty textProp = _findSoleTextProp(config, deser.properties());\nif (textProp != null) {\nreturn new WrapperHandlingDeserializer(deser);\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlReadContext:getCurrentName()Ljava/lang/String;",
+            "method_body": "public final String getCurrentName() { return _currentName; }\npublic final String getCurrentName() { return _currentName; }",
+            "method_id": 70
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlReadContext:setCurrentName(Ljava/lang/String;)V",
+            "method_body": "public void setCurrentName(String name) {\n_currentName = name;\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlTokenStream:getText()Ljava/lang/String;",
+            "method_body": "public String getText() { return _textValue; }\npublic String getText() { return _textValue; }",
+            "method_id": 72
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:matchesWrapper(Ljava/lang/String;Ljava/lang/String;)Z",
+            "method_body": "public boolean matchesWrapper(String localName, String ns)\nif (_wrapperName == null) {\nreturn true;\nif (ns == null) {\nreturn _wrapperName.equals(localName) && _wrapperNamespace.equals(ns);\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlTokenStream:getLocalName()Ljava/lang/String;",
+            "method_body": "public String getLocalName() { return _localName; }\npublic String getLocalName() { return _localName; }",
+            "method_id": 74
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlTokenStream:next()I",
+            "method_body": "public int next() throws IOException\nif (_repeatElement != 0) {\nreturn (_currentState = _handleRepeatElement());\nreturn _next();\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.XmlTokenStream:_collectUntilTag()Ljava/lang/String;",
+            "method_body": "private final String _collectUntilTag() throws XMLStreamException\nString text = null;\nswitch (_xmlReader.next()) {\nreturn text;\nif (text == null) {\ntext = _xmlReader.getText();\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:isMatching()Z",
+            "method_body": "public boolean isMatching() { return _wrapperName != null; }\npublic boolean isMatching() { return _wrapperName != null; }",
+            "method_id": 77
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:getWrapperLocalName()Ljava/lang/String;",
+            "method_body": "public String getWrapperLocalName() { return _wrapperName; }\npublic String getWrapperLocalName() { return _wrapperName; }",
+            "method_id": 78
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.dataformat.xml.deser.ElementWrapper:getWrapperNamespace()Ljava/lang/String;",
+            "method_body": "public String getWrapperNamespace() { return _wrapperNamespace; }\npublic String getWrapperNamespace() { return _wrapperNamespace; }",
+            "method_id": 79
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 58,
+    "test_id": 0,
+    "test_name": "org.jsoup.safety.CleanerTest.testIsValidBodyHtml",
+    "test_body": "145: @Test public void testIsValidBodyHtml() {\n146: String ok = \"<p>Test <b><a href='http://example.com/' rel='nofollow'>OK</a></b></p>\";\n147: String ok1 = \"<p>Test <b><a href='http://example.com/'>OK</a></b></p>\"; // missing enforced is OK because still needs run thru cleaner\n148: String nok1 = \"<p><script></script>Not <b>OK</b></p>\";\n149: String nok2 = \"<p align=right>Test Not <b>OK</b></p>\";\n150: String nok3 = \"<!-- comment --><p>Not OK</p>\"; // comments and the like will be cleaned\n151: String nok4 = \"<html><head>Foo</head><body><b>OK</b></body></html>\"; // not body html\n152: String nok5 = \"<p>Test <b><a href='http://example.com/' rel='nofollowme'>OK</a></b></p>\";\n153: String nok6 = \"<p>Test <b><a href='http://example.com/'>OK</b></p>\"; // missing close tag\n154: String nok7 = \"</div>What\";\n155: assertTrue(Jsoup.isValid(ok, Whitelist.basic()));\n156: assertTrue(Jsoup.isValid(ok1, Whitelist.basic()));\n157: assertFalse(Jsoup.isValid(nok1, Whitelist.basic()));\n158: assertFalse(Jsoup.isValid(nok2, Whitelist.basic()));\n159: assertFalse(Jsoup.isValid(nok3, Whitelist.basic()));\n160: assertFalse(Jsoup.isValid(nok4, Whitelist.basic()));\n161: assertFalse(Jsoup.isValid(nok5, Whitelist.basic()));\n162: assertFalse(Jsoup.isValid(nok6, Whitelist.basic()));\n163: assertFalse(Jsoup.isValid(ok, Whitelist.none()));\n164: assertFalse(Jsoup.isValid(nok7, Whitelist.basic()));\n165: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:advanceTransition(Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "void advanceTransition(TokeniserState state) {\nreader.advance();\nthis.state = state;\n}",
+            "method_id": 190
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createTagPending(Z)Lorg/jsoup/parser/Token$Tag;",
+            "method_body": "Token.Tag createTagPending(boolean start) {\ntagPending = start ? startPending.reset() : endPending.reset();\nreturn tagPending;\n}",
+            "method_id": 191
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emitTagPending()V",
+            "method_body": "void emitTagPending() {\ntagPending.finaliseTag();\nemit(tagPending);\n}",
+            "method_id": 192
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createCommentPending()V",
+            "method_body": "void createCommentPending() {\ncommentPending.reset();\n}",
+            "method_id": 193
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emitCommentPending()V",
+            "method_body": "void emitCommentPending() {\nemit(commentPending);\n}",
+            "method_id": 194
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createTempBuffer()V",
+            "method_body": "void createTempBuffer() {\nToken.reset(dataBuffer);\n}",
+            "method_id": 195
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:isAppropriateEndTagToken()Z",
+            "method_body": "boolean isAppropriateEndTagToken() {\nreturn lastStartTag != null && tagPending.name().equalsIgnoreCase(lastStartTag);\n}",
+            "method_id": 196
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:handleDataEndTag(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void handleDataEndTag(Tokeniser t, CharacterReader r, TokeniserState elseTransition) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.tagPending.appendTagName(name);\nt.dataBuffer.append(name);\nreturn;\nboolean needsExitTransition = false;\nif (t.isAppropriateEndTagToken() && !r.isEmpty()) {\nchar c = r.consume();\nswitch (c) {\nt.emitTagPending();\nt.transition(Data);\nbreak;\n} else {\nif (needsExitTransition) {\n}",
+            "method_id": 197
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:readEndTag(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void readEndTag(Tokeniser t, CharacterReader r, TokeniserState a, TokeniserState b) {\nif (r.matchesLetter()) {\nt.createTagPending(false);\nt.transition(a);\n}",
+            "method_id": 198
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$1:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(TagOpen);\nbreak;\nt.emit(new Token.EOF());\nbreak;\nString data = r.consumeData();\nt.emit(data);\n}",
+            "method_id": 199
+        }
+    ]
+}

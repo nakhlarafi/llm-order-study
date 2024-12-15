@@ -1,0 +1,59 @@
+{
+    "bug_id": 4,
+    "test_id": 5,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testASCIIFileRoundtripImplicitUnicodeExtra",
+    "test_body": "78: public void testASCIIFileRoundtripImplicitUnicodeExtra()\n79: throws IOException {\n80: testFileRoundtrip(US_ASCII, false, false);\n81: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipUtil:<clinit>()V",
+            "method_body": "private static final byte[] DOS_TIME_MIN = ZipLong.getBytes(0x00002100L);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:getZipEncoding(Ljava/lang/String;)Lorg/apache/commons/compress/archivers/zip/ZipEncoding;",
+            "method_body": "static ZipEncoding getZipEncoding(String name) {\nif (isUTF8(name)) {\nreturn UTF8_ZIP_ENCODING;\nif (name == null) {\nSimpleEncodingHolder h =\nif (h!=null) {\nreturn h.getEncoding();\nCharset cs = Charset.forName(name);\nreturn new NioZipEncoding(cs);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeOut([BII)V",
+            "method_body": "protected final void writeOut(byte[] data, int offset, int length)\nif (raf != null) {\nraf.write(data, offset, length);\nout.write(data, offset, length);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.JarMarker:<init>()V",
+            "method_body": "public JarMarker() {\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipShort:getBytes(I)[B",
+            "method_body": "public static byte[] getBytes(int value) {\nbyte[] result = new byte[2];\nresult[0] = (byte) (value & BYTE_MASK);\nresult[1] = (byte) ((value & BYTE_1_MASK) >> BYTE_1_SHIFT);\nreturn result;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.AbstractUnicodeExtraField:<init>(Ljava/lang/String;[BII)V",
+            "method_body": "protected AbstractUnicodeExtraField(String text, byte[] bytes, int off,\nint len) {\nCRC32 crc32 = new CRC32();\ncrc32.update(bytes, off, len);\nnameCRC32 = crc32.getValue();\nunicodeName = text.getBytes(\"UTF-8\");\n}\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:encode(Ljava/lang/String;)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer encode(String name) {\nCharsetEncoder enc = this.charset.newEncoder();\nenc.onMalformedInput(CodingErrorAction.REPORT);\nenc.onUnmappableCharacter(CodingErrorAction.REPORT);\nCharBuffer cb = CharBuffer.wrap(name);\nByteBuffer out = ByteBuffer.allocate(name.length()\nwhile (cb.remaining() > 0) {\nCoderResult res = enc.encode(cb, out,true);\nif (res.isUnmappable() || res.isMalformed()) {\nif (res.length() * 6 > out.remaining()) {\nfor (int i=0; i<res.length(); ++i) {\nZipEncodingHelper.appendSurrogate(out,cb.get());\n} else if (res.isOverflow()) {\nout = ZipEncodingHelper.growBuffer(out, 0);\n} else if (res.isUnderflow()) {\nenc.flush(out);\nbreak;\n}\nout.limit(out.position());\nout.rewind();\nreturn out;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:write([BII)V",
+            "method_body": "public void write(byte[] b, int offset, int length) throws IOException {\nif (entry.getMethod() == DEFLATED) {\nif (length > 0) {\nif (!def.finished()) {\nif (length <= DEFLATER_BLOCK_SIZE) {\ndef.setInput(b, offset, length);\ndeflateUntilInputIsNeeded();\ncrc.update(b, offset, length);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:isUTF8(Ljava/lang/String;)Z",
+            "method_body": "static boolean isUTF8(String encoding) {\nif (encoding == null) {\nreturn UTF8.equalsIgnoreCase(encoding)\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeCentralFileHeader(Lorg/apache/commons/compress/archivers/zip/ZipArchiveEntry;)V",
+            "method_body": "protected void writeCentralFileHeader(ZipArchiveEntry ze) throws IOException {\nwriteOut(CFH_SIG);\nwritten += WORD;\nwriteOut(ZipShort.getBytes((ze.getPlatform() << 8) | 20));\nwritten += SHORT;\nfinal int zipMethod = ze.getMethod();\nfinal boolean encodable = zipEncoding.canEncode(ze.getName());\nwriteVersionNeededToExtractAndGeneralPurposeBits(zipMethod,\nwritten += WORD;\nwriteOut(ZipShort.getBytes(zipMethod));\nwritten += SHORT;\nwriteOut(ZipUtil.toDosTime(ze.getTime()));\nwritten += WORD;\nwriteOut(ZipLong.getBytes(ze.getCrc()));\nwriteOut(ZipLong.getBytes(ze.getCompressedSize()));\nwriteOut(ZipLong.getBytes(ze.getSize()));\nwritten += 12;\nif (!encodable && fallbackToUTF8) {\nentryEncoding = zipEncoding;\nByteBuffer name = entryEncoding.encode(ze.getName());\nwriteOut(ZipShort.getBytes(name.limit()));\nwritten += SHORT;\nbyte[] extra = ze.getCentralDirectoryExtra();\nwriteOut(ZipShort.getBytes(extra.length));\nwritten += SHORT;\nString comm = ze.getComment();\nif (comm == null) {\ncomm = \"\";\nByteBuffer commentB = entryEncoding.encode(comm);\nwriteOut(ZipShort.getBytes(commentB.limit()));\nwritten += SHORT;\nwriteOut(ZERO);\nwritten += SHORT;\nwriteOut(ZipShort.getBytes(ze.getInternalAttributes()));\nwritten += SHORT;\nwriteOut(ZipLong.getBytes(ze.getExternalAttributes()));\nwritten += WORD;\nwriteOut((byte[]) offsets.get(ze));\nwritten += WORD;\nwriteOut(name.array(), name.arrayOffset(), name.limit());\nwritten += name.limit();\nwriteOut(extra);\nwritten += extra.length;\nwriteOut(commentB.array(), commentB.arrayOffset(), commentB.limit());\nwritten += commentB.limit();\n}",
+            "method_id": 9
+        }
+    ]
+}

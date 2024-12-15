@@ -1,0 +1,59 @@
+{
+    "bug_id": 14,
+    "test_id": 0,
+    "test_name": "org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest.testCompatibilityWithOriginalVersion",
+    "test_body": "public void testCompatibilityWithOriginalVersion() {\n// see CODEC-187\n// comparison: http://stevemorse.org/census/soundex.html\n185: Map<String, String> args = new TreeMap<String, String>();\nargs.put(\"nameType\", \"GENERIC\");\nargs.put(\"ruleType\", \"APPROX\");\n189: assertEquals(encode(args, true, \"abram\"), \"Ybram|Ybrom|abram|abran|abrom|abron|avram|avrom|obram|obran|obrom|obron|ovram|ovrom\");\nassertEquals(encode(args, true, \"Bendzin\"), \"bndzn|bntsn|bnzn|vndzn|vntsn\");\n192: args.put(\"nameType\", \"ASHKENAZI\");\nargs.put(\"ruleType\", \"APPROX\");\n195: assertEquals(encode(args, true, \"abram\"), \"Ybram|Ybrom|abram|abrom|avram|avrom|imbram|imbrom|obram|obrom|ombram|ombrom|ovram|ovrom\");\nassertEquals(encode(args, true, \"Halpern\"), \"YlpYrn|Ylpirn|alpYrn|alpirn|olpYrn|olpirn|xalpirn|xolpirn\");\n198: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<...dzn|bntsn|bnzn|vndzn[]> but was:<...dzn|bntsn|bnzn|vndzn[|vntsn]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest.testCompatibilityWithOriginalVersion(PhoneticEngineRegressionTest.java:190)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.PhoneticEngine:applyFinalRules(Lorg/apache/commons/codec/language/bm/PhoneticEngine$PhonemeBuilder;Ljava/util/Map;)Lorg/apache/commons/codec/language/bm/PhoneticEngine$PhonemeBuilder;",
+            "method_body": "private PhonemeBuilder applyFinalRules(final PhonemeBuilder phonemeBuilder,\nif (finalRules == null) {\nif (finalRules.isEmpty()) {\nfinal Set<Rule.Phoneme> phonemes = new TreeSet<Rule.Phoneme>(Rule.Phoneme.COMPARATOR);\nfor (final Rule.Phoneme phoneme : phonemeBuilder.getPhonemes()) {\nPhonemeBuilder subBuilder = PhonemeBuilder.empty(phoneme.getLanguages());\nfinal String phonemeText = phoneme.getPhonemeText().toString();\nfor (int i = 0; i < phonemeText.length();) {\nfinal RulesApplication rulesApplication =\nfinal boolean found = rulesApplication.isFound();\nsubBuilder = rulesApplication.getPhonemeBuilder();\nif (!found) {\nsubBuilder.append(phonemeText.subSequence(i, i + 1));\ni = rulesApplication.getI();\n}\nphonemes.addAll(subBuilder.getPhonemes());\n}\nreturn new PhonemeBuilder(phonemes);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Lang:<clinit>()V",
+            "method_body": "private static final Map<NameType, Lang> Langs = new EnumMap<NameType, Lang>(NameType.class);\nfor (final NameType s : NameType.values()) {\nLangs.put(s, loadFromResource(LANGUAGE_RULES_RN, Languages.getInstance(s)));\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.PhoneticEngine:encode(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String encode(final String input) {\nfinal Languages.LanguageSet languageSet = this.lang.guessLanguages(input);\nreturn encode(input, languageSet);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Lang:guessLanguages(Ljava/lang/String;)Lorg/apache/commons/codec/language/bm/Languages$LanguageSet;",
+            "method_body": "public Languages.LanguageSet guessLanguages(final String input) {\nfinal String text = input.toLowerCase(Locale.ENGLISH);\nfinal Set<String> langs = new HashSet<String>(this.languages.getLanguages());\nfor (final LangRule rule : this.rules) {\nfinal Languages.LanguageSet ls = Languages.LanguageSet.from(langs);\nreturn ls.equals(Languages.NO_LANGUAGES) ? Languages.ANY_LANGUAGE : ls;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.PhoneticEngine$RulesApplication:invoke()Lorg/apache/commons/codec/language/bm/PhoneticEngine$RulesApplication;",
+            "method_body": "public RulesApplication invoke() {\nthis.found = false;\nint patternLength = 1;\nfinal List<Rule> rules = this.finalRules.get(input.subSequence(i, i+patternLength));\nif (rules != null) {\nfor (final Rule rule : rules) {\nfinal String pattern = rule.getPattern();\npatternLength = pattern.length();\nif (rule.patternAndContextMatches(this.input, this.i)) {\nthis.phonemeBuilder.apply(rule.getPhoneme(), maxPhonemes);\nthis.found = true;\nbreak;\n}\nif (!this.found) {\npatternLength = 1;\nthis.i += patternLength;\nreturn this;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.PhoneticEngine$PhonemeBuilder:makeString()Ljava/lang/String;",
+            "method_body": "public String makeString() {\nfinal StringBuilder sb = new StringBuilder();\nfor (final Rule.Phoneme ph : this.phonemes) {\nif (sb.length() > 0) {\nsb.append(\"|\");\nsb.append(ph.getPhonemeText());\n}\nreturn sb.toString();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.NameType:<init>(Ljava/lang/String;ILjava/lang/String;)V",
+            "method_body": "NameType(final String name) {\nthis.name = name;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.NameType:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn this.name;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.RuleType:<init>(Ljava/lang/String;ILjava/lang/String;)V",
+            "method_body": "RuleType(final String name) {\nthis.name = name;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.RuleType:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn this.name;\n}",
+            "method_id": 9
+        }
+    ]
+}

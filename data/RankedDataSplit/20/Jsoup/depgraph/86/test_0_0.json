@@ -1,0 +1,109 @@
+{
+    "bug_id": 86,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.XmlTreeBuilderTest.handlesLTinScript",
+    "test_body": "242: public void handlesLTinScript() {\n243: // https://github.com/jhy/jsoup/issues/1139\n244: String html = \"<script> var a=\\\"<?\\\"; var b=\\\"?>\\\"; </script>\";\n245: Document doc = Jsoup.parse(html, \"\", Parser.xmlParser());\n246: assertEquals(\"<script> var a=\\\"\\n <!--?\\\"; var b=\\\"?-->\\\"; </script>\", doc.html()); // converted from pseudo xmldecl to comment",
+    "stack_trace": "java.lang.IndexOutOfBoundsException: Index: 0, Size: 0\nat java.util.ArrayList.rangeCheck(ArrayList.java:657)\nat java.util.ArrayList.get(ArrayList.java:433)\nat org.jsoup.nodes.Element.child(Element.java:253)\nat org.jsoup.nodes.Comment.asXmlDeclaration(Comment.java:79)\nat org.jsoup.parser.XmlTreeBuilder.insert(XmlTreeBuilder.java:95)\nat org.jsoup.parser.XmlTreeBuilder.process(XmlTreeBuilder.java:55)\nat org.jsoup.parser.TreeBuilder.runParser(TreeBuilder.java:56)\nat org.jsoup.parser.TreeBuilder.parse(TreeBuilder.java:47)\nat org.jsoup.parser.Parser.parseInput(Parser.java:31)\nat org.jsoup.Jsoup.parse(Jsoup.java:45)\nat org.jsoup.parser.XmlTreeBuilderTest.handlesLTinScript(XmlTreeBuilderTest.java:245)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:insert(Lorg/jsoup/parser/Token$Comment;)V",
+            "method_body": "void insert(Token.Comment commentToken) {\nComment comment = new Comment(commentToken.getData());\nNode insert = comment;\nif (commentToken.bogus && comment.isXmlDeclaration()) {\nXmlDeclaration decl = comment.asXmlDeclaration(); // else, we couldn't parse it as a decl, so leave as a comment\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:process(Lorg/jsoup/parser/Token;)Z",
+            "method_body": "protected boolean process(Token token) {\nswitch (token.type) {\ninsert(token.asStartTag());\nbreak;\ninsert(token.asComment());\ninsert(token.asCharacter());\nbreak;\nbreak;\nValidate.fail(\"Unexpected token type: \" + token.type);\nreturn true;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Comment:asXmlDeclaration()Lorg/jsoup/nodes/XmlDeclaration;",
+            "method_body": "public XmlDeclaration asXmlDeclaration() {\nString data = getData();\nDocument doc = Jsoup.parse(\"<\" + data.substring(1, data.length() -1) + \">\", baseUri(), Parser.xmlParser());\nXmlDeclaration decl = null;\nif (doc.childNodeSize() > 0) {\nElement el = doc.child(0);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:insert(Lorg/jsoup/parser/Token$StartTag;)Lorg/jsoup/nodes/Element;",
+            "method_body": "Element insert(Token.StartTag startTag) {\nTag tag = Tag.valueOf(startTag.name(), settings);\nElement el = new Element(tag, baseUri, settings.normalizeAttributes(startTag.attributes));\ninsertNode(el);\nif (startTag.isSelfClosing()) {\nstack.add(el);\nreturn el;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:initialiseParse(Ljava/io/Reader;Ljava/lang/String;Lorg/jsoup/parser/Parser;)V",
+            "method_body": "protected void initialiseParse(Reader input, String baseUri, Parser parser) {\nsuper.initialiseParse(input, baseUri, parser);\nstack.add(doc); // place the document onto the stack. differs from HtmlTreeBuilder (not on stack)\ndoc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:insert(Lorg/jsoup/parser/Token$Character;)V",
+            "method_body": "void insert(Token.Character token) {\nfinal String data = token.getData();\ninsertNode(token.isCData() ? new CDataNode(data) : new TextNode(data));\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:insertNode(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "private void insertNode(Node node) {\ncurrentElement().appendChild(node);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder$1:<clinit>()V",
+            "method_body": "protected boolean process(Token token) {\nswitch (token.type) {\ninsert(token.asStartTag());\nbreak;\ninsert(token.asComment());\ninsert(token.asCharacter());\nbreak;\nbreak;\nValidate.fail(\"Unexpected token type: \" + token.type);\nreturn true;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:initialiseParse(Ljava/io/Reader;Ljava/lang/String;Lorg/jsoup/parser/Parser;)V",
+            "method_body": "abstract ParseSettings defaultSettings();\nValidate.notNull(input, \"String input must not be null\");\nValidate.notNull(baseUri, \"BaseURI must not be null\");\ndoc = new Document(baseUri);\ndoc.parser(parser);\nthis.parser = parser;\nsettings = parser.settings();\nreader = new CharacterReader(input);\ncurrentToken = null;\ntokeniser = new Tokeniser(reader, parser.getErrors());\nstack = new ArrayList<>(32);\nthis.baseUri = baseUri;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Comment:isXmlDeclaration()Z",
+            "method_body": "public boolean isXmlDeclaration() {\nString data = getData();\nreturn (data.length() > 1 && (data.startsWith(\"!\") || data.startsWith(\"?\")));\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:runParser()V",
+            "method_body": "abstract List<Node> parseFragment(String inputFragment, Element context, String baseUri, Parser parser);\nToken token = tokeniser.read();\nprocess(token);\ntoken.reset();\nif (token.type == Token.TokenType.EOF)\nbreak;\n}\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.parser.XmlTreeBuilder:defaultSettings()Lorg/jsoup/parser/ParseSettings;",
+            "method_body": "ParseSettings defaultSettings() {\nreturn ParseSettings.preserveCase;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:parse(Ljava/io/Reader;Ljava/lang/String;Lorg/jsoup/parser/Parser;)Lorg/jsoup/nodes/Document;",
+            "method_body": "Document parse(Reader input, String baseUri, Parser parser) {\ninitialiseParse(input, baseUri, parser);\nrunParser();\nreturn doc;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:<init>()V",
+            "method_body": "protected Parser parser;\nprivate Token.StartTag start = new Token.StartTag(); // start tag to process\nprivate Token.EndTag end  = new Token.EndTag();\nValidate.notNull(input, \"String input must not be null\");\nValidate.notNull(baseUri, \"BaseURI must not be null\");\ndoc = new Document(baseUri);\ndoc.parser(parser);\nthis.parser = parser;\nsettings = parser.settings();\nreader = new CharacterReader(input);\ncurrentToken = null;\ntokeniser = new Tokeniser(reader, parser.getErrors());\nstack = new ArrayList<>(32);\nthis.baseUri = baseUri;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:currentElement()Lorg/jsoup/nodes/Element;",
+            "method_body": "protected Element currentElement() {\nint size = stack.size();\nreturn size > 0 ? stack.get(size-1) : null;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:xmlParser()Lorg/jsoup/parser/Parser;",
+            "method_body": "public static Parser xmlParser() {\nreturn new Parser(new XmlTreeBuilder());\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$8:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(BogusComment);\nbreak;\nif (r.matchesLetter()) {\nt.createTagPending(true);\nt.transition(TagName);\nt.error(this);\nt.emit('<'); // char that got us here\nt.transition(Data);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$43:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nr.unconsume();\nToken.Comment comment = new Token.Comment();\ncomment.bogus = true;\ncomment.data.append(r.consumeTo('>'));\nt.emit(comment);\nt.advanceTransition(Data);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(C)V",
+            "method_body": "void emit(char c) {\nemit(String.valueOf(c));\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:childElementsList()Ljava/util/List;",
+            "method_body": "private List<Element> childElementsList() {\nif (shadowChildrenRef == null || (children = shadowChildrenRef.get()) == null) {\nfinal int size = childNodes.size();\nchildren = new ArrayList<>(size);\nfor (int i = 0; i < size; i++) {\nfinal Node node = childNodes.get(i);\nif (node instanceof Element)\nshadowChildrenRef = new WeakReference<>(children);\nreturn children;\n}",
+            "method_id": 19
+        }
+    ]
+}

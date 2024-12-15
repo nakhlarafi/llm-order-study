@@ -1,0 +1,59 @@
+{
+    "bug_id": 15,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.ParserTest.handlesDataOnlyTags",
+    "test_body": "155: @Test public void handlesDataOnlyTags() {\n156: String t = \"<style>font-family: bold</style>\";\n157: List<Element> tels = Jsoup.parse(t).getElementsByTag(\"style\");\n158: assertEquals(\"font-family: bold\", tels.get(0).data());\n159: assertEquals(\"\", tels.get(0).text());\n160: 161: String s = \"<p>Hello</p><script>obj.insert('<a rel=\\\"none\\\" />');\\ni++;</script><p>There</p>\";\n162: Document doc = Jsoup.parse(s);\n163: assertEquals(\"Hello There\", doc.text());\n164: assertEquals(\"obj.insert('<a rel=\\\"none\\\" />');\\ni++;\", doc.data());\n165: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:reconstructFormattingElements()V",
+            "method_body": "void reconstructFormattingElements() {\nint size = formattingElements.size();\nif (size == 0 || formattingElements.getLast() == null || onStack(formattingElements.getLast()))\nreturn;\nElement entry = formattingElements.getLast();\nint pos = size - 1;\nboolean skip = false;\nif (pos == 0) { // step 4. if none before, skip to 8\nskip = true;\nbreak;\nif (!skip) // step 7: on later than entry\nValidate.notNull(entry); // should not occur, as we break at last element\nskip = false; // can only skip increment from 4.\nElement newEl = insert(entry.nodeName()); // todo: avoid fostering here?\nnewEl.attributes().addAll(entry.attributes());\nformattingElements.add(pos, newEl);\nformattingElements.remove(pos + 1);\nif (pos == size-1) // if not last entry in list, jump to 7\nbreak;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:getActiveFormattingElement(Ljava/lang/String;)Lorg/jsoup/nodes/Element;",
+            "method_body": "Element getActiveFormattingElement(String nodeName) {\nIterator<Element> it = formattingElements.descendingIterator();\nwhile (it.hasNext()) {\nreturn null;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.jsoup.helper.DescendableLinkedList:peekLast()Ljava/lang/Object;",
+            "method_body": "public E peekLast() {\nreturn size() == 0 ? null : getLast();\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.jsoup.helper.DescendableLinkedList:pollLast()Ljava/lang/Object;",
+            "method_body": "public E pollLast() {\nreturn size() == 0 ? null : removeLast();\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.jsoup.helper.DescendableLinkedList:descendingIterator()Ljava/util/Iterator;",
+            "method_body": "public Iterator<E> descendingIterator() {\nreturn new DescendingIterator<E>(size());\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState:<init>(Ljava/lang/String;I)V",
+            "method_body": "boolean process(Token t, TreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\nhandleRawtext(start, tb);\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\n} else if (name.equals(\"head\")) {\nreturn anythingElse(t, tb);\nToken.EndTag end = t.asEndTag();\nname = end.name();\nif (name.equals(\"head\")) {\ntb.pop();\ntb.transition(AfterHead);\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState:isWhitespace(Lorg/jsoup/parser/Token;)Z",
+            "method_body": "abstract boolean process(Token t, TreeBuilder tb);\nif (t.isCharacter()) {\nString data = t.asCharacter().getData();\nfor (int i = 0; i < data.length(); i++) {\nchar c = data.charAt(i);\nif (!Character.isWhitespace(c))\nreturn false;\nreturn false;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState:handleRawtext(Lorg/jsoup/parser/Token$StartTag;Lorg/jsoup/parser/TreeBuilder;)V",
+            "method_body": "private static void handleRawtext(Token.StartTag startTag, TreeBuilder tb) {\ntb.insert(startTag);\ntb.tokeniser.transition(TokeniserState.Rawtext);\ntb.markInsertionMode();\ntb.transition(Text);\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState$1:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/TreeBuilder;)Z",
+            "method_body": "boolean process(Token t, TreeBuilder tb) {\nif (isWhitespace(t)) {\n} else if (t.isComment()) {\n} else if (t.isDoctype()) {\ntb.transition(BeforeHtml);\nreturn tb.process(t); // re-process token\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState$2:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/TreeBuilder;)Z",
+            "method_body": "boolean process(Token t, TreeBuilder tb) {\nif (t.isDoctype()) {\n} else if (t.isComment()) {\n} else if (isWhitespace(t)) {\n} else if (t.isStartTag() && t.asStartTag().name().equals(\"html\")) {\n} else if (t.isEndTag() && (StringUtil.in(t.asEndTag().name(), \"head\", \"body\", \"html\", \"br\"))) {\n} else if (t.isEndTag()) {\nreturn anythingElse(t, tb);\n}",
+            "method_id": 59
+        }
+    ]
+}

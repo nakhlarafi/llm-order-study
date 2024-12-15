@@ -1,0 +1,209 @@
+{
+    "bug_id": 26,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral",
+    "test_body": "public void testBug2182444_usCentral() {\nChronology chronUSCentral = GregorianChronology.getInstance(DateTimeZone.forID(\"US/Central\"));\nChronology chronUTC = GregorianChronology.getInstance(DateTimeZone.UTC);\nDateTime usCentralStandardInUTC = new DateTime(2008, 11, 2, 7, 0, 0, 0, chronUTC);\nDateTime usCentralDaylightInUTC = new DateTime(2008, 11, 2, 6, 0, 0, 0, chronUTC);\nassertTrue(\"Should be standard time\", chronUSCentral.getZone().isStandardOffset(usCentralStandardInUTC.getMillis()));\nassertFalse(\"Should be daylight time\", chronUSCentral.getZone().isStandardOffset(usCentralDaylightInUTC.getMillis()));\n1161: DateTime usCentralStandardInUSCentral = usCentralStandardInUTC.toDateTime(chronUSCentral);\nDateTime usCentralDaylightInUSCentral = usCentralDaylightInUTC.toDateTime(chronUSCentral);\nassertEquals(1, usCentralStandardInUSCentral.getHourOfDay());\nassertEquals(usCentralStandardInUSCentral.getHourOfDay(), usCentralDaylightInUSCentral.getHourOfDay());\nassertTrue(usCentralStandardInUSCentral.getMillis() != usCentralDaylightInUSCentral.getMillis());\nassertEquals(usCentralStandardInUSCentral, usCentralStandardInUSCentral.withHourOfDay(1));\nassertEquals(usCentralStandardInUSCentral.getMillis() + 3, usCentralStandardInUSCentral.withMillisOfSecond(3).getMillis());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2008-11-02T01:00:00.000-06:00> but was:<2008-11-02T01:00:00.000-05:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral(TestDateTimeZoneCutover.java:1166)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:readFrom(Ljava/io/DataInput;Ljava/lang/String;)Lorg/joda/time/tz/DateTimeZoneBuilder$PrecalculatedZone;",
+            "method_body": "static PrecalculatedZone readFrom(DataInput in, String id) throws IOException {\nint poolSize = in.readUnsignedShort();\nString[] pool = new String[poolSize];\nfor (int i=0; i<poolSize; i++) {\npool[i] = in.readUTF();\nint size = in.readInt();\nlong[] transitions = new long[size];\nint[] wallOffsets = new int[size];\nint[] standardOffsets = new int[size];\nString[] nameKeys = new String[size];\nfor (int i=0; i<size; i++) {\ntransitions[i] = readMillis(in);\nwallOffsets[i] = (int)readMillis(in);\nstandardOffsets[i] = (int)readMillis(in);\nif (poolSize < 256) {\nindex = in.readUnsignedByte();\nnameKeys[i] = pool[index];\n}\nDSTZone tailZone = null;\nif (in.readBoolean()) {\ntailZone = DSTZone.readFrom(in, id);\nreturn new PrecalculatedZone\n}",
+            "method_id": 200
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicYearDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn null;\n}",
+            "method_id": 201
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationDateTimeField:getUnitMillis()J",
+            "method_body": "public final long getUnitMillis() {\nreturn iUnitMillis;\n}",
+            "method_id": 202
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearMonthDayMillis(III)J",
+            "method_body": "long getYearMonthDayMillis(int year, int month, int dayOfMonth) {\nlong millis = getYearMillis(year);\nmillis += getTotalMillisByYearMonth(year, month);\nreturn millis + (dayOfMonth - 1) * (long)DateTimeConstants.MILLIS_PER_DAY;\n}",
+            "method_id": 203
+        },
+        {
+            "method_signature": "org.joda.time.tz.ZoneInfoProvider:openResource(Ljava/lang/String;)Ljava/io/InputStream;",
+            "method_body": "private InputStream openResource(String name) throws IOException {\nif (iFileDir != null) {\nString path = iResourcePath.concat(name);\nif (iLoader != null) {\nin = iLoader.getResourceAsStream(path);\nif (in == null) {\nreturn in;\n}",
+            "method_id": 204
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicDayOfMonthDateTimeField:getMaximumValueForSet(JI)I",
+            "method_body": "protected int getMaximumValueForSet(long instant, int value) {\nreturn iChronology.getDaysInMonthMaxForSet(instant, value);\n}",
+            "method_id": 205
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDateTimeField:set(JI)J",
+            "method_body": "public long set(long instant, int value) {\nFieldUtils.verifyValueBounds(this, value, getMinimumValue(), getMaximumValue());\nreturn instant + (value - get(instant)) * iUnitMillis;\n}",
+            "method_id": 206
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:convertUTCToLocal(J)J",
+            "method_body": "public long convertUTCToLocal(long instantUTC) {\nint offset = getOffset(instantUTC);\nlong instantLocal = instantUTC + offset;\nif ((instantUTC ^ instantLocal) < 0 && (instantUTC ^ offset) >= 0) {\nreturn instantLocal;\n}",
+            "method_id": 207
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:<init>(Ljava/lang/String;[J[I[I[Ljava/lang/String;Lorg/joda/time/tz/DateTimeZoneBuilder$DSTZone;)V",
+            "method_body": "private PrecalculatedZone(String id, long[] transitions, int[] wallOffsets,\nsuper(id);\niTransitions = transitions;\niWallOffsets = wallOffsets;\niStandardOffsets = standardOffsets;\niNameKeys = nameKeys;\niTailZone = tailZone;\n}",
+            "method_id": 208
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeFieldType:minuteOfHour()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public static DateTimeFieldType minuteOfHour() {\nreturn MINUTE_OF_HOUR_TYPE;\n}",
+            "method_id": 209
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicYearDateTimeField:set(JI)J",
+            "method_body": "public long set(long instant, int year) {\nFieldUtils.verifyValueBounds\nreturn iChronology.setYear(instant, year);\n}",
+            "method_id": 210
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicGJChronology:getMonthOfYear(JI)I",
+            "method_body": "int getMonthOfYear(long millis, int year) {\nint i = (int)((millis - getYearMillis(year)) >> 10);\nreturn\n}",
+            "method_id": 211
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeFieldType:year()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public static DateTimeFieldType year() {\nreturn YEAR_TYPE;\n}",
+            "method_id": 212
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$OfYear:<init>(CIIIZI)V",
+            "method_body": "OfYear(char mode,\n{\nif (mode != 'u' && mode != 'w' && mode != 's') {\niMode = mode;\niMonthOfYear = monthOfYear;\niDayOfMonth = dayOfMonth;\niDayOfWeek = dayOfWeek;\niAdvance = advanceDayOfWeek;\niMillisOfDay = millisOfDay;\n}",
+            "method_id": 213
+        },
+        {
+            "method_signature": "org.joda.time.base.BaseDateTime:getMillis()J",
+            "method_body": "public long getMillis() {\nreturn iMillis;\n}",
+            "method_id": 214
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:years()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField years() {\nreturn iYears;\n}",
+            "method_id": 215
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder:readMillis(Ljava/io/DataInput;)J",
+            "method_body": "static long readMillis(DataInput in) throws IOException {\nint v = in.readUnsignedByte();\nswitch (v >> 6) {\nv = (v << (32 - 6)) >> (32 - 6);\nreturn v * (30 * 60000L);\nv = (v << (32 - 6)) >> (32 - 30);\nv |= (in.readUnsignedByte()) << 16;\nv |= (in.readUnsignedByte()) << 8;\nv |= (in.readUnsignedByte());\nreturn v * 60000L;\nlong w = (((long)v) << (64 - 6)) >> (64 - 38);\nw |= (in.readUnsignedByte()) << 24;\nw |= (in.readUnsignedByte()) << 16;\nw |= (in.readUnsignedByte()) << 8;\nw |= (in.readUnsignedByte());\nreturn w * 1000L;\nreturn in.readLong();\n}",
+            "method_id": 216
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getMaxMonth()I",
+            "method_body": "int getMaxMonth() {\nreturn 12;\n}",
+            "method_id": 217
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:<init>(Lorg/joda/time/Chronology;Ljava/lang/Object;I)V",
+            "method_body": "BasicChronology(Chronology base, Object param, int minDaysInFirstWeek) {\nsuper(base, param);\nif (minDaysInFirstWeek < 1 || minDaysInFirstWeek > 7) {\niMinDaysInFirstWeek = minDaysInFirstWeek;\n}",
+            "method_id": 218
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDateTimeField:<init>(Lorg/joda/time/DateTimeField;Lorg/joda/time/DateTimeZone;Lorg/joda/time/DurationField;Lorg/joda/time/DurationField;Lorg/joda/time/DurationField;)V",
+            "method_body": "ZonedDateTimeField(DateTimeField field,\nsuper(field.getType());\nif (!field.isSupported()) {\niField = field;\niZone = zone;\niDurationField = durationField;\niTimeField = useTimeArithmetic(durationField);\niRangeDurationField = rangeDurationField;\niLeapDurationField = leapDurationField;\n}",
+            "method_id": 219
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicMonthOfYearDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn iChronology.years();\n}",
+            "method_id": 220
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicGJChronology:getDaysInYearMonth(II)I",
+            "method_body": "int getDaysInYearMonth(int year, int month) {\nif (isLeapYear(year)) {\nreturn MAX_DAYS_PER_MONTH_ARRAY[month - 1];\nreturn MIN_DAYS_PER_MONTH_ARRAY[month - 1];\n}",
+            "method_id": 221
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence:next(JII)J",
+            "method_body": "public long next(long instant, int standardOffset, int saveMillis) {\nreturn iOfYear.next(instant, standardOffset, saveMillis);\n}",
+            "method_id": 222
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicYearDateTimeField:add(JI)J",
+            "method_body": "public long add(long instant, int years) {\nif (years == 0) {\nint thisYear = get(instant);\nint newYear = FieldUtils.safeAdd(thisYear, years);\nreturn set(instant, newYear);\n}",
+            "method_id": 223
+        },
+        {
+            "method_signature": "org.joda.time.field.BaseDateTimeField:getType()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public final DateTimeFieldType getType() {\nreturn iType;\n}",
+            "method_id": 224
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJEraDateTimeField:getDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getDurationField() {\nreturn UnsupportedDurationField.getInstance(DurationFieldType.eras());\n}",
+            "method_id": 225
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationField:hashCode()I",
+            "method_body": "public int hashCode() {\nlong millis = iUnitMillis;\nint hash = (int) (millis ^ (millis >>> 32));\nhash += getType().hashCode();\nreturn hash;\n}",
+            "method_id": 226
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractInstant:toDateTime(Lorg/joda/time/Chronology;)Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime toDateTime(Chronology chronology) {\nreturn new DateTime(getMillis(), chronology);\n}",
+            "method_id": 227
+        },
+        {
+            "method_signature": "org.joda.time.field.UnsupportedDurationField:getInstance(Lorg/joda/time/DurationFieldType;)Lorg/joda/time/field/UnsupportedDurationField;",
+            "method_body": "public static synchronized UnsupportedDurationField getInstance(DurationFieldType type) {\nif (cCache == null) {\nfield = cCache.get(type);\nif (field == null) {\nreturn field;\n}",
+            "method_id": 228
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatter:print(Lorg/joda/time/ReadableInstant;)Ljava/lang/String;",
+            "method_body": "public String print(ReadableInstant instant) {\nStringBuffer buf = new StringBuffer(requirePrinter().estimatePrintedLength());\nprintTo(buf, instant);\nreturn buf.toString();\n}",
+            "method_id": 229
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:dayOfMonth()Lorg/joda/time/DateTimeField;",
+            "method_body": "public final DateTimeField dayOfMonth() {\nreturn iDayOfMonth;\n}",
+            "method_id": 230
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDateTimeMillis(IIIIIII)J",
+            "method_body": "public long getDateTimeMillis(\nif ((base = getBase()) != null) {\nFieldUtils.verifyValueBounds(DateTimeFieldType.hourOfDay(), hourOfDay, 0, 23);\nFieldUtils.verifyValueBounds(DateTimeFieldType.minuteOfHour(), minuteOfHour, 0, 59);\nFieldUtils.verifyValueBounds(DateTimeFieldType.secondOfMinute(), secondOfMinute, 0, 59);\nFieldUtils.verifyValueBounds(DateTimeFieldType.millisOfSecond(), millisOfSecond, 0, 999);\nreturn getDateMidnightMillis(year, monthOfYear, dayOfMonth)\n}",
+            "method_id": 231
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicDayOfMonthDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn iChronology.months();\n}",
+            "method_id": 232
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:clockhourOfHalfday()Lorg/joda/time/DateTimeField;",
+            "method_body": "public final DateTimeField clockhourOfHalfday() {\nreturn iClockhourOfHalfday;\n}",
+            "method_id": 233
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:weekyears()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField weekyears() {\nreturn iWeekyears;\n}",
+            "method_id": 234
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getMaxMonth(I)I",
+            "method_body": "abstract long getYearDifference(long minuendInstant, long subtrahendInstant);\nreturn getMaxMonth();\n}",
+            "method_id": 235
+        },
+        {
+            "method_signature": "org.joda.time.field.DecoratedDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn iField.getRangeDurationField();\n}",
+            "method_id": 236
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicWeekOfWeekyearDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn iChronology.weekyears();\n}",
+            "method_id": 237
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:setFields()V",
+            "method_body": "private void setFields() {\nFields fields = new Fields();\nif (iBase != null) {\nfields.copyFieldsFrom(iBase);\nassemble(fields);\niMillis    = (f = fields.millis)    != null ? f : super.millis();\niSeconds   = (f = fields.seconds)   != null ? f : super.seconds();\niMinutes   = (f = fields.minutes)   != null ? f : super.minutes();\niHours     = (f = fields.hours)     != null ? f : super.hours();\niHalfdays  = (f = fields.halfdays)  != null ? f : super.halfdays();\niDays      = (f = fields.days)      != null ? f : super.days();\niWeeks     = (f = fields.weeks)     != null ? f : super.weeks();\niWeekyears = (f = fields.weekyears) != null ? f : super.weekyears();\niMonths    = (f = fields.months)    != null ? f : super.months();\niYears     = (f = fields.years)     != null ? f : super.years();\niCenturies = (f = fields.centuries) != null ? f : super.centuries();\niEras      = (f = fields.eras)      != null ? f : super.eras();\niMillisOfSecond     = (f = fields.millisOfSecond)     != null ? f : super.millisOfSecond();\niMillisOfDay        = (f = fields.millisOfDay)        != null ? f : super.millisOfDay();\niSecondOfMinute     = (f = fields.secondOfMinute)     != null ? f : super.secondOfMinute();\niSecondOfDay        = (f = fields.secondOfDay)        != null ? f : super.secondOfDay();\niMinuteOfHour       = (f = fields.minuteOfHour)       != null ? f : super.minuteOfHour();\niMinuteOfDay        = (f = fields.minuteOfDay)        != null ? f : super.minuteOfDay();\niHourOfDay          = (f = fields.hourOfDay)          != null ? f : super.hourOfDay();\niClockhourOfDay     = (f = fields.clockhourOfDay)     != null ? f : super.clockhourOfDay();\niHourOfHalfday      = (f = fields.hourOfHalfday)      != null ? f : super.hourOfHalfday();\niClockhourOfHalfday = (f = fields.clockhourOfHalfday) != null ? f : super.clockhourOfHalfday();\niHalfdayOfDay       = (f = fields.halfdayOfDay)       != null ? f : super.halfdayOfDay();\niDayOfWeek          = (f = fields.dayOfWeek)          != null ? f : super.dayOfWeek();\niDayOfMonth         = (f = fields.dayOfMonth)         != null ? f : super.dayOfMonth();\niDayOfYear          = (f = fields.dayOfYear)          != null ? f : super.dayOfYear();\niWeekOfWeekyear     = (f = fields.weekOfWeekyear)     != null ? f : super.weekOfWeekyear();\niWeekyear           = (f = fields.weekyear)           != null ? f : super.weekyear();\niWeekyearOfCentury  = (f = fields.weekyearOfCentury)  != null ? f : super.weekyearOfCentury();\niMonthOfYear        = (f = fields.monthOfYear)        != null ? f : super.monthOfYear();\niYear               = (f = fields.year)               != null ? f : super.year();\niYearOfEra          = (f = fields.yearOfEra)          != null ? f : super.yearOfEra();\niYearOfCentury      = (f = fields.yearOfCentury)      != null ? f : super.yearOfCentury();\niCenturyOfEra       = (f = fields.centuryOfEra)       != null ? f : super.centuryOfEra();\niEra                = (f = fields.era)                != null ? f : super.era();\nif (iBase == null) {\nflags =\niBaseFlags = flags;\n}",
+            "method_id": 238
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicYearDateTimeField:get(J)I",
+            "method_body": "public int get(long instant) {\nreturn iChronology.getYear(instant);\n}",
+            "method_id": 239
+        }
+    ]
+}

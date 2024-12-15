@@ -1,0 +1,59 @@
+{
+    "bug_id": 69,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math.stat.correlation.PearsonsCorrelationTest.testPValueNearZero",
+    "test_body": "public void testPValueNearZero() throws Exception {\n/*\n* Create a dataset that has r -> 1, p -> 0 as dimension increases.\n* Prior to the fix for MATH-371, p vanished for dimension >= 14.\n* Post fix, p-values diminish smoothly, vanishing at dimension = 127.\n* Tested value is ~1E-303.\n*/\nint dimension = 120; \ndouble[][] data = new double[dimension][2];\nfor (int i = 0; i < dimension; i++) {\ndata[i][0] = i;\ndata[i][1] = i + 1/((double)i + 1);\n}\nPearsonsCorrelation corrInstance = new PearsonsCorrelation(data);\nassertTrue(corrInstance.getCorrelationPValues().getEntry(0, 1) > 0);\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat junit.framework.Assert.fail(Assert.java:55)\nat junit.framework.Assert.assertTrue(Assert.java:22)\nat junit.framework.Assert.assertTrue(Assert.java:31)\nat junit.framework.TestCase.assertTrue(TestCase.java:201)\nat org.apache.commons.math.stat.correlation.PearsonsCorrelationTest.testPValueNearZero(PearsonsCorrelationTest.java:181)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.distribution.TDistributionImpl:setDegreesOfFreedomInternal(D)V",
+            "method_body": "private void setDegreesOfFreedomInternal(double newDegreesOfFreedom) {\nif (newDegreesOfFreedom <= 0.0) {\nthis.degreesOfFreedom = newDegreesOfFreedom;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:<init>(Lorg/apache/commons/math/distribution/TDistribution;)V",
+            "method_body": "public SimpleRegression(TDistribution t) {\nsuper();\nsetDistribution(t);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:correlation([D[D)D",
+            "method_body": "public double correlation(final double[] xArray, final double[] yArray) throws IllegalArgumentException {\nSimpleRegression regression = new SimpleRegression();\nif(xArray.length == yArray.length && xArray.length > 1) {\nfor(int i=0; i<xArray.length; i++) {\nregression.addData(xArray[i], yArray[i]);\nreturn regression.getR();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:<init>()V",
+            "method_body": "public SimpleRegression() {\nthis(new TDistributionImpl(1.0));\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:<init>(II)V",
+            "method_body": "protected AbstractRealMatrix(final int rowDimension, final int columnDimension)\nthrows IllegalArgumentException {\nif (rowDimension <= 0 ) {\nif (columnDimension <= 0) {\nlu = null;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.distribution.AbstractDistribution:<init>()V",
+            "method_body": "protected AbstractDistribution() {\nsuper();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:<init>(Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "public PearsonsCorrelation(RealMatrix matrix) {\ncheckSufficientData(matrix);\nnObs = matrix.getRowDimension();\ncorrelationMatrix = computeCorrelationMatrix(matrix);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.correlation.PearsonsCorrelation:getCorrelationPValues()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getCorrelationPValues() throws MathException {\nTDistribution tDistribution = new TDistributionImpl(nObs - 2);\nint nVars = correlationMatrix.getColumnDimension();\ndouble[][] out = new double[nVars][nVars];\nfor (int i = 0; i < nVars; i++) {\nfor (int j = 0; j < nVars; j++) {\nif (i == j) {\nout[i][j] = 0d;\ndouble r = correlationMatrix.getEntry(i, j);\ndouble t = Math.abs(r * Math.sqrt((nObs - 2)/(1 - r * r)));\nout[i][j] = 2 * (1 - tDistribution.cumulativeProbability(t));\nreturn new BlockRealMatrix(out);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.stat.regression.SimpleRegression:getR()D",
+            "method_body": "public double getR() {\ndouble b1 = getSlope();\ndouble result = Math.sqrt(getRSquare());\nif (b1 < 0) {\nreturn result;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BlockRealMatrix:<init>(II[[DZ)V",
+            "method_body": "public BlockRealMatrix(final int rows, final int columns,\nsuper(rows, columns);\nthis.rows    = rows;\nthis.columns = columns;\nblockRows    = (rows    + BLOCK_SIZE - 1) / BLOCK_SIZE;\nblockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nif (copyArray) {\nblocks = blockData;\nint index = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int iHeight = blockHeight(iBlock);\nfor (int jBlock = 0; jBlock < blockColumns; ++jBlock, ++index) {\nif (blockData[index].length != iHeight * blockWidth(jBlock)) {\nif (copyArray) {\n}",
+            "method_id": 9
+        }
+    ]
+}

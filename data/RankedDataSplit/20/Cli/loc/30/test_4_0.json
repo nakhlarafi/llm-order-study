@@ -1,0 +1,129 @@
+{
+    "bug_id": 30,
+    "test_id": 4,
+    "test_name": "org.apache.commons.cli.OptionGroupTest.testTwoOptionsFromGroupWithProperties",
+    "test_body": "public void testTwoOptionsFromGroupWithProperties() throws Exception\n{\nString[] args = new String[] { \"-f\" };\n195: Properties properties = new Properties();\nproperties.put(\"d\", \"true\");\n198: CommandLine cl = parser.parse( _options, args, properties);\nassertTrue(cl.hasOption(\"f\"));",
+    "stack_trace": "org.apache.commons.cli.AlreadySelectedException: The option 'd' was specified but an option from this group has already been selected: 'f'\nat org.apache.commons.cli.OptionGroup.setSelected(OptionGroup.java:105)\nat org.apache.commons.cli.Parser.updateRequiredOptions(Parser.java:421)\nat org.apache.commons.cli.Parser.processProperties(Parser.java:296)\nat org.apache.commons.cli.Parser.parse(Parser.java:241)\nat org.apache.commons.cli.Parser.parse(Parser.java:103)\nat org.apache.commons.cli.OptionGroupTest.testTwoOptionsFromGroupWithProperties(OptionGroupTest.java:198)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli.Parser:parse(Lorg/apache/commons/cli/Options;[Ljava/lang/String;Ljava/util/Properties;Z)Lorg/apache/commons/cli/CommandLine;",
+            "method_body": "public CommandLine parse(Options options, String[] arguments, Properties properties, boolean stopAtNonOption)\nfor (Iterator it = options.helpOptions().iterator(); it.hasNext();)\nOption opt = (Option) it.next();\nopt.clearValues();\n}\nfor (Iterator it = options.getOptionGroups().iterator(); it.hasNext();)\nOptionGroup group = (OptionGroup) it.next();\ngroup.setSelected(null);\n}\nsetOptions(options);\ncmd = new CommandLine();\nboolean eatTheRest = false;\nif (arguments == null)\narguments = new String[0];\nList tokenList = Arrays.asList(flatten(getOptions(), arguments, stopAtNonOption));\nListIterator iterator = tokenList.listIterator();\nwhile (iterator.hasNext())\nString t = (String) iterator.next();\nif (\"--\".equals(t))\nelse if (\"-\".equals(t))\nelse if (t.startsWith(\"-\"))\nif (stopAtNonOption && !getOptions().hasOption(t))\nprocessOption(t, iterator);\nif (eatTheRest)\n}\nprocessProperties(properties);\n}",
+            "method_id": 0,
+            "loc": 27
+        },
+        {
+            "method_signature": "org.apache.commons.cli.PosixParser:flatten(Lorg/apache/commons/cli/Options;[Ljava/lang/String;Z)[Ljava/lang/String;",
+            "method_body": "protected String[] flatten(Options options, String[] arguments, boolean stopAtNonOption) throws ParseException\ninit();\nthis.options = options;\nIterator iter = Arrays.asList(arguments).iterator();\nwhile (iter.hasNext())\nString token = (String) iter.next();\nif (\"-\".equals(token) || \"--\".equals(token))\nelse if (token.startsWith(\"--\"))\nelse if (token.startsWith(\"-\"))\nif (token.length() == 2 || options.hasOption(token))\nprocessOptionToken(token, stopAtNonOption);\ngobble(iter);\n}\nreturn (String[]) tokens.toArray(new String[tokens.size()]);\n}",
+            "method_id": 1,
+            "loc": 15
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Parser:processProperties(Ljava/util/Properties;)V",
+            "method_body": "protected void processProperties(Properties properties) throws ParseException\nif (properties == null)\nfor (Enumeration e = properties.propertyNames(); e.hasMoreElements();)\nString option = e.nextElement().toString();\nif (!cmd.hasOption(option))\nOption opt = getOptions().getOption(option);\nString value = properties.getProperty(option);\nif (opt.hasArg())\nelse if (!(\"yes\".equalsIgnoreCase(value)\ncmd.addOption(opt);\nupdateRequiredOptions(opt);\n}",
+            "method_id": 2,
+            "loc": 12
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:addOptionGroup(Lorg/apache/commons/cli/OptionGroup;)Lorg/apache/commons/cli/Options;",
+            "method_body": "public Options addOptionGroup(OptionGroup group)\nIterator options = group.getOptions().iterator();\nif (group.isRequired())\nwhile (options.hasNext())\nOption option = (Option) options.next();\noption.setRequired(false);\naddOption(option);\noptionGroups.put(option.getKey(), group);\n}\nreturn this;\n}",
+            "method_id": 3,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.apache.commons.cli.CommandLine:resolveOption(Ljava/lang/String;)Lorg/apache/commons/cli/Option;",
+            "method_body": "private Option resolveOption(String opt)\nopt = Util.stripLeadingHyphens(opt);\nfor (Iterator it = options.iterator(); it.hasNext();)\nOption option = (Option) it.next();\nif (opt.equals(option.getOpt()))\nif (opt.equals(option.getLongOpt()))\n}\nreturn null;\n}",
+            "method_id": 4,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:<init>(Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)V",
+            "method_body": "public Option(String opt, String longOpt, boolean hasArg, String description)\n{\nOptionValidator.validateOption(opt);\nthis.opt = opt;\nthis.longOpt = longOpt;\nif (hasArg)\nthis.numberOfArgs = 1;\nthis.description = description;\n}",
+            "method_id": 5,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:addOption(Lorg/apache/commons/cli/Option;)Lorg/apache/commons/cli/Options;",
+            "method_body": "public Options addOption(Option opt)\nString key = opt.getKey();\nif (opt.hasLongOpt())\nlongOpts.put(opt.getLongOpt(), opt);\nif (opt.isRequired())\nshortOpts.put(key, opt);\nreturn this;\n}",
+            "method_id": 6,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.cli.OptionValidator:validateOption(Ljava/lang/String;)V",
+            "method_body": "static void validateOption(String opt) throws IllegalArgumentException\nif (opt == null)\nreturn;\nif (opt.length() == 1)\nchar ch = opt.charAt(0);\nif (!isValidOpt(ch))\n}\n}",
+            "method_id": 7,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Parser:processOption(Ljava/lang/String;Ljava/util/ListIterator;)V",
+            "method_body": "protected void processOption(String arg, ListIterator iter) throws ParseException\nboolean hasOption = getOptions().hasOption(arg);\nif (!hasOption)\nOption opt = (Option) getOptions().getOption(arg).clone();\nupdateRequiredOptions(opt);\nif (opt.hasArg())\ncmd.addOption(opt);\n}",
+            "method_id": 8,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.cli.OptionGroup:setSelected(Lorg/apache/commons/cli/Option;)V",
+            "method_body": "public void setSelected(Option option) throws AlreadySelectedException\nif (option == null)\nselected = null;\nreturn;\nif (selected == null || selected.equals(option.getKey()))\nselected = option.getKey();\nthrow new AlreadySelectedException(this, option);\n}",
+            "method_id": 9,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Util:stripLeadingHyphens(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String stripLeadingHyphens(String str)\nif (str == null)\nif (str.startsWith(\"--\"))\nelse if (str.startsWith(\"-\"))\nreturn str.substring(1, str.length());\nreturn str;\n}",
+            "method_id": 10,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Parser:updateRequiredOptions(Lorg/apache/commons/cli/Option;)V",
+            "method_body": "private void updateRequiredOptions(Option opt) throws ParseException\nif (opt.isRequired())\nif (getOptions().getOptionGroup(opt) != null)\nOptionGroup group = getOptions().getOptionGroup(opt);\nif (group.isRequired())\ngroup.setSelected(opt);\n}",
+            "method_id": 11,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.apache.commons.cli.PosixParser:processOptionToken(Ljava/lang/String;Z)V",
+            "method_body": "private void processOptionToken(String token, boolean stopAtNonOption)\nif (stopAtNonOption && !options.hasOption(token))\nif (options.hasOption(token))\ncurrentOption = options.getOption(token);\ntokens.add(token);\n}",
+            "method_id": 12,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.apache.commons.cli.CommandLine:<init>()V",
+            "method_body": "private static final long serialVersionUID = 1L;\nprivate List args = new LinkedList();\nprivate List options = new ArrayList();\n{\n}",
+            "method_id": 13,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:clone()Ljava/lang/Object;",
+            "method_body": "public Object clone()\nOption option = (Option) super.clone();\noption.values = new ArrayList(values);\nreturn option;\n}",
+            "method_id": 14,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:getKey()Ljava/lang/String;",
+            "method_body": "String getKey()\nif (opt == null)\nreturn longOpt;\nreturn opt;\n}",
+            "method_id": 15,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.cli.OptionGroup:<init>()V",
+            "method_body": "private static final long serialVersionUID = 1L;\nprivate Map optionMap = new HashMap();\noptionMap.put(option.getKey(), option);\nreturn this;\n}",
+            "method_id": 16,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.cli.AlreadySelectedException:<init>(Lorg/apache/commons/cli/OptionGroup;Lorg/apache/commons/cli/Option;)V",
+            "method_body": "public AlreadySelectedException(OptionGroup group, Option option)\nthis(\"The option '\" + option.getKey() + \"' was specified but an option from this group \"\nthis.group = group;\nthis.option = option;\n}",
+            "method_id": 17,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:hasOption(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasOption(String opt)\nopt = Util.stripLeadingHyphens(opt);\nreturn shortOpts.containsKey(opt) || longOpts.containsKey(opt);\n}",
+            "method_id": 18,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:addOption(Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)Lorg/apache/commons/cli/Options;",
+            "method_body": "public Options addOption(String opt, String longOpt, boolean hasArg, String description)\naddOption(new Option(opt, longOpt, hasArg, description));\nreturn this;\n}",
+            "method_id": 19,
+            "loc": 4
+        }
+    ]
+}

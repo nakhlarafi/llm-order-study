@@ -1,0 +1,34 @@
+{
+    "bug_id": 14,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.workaroundForBrokenTimeHeader",
+    "test_body": "51: public void workaroundForBrokenTimeHeader() throws Exception {\n52: URL tar = getClass().getResource(\"/simple-aix-native-tar.tar\");\n53: TarArchiveInputStream in = null;\n54: try {\n55: in = new TarArchiveInputStream(new FileInputStream(new File(new URI(tar.toString()))));\n56: TarArchiveEntry tae = in.getNextTarEntry();\n57: tae = in.getNextTarEntry();\n58: assertEquals(\"sample/link-to-txt-file.lnk\", tae.getName());",
+    "stack_trace": "java.io.IOException: Error detected parsing the header\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.getNextTarEntry(TarArchiveInputStream.java:201)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.workaroundForBrokenTimeHeader(TarArchiveInputStreamTest.java:57)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:evaluateType([B)I",
+            "method_body": "private int evaluateType(byte[] header) {\nfinal ByteBuffer magic = ByteBuffer.wrap(header, MAGIC_OFFSET, MAGICLEN);\nif (magic.compareTo(ByteBuffer.wrap(MAGIC_GNU.getBytes())) == 0)\nif (magic.compareTo(ByteBuffer.wrap(MAGIC_POSIX.getBytes())) == 0)\nreturn FORMAT_POSIX;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:parseTarHeader([B)V",
+            "method_body": "public void parseTarHeader(byte[] header) {\nint offset = 0;\nname = TarUtils.parseName(header, offset, NAMELEN);\noffset += NAMELEN;\nmode = (int) TarUtils.parseOctal(header, offset, MODELEN);\noffset += MODELEN;\nuserId = (int) TarUtils.parseOctalOrBinary(header, offset, UIDLEN);\noffset += UIDLEN;\ngroupId = (int) TarUtils.parseOctalOrBinary(header, offset, GIDLEN);\noffset += GIDLEN;\nsize = TarUtils.parseOctalOrBinary(header, offset, SIZELEN);\noffset += SIZELEN;\nmodTime = TarUtils.parseOctal(header, offset, MODTIMELEN);\noffset += MODTIMELEN;\noffset += CHKSUMLEN;\nlinkFlag = header[offset++];\nlinkName = TarUtils.parseName(header, offset, NAMELEN);\noffset += NAMELEN;\nmagic = TarUtils.parseName(header, offset, MAGICLEN);\noffset += MAGICLEN;\nversion = TarUtils.parseName(header, offset, VERSIONLEN);\noffset += VERSIONLEN;\nuserName = TarUtils.parseName(header, offset, UNAMELEN);\noffset += UNAMELEN;\ngroupName = TarUtils.parseName(header, offset, GNAMELEN);\noffset += GNAMELEN;\ndevMajor = (int) TarUtils.parseOctal(header, offset, DEVLEN);\noffset += DEVLEN;\ndevMinor = (int) TarUtils.parseOctal(header, offset, DEVLEN);\noffset += DEVLEN;\nint type = evaluateType(header);\nswitch (type) {\nString prefix = TarUtils.parseName(header, offset, PREFIXLEN);\nif (isDirectory() && !name.endsWith(\"/\")){\nif (prefix.length() > 0){\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:isDirectory()Z",
+            "method_body": "public boolean isDirectory() {\nif (file != null) {\nif (linkFlag == LF_DIR) {\nreturn true;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "public TarBuffer(InputStream inStream, int blockSize, int recordSize) {\nthis(inStream, null, blockSize, recordSize);\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:<init>(Ljava/io/InputStream;Ljava/io/OutputStream;II)V",
+            "method_body": "private TarBuffer(InputStream inStream, OutputStream outStream, int blockSize, int recordSize) {\nthis.inStream = inStream;\nthis.outStream = outStream;\nthis.blockSize = blockSize;\nthis.recordSize = recordSize;\nthis.recsPerBlock = (this.blockSize / this.recordSize);\nthis.blockBuffer = new byte[this.blockSize];\nif (this.inStream != null) {\nthis.currBlkIdx = -1;\nthis.currRecIdx = this.recsPerBlock;\n}",
+            "method_id": 24
+        }
+    ]
+}

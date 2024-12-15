@@ -1,0 +1,59 @@
+{
+    "bug_id": 11,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.sym.SymbolsViaParserTest.testSymbolTableExpansionBytes",
+    "test_body": "public void testSymbolTableExpansionBytes() throws Exception {\n_testSymbolTableExpansion(true);\n}\n",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 512\nat com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer.addName(ByteQuadsCanonicalizer.java:824)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.addName(UTF8StreamJsonParser.java:2340)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.findName(UTF8StreamJsonParser.java:2185)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._parseName(UTF8StreamJsonParser.java:1691)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:740)\nat com.fasterxml.jackson.core.sym.SymbolsViaParserTest._testSymbolTableExpansion(SymbolsViaParserTest.java:87)\nat com.fasterxml.jackson.core.sym.SymbolsViaParserTest.testSymbolTableExpansionBytes(SymbolsViaParserTest.java:32)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:addName(Ljava/lang/String;[II)Ljava/lang/String;",
+            "method_body": "public String addName(String name, int[] q, int qlen)\n_verifySharing();\nif (_intern) {\nname = InternCache.instance.intern(name);\nswitch (qlen) {\noffset = _findOffsetForAdd(calcHash(q[0]));\n_hashArea[offset] = q[0];\n_hashArea[offset+3] = 1;\nbreak;\n_names[offset >> 2] = name;\n++_count;\n_verifyNeedForRehash();\nreturn name;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifyNeedForRehash()V",
+            "method_body": "private void _verifyNeedForRehash() {\nif (_count > (_hashSize >> 1)) { // over 50%\nint spillCount = (_spilloverEnd - _spilloverStart()) >> 2;\nif ((spillCount > (1 + _count >> 7))\n_needRehash = true;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_findOffsetForAdd(I)I",
+            "method_body": "private int _findOffsetForAdd(int hash)\nint offset = _calcOffset(hash);\nfinal int[] hashArea = _hashArea;\nif (hashArea[offset+3] == 0) {\nreturn offset;\nint offset2 = _secondaryStart + ((offset >> 3) << 2);\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset2 = _tertiaryStart + ((offset >> (_tertiaryShift + 2)) << _tertiaryShift);\nfinal int bucketSize = (1 << _tertiaryShift);\nfor (int end = offset2 + bucketSize; offset2 < end; offset2 += 4) {\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset = _spilloverEnd;\n_spilloverEnd += 4;\nfinal int end = (_hashSize << 3);\nif (_spilloverEnd >= end) {\nif (_failOnDoS) {\n_reportTooManyCollisions();\n_needRehash = true;\nreturn offset;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(I)I",
+            "method_body": "public int calcHash(int q1)\nint hash = q1 ^ _seed;\nhash += (hash >>> 16); // to xor hi- and low- 16-bits\nhash ^= (hash << 3); // shuffle back a bit\nhash += (hash >>> 12); // and bit more\nreturn hash;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_spilloverStart()I",
+            "method_body": "private final int _spilloverStart() {\nint offset = _hashSize;\nreturn (offset << 3) - offset;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_reportTooManyCollisions()V",
+            "method_body": "protected void _reportTooManyCollisions()\nif (_hashSize <= 1024) { // would have spill-over area of 128 entries\nreturn;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_calcTertiaryShift(I)I",
+            "method_body": "static int _calcTertiaryShift(int primarySlots)\nint tertSlots = (primarySlots) >> 2;\nif (tertSlots < 64) {\nreturn 4;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:<init>(III[I[Ljava/lang/String;II)V",
+            "method_body": "public TableInfo(int size, int count, int tertiaryShift,\n{\nthis.size = size;\nthis.count = count;\nthis.tertiaryShift = tertiaryShift;\nthis.mainHash = mainHash;\nthis.names = names;\nthis.spilloverEnd = spilloverEnd;\nthis.longNameOffset = longNameOffset;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:<init>(Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;)V",
+            "method_body": "public TableInfo(ByteQuadsCanonicalizer src)\n{\nsize = src._hashSize;\ncount = src._count;\ntertiaryShift = src._tertiaryShift;\nmainHash = src._hashArea;\nnames = src._names;\nspilloverEnd = src._spilloverEnd;\nlongNameOffset = src._longNameOffset;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:createInitial(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;",
+            "method_body": "public static TableInfo createInitial(int sz) {\nint hashAreaSize = sz << 3;\nint tertShift = _calcTertiaryShift(sz);\nreturn new TableInfo(sz, // hashSize\n}",
+            "method_id": 59
+        }
+    ]
+}

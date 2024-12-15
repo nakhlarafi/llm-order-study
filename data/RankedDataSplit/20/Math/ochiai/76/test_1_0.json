@@ -1,0 +1,109 @@
+{
+    "bug_id": 76,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math.linear.SingularValueSolverTest.testMath320A",
+    "test_body": "public void testMath320A() {\nRealMatrix rm = new Array2DRowRealMatrix(new double[][] {\n{ 1.0, 2.0, 3.0 }, { 2.0, 3.0, 4.0 }, { 3.0, 5.0, 7.0 }\n});\ndouble s439  = Math.sqrt(439.0);\ndouble[] reference = new double[] {\nMath.sqrt(3.0 * (21.0 + s439)), Math.sqrt(3.0 * (21.0 - s439))\n};\nSingularValueDecomposition svd =\nnew SingularValueDecompositionImpl(rm);\n179: // check we get the expected theoretical singular values\ndouble[] singularValues = svd.getSingularValues();\nAssert.assertEquals(reference.length, singularValues.length);\nfor (int i = 0; i < reference.length; ++i) {\nAssert.assertEquals(reference[i], singularValues[i], 4.0e-13);\n}\n186: // check the decomposition allows to recover the original matrix\nRealMatrix recomposed = svd.getU().multiply(svd.getS()).multiply(svd.getVT());\nAssert.assertEquals(0.0, recomposed.subtract(rm).getNorm(), 5.0e-13);\n190: // check we can solve a singular system\ndouble[] b = new double[] { 5.0, 6.0, 7.0 };\ndouble[] resSVD = svd.getSolver().solve(b);\nAssert.assertEquals(rm.getColumnDimension(), resSVD.length);\n195: // check the solution really minimizes the residuals\ndouble svdMinResidual = residual(rm, resSVD, b);\ndouble epsilon = 2 * Math.ulp(svdMinResidual);\ndouble h = 0.1;\nint    k = 3;\nfor (double d0 = -k * h; d0 <= k * h; d0 += h) {\nfor (double d1 = -k * h ; d1 <= k * h; d1 += h) {\nfor (double d2 = -k * h; d2 <= k * h; d2 += h) {\ndouble[] x = new double[] { resSVD[0] + d0, resSVD[1] + d1, resSVD[2] + d2 };\nAssert.assertTrue((residual(rm, x, b) - svdMinResidual) > -epsilon);\n}\n}\n}\n209: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<0.09336767546650937>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.linear.SingularValueSolverTest.testMath320A(SingularValueSolverTest.java:188)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getVT()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getVT()\nif (cachedVt == null) {\ncachedVt = getV().transpose();\nreturn cachedVt;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getS()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getS()\nif (cachedS == null) {\ncachedS = MatrixUtils.createRealDiagonalMatrix(singularValues);\nreturn cachedS;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:createRealDiagonalMatrix([D)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealDiagonalMatrix(final double[] diagonal) {\nfinal RealMatrix m = createRealMatrix(diagonal.length, diagonal.length);\nfor (int i = 0; i < diagonal.length; ++i) {\nm.setEntry(i, i, diagonal[i]);\nreturn m;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getU()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getU()\nif (cachedU == null) {\nfinal int p = singularValues.length;\nif (m >= n) {\nfinal RealMatrix e =\nfinal double[][] eData = e.getData();\nfinal double[][] wData = new double[m][p];\ndouble[] ei1 = eData[0];\nfor (int i = 0; i < p - 1; ++i) {\nfinal double mi = mainBidiagonal[i];\nfinal double[] ei0 = ei1;\nfinal double[] wi  = wData[i];\nei1 = eData[i + 1];\nfinal double si = secondaryBidiagonal[i];\nfor (int j = 0; j < p; ++j) {\nwi[j] = (mi * ei0[j] + si * ei1[j]) / singularValues[j];\nfor (int j = 0; j < p; ++j) {\nwData[p - 1][j] = ei1[j] * mainBidiagonal[p - 1] / singularValues[j];\nfor (int i = p; i < m; ++i) {\nwData[i] = new double[p];\ncachedU =\n} else {\nreturn cachedU;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getV()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getV()\nif (cachedV == null) {\nfinal int p = singularValues.length;\nif (m >= n) {\nfinal RealMatrix e =\ncachedV = transformer.getV().multiply(e);\n} else {\nreturn cachedV;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:getU()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getU() {\nif (cachedU == null) {\nfinal int m = householderVectors.length;\nfinal int n = householderVectors[0].length;\nfinal int p = main.length;\nfinal int diagOffset    = (m >= n) ? 0 : 1;\nfinal double[] diagonal = (m >= n) ? main : secondary;\ncachedU = MatrixUtils.createRealMatrix(m, m);\nfor (int k = m - 1; k >= p; --k) {\nfor (int k = p - 1; k >= diagOffset; --k) {\nfinal double[] hK = householderVectors[k];\ncachedU.setEntry(k, k, 1);\nif (hK[k - diagOffset] != 0.0) {\nfor (int j = k; j < m; ++j) {\ndouble alpha = 0;\nfor (int i = k; i < m; ++i) {\nalpha -= cachedU.getEntry(i, j) * householderVectors[i][k - diagOffset];\nalpha /= diagonal[k - diagOffset] * hK[k - diagOffset];\nfor (int i = k; i < m; ++i) {\ncachedU.addToEntry(i, j, -alpha * householderVectors[i][k - diagOffset]);\nif (diagOffset > 0) {\nreturn cachedU;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:<init>(Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "public SingularValueDecompositionImpl(final RealMatrix matrix)\nthis(matrix, Math.min(matrix.getRowDimension(), matrix.getColumnDimension()));\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:getV()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getV() {\nif (cachedV == null) {\nfinal int m = householderVectors.length;\nfinal int n = householderVectors[0].length;\nfinal int p = main.length;\nfinal int diagOffset    = (m >= n) ? 1 : 0;\nfinal double[] diagonal = (m >= n) ? secondary : main;\ncachedV = MatrixUtils.createRealMatrix(n, n);\nfor (int k = n - 1; k >= p; --k) {\nfor (int k = p - 1; k >= diagOffset; --k) {\nfinal double[] hK = householderVectors[k - diagOffset];\ncachedV.setEntry(k, k, 1);\nif (hK[k] != 0.0) {\nfor (int j = k; j < n; ++j) {\ndouble beta = 0;\nfor (int i = k; i < n; ++i) {\nbeta -= cachedV.getEntry(i, j) * hK[i];\nbeta /= diagonal[k - diagOffset] * hK[k];\nfor (int i = k; i < n; ++i) {\ncachedV.addToEntry(i, j, -beta * hK[i]);\nif (diagOffset > 0) {\ncachedV.setEntry(0, 0, 1);\nreturn cachedV;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:getMainDiagonalRef()[D",
+            "method_body": "double[] getMainDiagonalRef() {\nreturn main;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:getSecondaryDiagonalRef()[D",
+            "method_body": "double[] getSecondaryDiagonalRef() {\nreturn secondary;\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:<init>(Lorg/apache/commons/math/linear/RealMatrix;I)V",
+            "method_body": "public SingularValueDecompositionImpl(final RealMatrix matrix, final int max)\nthrows InvalidMatrixException {\nm = matrix.getRowDimension();\nn = matrix.getColumnDimension();\ncachedU  = null;\ncachedS  = null;\ncachedV  = null;\ncachedVt = null;\ntransformer         = new BiDiagonalTransformer(matrix);\nmainBidiagonal      = transformer.getMainDiagonalRef();\nsecondaryBidiagonal = transformer.getSecondaryDiagonalRef();\nmainTridiagonal      = new double[mainBidiagonal.length];\nsecondaryTridiagonal = new double[mainBidiagonal.length - 1];\ndouble a = mainBidiagonal[0];\nmainTridiagonal[0] = a * a;\nfor (int i = 1; i < mainBidiagonal.length; ++i) {\nfinal double b  = secondaryBidiagonal[i - 1];\nsecondaryTridiagonal[i - 1] = a * b;\na = mainBidiagonal[i];\nmainTridiagonal[i] = a * a + b * b;\neigenDecomposition =\nfinal double[] eigenValues = eigenDecomposition.getRealEigenvalues();\nint p = Math.min(max, eigenValues.length);\nwhile ((p > 0) && (eigenValues[p - 1] <= 0)) {\n--p;\nsingularValues = new double[p];\nfor (int i = 0; i < p; ++i) {\nsingularValues[i] = Math.sqrt(eigenValues[i]);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:getV()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getV()\nif (cachedV == null) {\nif (eigenvectors == null) {\nfindEigenVectors();\nfinal int m = eigenvectors.length;\ncachedV = MatrixUtils.createRealMatrix(m, m);\nfor (int k = 0; k < m; ++k) {\ncachedV.setColumnVector(k, eigenvectors[k]);\nreturn cachedV;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:getSubMatrix(IIII)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getSubMatrix(final int startRow, final int endRow,\nMatrixUtils.checkSubMatrixIndex(this, startRow, endRow, startColumn, endColumn);\nfinal RealMatrix subMatrix =\nfor (int i = startRow; i <= endRow; ++i) {\nfor (int j = startColumn; j <= endColumn; ++j) {\nsubMatrix.setEntry(i - startRow, j - startColumn, getEntry(i, j));\nreturn subMatrix;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getSingularValues()[D",
+            "method_body": "public double[] getSingularValues()\nreturn singularValues.clone();\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:setColumnVector(ILorg/apache/commons/math/linear/RealVector;)V",
+            "method_body": "public void setColumnVector(final int column, final RealVector vector)\nMatrixUtils.checkColumnIndex(this, column);\nfinal int nRows = getRowDimension();\nif (vector.getDimension() != nRows) {\nfor (int i = 0; i < nRows; ++i) {\nsetEntry(i, column, vector.getEntry(i));\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:<init>([D[DD)V",
+            "method_body": "public EigenDecompositionImpl(final double[] main, double[] secondary,\nthrows InvalidMatrixException {\nthis.main      = main.clone();\nthis.secondary = secondary.clone();\ntransformer    = null;\nsquaredSecondary = new double[secondary.length];\nfor (int i = 0; i < squaredSecondary.length; ++i) {\nfinal double s = secondary[i];\nsquaredSecondary[i] = s * s;\nthis.splitTolerance = splitTolerance;\ndecompose();\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:transformToUpperBiDiagonal()V",
+            "method_body": "private void transformToUpperBiDiagonal() {\nfinal int m = householderVectors.length;\nfinal int n = householderVectors[0].length;\nfor (int k = 0; k < n; k++) {\ndouble xNormSqr = 0;\nfor (int i = k; i < m; ++i) {\nfinal double c = householderVectors[i][k];\nxNormSqr += c * c;\nfinal double[] hK = householderVectors[k];\nfinal double a = (hK[k] > 0) ? -Math.sqrt(xNormSqr) : Math.sqrt(xNormSqr);\nmain[k] = a;\nif (a != 0.0) {\nhK[k] -= a;\nfor (int j = k + 1; j < n; ++j) {\ndouble alpha = 0;\nfor (int i = k; i < m; ++i) {\nfinal double[] hI = householderVectors[i];\nalpha -= hI[j] * hI[k];\nalpha /= a * householderVectors[k][k];\nfor (int i = k; i < m; ++i) {\nfinal double[] hI = householderVectors[i];\nhI[j] -= alpha * hI[k];\nif (k < n - 1) {\nxNormSqr = 0;\nfor (int j = k + 1; j < n; ++j) {\nfinal double c = hK[j];\nxNormSqr += c * c;\nfinal double b = (hK[k + 1] > 0) ? -Math.sqrt(xNormSqr) : Math.sqrt(xNormSqr);\nsecondary[k] = b;\nif (b != 0.0) {\nhK[k + 1] -= b;\nfor (int i = k + 1; i < m; ++i) {\nfinal double[] hI = householderVectors[i];\ndouble beta = 0;\nfor (int j = k + 1; j < n; ++j) {\nbeta -= hI[j] * hK[j];\nbeta /= b * hK[k + 1];\nfor (int j = k + 1; j < n; ++j) {\nhI[j] -= beta * hK[j];\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:<init>(Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "public BiDiagonalTransformer(RealMatrix matrix) {\nfinal int m = matrix.getRowDimension();\nfinal int n = matrix.getColumnDimension();\nfinal int p = Math.min(m, n);\nhouseholderVectors = matrix.getData();\nmain      = new double[p];\nsecondary = new double[p - 1];\ncachedU   = null;\ncachedB   = null;\ncachedV   = null;\nif (m >= n) {\ntransformToUpperBiDiagonal();\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:getRealEigenvalues()[D",
+            "method_body": "public double[] getRealEigenvalues()\nreturn realEigenvalues.clone();\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:findEigenVectors()V",
+            "method_body": "private void findEigenVectors() {\nfinal int m = main.length;\neigenvectors = new ArrayRealVector[m];\nfinal double[] d = new double[m];\nfinal double[] l = new double[m - 1];\nfinal double mu = realEigenvalues[m-1] <= 0 && realEigenvalues[0] > 0 ? 0.5-realEigenvalues[m-1] : 0;\ndouble di = main[0]+mu;\nd[0] = di;\nfor (int i = 1; i < m; ++i) {\nfinal double eiM1  = secondary[i - 1];\nfinal double ratio = eiM1 / di;\ndi       = main[i] - eiM1 * ratio + mu;\nl[i - 1] = ratio;\nd[i]     = di;\nfor (int i = 0; i < m; ++i) {\neigenvectors[i] = findEigenvector(realEigenvalues[i]+mu, d, l);\n}",
+            "method_id": 19
+        }
+    ]
+}

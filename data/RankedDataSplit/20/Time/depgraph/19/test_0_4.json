@@ -1,0 +1,109 @@
+{
+    "bug_id": 19,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testDateTimeCreation_london",
+    "test_body": "1263: public void testDateTimeCreation_london() {\n1264: DateTimeZone zone = DateTimeZone.forID(\"Europe/London\");\n1265: DateTime base = new DateTime(2011, 10, 30, 1, 15, zone);\n1266: assertEquals(\"2011-10-30T01:15:00.000+01:00\", base.toString());\n1267: assertEquals(\"2011-10-30T01:15:00.000Z\", base.plusHours(1).toString());",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<...1-10-30T01:15:00.000[+01:00]> but was:<...1-10-30T01:15:00.000[Z]>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat junit.framework.TestCase.assertEquals(TestCase.java:269)\nat org.joda.time.TestDateTimeZoneCutover.testDateTimeCreation_london(TestDateTimeZoneCutover.java:1266)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone$Info:getOffset(J)I",
+            "method_body": "public int getOffset(long millis) {\nif (iNextInfo == null || millis < iNextInfo.iPeriodStart) {\nif (iOffset == Integer.MIN_VALUE) {\niOffset = iZoneRef.getOffset(iPeriodStart);\nreturn iOffset;\nreturn iNextInfo.getOffset(millis);\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:getOffset(J)I",
+            "method_body": "public int getOffset(long instant) {\nlong[] transitions = iTransitions;\nint i = Arrays.binarySearch(transitions, instant);\nif (i >= 0) {\ni = ~i;\nif (i < transitions.length) {\nif (iTailZone == null) {\nreturn iTailZone.getOffset(instant);\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:nextTransition(J)J",
+            "method_body": "public long nextTransition(long instant) {\nlong[] transitions = iTransitions;\nint i = Arrays.binarySearch(transitions, instant);\ni = (i >= 0) ? (i + 1) : ~i;\nif (i < transitions.length) {\nif (iTailZone == null) {\nlong end = transitions[transitions.length - 1];\nif (instant < end) {\nreturn iTailZone.nextTransition(instant);\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone:getInfo(J)Lorg/joda/time/tz/CachedDateTimeZone$Info;",
+            "method_body": "private Info getInfo(long millis) {\nint period = (int)(millis >> 32);\nInfo[] cache = iInfoCache;\nint index = period & cInfoCacheMask;\nInfo info = cache[index];\nif (info == null || (int)((info.iPeriodStart >> 32)) != period) {\ninfo = createInfo(millis);\ncache[index] = info;\nreturn info;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone:createInfo(J)Lorg/joda/time/tz/CachedDateTimeZone$Info;",
+            "method_body": "private Info createInfo(long millis) {\nlong periodStart = millis & (0xffffffffL << 32);\nInfo info = new Info(iZone, periodStart);\nlong end = periodStart | 0xffffffffL;\nInfo chain = info;\nlong next = iZone.nextTransition(periodStart);\nif (next == periodStart || next > end) {\nbreak;\nperiodStart = next;\nchain = (chain.iNextInfo = new Info(iZone, periodStart));\n}\nreturn info;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone$Info:<init>(Lorg/joda/time/DateTimeZone;J)V",
+            "method_body": "Info(DateTimeZone zone, long periodStart) {\niPeriodStart = periodStart;\niZoneRef = zone;\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicDayOfMonthDateTimeField:getMinimumValue()I",
+            "method_body": "public int getMinimumValue() {\nreturn 1;\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfYear(JI)I",
+            "method_body": "int getDayOfYear(long instant, int year) {\nlong yearStart = getYearMillis(year);\nreturn (int) ((instant - yearStart) / DateTimeConstants.MILLIS_PER_DAY) + 1;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getMillisOfDay(J)I",
+            "method_body": "int getMillisOfDay(long instant) {\nif (instant >= 0) {\nreturn (int) (instant % DateTimeConstants.MILLIS_PER_DAY);\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.joda.time.base.BaseDateTime:<init>(IIIIIIILorg/joda/time/Chronology;)V",
+            "method_body": "public BaseDateTime(\nsuper();\niChronology = checkChronology(chronology);\nlong instant = iChronology.getDateTimeMillis(year, monthOfYear, dayOfMonth,\niMillis = checkInstant(instant, iChronology);\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDateTimeField:getMaximumValue()I",
+            "method_body": "public int getMaximumValue() {\nreturn iRange - 1;\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfMonth(J)I",
+            "method_body": "abstract int getMonthOfYear(long millis, int year);\nint year = getYear(millis);\nint month = getMonthOfYear(millis, year);\nreturn getDayOfMonth(millis, year, month);\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicDayOfMonthDateTimeField:get(J)I",
+            "method_body": "public int get(long instant) {\nreturn iChronology.getDayOfMonth(instant);\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.joda.time.field.FieldUtils:verifyValueBounds(Lorg/joda/time/DateTimeField;III)V",
+            "method_body": "public static void verifyValueBounds(DateTimeField field,\nif ((value < lowerBound) || (value > upperBound)) {\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicYearDateTimeField:get(J)I",
+            "method_body": "public int get(long instant) {\nreturn iChronology.getYear(instant);\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:getZone()Lorg/joda/time/DateTimeZone;",
+            "method_body": "public DateTimeZone getZone() {\nif ((base = iBase) != null) {\nreturn base.getZone();\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfMonth(JII)I",
+            "method_body": "int getDayOfMonth(long millis, int year, int month) {\nlong dateMillis = getYearMillis(year);\ndateMillis += getTotalMillisByYearMonth(year, month);\nreturn (int) ((millis - dateMillis) / DateTimeConstants.MILLIS_PER_DAY) + 1;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicGJChronology:getMonthOfYear(JI)I",
+            "method_body": "int getMonthOfYear(long millis, int year) {\nint i = (int)((millis - getYearMillis(year)) >> 10);\nreturn\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDateTimeField:get(J)I",
+            "method_body": "public int get(long instant) {\nif (instant >= 0) {\nreturn (int) ((instant / getUnitMillis()) % iRange);\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDateMidnightMillis(III)J",
+            "method_body": "long getDateMidnightMillis(int year, int monthOfYear, int dayOfMonth) {\nFieldUtils.verifyValueBounds(DateTimeFieldType.year(), year, getMinYear(), getMaxYear());\nFieldUtils.verifyValueBounds(DateTimeFieldType.monthOfYear(), monthOfYear, 1, getMaxMonth(year));\nFieldUtils.verifyValueBounds(DateTimeFieldType.dayOfMonth(), dayOfMonth, 1, getDaysInYearMonth(year, monthOfYear));\nreturn getYearMonthDayMillis(year, monthOfYear, dayOfMonth);\n}",
+            "method_id": 99
+        }
+    ]
+}

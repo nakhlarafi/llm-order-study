@@ -1,0 +1,59 @@
+{
+    "bug_id": 7,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling",
+    "test_body": "public void testEventsScheduling() {\n339: FirstOrderDifferentialEquations sincos = new FirstOrderDifferentialEquations() {\n341: public int getDimension() {\nreturn 2;\n}\n345: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] =  y[1];\nyDot[1] = -y[0];\n}\n350: };\n352: SchedulingChecker sinChecker = new SchedulingChecker(0); // events at 0, PI, 2PI ...\nSchedulingChecker cosChecker = new SchedulingChecker(1); // events at PI/2, 3PI/2, 5PI/2 ...\n355: FirstOrderIntegrator integ =\nnew DormandPrince853Integrator(0.001, 1.0, 1.0e-12, 0.0);\ninteg.addEventHandler(sinChecker, 0.01, 1.0e-7, 100);\ninteg.addStepHandler(sinChecker);\ninteg.addEventHandler(cosChecker, 0.01, 1.0e-7, 100);\ninteg.addStepHandler(cosChecker);\ndouble   t0 = 0.5;\ndouble[] y0 = new double[] { FastMath.sin(t0), FastMath.cos(t0) };\ndouble   t  = 10.0;\ndouble[] y  = new double[2];\ninteg.integrate(sincos, t0, y0, t, y);\n367: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest$SchedulingChecker.g(DormandPrince853IntegratorTest.java:389)\nat org.apache.commons.math3.ode.events.EventState.evaluateStep(EventState.java:224)\nat org.apache.commons.math3.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:323)\nat org.apache.commons.math3.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:303)\nat org.apache.commons.math3.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling(DormandPrince853IntegratorTest.java:365)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.ode.events.EventState:evaluateStep(Lorg/apache/commons/math3/ode/sampling/StepInterpolator;)Z",
+            "method_body": "public boolean evaluateStep(final StepInterpolator interpolator)\nforward = interpolator.isForward();\nfinal double t1 = interpolator.getCurrentTime();\nfinal double dt = t1 - t0;\nif (FastMath.abs(dt) < convergence) {\nfinal int    n = FastMath.max(1, (int) FastMath.ceil(FastMath.abs(dt) / maxCheckInterval));\nfinal double h = dt / n;\nfinal UnivariateFunction f = new UnivariateFunction() {\ninterpolator.setInterpolatedTime(t);\nreturn handler.g(t, interpolator.getInterpolatedState());\ndouble ta = t0;\ndouble ga = g0;\nfor (int i = 0; i < n; ++i) {\nfinal double tb = t0 + (i + 1) * h;\ninterpolator.setInterpolatedTime(tb);\nfinal double gb = handler.g(tb, interpolator.getInterpolatedState());\nif (g0Positive ^ (gb >= 0)) {\nincreasing = gb >= ga;\nif (solver instanceof BracketedUnivariateSolver<?>) {\nBracketedUnivariateSolver<UnivariateFunction> bracketing =\nroot = forward ?\n} else {\nif ((!Double.isNaN(previousEventTime)) &&\n} else if (Double.isNaN(previousEventTime) ||\npendingEventTime = root;\npendingEvent = true;\nreturn true;\nta = tb;\nga = gb;\npendingEvent     = false;\npendingEventTime = Double.NaN;\nreturn false;\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getPrimaryMapper()Lorg/apache/commons/math3/ode/EquationsMapper;",
+            "method_body": "public EquationsMapper getPrimaryMapper() {\nreturn primaryMapper;\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.DormandPrince853StepInterpolator:<init>(Lorg/apache/commons/math3/ode/nonstiff/DormandPrince853StepInterpolator;)V",
+            "method_body": "public DormandPrince853StepInterpolator(final DormandPrince853StepInterpolator interpolator) {\nsuper(interpolator);\nif (interpolator.currentState == null) {\nyDotKLast = null;\nv         = null;\nvectorsInitialized = false;\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:copy()Lorg/apache/commons/math3/ode/sampling/StepInterpolator;",
+            "method_body": "public StepInterpolator copy() throws MaxCountExceededException {\nfinalizeStep();\nreturn doCopy();\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:setPrimaryState([D)V",
+            "method_body": "public void setPrimaryState(final double[] primaryState) throws DimensionMismatchException {\nif (primaryState.length != this.primaryState.length) {\nSystem.arraycopy(primaryState, 0, this.primaryState, 0, primaryState.length);\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:computeDerivatives(D[D[D)V",
+            "method_body": "public abstract void integrate(ExpandableStatefulODE equations, double t)\nevaluations.incrementCount();\nexpandable.computeDerivatives(t, y, yDot);\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getFunctionValueAccuracy()D",
+            "method_body": "public double getFunctionValueAccuracy() {\nreturn functionValueAccuracy;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.UnivariateSolverUtils:verifySequence(DDD)V",
+            "method_body": "public static void verifySequence(final double lower,\nverifyInterval(lower, initial);\nverifyInterval(initial, upper);\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:computeObjectiveValue(D)D",
+            "method_body": "protected double computeObjectiveValue(double point)\nincrementEvaluationCount();\nreturn function.value(point);\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:abs(J)J",
+            "method_body": "public static long abs(final long x) {\nreturn (x < 0l) ? -x : x;\n}",
+            "method_id": 99
+        }
+    ]
+}

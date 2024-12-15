@@ -1,0 +1,159 @@
+{
+    "bug_id": 21,
+    "test_id": 0,
+    "test_name": "org.jsoup.select.SelectorTest.handlesCommasInSelector",
+    "test_body": "588: @Test public void handlesCommasInSelector() {\n589: Document doc = Jsoup.parse(\"<p name='1,2'>One</p><div>Two</div><ol><li>123</li><li>Text</li></ol>\");\n590: 591: Elements ps = doc.select(\"[name=1,2]\");\n592: assertEquals(1, ps.size());\n593: 594: Elements containers = doc.select(\"div, li:matches([0-9,]+)\");\n595: assertEquals(2, containers.size());\n596: assertEquals(\"div\", containers.get(0).tagName());\n597: assertEquals(\"li\", containers.get(1).tagName());\n598: assertEquals(\"123\", containers.get(1).text());\n599: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.select.QueryParser:<init>(Ljava/lang/String;)V",
+            "method_body": "private QueryParser(String query) {\nthis.query = query;\nthis.tq = new TokenQueue(query);\n}",
+            "method_id": 150
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:<clinit>()V",
+            "method_body": "private final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};\nprivate final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};",
+            "method_id": 151
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:parse(Ljava/lang/String;)Lorg/jsoup/select/Evaluator;",
+            "method_body": "public static Evaluator parse(String query) {\nQueryParser p = new QueryParser(query);\nreturn p.parse();\n}",
+            "method_id": 152
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:findElements()V",
+            "method_body": "private void findElements() {\nif (tq.matchChomp(\"#\"))\nelse if (tq.matchChomp(\".\"))\nbyClass();\nelse if (tq.matchesWord())\nbyTag();\nelse if (tq.matches(\"[\"))\nbyAttribute();\nelse if (tq.matchChomp(\"*\"))\nelse if (tq.matchChomp(\":lt(\"))\nelse if (tq.matchChomp(\":gt(\"))\nelse if (tq.matchChomp(\":eq(\"))\nelse if (tq.matches(\":has(\"))\nelse if (tq.matches(\":contains(\"))\nelse if (tq.matches(\":containsOwn(\"))\nelse if (tq.matches(\":matches(\"))\nmatches(false);\n}",
+            "method_id": 153
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byTag()V",
+            "method_body": "private void byTag() {\nString tagName = tq.consumeElementSelector();\nValidate.notEmpty(tagName);\nif (tagName.contains(\"|\"))\nevals.add(new Evaluator.Tag(tagName.trim().toLowerCase()));\n}",
+            "method_id": 154
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byAttribute()V",
+            "method_body": "private void byAttribute() {\nTokenQueue cq = new TokenQueue(tq.chompBalanced('[', ']')); // content queue\nString key = cq.consumeToAny(\"=\", \"!=\", \"^=\", \"$=\", \"*=\", \"~=\"); // eq, not, start, end, contain, match, (no val)\nValidate.notEmpty(key);\ncq.consumeWhitespace();\nif (cq.isEmpty()) {\nif (cq.matchChomp(\"=\"))\nevals.add(new Evaluator.AttributeWithValue(key, cq.remainder()));\n}",
+            "method_id": 155
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:matches(Z)V",
+            "method_body": "private void matches(boolean own) {\ntq.consume(own ? \":matchesOwn\" : \":matches\");\nString regex = tq.chompBalanced('(', ')'); // don't unescape, as regex bits will be escaped\nValidate.notEmpty(regex, \":matches(regex) query must not be empty\");\nif (own)\nevals.add(new Evaluator.Matches(Pattern.compile(regex)));\n}",
+            "method_id": 156
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:<init>(Ljava/lang/String;)V",
+            "method_body": "public TokenQueue(String data) {\nValidate.notNull(data);\nqueue = data;\n}",
+            "method_id": 157
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nreturn remainingLength() == 0;\n}",
+            "method_id": 158
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:remainingLength()I",
+            "method_body": "private int remainingLength() {\nreturn queue.length() - pos;\n}",
+            "method_id": 159
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matches(Ljava/lang/String;)Z",
+            "method_body": "public boolean matches(String seq) {\nreturn queue.regionMatches(true, pos, seq, 0, seq.length());\n}",
+            "method_id": 160
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesAny([Ljava/lang/String;)Z",
+            "method_body": "public boolean matchesAny(String... seq) {\nfor (String s : seq) {\nif (matches(s))\nreturn true;\nreturn false;\n}",
+            "method_id": 161
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesAny([C)Z",
+            "method_body": "public boolean matchesAny(char... seq) {\nif (isEmpty())\nfor (char c: seq) {\nif (queue.charAt(pos) == c)\nreturn false;\n}",
+            "method_id": 162
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchChomp(Ljava/lang/String;)Z",
+            "method_body": "public boolean matchChomp(String seq) {\nif (matches(seq)) {\npos += seq.length();\nreturn true;\nreturn false;\n}",
+            "method_id": 163
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesWhitespace()Z",
+            "method_body": "public boolean matchesWhitespace() {\nreturn !isEmpty() && StringUtil.isWhitespace(queue.charAt(pos));\n}",
+            "method_id": 164
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesWord()Z",
+            "method_body": "public boolean matchesWord() {\nreturn !isEmpty() && Character.isLetterOrDigit(queue.charAt(pos));\n}",
+            "method_id": 165
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consume()C",
+            "method_body": "public char consume() {\nreturn queue.charAt(pos++);\n}",
+            "method_id": 166
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consume(Ljava/lang/String;)V",
+            "method_body": "public void consume(String seq) {\nif (!matches(seq))\nint len = seq.length();\nif (len > remainingLength())\npos += len;\n}",
+            "method_id": 167
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeTo(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String consumeTo(String seq) {\nint offset = queue.indexOf(seq, pos);\nif (offset != -1) {\nString consumed = queue.substring(pos, offset);\npos += consumed.length();\nreturn consumed;\nreturn remainder();\n}",
+            "method_id": 168
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeToAny([Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String consumeToAny(String... seq) {\nint start = pos;\nwhile (!isEmpty() && !matchesAny(seq)) {\npos++;\nString data = queue.substring(start, pos);\nreturn data;\n}",
+            "method_id": 169
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:chompTo(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String chompTo(String seq) {\nString data = consumeTo(seq);\nmatchChomp(seq);\nreturn data;\n}",
+            "method_id": 170
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:chompBalanced(CC)Ljava/lang/String;",
+            "method_body": "public String chompBalanced(char open, char close) {\nStringBuilder accum = new StringBuilder();\nint depth = 0;\nchar last = 0;\nif (isEmpty()) break;\nCharacter c = consume();\nif (last == 0 || last != ESC) {\nif (c.equals(open))\ndepth++;\nelse if (c.equals(close))\ndepth--;\nif (depth > 0 && last != 0)\naccum.append(c); // don't include the outer match pair in the return\nlast = c;\n} while (depth > 0);\nreturn accum.toString();\n}",
+            "method_id": 171
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeWhitespace()Z",
+            "method_body": "public boolean consumeWhitespace() {\nboolean seen = false;\nwhile (matchesWhitespace()) {\npos++;\nseen = true;\nreturn seen;\n}",
+            "method_id": 172
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeElementSelector()Ljava/lang/String;",
+            "method_body": "public String consumeElementSelector() {\nint start = pos;\nwhile (!isEmpty() && (matchesWord() || matchesAny('|', '_', '-')))\npos++;\nreturn queue.substring(start, pos);\n}",
+            "method_id": 173
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:remainder()Ljava/lang/String;",
+            "method_body": "public String remainder() {\nStringBuilder accum = new StringBuilder();\nwhile (!isEmpty()) {\naccum.append(consume());\nreturn accum.toString();\n}",
+            "method_id": 174
+        },
+        {
+            "method_signature": "org.jsoup.select.Evaluator:<init>()V",
+            "method_body": "protected Evaluator() {\n}",
+            "method_id": 175
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector:collect(Lorg/jsoup/select/Evaluator;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements collect (Evaluator eval, Element root) {\nElements elements = new Elements();\nnew NodeTraversor(new Accumulator(root, elements, eval)).traverse(root);\nreturn elements;\n}",
+            "method_id": 176
+        },
+        {
+            "method_signature": "org.jsoup.select.Elements:<init>()V",
+            "method_body": "public Elements() {\ncontents = new ArrayList<Element>();\n}",
+            "method_id": 177
+        },
+        {
+            "method_signature": "org.jsoup.select.Elements:add(Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "public boolean add(Element element) {return contents.add(element);}\npublic boolean add(Element element) {return contents.add(element);}",
+            "method_id": 178
+        },
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:<init>(Lorg/jsoup/select/NodeVisitor;)V",
+            "method_body": "public NodeTraversor(NodeVisitor visitor) {\nthis.visitor = visitor;\n}",
+            "method_id": 179
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 22,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.compressors.bzip2.PythonTruncatedBzip2Test.testPartialReadTruncatedData",
+    "test_body": "85: public void testPartialReadTruncatedData() throws IOException {\n86: //with BZ2File(self.filename) as f:\n87: //    self.assertEqual(f.read(len(self.TEXT)), self.TEXT)\n88: //    self.assertRaises(EOFError, f.read, 1)\n89: 90: final int length = TEXT.length();\n91: ByteBuffer buffer = ByteBuffer.allocate(length);\n92: bz2Channel.read(buffer);\n93: 94: assertArrayEquals(Arrays.copyOfRange(TEXT.getBytes(), 0, length),\n95: buffer.array());\n96: 97: // subsequent read should throw\n98: buffer = ByteBuffer.allocate(1);\n99: try {\n100: bz2Channel.read(buffer);\n101: Assert.fail(\"The read should have thrown.\");\n102: } catch (IOException e) {\n103: // pass\n104: }\n105: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:<init>(Ljava/io/InputStream;Z)V",
+            "method_body": "public BZip2CompressorInputStream(final InputStream in, final boolean decompressConcatenated) throws IOException {\nthis.in = in;\nthis.decompressConcatenated = decompressConcatenated;\ninit(true);\ninitBlock();\nsetupBlock();\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:read0()I",
+            "method_body": "private int read0() throws IOException {\nfinal int retChar = this.currentChar;\nswitch (currentState) {\nsetupNoRandPartB();\nbreak;\nreturn retChar;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:setupNoRandPartA()I",
+            "method_body": "private int setupNoRandPartA() throws IOException {\nif (this.su_i2 <= this.last) {\nthis.su_chPrev = this.su_ch2;\nint su_ch2Shadow = this.data.ll8[this.su_tPos] & 0xff;\nthis.su_ch2 = su_ch2Shadow;\nthis.su_tPos = this.data.tt[this.su_tPos];\nthis.su_i2++;\nthis.currentChar = su_ch2Shadow;\nthis.currentState = NO_RAND_PART_B_STATE;\nthis.crc.updateCRC(su_ch2Shadow);\nreturn su_ch2Shadow;\nthis.currentState = NO_RAND_PART_A_STATE;\nendBlock();\ninitBlock();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.CompressorInputStream:count(I)V",
+            "method_body": "protected void count(int read) {\ncount((long) read);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.CompressorInputStream:count(J)V",
+            "method_body": "protected void count(long read) {\nif (read != -1) {\nbytesRead = bytesRead + read;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:<init>(Ljava/io/OutputStream;)V",
+            "method_body": "public BZip2CompressorOutputStream(final OutputStream out)\nthis(out, MAX_BLOCKSIZE);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:<init>(Ljava/io/OutputStream;I)V",
+            "method_body": "public BZip2CompressorOutputStream(final OutputStream out, final int blockSize) throws IOException {\nif (blockSize < 1) {\nif (blockSize > 9) {\nthis.blockSize100k = blockSize;\nthis.out = out;\nthis.allowableBlockSize = (this.blockSize100k * BZip2Constants.BASEBLOCKSIZE) - 20;\ninit();\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:hbMakeCodeLengths([B[ILorg/apache/commons/compress/compressors/bzip2/BZip2CompressorOutputStream$Data;II)V",
+            "method_body": "private static void hbMakeCodeLengths(final byte[] len, final int[] freq,\nfinal int[] heap = dat.heap;\nfinal int[] weight = dat.weight;\nfinal int[] parent = dat.parent;\nfor (int i = alphaSize; --i >= 0;) {\nweight[i + 1] = (freq[i] == 0 ? 1 : freq[i]) << 8;\nfor (boolean tooLong = true; tooLong;) {\ntooLong = false;\nint nNodes = alphaSize;\nint nHeap = 0;\nheap[0] = 0;\nweight[0] = 0;\nparent[0] = -2;\nfor (int i = 1; i <= alphaSize; i++) {\nparent[i] = -1;\nnHeap++;\nheap[nHeap] = i;\nint zz = nHeap;\nint tmp = heap[zz];\nwhile (weight[tmp] < weight[heap[zz >> 1]]) {\nheap[zz] = heap[zz >> 1];\nzz >>= 1;\nheap[zz] = tmp;\nwhile (nHeap > 1) {\nint n1 = heap[1];\nheap[1] = heap[nHeap];\nnHeap--;\nint yy = 0;\nint zz = 1;\nint tmp = heap[1];\nyy = zz << 1;\nif (yy > nHeap) {\nbreak;\nif ((yy < nHeap)\nyy++;\nif (weight[tmp] < weight[heap[yy]]) {\nbreak;\nheap[zz] = heap[yy];\nzz = yy;\nheap[zz] = tmp;\nint n2 = heap[1];\nheap[1] = heap[nHeap];\nnHeap--;\nyy = 0;\nzz = 1;\ntmp = heap[1];\nyy = zz << 1;\nif (yy > nHeap) {\nbreak;\nif ((yy < nHeap)\nyy++;\nif (weight[tmp] < weight[heap[yy]]) {\nbreak;\nheap[zz] = heap[yy];\nzz = yy;\nheap[zz] = tmp;\nnNodes++;\nparent[n1] = parent[n2] = nNodes;\nfinal int weight_n1 = weight[n1];\nfinal int weight_n2 = weight[n2];\nweight[nNodes] = ((weight_n1 & 0xffffff00)\nparent[nNodes] = -1;\nnHeap++;\nheap[nHeap] = nNodes;\ntmp = 0;\nzz = nHeap;\ntmp = heap[zz];\nfinal int weight_tmp = weight[tmp];\nwhile (weight_tmp < weight[heap[zz >> 1]]) {\nheap[zz] = heap[zz >> 1];\nzz >>= 1;\nheap[zz] = tmp;\n}\nfor (int i = 1; i <= alphaSize; i++) {\nint j = 0;\nint k = i;\nfor (int parent_k; (parent_k = parent[k]) >= 0;) {\nk = parent_k;\nj++;\nlen[i - 1] = (byte) j;\nif (j > maxLen) {\nif (tooLong) {\n}\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:writeRun()V",
+            "method_body": "private void writeRun() throws IOException {\nfinal int lastShadow = this.last;\nif (lastShadow < this.allowableBlockSize) {\nfinal int currentCharShadow = this.currentChar;\nfinal Data dataShadow = this.data;\ndataShadow.inUse[currentCharShadow] = true;\nfinal byte ch = (byte) currentCharShadow;\nint runLengthShadow = this.runLength;\nthis.crc.updateCRC(currentCharShadow, runLengthShadow);\nswitch (runLengthShadow) {\ndataShadow.block[lastShadow + 2] = ch;\nthis.last = lastShadow + 1;\nbreak;\ndataShadow.block[lastShadow + 2] = ch;\ndataShadow.block[lastShadow + 3] = ch;\nthis.last = lastShadow + 2;\nbreak;\nfinal byte[] block = dataShadow.block;\nblock[lastShadow + 2] = ch;\nblock[lastShadow + 3] = ch;\nblock[lastShadow + 4] = ch;\nthis.last = lastShadow + 3;\nbreak;\n} else {\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:finish()V",
+            "method_body": "public void finish() throws IOException {\nif (out != null) {\nif (this.runLength > 0) {\nwriteRun();\nthis.currentChar = -1;\nendBlock();\nendCompression();\nthis.out = null;\nthis.data = null;\nthis.blockSorter = null;\n}\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:close()V",
+            "method_body": "public void close() throws IOException {\nif (out != null) {\nOutputStream outShadow = this.out;\nfinish();\noutShadow.close();\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:init()V",
+            "method_body": "private void init() throws IOException {\nbsPutUByte('B');\nbsPutUByte('Z');\nthis.data = new Data(this.blockSize100k);\nthis.blockSorter = new BlockSort(this.data);\nbsPutUByte('h');\nbsPutUByte('0' + this.blockSize100k);\nthis.combinedCRC = 0;\ninitBlock();\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:initBlock()V",
+            "method_body": "private void initBlock() {\nthis.crc.initialiseCRC();\nthis.last = -1;\nboolean[] inUse = this.data.inUse;\nfor (int i = 256; --i >= 0;) {\ninUse[i] = false;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:endBlock()V",
+            "method_body": "private void endBlock() throws IOException {\nthis.blockCRC = this.crc.getFinalCRC();\nthis.combinedCRC = (this.combinedCRC << 1) | (this.combinedCRC >>> 31);\nthis.combinedCRC ^= this.blockCRC;\nif (this.last == -1) {\nblockSort();\nbsPutUByte(0x31);\nbsPutUByte(0x41);\nbsPutUByte(0x59);\nbsPutUByte(0x26);\nbsPutUByte(0x53);\nbsPutUByte(0x59);\nbsPutInt(this.blockCRC);\nbsW(1, 0);\nmoveToFrontCodeAndSend();\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:endCompression()V",
+            "method_body": "private void endCompression() throws IOException {\nbsPutUByte(0x17);\nbsPutUByte(0x72);\nbsPutUByte(0x45);\nbsPutUByte(0x38);\nbsPutUByte(0x50);\nbsPutUByte(0x90);\nbsPutInt(this.combinedCRC);\nbsFinishedWithStream();\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:write([BII)V",
+            "method_body": "public void write(final byte[] buf, int offs, final int len)\nif (offs < 0) {\nif (len < 0) {\nif (offs + len > buf.length) {\nif (this.out == null) {\nfor (int hi = offs + len; offs < hi;) {\nwrite0(buf[offs++]);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:write0(I)V",
+            "method_body": "private void write0(int b) throws IOException {\nif (this.currentChar != -1) {\nb &= 0xff;\nif (this.currentChar == b) {\nif (++this.runLength > 254) {\nwriteRun();\nthis.runLength = 1;\nthis.currentChar = b;\nthis.currentChar = b & 0xff;\nthis.runLength++;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:hbAssignCodes([I[BIII)V",
+            "method_body": "private static void hbAssignCodes(final int[] code, final byte[] length,\nint vec = 0;\nfor (int n = minLen; n <= maxLen; n++) {\nfor (int i = 0; i < alphaSize; i++) {\nif ((length[i] & 0xff) == n) {\ncode[i] = vec;\nvec++;\nvec <<= 1;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:bsFinishedWithStream()V",
+            "method_body": "private void bsFinishedWithStream() throws IOException {\nwhile (this.bsLive > 0) {\nint ch = this.bsBuff >> 24;\nthis.out.write(ch); // write 8-bit\nthis.bsBuff <<= 8;\nthis.bsLive -= 8;\n}\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:bsW(II)V",
+            "method_body": "private void bsW(final int n, final int v) throws IOException {\nfinal OutputStream outShadow = this.out;\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nthis.bsBuff = bsBuffShadow | (v << (32 - bsLiveShadow - n));\nthis.bsLive = bsLiveShadow + n;\n}",
+            "method_id": 19
+        }
+    ]
+}

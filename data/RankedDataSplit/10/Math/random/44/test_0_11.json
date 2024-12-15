@@ -1,0 +1,54 @@
+{
+    "bug_id": 44,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.events.EventStateTest.testIssue695",
+    "test_body": "public void testIssue695() {\n82: FirstOrderDifferentialEquations equation = new FirstOrderDifferentialEquations() {\n84: public int getDimension() {\nreturn 1;\n}\n88: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] = 1.0;\n}\n};\n93: DormandPrince853Integrator integrator = new DormandPrince853Integrator(0.001, 1000, 1.0e-14, 1.0e-14);\nintegrator.addEventHandler(new ResettingEvent(10.99), 0.1, 1.0e-9, 1000);\nintegrator.addEventHandler(new ResettingEvent(11.01), 0.1, 1.0e-9, 1000);\nintegrator.setInitialStepSize(3.0);\n98: double target = 30.0;\ndouble[] y = new double[1];\ndouble tEnd = integrator.integrate(equation, 0.0, y, target, y);\nAssert.assertEquals(target, tEnd, 1.0e-10);",
+    "stack_trace": "junit.framework.AssertionFailedError: going backard in time! (7.796578226186635 < 10.99)\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.apache.commons.math.ode.events.EventStateTest$ResettingEvent.g(EventStateTest.java:120)\nat org.apache.commons.math.ode.events.EventState.evaluateStep(EventState.java:214)\nat org.apache.commons.math.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:302)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:296)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:213)\nat org.apache.commons.math.ode.events.EventStateTest.testIssue695(EventStateTest.java:100)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:setMaxEvaluations(I)V",
+            "method_body": "public void setMaxEvaluations(int maxEvaluations) {\nevaluations.setMaximalCount((maxEvaluations < 0) ? Integer.MAX_VALUE : maxEvaluations);\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:sanityChecks(Lorg/apache/commons/math/ode/ExpandableStatefulODE;D)V",
+            "method_body": "protected void sanityChecks(final ExpandableStatefulODE equations, final double t)\nfinal double threshold = 1000 * FastMath.ulp(FastMath.max(FastMath.abs(equations.getTime()),\nfinal double dt = FastMath.abs(equations.getTime() - t);\nif (dt <= threshold) {\n}",
+            "method_id": 111
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.DormandPrince853StepInterpolator:storeTime(D)V",
+            "method_body": "public void storeTime(final double t) {\nsuper.storeTime(t);\nvectorsInitialized = false;\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getInterpolatedState()[D",
+            "method_body": "public double[] getInterpolatedState() {\nevaluateCompleteInterpolatedState();\nprimaryMapper.extractEquationData(interpolatedState,\nreturn interpolatedPrimaryState;\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator$1:compare(Ljava/lang/Object;Ljava/lang/Object;)I",
+            "method_body": "protected double acceptStep(final AbstractStepInterpolator interpolator,\ndouble previousT = interpolator.getGlobalPreviousTime();\nfinal double currentT = interpolator.getGlobalCurrentTime();\nresetOccurred = false;\nif (! statesInitialized) {\nfor (EventState state : eventsStates) {\nstate.reinitializeBegin(interpolator);\nstatesInitialized = true;\nfinal int orderingSign = interpolator.isForward() ? +1 : -1;\nSortedSet<EventState> occuringEvents = new TreeSet<EventState>(new Comparator<EventState>() {\nreturn orderingSign * Double.compare(es0.getEventTime(), es1.getEventTime());\nfor (final EventState state : eventsStates) {\nif (state.evaluateStep(interpolator)) {\noccuringEvents.add(state);\nwhile (!occuringEvents.isEmpty()) {\nfinal Iterator<EventState> iterator = occuringEvents.iterator();\nfinal EventState currentEvent = iterator.next();\niterator.remove();\nfinal double eventT = currentEvent.getEventTime();\ninterpolator.setSoftPreviousTime(previousT);\ninterpolator.setSoftCurrentTime(eventT);\ninterpolator.setInterpolatedTime(eventT);\nfinal double[] eventY = interpolator.getInterpolatedState();\ncurrentEvent.stepAccepted(eventT, eventY);\nisLastStep = currentEvent.stop();\nfor (final StepHandler handler : stepHandlers) {\nif (isLastStep) {\nif (currentEvent.reset(eventT, eventY)) {\nSystem.arraycopy(eventY, 0, y, 0, y.length);\ncomputeDerivatives(eventT, y, yDot);\nresetOccurred = true;\nreturn eventT;\ninterpolator.setInterpolatedTime(currentT);\nfinal double[] currentY = interpolator.getInterpolatedState();\nfor (final EventState state : eventsStates) {\nstate.stepAccepted(currentT, currentY);\nisLastStep = isLastStep || state.stop();\nisLastStep = isLastStep || Precision.equals(currentT, tEnd, 1);\nfor (StepHandler handler : stepHandlers) {\nreturn currentT;\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:getAbsoluteAccuracy()D",
+            "method_body": "public double getAbsoluteAccuracy() {\nreturn absoluteAccuracy;\n}",
+            "method_id": 115
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:computeDerivatives(D[D[D)V",
+            "method_body": "public abstract void integrate(ExpandableStatefulODE equations, double t)\nevaluations.incrementCount();\nexpandable.computeDerivatives(t, y, yDot);\n}",
+            "method_id": 116
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:shift()V",
+            "method_body": "public void shift() {\nglobalPreviousTime = globalCurrentTime;\nsoftPreviousTime   = globalPreviousTime;\nsoftCurrentTime    = globalCurrentTime;\n}",
+            "method_id": 117
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:incrementCount()V",
+            "method_body": "public void incrementCount() {\nif (++count > maximalCount) {\n}",
+            "method_id": 118
+        }
+    ]
+}

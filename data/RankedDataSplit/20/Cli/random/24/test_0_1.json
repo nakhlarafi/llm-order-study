@@ -1,0 +1,44 @@
+{
+    "bug_id": 24,
+    "test_id": 0,
+    "test_name": "org.apache.commons.cli.bug.BugCLI162Test.testLongLineChunkingIndentIgnored",
+    "test_body": "public void testLongLineChunkingIndentIgnored() throws ParseException, IOException {\nOptions options = new Options();\noptions.addOption(\"x\", \"extralongarg\", false, \"This description is Long.\" );\nHelpFormatter formatter = new HelpFormatter();\nStringWriter sw = new StringWriter();\nformatter.printHelp(new PrintWriter(sw), 22, this.getClass().getName(), \"Header\", options, 0, 5, \"Footer\");\nString expected = \"usage:\\n\" +",
+    "stack_trace": "java.lang.IllegalStateException: Total width is less than the width of the argument and indent - no room for the description\nat org.apache.commons.cli.HelpFormatter.renderWrappedText(HelpFormatter.java:825)\nat org.apache.commons.cli.HelpFormatter.renderOptions(HelpFormatter.java:787)\nat org.apache.commons.cli.HelpFormatter.printOptions(HelpFormatter.java:666)\nat org.apache.commons.cli.HelpFormatter.printHelp(HelpFormatter.java:489)\nat org.apache.commons.cli.HelpFormatter.printHelp(HelpFormatter.java:443)\nat org.apache.commons.cli.bug.BugCLI162Test.testLongLineChunkingIndentIgnored(BugCLI162Test.java:269)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli.Option:<init>(Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)V",
+            "method_body": "public Option(String opt, String longOpt, boolean hasArg, String description)\n{\nOptionValidator.validateOption(opt);\nthis.opt = opt;\nthis.longOpt = longOpt;\nif (hasArg)\nthis.description = description;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.cli.HelpFormatter:renderOptions(Ljava/lang/StringBuffer;ILorg/apache/commons/cli/Options;II)Ljava/lang/StringBuffer;",
+            "method_body": "protected StringBuffer renderOptions(StringBuffer sb, int width, Options options, int leftPad, int descPad)\nfinal String lpad = createPadding(leftPad);\nfinal String dpad = createPadding(descPad);\nint max = 0;\nList prefixList = new ArrayList();\nList optList = options.helpOptions();\nCollections.sort(optList, getOptionComparator());\nfor (Iterator i = optList.iterator(); i.hasNext();)\nOption option = (Option) i.next();\noptBuf = new StringBuffer(8);\nif (option.getOpt() == null)\noptBuf.append(lpad).append(defaultOptPrefix).append(option.getOpt());\nif (option.hasLongOpt())\noptBuf.append(',').append(defaultLongOptPrefix).append(option.getLongOpt());\nif (option.hasArg())\nprefixList.add(optBuf);\nmax = (optBuf.length() > max) ? optBuf.length() : max;\n}\nint x = 0;\nfor (Iterator i = optList.iterator(); i.hasNext();)\nOption option = (Option) i.next();\noptBuf = new StringBuffer(prefixList.get(x++).toString());\nif (optBuf.length() < max)\noptBuf.append(dpad);\nint nextLineTabStop = max + descPad;\nif (option.getDescription() != null)\noptBuf.append(option.getDescription());\nrenderWrappedText(sb, width, nextLineTabStop, optBuf.toString());\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:getOpt()Ljava/lang/String;",
+            "method_body": "public String getOpt()\nreturn opt;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.cli.HelpFormatter:createPadding(I)Ljava/lang/String;",
+            "method_body": "protected String createPadding(int len)\nStringBuffer sb = new StringBuffer(len);\nfor (int i = 0; i < len; ++i)\nsb.append(' ');\nreturn sb.toString();\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:helpOptions()Ljava/util/List;",
+            "method_body": "List helpOptions()\nreturn new ArrayList(shortOpts.values());\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.cli.HelpFormatter:printUsage(Ljava/io/PrintWriter;ILjava/lang/String;)V",
+            "method_body": "public void printUsage(PrintWriter pw, int width, String cmdLineSyntax)\nint argPos = cmdLineSyntax.indexOf(' ') + 1;\nprintWrapped(pw, width, defaultSyntaxPrefix.length() + argPos, defaultSyntaxPrefix + cmdLineSyntax);\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.cli.HelpFormatter:printWrapped(Ljava/io/PrintWriter;IILjava/lang/String;)V",
+            "method_body": "public void printWrapped(PrintWriter pw, int width, int nextLineTabStop, String text)\nStringBuffer sb = new StringBuffer(text.length());\nrenderWrappedText(sb, width, nextLineTabStop, text);\npw.println(sb.toString());\n}",
+            "method_id": 26
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 5,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.ParserTest.parsesQuiteRoughAttributes",
+    "test_body": "43: @Test public void parsesQuiteRoughAttributes() {\n44: String html = \"<p =a>One<a =a\";\n45: Document doc = Jsoup.parse(html);\n46: assertEquals(\"<p>One<a></a></p>\", doc.body().html());\n47: 48: doc = Jsoup.parse(\"<p .....\");\n49: assertEquals(\"<p></p>\", doc.body().html());\n50: 51: doc = Jsoup.parse(\"<p .....<p!!\");\n52: assertEquals(\"<p></p>\\n<p></p>\", doc.body().html());\n53: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesStartTag()Z",
+            "method_body": "public boolean matchesStartTag() {\nreturn (remainingLength() >= 2 && queue.charAt(pos) == '<' && Character.isLetterOrDigit(queue.charAt(pos+1)));\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseStartTag()V",
+            "method_body": "private void parseStartTag() {\ntq.consume(\"<\");\nString tagName = tq.consumeTagName();\nValidate.notEmpty(tagName, \"Unexpectedly empty tagname. (This should not occur, please report!)\");\ntq.consumeWhitespace();\nAttributes attributes = new Attributes();\nwhile (!tq.matchesAny(\"<\", \"/>\", \">\") && !tq.isEmpty()) {\nAttribute attribute = parseAttribute();\nif (attribute != null)\nattributes.put(attribute);\n}\nTag tag = Tag.valueOf(tagName);\nElement child = new Element(tag, baseUri, attributes);\nboolean isEmptyElement = tag.isEmpty(); // empty element if empty tag (e.g. img) or self-closed el (<div/>\nif (tq.matchChomp(\"/>\")) { // close empty element or tag\ntq.matchChomp(\">\");\naddChildToParent(child, isEmptyElement);\nif (tag.isData()) {\nif (child.tagName().equals(\"base\")) {\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consume(Ljava/lang/String;)V",
+            "method_body": "public void consume(String seq) {\nif (!matches(seq))\nint len = seq.length();\nif (len > remainingLength())\npos += len;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeTagName()Ljava/lang/String;",
+            "method_body": "public String consumeTagName() {\nint start = pos;\nwhile (!isEmpty() && (matchesWord() || matchesAny(':', '_', '-')))\npos++;\nreturn queue.substring(start, pos);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.helper.Validate:notEmpty(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public static void notEmpty(String string, String msg) {\nif (string == null || string.length() == 0)\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeWhitespace()Z",
+            "method_body": "public boolean consumeWhitespace() {\nboolean seen = false;\nwhile (matchesWhitespace()) {\npos++;\nseen = true;\nreturn seen;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:<init>()V",
+            "method_body": "protected static final String dataPrefix = \"data-\";\nprivate LinkedHashMap<String, Attribute> attributes = new LinkedHashMap<String, Attribute>(2);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesAny([Ljava/lang/String;)Z",
+            "method_body": "public boolean matchesAny(String... seq) {\nfor (String s : seq) {\nif (matches(s))\nreturn true;\nreturn false;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchChomp(Ljava/lang/String;)Z",
+            "method_body": "public boolean matchChomp(String seq) {\nif (matches(seq)) {\npos += seq.length();\nreturn true;\nreturn false;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:isData()Z",
+            "method_body": "public boolean isData() {\nreturn !canContainInline && !isEmpty();\n}",
+            "method_id": 19
+        }
+    ]
+}

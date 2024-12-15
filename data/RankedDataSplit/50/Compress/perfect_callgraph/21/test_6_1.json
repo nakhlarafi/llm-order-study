@@ -1,0 +1,79 @@
+{
+    "bug_id": 21,
+    "test_id": 6,
+    "test_name": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFileTest.testNineEmptyFiles",
+    "test_body": "198: public void testNineEmptyFiles() throws Exception {\n199: testCompress252(9, 0);\n200: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readFilesInfo(Ljava/io/DataInput;Lorg/apache/commons/compress/archivers/sevenz/Archive;)V",
+            "method_body": "private void readFilesInfo(final DataInput header, final Archive archive) throws IOException {\nfinal long numFiles = readUint64(header);\nfinal SevenZArchiveEntry[] files = new SevenZArchiveEntry[(int)numFiles];\nfor (int i = 0; i < files.length; i++) {\nfiles[i] = new SevenZArchiveEntry();\nBitSet isEmptyStream = null;\nBitSet isEmptyFile = null;\nBitSet isAnti = null;\nfinal int propertyType = header.readUnsignedByte();\nif (propertyType == 0) {\nbreak;\nlong size = readUint64(header);\nswitch (propertyType) {\nisEmptyStream = readBits(header, files.length);\nbreak;\nif (isEmptyStream == null) { // protect against NPE\nisEmptyFile = readBits(header, isEmptyStream.cardinality());\nbreak;\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nif (((size - 1) & 1) != 0) {\nfinal byte[] names = new byte[(int)(size - 1)];\nheader.readFully(names);\nint nextFile = 0;\nint nextName = 0;\nfor (int i = 0; i < names.length; i += 2) {\nif (names[i] == 0 && names[i+1] == 0) {\nfiles[nextFile++].setName(new String(names, nextName, i-nextName, CharsetNames.UTF_16LE));\nnextName = i + 2;\nif (nextName != names.length || nextFile != files.length) {\nbreak;\nfinal BitSet timesDefined = readAllOrBits(header, files.length);\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nfor (int i = 0; i < files.length; i++) {\nfiles[i].setHasLastModifiedDate(timesDefined.get(i));\nif (files[i].getHasLastModifiedDate()) {\nfiles[i].setLastModifiedDate(Long.reverseBytes(header.readLong()));\nbreak;\nthrow new IOException(\"Unknown property \" + propertyType);\n}\nint nonEmptyFileCounter = 0;\nint emptyFileCounter = 0;\nfor (int i = 0; i < files.length; i++) {\nfiles[i].setHasStream((isEmptyStream == null) ? true : !isEmptyStream.get(i));\nif (files[i].hasStream()) {\nfiles[i].setDirectory(false);\nfiles[i].setAntiItem(false);\nfiles[i].setHasCrc(archive.subStreamsInfo.hasCrc.get(nonEmptyFileCounter));\nfiles[i].setCrcValue(archive.subStreamsInfo.crcs[nonEmptyFileCounter]);\nfiles[i].setSize(archive.subStreamsInfo.unpackSizes[nonEmptyFileCounter]);\n++nonEmptyFileCounter;\nfiles[i].setDirectory((isEmptyFile == null) ? true : !isEmptyFile.get(emptyFileCounter));\nfiles[i].setAntiItem((isAnti == null) ? false : isAnti.get(emptyFileCounter));\nfiles[i].setHasCrc(false);\nfiles[i].setSize(0);\n++emptyFileCounter;\narchive.files = files;\ncalculateStreamMap(archive);\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readUint64(Ljava/io/DataInput;)J",
+            "method_body": "private static long readUint64(final DataInput in) throws IOException {\nlong firstByte = in.readUnsignedByte();\nint mask = 0x80;\nlong value = 0;\nfor (int i = 0; i < 8; i++) {\nif ((firstByte & mask) == 0) {\nreturn value | ((firstByte & (mask - 1)) << (8 * i));\nlong nextByte = in.readUnsignedByte();\nvalue |= (nextByte << (8 * i));\nmask >>>= 1;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:<init>(Ljava/util/zip/Checksum;Ljava/io/InputStream;JJ)V",
+            "method_body": "public ChecksumVerifyingInputStream(final Checksum checksum, final InputStream in,\nfinal long size, final long expectedChecksum) {\nthis.checksum = checksum;\nthis.in = in;\nthis.expectedChecksum = expectedChecksum;\nthis.bytesRemaining = size;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:read()I",
+            "method_body": "public int read() throws IOException {\nif (bytesRemaining <= 0) {\nint ret = in.read();\nif (ret >= 0) {\nchecksum.update(ret);\n--bytesRemaining;\nif (bytesRemaining == 0 && expectedChecksum != checksum.getValue()) {\nreturn ret;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nint ret = in.read(b, off, len);\nif (ret >= 0) {\nchecksum.update(b, off, ret);\nbytesRemaining -= ret;\nif (bytesRemaining <= 0 && expectedChecksum != checksum.getValue()) {\nreturn ret;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:close()V",
+            "method_body": "public void close() throws IOException {\nin.close();\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.CRC32VerifyingInputStream:<init>(Ljava/io/InputStream;JJ)V",
+            "method_body": "public CRC32VerifyingInputStream(final InputStream in, final long size, final long expectedCrc32) {\nsuper(new CRC32(), in, size, expectedCrc32);\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:<init>(Ljava/io/RandomAccessFile;J)V",
+            "method_body": "public BoundedRandomAccessFileInputStream(final RandomAccessFile file,\nfinal long size) {\nthis.file = file;\nthis.bytesRemaining = size;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:read()I",
+            "method_body": "public int read() throws IOException {\nif (bytesRemaining > 0) {\n--bytesRemaining;\nreturn file.read();\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nif (bytesRemaining == 0) {\nint bytesToRead = len;\nif (bytesToRead > bytesRemaining) {\nfinal int bytesRead = file.read(b, off, bytesToRead);\nif (bytesRead >= 0) {\nbytesRemaining -= bytesRead;\nreturn bytesRead;\n}",
+            "method_id": 59
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:close()V",
+            "method_body": "public void close() {\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setAntiItem(Z)V",
+            "method_body": "public void setAntiItem(boolean isAntiItem) {\nthis.isAntiItem = isAntiItem;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setHasLastModifiedDate(Z)V",
+            "method_body": "public void setHasLastModifiedDate(boolean hasLastModifiedDate) {\nthis.hasLastModifiedDate = hasLastModifiedDate;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setLastModifiedDate(J)V",
+            "method_body": "public void setLastModifiedDate(long ntfsLastModifiedDate) {\nthis.lastModifiedDate = ntfsLastModifiedDate;\n}",
+            "method_id": 63
+        }
+    ]
+}

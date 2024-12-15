@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStreamTest.testWriteNonAsciiDirectoryNamePosixMode",
+    "test_body": "412: public void testWriteNonAsciiDirectoryNamePosixMode() throws Exception {\n413: String n = \"f\\u00f6\\u00f6/\";\n414: TarArchiveEntry t = new TarArchiveEntry(n);\n415: ByteArrayOutputStream bos = new ByteArrayOutputStream();\n416: TarArchiveOutputStream tos = new TarArchiveOutputStream(bos);\n417: tos.setAddPaxHeadersForNonAsciiNames(true);\n418: tos.putArchiveEntry(t);\n419: tos.closeArchiveEntry();\n420: tos.close();\n421: byte[] data = bos.toByteArray();\n422: TarArchiveInputStream tin =\n423: new TarArchiveInputStream(new ByteArrayInputStream(data));\n424: TarArchiveEntry e = tin.getNextTarEntry();\n425: assertEquals(n, e.getName());\n426: assertTrue(e.isDirectory());\n427: tin.close();\n428: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:<init>(Ljava/lang/String;B)V",
+            "method_body": "public TarArchiveEntry(String name, byte linkFlag) {\nthis(name);\nthis.linkFlag = linkFlag;\nif (linkFlag == LF_GNUTYPE_LONGNAME) {\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:<init>()V",
+            "method_body": "private TarArchiveEntry() {\nthis.magic = MAGIC_POSIX;\nthis.version = VERSION_POSIX;\nthis.name = \"\";\nthis.linkName = \"\";\nString user = System.getProperty(\"user.name\", \"\");\nif (user.length() > MAX_NAMELEN) {\nthis.userId = 0;\nthis.groupId = 0;\nthis.userName = user;\nthis.groupName = \"\";\nthis.file = null;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:isDirectory()Z",
+            "method_body": "public boolean isDirectory() {\nif (file != null) {\nif (linkFlag == LF_DIR) {\nif (getName().endsWith(\"/\")) {\nreturn true;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:getMode()I",
+            "method_body": "public int getMode() {\nreturn mode;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn name.toString();\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatUnsignedOctalString(J[BII)V",
+            "method_body": "public static void formatUnsignedOctalString(final long value, byte[] buffer,\nint remaining = length;\nremaining--;\nif (value == 0) {\nbuffer[offset + remaining--] = (byte) '0';\nlong val = value;\nfor (; remaining >= 0 && val != 0; --remaining) {\nbuffer[offset + remaining] = (byte) ((byte) '0' + (byte) (val & 7));\nval = val >>> 3;\nif (val != 0){\nfor (; remaining >= 0; --remaining) { // leading zeros\nbuffer[offset + remaining] = (byte) '0';\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:writePaxHeaders(Ljava/lang/String;Ljava/util/Map;)V",
+            "method_body": "void writePaxHeaders(String entryName,\nString name = \"./PaxHeaders.X/\" + stripTo7Bits(entryName);\nif (name.length() >= TarConstants.NAMELEN) {\nTarArchiveEntry pex = new TarArchiveEntry(name,\nStringWriter w = new StringWriter();\nfor (Map.Entry<String, String> h : headers.entrySet()) {\nString key = h.getKey();\nString value = h.getValue();\nint len = key.length() + value.length()\nString line = len + \" \" + key + \"=\" + value + \"\\n\";\nint actualLength = line.getBytes(CharsetNames.UTF_8).length;\nwhile (len != actualLength) {\nlen = actualLength;\nline = len + \" \" + key + \"=\" + value + \"\\n\";\nactualLength = line.getBytes(CharsetNames.UTF_8).length;\nw.write(line);\n}\nbyte[] data = w.toString().getBytes(CharsetNames.UTF_8);\npex.setSize(data.length);\nputArchiveEntry(pex);\nwrite(data);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:isUTF8(Ljava/lang/String;)Z",
+            "method_body": "static boolean isUTF8(String encoding) {\nif (encoding == null) {\nencoding = System.getProperty(\"file.encoding\");\nreturn UTF8.equalsIgnoreCase(encoding)\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.FallbackZipEncoding:<init>(Ljava/lang/String;)V",
+            "method_body": "public FallbackZipEncoding(String charset) {\nthis.charset = charset;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatNameBytes(Ljava/lang/String;[BIILorg/apache/commons/compress/archivers/zip/ZipEncoding;)I",
+            "method_body": "public static int formatNameBytes(String name, byte[] buf, final int offset,\nint len = name.length();\nByteBuffer b = encoding.encode(name);\nwhile (b.limit() > length && len > 0) {\nfinal int limit = b.limit() - b.position();\nSystem.arraycopy(b.array(), b.arrayOffset(), buf, offset, limit);\nfor (int i = limit; i < length; ++i) {\nbuf[offset + i] = 0;\nreturn offset + length;\n}",
+            "method_id": 9
+        }
+    ]
+}

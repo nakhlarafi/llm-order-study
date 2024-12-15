@@ -1,0 +1,109 @@
+{
+    "bug_id": 100,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.estimation.GaussNewtonEstimatorTest.testBoundParameters",
+    "test_body": "public void testBoundParameters() throws EstimationException {\nEstimatedParameter[] p = {\nnew EstimatedParameter(\"unbound0\", 2, false),\nnew EstimatedParameter(\"unbound1\", 2, false),\nnew EstimatedParameter(\"bound\",    2, true)\n};\nLinearProblem problem = new LinearProblem(new LinearMeasurement[] {\nnew LinearMeasurement(new double[] { 1.0, 1.0, 1.0 },\nnew EstimatedParameter[] { p[0], p[1], p[2] },\n3.0),\nnew LinearMeasurement(new double[] { 1.0, -1.0, 1.0 },\nnew EstimatedParameter[] { p[0], p[1], p[2] },\n1.0),\nnew LinearMeasurement(new double[] { 1.0, 3.0, 2.0 },\nnew EstimatedParameter[] { p[0], p[1], p[2] },\n7.0)\n});\n469: GaussNewtonEstimator estimator = new GaussNewtonEstimator(100, 1.0e-6, 1.0e-6);\nestimator.estimate(problem);\nassertTrue(estimator.getRMS(problem) < 1.0e-10);\ndouble[][] covariances = estimator.getCovariances(problem);\nint i0 = 0, i1 = 1;",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 6\nat org.apache.commons.math.estimation.AbstractEstimator.getCovariances(AbstractEstimator.java:173)\nat org.apache.commons.math.estimation.GaussNewtonEstimatorTest.testBoundParameters(GaussNewtonEstimatorTest.java:472)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:getData()[[D",
+            "method_body": "public double[][] getData() {\nreturn copyOut();\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.AbstractEstimator:updateJacobian()V",
+            "method_body": "protected void updateJacobian() {\nincrementJacobianEvaluationsCounter();\nArrays.fill(jacobian, 0);\nfor (int i = 0, index = 0; i < rows; i++) {\nWeightedMeasurement wm = measurements[i];\ndouble factor = -Math.sqrt(wm.getWeight());\nfor (int j = 0; j < cols; ++j) {\njacobian[index++] = factor * wm.getPartial(parameters[j]);\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:copyOut()[[D",
+            "method_body": "private double[][] copyOut() {\nint nRows = this.getRowDimension();\ndouble[][] out = new double[nRows][this.getColumnDimension()];\nfor (int i = 0; i < nRows; i++) {\nSystem.arraycopy(data[i], 0, out[i], 0, data[i].length);\nreturn out;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:<init>(II)V",
+            "method_body": "public RealMatrixImpl(int rowDimension, int columnDimension) {\nif (rowDimension <= 0 || columnDimension <= 0) {\ndata = new double[rowDimension][columnDimension];\nlu = null;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:getDataRef()[[D",
+            "method_body": "public double[][] getDataRef() {\nreturn data;\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.AbstractEstimator:getRMS(Lorg/apache/commons/math/estimation/EstimationProblem;)D",
+            "method_body": "public double getRMS(EstimationProblem problem) {\nWeightedMeasurement[] wm = problem.getMeasurements();\ndouble criterion = 0;\nfor (int i = 0; i < wm.length; ++i) {\ndouble residual = wm[i].getResidual();\ncriterion += wm[i].getWeight() * residual * residual;\nreturn Math.sqrt(criterion / wm.length);\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.AbstractEstimator:updateResidualsAndCost()V",
+            "method_body": "protected void updateResidualsAndCost()\nif (++costEvaluations > maxCostEval) {\ncost = 0;\nfor (int i = 0, index = 0; i < rows; i++, index += cols) {\nWeightedMeasurement wm = measurements[i];\ndouble residual = wm.getResidual();\nresiduals[i] = Math.sqrt(wm.getWeight()) * residual;\ncost += wm.getWeight() * residual * residual;\ncost = Math.sqrt(cost);\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.EstimatedParameter:setEstimate(D)V",
+            "method_body": "public void setEstimate(double estimate) {\nthis.estimate = estimate;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.AbstractEstimator:setMaxCostEval(I)V",
+            "method_body": "public final void setMaxCostEval(int maxCostEval) {\nthis.maxCostEval = maxCostEval;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.AbstractEstimator:incrementJacobianEvaluationsCounter()V",
+            "method_body": "protected final void incrementJacobianEvaluationsCounter() {\n++jacobianEvaluations;\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.AbstractEstimator:initializeEstimate(Lorg/apache/commons/math/estimation/EstimationProblem;)V",
+            "method_body": "protected void initializeEstimate(EstimationProblem problem) {\ncostEvaluations     = 0;\njacobianEvaluations = 0;\nmeasurements = problem.getMeasurements();\nparameters   = problem.getUnboundParameters();\nrows      = measurements.length;\ncols      = parameters.length;\njacobian  = new double[rows * cols];\nresiduals = new double[rows];\ncost = Double.POSITIVE_INFINITY;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.WeightedMeasurement:getWeight()D",
+            "method_body": "public double getWeight() {\nreturn weight;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.WeightedMeasurement:getResidual()D",
+            "method_body": "public double getResidual() {\nreturn measuredValue - getTheoreticalValue();\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:getEntry(II)D",
+            "method_body": "public double getEntry(int row, int column)\nif (!isValidCoordinate(row,column)) {\nreturn data[row][column];\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:isValidCoordinate(II)Z",
+            "method_body": "private boolean isValidCoordinate(int row, int col) {\nint nRows = this.getRowDimension();\nint nCols = this.getColumnDimension();\nreturn !(row < 0 || row > nRows - 1 || col < 0 || col > nCols -1);\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.EstimatedParameter:getEstimate()D",
+            "method_body": "public double getEstimate() {\nreturn estimate;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:<init>([[D)V",
+            "method_body": "public RealMatrixImpl(double[][] d) {\nthis.copyIn(d);\nlu = null;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:setSubMatrix([[DII)V",
+            "method_body": "public void setSubMatrix(double[][] subMatrix, int row, int column)\nif ((row < 0) || (column < 0)){\nint nRows = subMatrix.length;\nif (nRows == 0) {\nint nCols = subMatrix[0].length;\nif (nCols == 0) {\nfor (int r = 1; r < nRows; r++) {\nif (subMatrix[r].length != nCols) {\nif (data == null) {\nif ((row > 0)||(column > 0)) throw new MatrixIndexException\ndata = new double[nRows][nCols];\nSystem.arraycopy(subMatrix, 0, data, 0, subMatrix.length);\nif (((nRows + row) > this.getRowDimension()) ||\nfor (int i = 0; i < nRows; i++) {\nSystem.arraycopy(subMatrix[i], 0, data[row + i], column, nCols);\nlu = null;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:copyIn([[D)V",
+            "method_body": "private void copyIn(double[][] in) {\nsetSubMatrix(in,0,0);\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:getRowDimension()I",
+            "method_body": "public int getRowDimension() {\nreturn data.length;\n}",
+            "method_id": 39
+        }
+    ]
+}

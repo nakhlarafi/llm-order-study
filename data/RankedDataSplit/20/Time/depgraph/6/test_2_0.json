@@ -1,0 +1,109 @@
+{
+    "bug_id": 6,
+    "test_id": 2,
+    "test_name": "org.joda.time.chrono.TestGJDate.test_plusWeekyears_positiveToZero_crossCutover",
+    "test_body": "115: public void test_plusWeekyears_positiveToZero_crossCutover() {\n116: LocalDate date = new LocalDate(2003, 6, 30, GJ_CHRONOLOGY);\n117: LocalDate expected = new LocalDate(-1, 6, 30, GJ_CHRONOLOGY).withWeekOfWeekyear(date.getWeekOfWeekyear()).withDayOfWeek(date.getDayOfWeek());\n118: assertEquals(expected, date.weekyear().addToCopy(-2003));\n119: }\n",
+    "stack_trace": "org.joda.time.IllegalFieldValueException: Value 0 for year is not supported\nat org.joda.time.field.SkipDateTimeField.set(SkipDateTimeField.java:92)\nat org.joda.time.chrono.GJChronology.convertByWeekyear(GJChronology.java:96)\nat org.joda.time.chrono.GJChronology.gregorianToJulianByWeekyear(GJChronology.java:596)\nat org.joda.time.chrono.GJChronology$CutoverField.gregorianToJulian(GJChronology.java:922)\nat org.joda.time.chrono.GJChronology$ImpreciseCutoverField.add(GJChronology.java:979)\nat org.joda.time.LocalDate$Property.addToCopy(LocalDate.java:1965)\nat org.joda.time.chrono.TestGJDate.test_plusWeekyears_positiveToZero_crossCutover(TestGJDate.java:118)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.chrono.GJChronology:convertByWeekyear(JLorg/joda/time/Chronology;Lorg/joda/time/Chronology;)J",
+            "method_body": "private static long convertByWeekyear(final long instant, Chronology from, Chronology to) {\nnewInstant = to.weekyear().set(0, from.weekyear().get(instant));\nnewInstant = to.weekOfWeekyear().set(newInstant, from.weekOfWeekyear().get(instant));\nnewInstant = to.dayOfWeek().set(newInstant, from.dayOfWeek().get(instant));\nnewInstant = to.millisOfDay().set(newInstant, from.millisOfDay().get(instant));\nreturn newInstant;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJChronology:getDateTimeMillis(IIII)J",
+            "method_body": "public long getDateTimeMillis(int year, int monthOfYear, int dayOfMonth,\nif ((base = getBase()) != null) {\nlong instant = iGregorianChronology.getDateTimeMillis\nif (instant < iCutoverMillis) {\ninstant = iJulianChronology.getDateTimeMillis\nif (instant >= iCutoverMillis) {\nreturn instant;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJChronology:gregorianToJulianByWeekyear(J)J",
+            "method_body": "long gregorianToJulianByWeekyear(long instant) {\nreturn convertByWeekyear(instant, iGregorianChronology, iJulianChronology);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate$Property:addToCopy(I)Lorg/joda/time/LocalDate;",
+            "method_body": "public LocalDate addToCopy(int value) {\nreturn iInstant.withLocalMillis(iField.add(iInstant.getLocalMillis(), value));\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate$Property:<init>(Lorg/joda/time/LocalDate;Lorg/joda/time/DateTimeField;)V",
+            "method_body": "Property(LocalDate instant, DateTimeField field) {\nsuper();\niInstant = instant;\niField = field;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:<init>(JLorg/joda/time/Chronology;)V",
+            "method_body": "public LocalDate(long instant, Chronology chronology) {\nchronology = DateTimeUtils.getChronology(chronology);\nlong localMillis = chronology.getZone().getMillisKeepLocal(DateTimeZone.UTC, instant);\nchronology = chronology.withUTC();\niLocalMillis = chronology.dayOfMonth().roundFloor(localMillis);\niChronology = chronology;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:getWeekOfWeekyear()I",
+            "method_body": "public int getWeekOfWeekyear() {\nreturn getChronology().weekOfWeekyear().get(getLocalMillis());\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:getDayOfWeek()I",
+            "method_body": "public int getDayOfWeek() {\nreturn getChronology().dayOfWeek().get(getLocalMillis());\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:weekyear()Lorg/joda/time/LocalDate$Property;",
+            "method_body": "public Property weekyear() {\nreturn new Property(this, getChronology().weekyear());\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:withWeekOfWeekyear(I)Lorg/joda/time/LocalDate;",
+            "method_body": "public LocalDate withWeekOfWeekyear(int weekOfWeekyear) {\nreturn withLocalMillis(getChronology().weekOfWeekyear().set(getLocalMillis(), weekOfWeekyear));\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:withDayOfWeek(I)Lorg/joda/time/LocalDate;",
+            "method_body": "public LocalDate withDayOfWeek(int dayOfWeek) {\nreturn withLocalMillis(getChronology().dayOfWeek().set(getLocalMillis(), dayOfWeek));\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:<init>(IIILorg/joda/time/Chronology;)V",
+            "method_body": "public LocalDate(\nsuper();\nchronology = DateTimeUtils.getChronology(chronology).withUTC();\nlong instant = chronology.getDateTimeMillis(year, monthOfYear, dayOfMonth, 0);\niChronology = chronology;\niLocalMillis = instant;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:withLocalMillis(J)Lorg/joda/time/LocalDate;",
+            "method_body": "LocalDate withLocalMillis(long newMillis) {\nnewMillis = iChronology.dayOfMonth().roundFloor(newMillis);\nreturn (newMillis == getLocalMillis() ? this : new LocalDate(newMillis, getChronology()));\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJChronology:withZone(Lorg/joda/time/DateTimeZone;)Lorg/joda/time/Chronology;",
+            "method_body": "public Chronology withZone(DateTimeZone zone) {\nif (zone == null) {\nif (zone == getZone()) {\nreturn this;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:getLocalMillis()J",
+            "method_body": "protected long getLocalMillis() {\nreturn iLocalMillis;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.joda.time.LocalDate:getChronology()Lorg/joda/time/Chronology;",
+            "method_body": "public Chronology getChronology() {\nreturn iChronology;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJChronology:getZone()Lorg/joda/time/DateTimeZone;",
+            "method_body": "public DateTimeZone getZone() {\nif ((base = getBase()) != null) {\nreturn DateTimeZone.UTC;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:getChronology(Lorg/joda/time/Chronology;)Lorg/joda/time/Chronology;",
+            "method_body": "public static final Chronology getChronology(Chronology chrono) {\nif (chrono == null) {\nreturn chrono;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJChronology:withUTC()Lorg/joda/time/Chronology;",
+            "method_body": "public Chronology withUTC() {\nreturn withZone(DateTimeZone.UTC);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeFieldType:year()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public static DateTimeFieldType year() {\nreturn YEAR_TYPE;\n}",
+            "method_id": 19
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 58,
+    "test_id": 1,
+    "test_name": "org.jsoup.safety.CleanerTest.testIsValidDocument",
+    "test_body": "167: @Test public void testIsValidDocument() {\n168: String ok = \"<html><head></head><body><p>Hello</p></body><html>\";\n169: String nok = \"<html><head><script>woops</script><title>Hello</title></head><body><p>Hello</p></body><html>\";\n170: 171: Whitelist relaxed = Whitelist.relaxed();\n172: Cleaner cleaner = new Cleaner(relaxed);\n173: Document okDoc = Jsoup.parse(ok);\n174: assertTrue(cleaner.isValid(okDoc));\n175: assertFalse(cleaner.isValid(Jsoup.parse(nok)));\n176: assertFalse(new Cleaner(Whitelist.none()).isValid(okDoc));\n177: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:<init>(Lorg/jsoup/select/NodeVisitor;)V",
+            "method_body": "public NodeTraversor(NodeVisitor visitor) {\nthis.visitor = visitor;\n}",
+            "method_id": 180
+        },
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:traverse(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "public void traverse(Node root) {\nNode node = root;\nint depth = 0;\nwhile (node != null) {\nvisitor.head(node, depth);\nif (node.childNodeSize() > 0) {\nnode = node.childNode(0);\ndepth++;\nwhile (node.nextSibling() == null && depth > 0) {\nvisitor.tail(node, depth);\nnode = node.parentNode();\ndepth--;\nvisitor.tail(node, depth);\nif (node == root)\nbreak;\nnode = node.nextSibling();\n}",
+            "method_id": 181
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:isSafeTag(Ljava/lang/String;)Z",
+            "method_body": "protected boolean isSafeTag(String tag) {\nreturn tagNames.contains(TagName.valueOf(tag));\n}",
+            "method_id": 182
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:getEnforcedAttributes(Ljava/lang/String;)Lorg/jsoup/nodes/Attributes;",
+            "method_body": "Attributes getEnforcedAttributes(String tagName) {\nAttributes attrs = new Attributes();\nTagName tag = TagName.valueOf(tagName);\nif (enforcedAttributes.containsKey(tag)) {\nMap<AttributeKey, AttributeValue> keyVals = enforcedAttributes.get(tag);\nfor (Map.Entry<AttributeKey, AttributeValue> entry : keyVals.entrySet()) {\nattrs.put(entry.getKey().toString(), entry.getValue().toString());\n}\nreturn attrs;\n}",
+            "method_id": 183
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$TypedValue:hashCode()I",
+            "method_body": "public int hashCode() {\nfinal int prime = 31;\nint result = 1;\nresult = prime * result + ((value == null) ? 0 : value.hashCode());\nreturn result;\n}",
+            "method_id": 184
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$TypedValue:equals(Ljava/lang/Object;)Z",
+            "method_body": "public boolean equals(Object obj) {\nif (this == obj) return true;\nif (obj == null) return false;\nif (getClass() != obj.getClass()) return false;\nTypedValue other = (TypedValue) obj;\nif (value == null) {\n} else if (!value.equals(other.value)) return false;\nreturn true;\n}",
+            "method_id": 185
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:<init>(Lorg/jsoup/safety/Whitelist;)V",
+            "method_body": "public Cleaner(Whitelist whitelist) {\nValidate.notNull(whitelist);\nthis.whitelist = whitelist;\n}",
+            "method_id": 186
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:copySafeNodes(Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Element;)I",
+            "method_body": "private int copySafeNodes(Element source, Element dest) {\nCleaningVisitor cleaningVisitor = new CleaningVisitor(source, dest);\nNodeTraversor traversor = new NodeTraversor(cleaningVisitor);\ntraversor.traverse(source);\nreturn cleaningVisitor.numDiscarded;\n}",
+            "method_id": 187
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:createSafeElement(Lorg/jsoup/nodes/Element;)Lorg/jsoup/safety/Cleaner$ElementMeta;",
+            "method_body": "private ElementMeta createSafeElement(Element sourceEl) {\nString sourceTag = sourceEl.tagName();\nAttributes destAttrs = new Attributes();\nElement dest = new Element(Tag.valueOf(sourceTag), sourceEl.baseUri(), destAttrs);\nint numDiscarded = 0;\nAttributes sourceAttrs = sourceEl.attributes();\nfor (Attribute sourceAttr : sourceAttrs) {\nif (whitelist.isSafeAttribute(sourceTag, sourceEl, sourceAttr))\ndestAttrs.put(sourceAttr);\nnumDiscarded++;\n}\nAttributes enforcedAttrs = whitelist.getEnforcedAttributes(sourceTag);\ndestAttrs.addAll(enforcedAttrs);\nreturn new ElementMeta(dest, numDiscarded);\n}",
+            "method_id": 188
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner$CleaningVisitor:<init>(Lorg/jsoup/safety/Cleaner;Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Element;)V",
+            "method_body": "private CleaningVisitor(Element root, Element destination) {\nthis.root = root;\nthis.destination = destination;\n}",
+            "method_id": 189
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 44,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.events.EventStateTest.testIssue695",
+    "test_body": "public void testIssue695() {\n82: FirstOrderDifferentialEquations equation = new FirstOrderDifferentialEquations() {\n84: public int getDimension() {\nreturn 1;\n}\n88: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] = 1.0;\n}\n};\n93: DormandPrince853Integrator integrator = new DormandPrince853Integrator(0.001, 1000, 1.0e-14, 1.0e-14);\nintegrator.addEventHandler(new ResettingEvent(10.99), 0.1, 1.0e-9, 1000);\nintegrator.addEventHandler(new ResettingEvent(11.01), 0.1, 1.0e-9, 1000);\nintegrator.setInitialStepSize(3.0);\n98: double target = 30.0;\ndouble[] y = new double[1];\ndouble tEnd = integrator.integrate(equation, 0.0, y, target, y);\nAssert.assertEquals(target, tEnd, 1.0e-10);",
+    "stack_trace": "junit.framework.AssertionFailedError: going backard in time! (7.796578226186635 < 10.99)\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.apache.commons.math.ode.events.EventStateTest$ResettingEvent.g(EventStateTest.java:120)\nat org.apache.commons.math.ode.events.EventState.evaluateStep(EventState.java:214)\nat org.apache.commons.math.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:302)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:296)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:213)\nat org.apache.commons.math.ode.events.EventStateTest.testIssue695(EventStateTest.java:100)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:ulp(D)D",
+            "method_body": "public static double ulp(double x) {\nif (Double.isInfinite(x)) {\nreturn abs(x - Double.longBitsToDouble(Double.doubleToLongBits(x) ^ 1));\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolver:<init>(DI)V",
+            "method_body": "public BracketingNthOrderBrentSolver(final double absoluteAccuracy,\nsuper(absoluteAccuracy);\nif (maximalOrder < 2) {\nthis.maximalOrder = maximalOrder;\nthis.allowed = AllowedSolution.ANY_SIDE;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:setTime(D)V",
+            "method_body": "public void setTime(final double time) {\nthis.time = time;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getCurrentTime()D",
+            "method_body": "public double getCurrentTime() {\nreturn softCurrentTime;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.events.EventState:stepAccepted(D[D)V",
+            "method_body": "public void stepAccepted(final double t, final double[] y) {\nt0 = t;\ng0 = handler.g(t, y);\nif (pendingEvent && (FastMath.abs(pendingEventTime - t) <= convergence)) {\npreviousEventTime = t;\ng0Positive        = increasing;\nnextAction        = handler.eventOccurred(t, y, !(increasing ^ forward));\ng0Positive = g0 >= 0;\nnextAction = EventHandler.Action.CONTINUE;\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:reinitialize([DZLorg/apache/commons/math/ode/EquationsMapper;[Lorg/apache/commons/math/ode/EquationsMapper;)V",
+            "method_body": "protected void reinitialize(final double[] y, final boolean isForward,\nglobalPreviousTime    = Double.NaN;\nglobalCurrentTime     = Double.NaN;\nsoftPreviousTime      = Double.NaN;\nsoftCurrentTime       = Double.NaN;\nh                     = Double.NaN;\ninterpolatedTime      = Double.NaN;\ncurrentState          = y;\nfinalized             = false;\nthis.forward          = isForward;\nthis.dirtyState       = true;\nthis.primaryMapper    = primary;\nthis.secondaryMappers = secondary.clone();\nallocateInterpolatedArrays(y.length);\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:log(D[D)D",
+            "method_body": "private static double log(final double x, final double[] hiPrec) {\nif (x==0) { // Handle special case of +0/-0\nlong bits = Double.doubleToLongBits(x);\nif ((bits & 0x8000000000000000L) != 0 || x != x) {\nif (x == Double.POSITIVE_INFINITY) {\nint exp = (int)(bits >> 52)-1023;\nif ((bits & 0x7ff0000000000000L) == 0) {\nif (exp == -1 || exp == 0) {\ndouble lnm[] = lnMant.LN_MANT[(int)((bits & 0x000ffc0000000000L) >> 42)];\ndouble epsilon = (bits & 0x3ffffffffffL) / (TWO_POWER_52 + (bits & 0x000ffc0000000000L));\ndouble lnza = 0.0;\ndouble lnzb = 0.0;\nif (hiPrec != null) {\ndouble tmp = epsilon * HEX_40000000;\ndouble aa = epsilon + tmp - tmp;\ndouble ab = epsilon - aa;\ndouble xa = aa;\ndouble xb = ab;\ndouble numer = bits & 0x3ffffffffffL;\ndouble denom = TWO_POWER_52 + (bits & 0x000ffc0000000000L);\naa = numer - xa*denom - xb * denom;\nxb += aa / denom;\ndouble ya = LN_HI_PREC_COEF[LN_HI_PREC_COEF.length-1][0];\ndouble yb = LN_HI_PREC_COEF[LN_HI_PREC_COEF.length-1][1];\nfor (int i = LN_HI_PREC_COEF.length - 2; i >= 0; i--) {\naa = ya * xa;\nab = ya * xb + yb * xa + yb * xb;\ntmp = aa * HEX_40000000;\nya = aa + tmp - tmp;\nyb = aa - ya + ab;\naa = ya + LN_HI_PREC_COEF[i][0];\nab = yb + LN_HI_PREC_COEF[i][1];\ntmp = aa * HEX_40000000;\nya = aa + tmp - tmp;\nyb = aa - ya + ab;\naa = ya * xa;\nab = ya * xb + yb * xa + yb * xb;\nlnza = aa + ab;\nlnzb = -(lnza - aa - ab);\n} else {\ndouble a = LN_2_A*exp;\ndouble b = 0.0;\ndouble c = a+lnm[0];\ndouble d = -(c-a-lnm[0]);\na = c;\nb = b + d;\nc = a + lnza;\nd = -(c - a - lnza);\na = c;\nb = b + d;\nc = a + LN_2_B*exp;\nd = -(c - a - LN_2_B*exp);\na = c;\nb = b + d;\nc = a + lnm[1];\nd = -(c - a - lnm[1]);\na = c;\nb = b + d;\nc = a + lnzb;\nd = -(c - a - lnzb);\na = c;\nb = b + d;\nif (hiPrec != null) {\nhiPrec[0] = a;\nhiPrec[1] = b;\nreturn a + b;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdaptiveStepsizeIntegrator:initializeStep(ZI[DD[D[D[D[D)D",
+            "method_body": "public double initializeStep(final boolean forward, final int order, final double[] scale,\nif (initialStep > 0) {\nreturn forward ? initialStep : -initialStep;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:incrementCount()V",
+            "method_body": "public void incrementCount() {\nif (++count > maximalCount) {\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:abs(J)J",
+            "method_body": "public static long abs(final long x) {\nreturn (x < 0l) ? -x : x;\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.UnivariateRealSolverUtils:verifyInterval(DD)V",
+            "method_body": "public static void verifyInterval(final double lower,\nif (lower >= upper) {\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:addEventHandler(Lorg/apache/commons/math/ode/events/EventHandler;DDI)V",
+            "method_body": "public void addEventHandler(final EventHandler handler,\naddEventHandler(handler, maxCheckInterval, convergence,\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:shift()V",
+            "method_body": "public void shift() {\nglobalPreviousTime = globalCurrentTime;\nsoftPreviousTime   = globalPreviousTime;\nsoftCurrentTime    = globalCurrentTime;\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:<init>(DDD)V",
+            "method_body": "protected BaseAbstractUnivariateRealSolver(final double relativeAccuracy,\nfinal double functionValueAccuracy) {\nthis.absoluteAccuracy = absoluteAccuracy;\nthis.relativeAccuracy = relativeAccuracy;\nthis.functionValueAccuracy = functionValueAccuracy;\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:solve(ILorg/apache/commons/math/analysis/UnivariateRealFunction;DD)D",
+            "method_body": "public double solve(int maxEval, FUNC f, double min, double max) {\nreturn solve(maxEval, f, min, max, min + 0.5 * (max - min));\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdaptiveStepsizeIntegrator:sanityChecks(Lorg/apache/commons/math/ode/ExpandableStatefulODE;D)V",
+            "method_body": "protected void sanityChecks(final ExpandableStatefulODE equations, final double t)\nsuper.sanityChecks(equations, t);\nmainSetDimension = equations.getPrimaryMapper().getDimension();\nif ((vecAbsoluteTolerance != null) && (vecAbsoluteTolerance.length != mainSetDimension)) {\nif ((vecRelativeTolerance != null) && (vecRelativeTolerance.length != mainSetDimension)) {\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.AbstractUnivariateRealSolver:<init>(D)V",
+            "method_body": "protected AbstractUnivariateRealSolver(final double absoluteAccuracy) {\nsuper(absoluteAccuracy);\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator:integrate(Lorg/apache/commons/math/ode/ExpandableStatefulODE;D)V",
+            "method_body": "public void integrate(final ExpandableStatefulODE equations, final double t)\nsanityChecks(equations, t);\nsetEquations(equations);\nresetEvaluations();\nfinal boolean forward = t > equations.getTime();\nfinal double[] y0  = equations.getCompleteState();\nfinal double[] y = y0.clone();\nfinal int stages = c.length + 1;\nfinal double[][] yDotK = new double[stages][y.length];\nfinal double[] yTmp    = new double[y.length];\nfinal double[] yDotTmp = new double[y.length];\nfinal RungeKuttaStepInterpolator interpolator = (RungeKuttaStepInterpolator) prototype.copy();\ninterpolator.reinitialize(this, yTmp, yDotK, forward,\ninterpolator.storeTime(equations.getTime());\nstepStart         = equations.getTime();\ndouble  hNew      = 0;\nboolean firstTime = true;\nfor (StepHandler handler : stepHandlers) {\nsetStateInitialized(false);\nisLastStep = false;\ninterpolator.shift();\ndouble error = 10;\nwhile (error >= 1.0) {\nif (firstTime || !fsal) {\ncomputeDerivatives(stepStart, y, yDotK[0]);\nif (firstTime) {\nfinal double[] scale = new double[mainSetDimension];\nif (vecAbsoluteTolerance == null) {\nfor (int i = 0; i < scale.length; ++i) {\nscale[i] = scalAbsoluteTolerance + scalRelativeTolerance * FastMath.abs(y[i]);\nhNew = initializeStep(forward, getOrder(), scale,\nfirstTime = false;\nstepSize = hNew;\nfor (int k = 1; k < stages; ++k) {\nfor (int j = 0; j < y0.length; ++j) {\ndouble sum = a[k-1][0] * yDotK[0][j];\nfor (int l = 1; l < k; ++l) {\nsum += a[k-1][l] * yDotK[l][j];\nyTmp[j] = y[j] + stepSize * sum;\ncomputeDerivatives(stepStart + c[k-1] * stepSize, yTmp, yDotK[k]);\nfor (int j = 0; j < y0.length; ++j) {\ndouble sum    = b[0] * yDotK[0][j];\nfor (int l = 1; l < stages; ++l) {\nsum    += b[l] * yDotK[l][j];\nyTmp[j] = y[j] + stepSize * sum;\nerror = estimateError(yDotK, y, yTmp, stepSize);\nif (error >= 1.0) {\ninterpolator.storeTime(stepStart + stepSize);\nSystem.arraycopy(yTmp, 0, y, 0, y0.length);\nSystem.arraycopy(yDotK[stages - 1], 0, yDotTmp, 0, y0.length);\nstepStart = acceptStep(interpolator, y, yDotTmp, t);\nif (!isLastStep) {\ninterpolator.storeTime(stepStart);\nif (fsal) {\nSystem.arraycopy(yDotTmp, 0, yDotK[0], 0, y0.length);\nfinal double factor =\nfinal double  scaledH    = stepSize * factor;\nfinal double  nextT      = stepStart + scaledH;\nfinal boolean nextIsLast = forward ? (nextT >= t) : (nextT <= t);\nhNew = filterStep(scaledH, forward, nextIsLast);\nfinal double  filteredNextT      = stepStart + hNew;\nfinal boolean filteredNextIsLast = forward ? (filteredNextT >= t) : (filteredNextT <= t);\nif (filteredNextIsLast) {\n} while (!isLastStep);\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.RungeKuttaStepInterpolator:reinitialize(Lorg/apache/commons/math/ode/AbstractIntegrator;[D[[DZLorg/apache/commons/math/ode/EquationsMapper;[Lorg/apache/commons/math/ode/EquationsMapper;)V",
+            "method_body": "public void reinitialize(final AbstractIntegrator rkIntegrator,\nreinitialize(y, forward, primaryMapper, secondaryMappers);\nthis.yDotK = yDotArray;\nthis.integrator = rkIntegrator;\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.events.EventState$1:<init>(Lorg/apache/commons/math/ode/events/EventState;Lorg/apache/commons/math/ode/sampling/StepInterpolator;)V",
+            "method_body": "public boolean evaluateStep(final StepInterpolator interpolator)\nforward = interpolator.isForward();\nfinal double t1 = interpolator.getCurrentTime();\nfinal double dt = t1 - t0;\nif (FastMath.abs(dt) < convergence) {\nfinal int    n = FastMath.max(1, (int) FastMath.ceil(FastMath.abs(dt) / maxCheckInterval));\nfinal double h = dt / n;\nfinal UnivariateRealFunction f = new UnivariateRealFunction() {\ninterpolator.setInterpolatedTime(t);\nreturn handler.g(t, interpolator.getInterpolatedState());\ndouble ta = t0;\ndouble ga = g0;\nfor (int i = 0; i < n; ++i) {\nfinal double tb = t0 + (i + 1) * h;\ninterpolator.setInterpolatedTime(tb);\nfinal double gb = handler.g(tb, interpolator.getInterpolatedState());\nif (g0Positive ^ (gb >= 0)) {\nincreasing = gb >= ga;\nif (solver instanceof BracketedUnivariateRealSolver<?>) {\nBracketedUnivariateRealSolver<UnivariateRealFunction> bracketing =\nroot = forward ?\n} else {\nif ((!Double.isNaN(previousEventTime)) &&\n} else if (Double.isNaN(previousEventTime) ||\npendingEventTime = root;\npendingEvent = true;\nreturn true;\nta = tb;\nga = gb;\npendingEvent     = false;\npendingEventTime = Double.NaN;\nreturn false;\n}",
+            "method_id": 79
+        }
+    ]
+}

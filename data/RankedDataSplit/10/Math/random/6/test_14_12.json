@@ -1,0 +1,59 @@
+{
+    "bug_id": 6,
+    "test_id": 14,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.testEllipse",
+    "test_body": "public void testEllipse() {\ndouble[] startPoint = point(DIM,1.0);\ndouble[] insigma = point(DIM,0.1);\ndouble[][] boundaries = null;\nPointValuePair expected =\nnew PointValuePair(point(DIM,0.0),0.0);\ndoTest(new Elli(), startPoint, insigma, boundaries,\nGoalType.MINIMIZE, LAMBDA, true, 0, 1e-13,",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.doTest(CMAESOptimizerTest.java:514)\nat org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.testEllipse(CMAESOptimizerTest.java:168)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.util.Precision:compareTo(DDD)I",
+            "method_body": "public static int compareTo(double x, double y, double eps) {\nif (equals(x, y, eps)) {\nreturn 0;\n}",
+            "method_id": 120
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:checkParameters()V",
+            "method_body": "private void checkParameters() {\nfinal double[] init = getStartPoint();\nfinal double[] lB = getLowerBound();\nfinal double[] uB = getUpperBound();\nif (inputSigma != null) {\nif (inputSigma.length != init.length) {\nfor (int i = 0; i < init.length; i++) {\nif (inputSigma[i] > uB[i] - lB[i]) {\n}",
+            "method_id": 121
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$FitnessFunction:setValueRange(D)V",
+            "method_body": "public void setValueRange(double valueRange) {\nthis.valueRange = valueRange;\n}",
+            "method_id": 122
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:polyCosine(D)D",
+            "method_body": "private static double polyCosine(double x) {\ndouble x2 = x*x;\ndouble p = 2.479773539153719E-5;\np = p * x2 + -0.0013888888689039883;\np = p * x2 + 0.041666666666621166;\np = p * x2 + -0.49999999999999994;\np *= x2;\nreturn p;\n}",
+            "method_id": 123
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$PopulationSize:<init>(I)V",
+            "method_body": "public PopulationSize(int size)\nthrows NotStrictlyPositiveException {\nif (size <= 0) {\nlambda = size;\n}",
+            "method_id": 124
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:max(II)I",
+            "method_body": "public static int max(final int a, final int b) {\nreturn (a <= b) ? b : a;\n}",
+            "method_id": 125
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.AbstractRealMatrix:getColumnMatrix(I)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix getColumnMatrix(final int column)\nMatrixUtils.checkColumnIndex(this, column);\nfinal int nRows = getRowDimension();\nfinal RealMatrix out = createMatrix(nRows, 1);\nfor (int i = 0; i < nRows; ++i) {\nout.setEntry(i, 0, getEntry(i, column));\nreturn out;\n}",
+            "method_id": 126
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:initializeCMA([D)V",
+            "method_body": "private void initializeCMA(double[] guess) {\nif (lambda <= 0) {\nfinal double[][] sigmaArray = new double[guess.length][1];\nfor (int i = 0; i < guess.length; i++) {\nsigmaArray[i][0] = inputSigma[i];\nfinal RealMatrix insigma = new Array2DRowRealMatrix(sigmaArray, false);\nsigma = max(insigma); // overall standard deviation\nstopTolUpX = 1e3 * max(insigma);\nstopTolX = 1e-11 * max(insigma);\nstopTolFun = 1e-12;\nstopTolHistFun = 1e-13;\nmu = lambda / 2; // number of parents/points for recombination\nlogMu2 = Math.log(mu + 0.5);\nweights = log(sequence(1, mu, 1)).scalarMultiply(-1).scalarAdd(logMu2);\ndouble sumw = 0;\ndouble sumwq = 0;\nfor (int i = 0; i < mu; i++) {\ndouble w = weights.getEntry(i, 0);\nsumw += w;\nsumwq += w * w;\nweights = weights.scalarMultiply(1 / sumw);\nmueff = sumw * sumw / sumwq; // variance-effectiveness of sum w_i x_i\ncc = (4 + mueff / dimension) /\ncs = (mueff + 2) / (dimension + mueff + 3.);\ndamps = (1 + 2 * Math.max(0, Math.sqrt((mueff - 1) /\nccov1 = 2 / ((dimension + 1.3) * (dimension + 1.3) + mueff);\nccovmu = Math.min(1 - ccov1, 2 * (mueff - 2 + 1 / mueff) /\nccov1Sep = Math.min(1, ccov1 * (dimension + 1.5) / 3);\nccovmuSep = Math.min(1 - ccov1, ccovmu * (dimension + 1.5) / 3);\nchiN = Math.sqrt(dimension) *\nxmean = MatrixUtils.createColumnRealMatrix(guess); // objective variables\ndiagD = insigma.scalarMultiply(1 / sigma);\ndiagC = square(diagD);\npc = zeros(dimension, 1); // evolution paths for C and sigma\nps = zeros(dimension, 1); // B defines the coordinate system\nnormps = ps.getFrobeniusNorm();\nB = eye(dimension, dimension);\nD = ones(dimension, 1); // diagonal D defines the scaling\nBD = times(B, repmat(diagD.transpose(), dimension, 1));\nC = B.multiply(diag(square(D)).multiply(B.transpose())); // covariance\nhistorySize = 10 + (int) (3 * 10 * dimension / (double) lambda);\nfitnessHistory = new double[historySize]; // history of fitness values\nfor (int i = 0; i < historySize; i++) {\nfitnessHistory[i] = Double.MAX_VALUE;\n}",
+            "method_id": 127
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseMultivariateOptimizer:optimize([Lorg/apache/commons/math3/optim/OptimizationData;)Ljava/lang/Object;",
+            "method_body": "public PAIR optimize(OptimizationData... optData) {\nreturn super.optimize(optData);\n}",
+            "method_id": 128
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.EigenDecomposition:getD()Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix getD() {\nif (cachedD == null) {\ncachedD = MatrixUtils.createRealDiagonalMatrix(realEigenvalues);\nfor (int i = 0; i < imagEigenvalues.length; i++) {\nif (Precision.compareTo(imagEigenvalues[i], 0.0, EPSILON) > 0) {\n} else if (Precision.compareTo(imagEigenvalues[i], 0.0, EPSILON) < 0) {\nreturn cachedD;\n}",
+            "method_id": 129
+        }
+    ]
+}

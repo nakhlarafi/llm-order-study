@@ -1,0 +1,59 @@
+{
+    "bug_id": 74,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.ElementTest.testNormalizesInvisiblesInText",
+    "test_body": "1204: @Test public void testNormalizesInvisiblesInText() {\n1205: // return Character.getType(c) == 16 && (c == 8203 || c == 8204 || c == 8205 || c == 173);\n1206: String escaped = \"This&shy;is&#x200b;one&#x200c;long&#x200d;word\";\n1207: String decoded = \"This\\u00ADis\\u200Bone\\u200Clong\\u200Dword\"; // browser would not display those soft hyphens / other chars, so we don't want them in the text\n1208: 1209: Document doc = Jsoup.parse(\"<p>\" + escaped);\n1210: Element p = doc.select(\"p\").first();\n1211: doc.outputSettings().charset(\"ascii\"); // so that the outer html is easier to see with escaped invisibles\n1212: assertEquals(\"Thisisonelongword\", p.text()); // text is normalized\n1213: assertEquals(\"<p>\" + escaped + \"</p>\", p.outerHtml()); // html / whole text keeps &shy etc;\n1214: assertEquals(decoded, p.textNodes().get(0).getWholeText());\n1215: 1216: Element matched = doc.select(\"p:contains(Thisisonelongword)\").first(); // really just oneloneword, no invisibles\n1217: assertEquals(\"p\", matched.nodeName());\n1218: assertTrue(matched.is(\":containsOwn(Thisisonelongword)\"));\n1219: 1220: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nreturn bufPos >= bufLength;\n}",
+            "method_id": 160
+        },
+        {
+            "method_signature": "org.jsoup.helper.Validate:isFalse(Z)V",
+            "method_body": "public static void isFalse(boolean val) {\nif (val)\n}",
+            "method_id": 161
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Tag:normalName()Ljava/lang/String;",
+            "method_body": "final String normalName() { // loses case, used in tree building for working out where in tree it should go\nreturn normalName;\n}",
+            "method_id": 162
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:transition(Lorg/jsoup/parser/HtmlTreeBuilderState;)V",
+            "method_body": "void transition(HtmlTreeBuilderState state) {\nthis.state = state;\n}",
+            "method_id": 163
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:consumeCharacterReference(Ljava/lang/Character;Z)[I",
+            "method_body": "int[] consumeCharacterReference(Character additionalAllowedCharacter, boolean inAttribute) {\nif (reader.isEmpty())\nif (additionalAllowedCharacter != null && additionalAllowedCharacter == reader.current())\nif (reader.matchesAnySorted(notCharRefCharsSorted))\nfinal int[] codeRef = codepointHolder;\nreader.mark();\nif (reader.matchConsume(\"#\")) { // numbered\nboolean isHexMode = reader.matchConsumeIgnoreCase(\"X\");\nString numRef = isHexMode ? reader.consumeHexSequence() : reader.consumeDigitSequence();\nif (numRef.length() == 0) { // didn't match anything\nif (!reader.matchConsume(\";\"))\nint charval = -1;\nint base = isHexMode ? 16 : 10;\ncharval = Integer.valueOf(numRef, base);\n} // skip\nif (charval == -1 || (charval >= 0xD800 && charval <= 0xDFFF) || charval > 0x10FFFF) {\ncodeRef[0] = charval;\nreturn codeRef;\nString nameRef = reader.consumeLetterThenDigitSequence();\nboolean looksLegit = reader.matches(';');\nboolean found = (Entities.isBaseNamedEntity(nameRef) || (Entities.isNamedEntity(nameRef) && looksLegit));\nif (!found) {\nif (inAttribute && (reader.matchesLetter() || reader.matchesDigit() || reader.matchesAny('=', '-', '_'))) {\nif (!reader.matchConsume(\";\"))\nint numChars = Entities.codepointsForName(nameRef, multipointHolder);\nif (numChars == 1) {\ncodeRef[0] = multipointHolder[0];\nreturn codeRef;\n}",
+            "method_id": 164
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:parse(Ljava/lang/String;)Lorg/jsoup/select/Evaluator;",
+            "method_body": "public static Evaluator parse(String query) {\nQueryParser p = new QueryParser(query);\nreturn p.parse();\n}",
+            "method_id": 165
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:matchesWhitespace()Z",
+            "method_body": "public boolean matchesWhitespace() {\nreturn !isEmpty() && StringUtil.isWhitespace(queue.charAt(pos));\n}",
+            "method_id": 166
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:inSpecificScope([Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "private boolean inSpecificScope(String[] targetNames, String[] baseTypes, String[] extraTypes) {\nfinal int bottom = stack.size() -1;\nfinal int top = bottom > MaxScopeSearchDepth ? bottom - MaxScopeSearchDepth : 0;\nfor (int pos = bottom; pos >= top; pos--) {\nfinal String elName = stack.get(pos).nodeName();\nif (inSorted(elName, targetNames))\nif (inSorted(elName, baseTypes))\nreturn false;\nif (extraTypes != null && inSorted(elName, extraTypes))\n}",
+            "method_id": 167
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:readCharRef(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void readCharRef(Tokeniser t, TokeniserState advance) {\nint[] c = t.consumeCharacterReference(null, false);\nif (c == null)\nt.emit(c);\nt.transition(advance);\n}",
+            "method_id": 168
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchesLetter()Z",
+            "method_body": "boolean matchesLetter() {\nif (isEmpty())\nchar c = charBuf[bufPos];\nreturn (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || Character.isLetter(c);\n}",
+            "method_id": 169
+        }
+    ]
+}

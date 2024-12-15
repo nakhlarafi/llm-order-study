@@ -1,0 +1,109 @@
+{
+    "bug_id": 61,
+    "test_id": 1,
+    "test_name": "org.jsoup.select.SelectorTest.testByClassCaseInsensitive",
+    "test_body": "51: @Test public void testByClassCaseInsensitive() {\n52: String html = \"<p Class=foo>One <p Class=Foo>Two <p class=FOO>Three <p class=farp>Four\";\n53: Elements elsFromClass = Jsoup.parse(html).select(\"P.Foo\");\n54: Elements elsFromAttr = Jsoup.parse(html).select(\"p[class=foo]\");\n55: 56: assertEquals(elsFromAttr.size(), elsFromClass.size());\n57: assertEquals(3, elsFromClass.size());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<3> but was:<1>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:118)\nat org.junit.Assert.assertEquals(Assert.java:555)\nat org.junit.Assert.assertEquals(Assert.java:542)\nat org.jsoup.select.SelectorTest.testByClassCaseInsensitive(SelectorTest.java:56)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Element:hasClass(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasClass(String className) {\nfinal String classAttr = attributes.get(\"class\");\nfinal int len = classAttr.length();\nfinal int wantLen = className.length();\nif (len == 0 || len < wantLen) {\nreturn false;\nif (len == wantLen) {\nreturn className.equalsIgnoreCase(classAttr);\nboolean inClass = false;\nint start = 0;\nfor (int i = 0; i < len; i++) {\nif (Character.isWhitespace(classAttr.charAt(i))) {\nif (!inClass) {\ninClass = true;\nstart = i;\nif (inClass && len - start == wantLen) {\nreturn false;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byClass()V",
+            "method_body": "private void byClass() {\nString className = tq.consumeCssIdentifier();\nValidate.notEmpty(className);\nevals.add(new Evaluator.Class(className.trim()));\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byAttribute()V",
+            "method_body": "private void byAttribute() {\nTokenQueue cq = new TokenQueue(tq.chompBalanced('[', ']')); // content queue\nString key = cq.consumeToAny(AttributeEvals); // eq, not, start, end, contain, match, (no val)\nValidate.notEmpty(key);\ncq.consumeWhitespace();\nif (cq.isEmpty()) {\nif (cq.matchChomp(\"=\"))\nevals.add(new Evaluator.AttributeWithValue(key, cq.remainder()));\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:hasKeyIgnoreCase(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasKeyIgnoreCase(String key) {\nif (attributes == null)\nfor (String attrKey : attributes.keySet()) {\nif (attrKey.equalsIgnoreCase(key))\nreturn true;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:<init>(Ljava/lang/String;Lorg/jsoup/nodes/Element;)V",
+            "method_body": "private Selector(String query, Element root) {\nValidate.notNull(query);\nquery = query.trim();\nValidate.notEmpty(query);\nValidate.notNull(root);\nthis.evaluator = QueryParser.parse(query);\nthis.root = root;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:findElements()V",
+            "method_body": "private void findElements() {\nif (tq.matchChomp(\"#\"))\nelse if (tq.matchChomp(\".\"))\nbyClass();\nelse if (tq.matchesWord() || tq.matches(\"*|\"))\nbyTag();\nelse if (tq.matches(\"[\"))\nbyAttribute();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:hasAttr(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasAttr(String attributeKey) {\nValidate.notNull(attributeKey);\nif (attributeKey.startsWith(\"abs:\")) {\nreturn attributes.hasKeyIgnoreCase(attributeKey);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.select.Elements:<init>()V",
+            "method_body": "public Elements() {\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select(Ljava/lang/String;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements select(String query, Element root) {\nreturn new Selector(query, root).select();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements select() {\nreturn Collector.collect(evaluator, root);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.select.Evaluator$Class:<init>(Ljava/lang/String;)V",
+            "method_body": "public Class(String className) {\nthis.className = className;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:getIgnoreCase(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String getIgnoreCase(String key) {\nValidate.notEmpty(key);\nif (attributes == null)\nAttribute attr = attributes.get(key);\nif (attr != null)\nreturn attr.getValue();\nfor (String attrKey : attributes.keySet()) {\nif (attrKey.equalsIgnoreCase(key))\nreturn attributes.get(attrKey).getValue();\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.select.QueryParser:byTag()V",
+            "method_body": "private void byTag() {\nString tagName = tq.consumeElementSelector();\nValidate.notEmpty(tagName);\nif (tagName.startsWith(\"*|\")) {\nif (tagName.contains(\"|\"))\nevals.add(new Evaluator.Tag(tagName.trim()));\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.select.Evaluator$Class:matches(Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "public boolean matches(Element root, Element element) {\nreturn (element.hasClass(className));\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeElementSelector()Ljava/lang/String;",
+            "method_body": "public String consumeElementSelector() {\nint start = pos;\nwhile (!isEmpty() && (matchesWord() || matchesAny(\"*|\",\"|\", \"_\", \"-\")))\npos++;\nreturn queue.substring(start, pos);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:reconstructFormattingElements()V",
+            "method_body": "void reconstructFormattingElements() {\nElement last = lastFormattingElement();\nif (last == null || onStack(last))\nreturn;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:chompBalanced(CC)Ljava/lang/String;",
+            "method_body": "public String chompBalanced(char open, char close) {\nint start = -1;\nint end = -1;\nint depth = 0;\nchar last = 0;\nboolean inQuote = false;\nif (isEmpty()) break;\nCharacter c = consume();\nif (last == 0 || last != ESC) {\nif ((c.equals('\\'') || c.equals('\"')) && c != open)\nif (inQuote)\nif (c.equals(open)) {\ndepth++;\nif (start == -1)\nstart = pos;\nelse if (c.equals(close))\ndepth--;\nif (depth > 0 && last != 0)\nend = pos; // don't include the outer match pair in the return\nlast = c;\n} while (depth > 0);\nfinal String out = (end >= 0) ? queue.substring(start, end) : \"\";\nif (depth > 0) {// ran out of queue before seeing enough )\nreturn out;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.select.Evaluator$AttributeKeyPair:<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public AttributeKeyPair(String key, String value) {\nValidate.notEmpty(key);\nValidate.notEmpty(value);\nthis.key = key.trim().toLowerCase();\nif (value.startsWith(\"\\\"\") && value.endsWith(\"\\\"\")\nthis.value = value.trim().toLowerCase();\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$7:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nswitch (t.type) {\nToken.Character c = t.asCharacter();\nif (c.getData().equals(nullString)) {\n} else if (tb.framesetOk() && isWhitespace(c)) { // don't check if whitespace if frames already closed\ntb.reconstructFormattingElements();\ntb.insert(c);\ntb.framesetOk(false);\nbreak;\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.normalName();\nif (name.equals(\"a\")) {\n} else if (StringUtil.inSorted(name, Constants.InBodyStartEmptyFormatters)) {\n} else if (StringUtil.inSorted(name, Constants.InBodyStartPClosers)) {\nif (tb.inButtonScope(\"p\")) {\ntb.processEndTag(\"p\");\ntb.insert(startTag);\nToken.EndTag endTag = t.asEndTag();\nname = endTag.normalName();\nif (StringUtil.inSorted(name, Constants.InBodyEndAdoptionFormatters)) {\n} else if (StringUtil.inSorted(name, Constants.InBodyEndClosers)) {\n} else if (name.equals(\"span\")) {\n} else if (name.equals(\"li\")) {\n} else if (name.equals(\"body\")) {\n} else if (name.equals(\"html\")) {\n} else if (name.equals(\"form\")) {\n} else if (name.equals(\"p\")) {\nif (!tb.inButtonScope(name)) {\ntb.generateImpliedEndTags(name);\nif (!tb.currentElement().nodeName().equals(name))\ntb.popStackToClose(name);\nreturn true;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:load(Lorg/jsoup/nodes/Entities$EscapeMode;Ljava/lang/String;I)V",
+            "method_body": "private static void load(EscapeMode e, String file, int size) {\ne.nameKeys = new String[size];\ne.codeVals = new int[size];\ne.codeKeys = new int[size];\ne.nameVals = new String[size];\nInputStream stream = Entities.class.getResourceAsStream(file);\nif (stream == null)\nint i = 0;\nByteBuffer bytes = DataUtil.readToByteBuffer(stream, 0);\nString contents = Charset.forName(\"ascii\").decode(bytes).toString();\nCharacterReader reader = new CharacterReader(contents);\nwhile (!reader.isEmpty()) {\nfinal String name = reader.consumeTo('=');\nreader.advance();\nfinal int cp1 = Integer.parseInt(reader.consumeToAny(codeDelims), codepointRadix);\nfinal char codeDelim = reader.current();\nreader.advance();\nif (codeDelim == ',') {\ncp2 = Integer.parseInt(reader.consumeTo(';'), codepointRadix);\nreader.advance();\ncp2 = empty;\nString indexS = reader.consumeTo('\\n');\nif (indexS.charAt(indexS.length() - 1) == '\\r') {\nfinal int index = Integer.parseInt(indexS, codepointRadix);\nreader.advance();\ne.nameKeys[i] = name;\ne.codeVals[i] = cp1;\ne.codeKeys[index] = cp1;\ne.nameVals[index] = name;\nif (cp2 != empty) {\nmultipoints.put(name, new String(new int[]{cp1, cp2}, 0, 2));\ni++;\n}\n}\n}",
+            "method_id": 19
+        }
+    ]
+}

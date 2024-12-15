@@ -1,0 +1,109 @@
+{
+    "bug_id": 33,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.handlesKnownEmptyBlocks",
+    "test_body": "327: @Test public void handlesKnownEmptyBlocks() {\n328: // if a known tag, allow self closing outside of spec, but force an end tag. unknown tags can be self closing.\n329: String h = \"<div id='1' /><script src='/foo' /><div id=2><img /><img></div><a id=3 /><i /><foo /><foo>One</foo> <hr /> hr text <hr> hr text two\";\n330: Document doc = Jsoup.parse(h);\n331: assertEquals(\"<div id=\\\"1\\\"></div><script src=\\\"/foo\\\"></script><div id=\\\"2\\\"><img /><img /></div><a id=\\\"3\\\"></a><i></i><foo /><foo>One</foo> <hr /> hr text <hr /> hr text two\", TextUtil.stripNewlines(doc.body().html()));\n332: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.Token$Character:getData()Ljava/lang/String;",
+            "method_body": "String getData() {\nreturn data;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:indent(Ljava/lang/StringBuilder;ILorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "protected void indent(StringBuilder accum, int depth, Document.OutputSettings out) {\naccum.append(\"\\n\").append(StringUtil.padding(depth * out.indentAmount()));\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:ownerDocument()Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document ownerDocument() {\nif (this instanceof Document)\nreturn (Document) this;\nelse if (parentNode == null)\nreturn parentNode.ownerDocument();\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parse(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document parse(String html, String baseUri) {\nTreeBuilder treeBuilder = new HtmlTreeBuilder();\nreturn treeBuilder.parse(html, baseUri, ParseErrorList.noTracking());\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insert(Ljava/lang/String;)Lorg/jsoup/nodes/Element;",
+            "method_body": "Element insert(String startTagName) {\nElement el = new Element(Tag.valueOf(startTagName), baseUri);\ninsert(el);\nreturn el;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Tag:appendAttributeName(Ljava/lang/String;)V",
+            "method_body": "void appendAttributeName(String append) {\npendingAttributeName = pendingAttributeName == null ? append : pendingAttributeName.concat(append);\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/String;Ljava/nio/charset/CharsetEncoder;Lorg/jsoup/nodes/Entities$EscapeMode;)Ljava/lang/String;",
+            "method_body": "static String escape(String string, CharsetEncoder encoder, EscapeMode escapeMode) {\nStringBuilder accum = new StringBuilder(string.length() * 2);\nMap<Character, String> map = escapeMode.getMap();\nfinal int length = string.length();\nfor (int offset = 0; offset < length; ) {\nfinal int codePoint = string.codePointAt(offset);\nif (codePoint < Character.MIN_SUPPLEMENTARY_CODE_POINT) {\nfinal char c = (char) codePoint;\nif (map.containsKey(c))\naccum.append('&').append(map.get(c)).append(';');\nelse if (encoder.canEncode(c))\naccum.append(c);\n} else {\noffset += Character.charCount(codePoint);\n}\nreturn accum.toString();\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState:<init>(Ljava/lang/String;I)V",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\ntb.tokeniser.transition(TokeniserState.ScriptData);\ntb.markInsertionMode();\ntb.transition(Text);\ntb.insert(start);\n} else if (name.equals(\"head\")) {\nreturn anythingElse(t, tb);\nToken.EndTag end = t.asEndTag();\nname = end.name();\nif (name.equals(\"head\")) {\ntb.pop();\ntb.transition(AfterHead);\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$10:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString tagName = r.consumeToAny('\\t', '\\n', '\\r', '\\f', ' ', '/', '>', nullChar).toLowerCase();\nt.tagPending.appendTagName(tagName);\nswitch (r.consume()) {\nt.transition(BeforeAttributeName);\nbreak;\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node$OuterHtmlVisitor:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(Node node, int depth) {\nnode.outerHtmlHead(accum, depth, out);\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities$EscapeMode:getMap()Ljava/util/Map;",
+            "method_body": "public Map<Character, String> getMap() {\nreturn map;\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:findFirstElementByTagName(Ljava/lang/String;Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "private Element findFirstElementByTagName(String tag, Node node) {\nif (node.nodeName().equals(tag))\nreturn (Element) node;\nfor (Node child: node.childNodes) {\nElement found = findFirstElementByTagName(tag, child);\nif (found != null)\nreturn found;\n}\nreturn null;\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:html(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void html(StringBuilder accum, Document.OutputSettings out) {\nif (attributes == null)\nfor (Map.Entry<String, Attribute> entry : attributes.entrySet()) {\nAttribute attribute = entry.getValue();\naccum.append(\" \");\nattribute.html(accum, out);\n}\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document$OutputSettings:escapeMode()Lorg/jsoup/nodes/Entities$EscapeMode;",
+            "method_body": "public Entities.EscapeMode escapeMode() {\nreturn escapeMode;\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.jsoup.helper.DescendableLinkedList$DescendingIterator:next()Ljava/lang/Object;",
+            "method_body": "public E next() {\nreturn iter.previous();\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:read()Lorg/jsoup/parser/Token;",
+            "method_body": "Token read() {\nif (!selfClosingFlagAcknowledged) {\nerror(\"Self closing flag not acknowledged\");\nselfClosingFlagAcknowledged = true;\nwhile (!isEmitPending)\nstate.read(this, reader);\nif (charBuffer.length() > 0) {\nString str = charBuffer.toString();\ncharBuffer.delete(0, charBuffer.length());\nreturn new Token.Character(str);\nisEmitPending = false;\nreturn emitPending;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:put(Lorg/jsoup/nodes/Attribute;)V",
+            "method_body": "public void put(Attribute attribute) {\nValidate.notNull(attribute);\nif (attributes == null)\nattributes = new LinkedHashMap<String, Attribute>(2);\nattributes.put(attribute.getKey(), attribute);\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Tag:ensureAttributeValue()V",
+            "method_body": "private final void ensureAttributeValue() {\nif (pendingAttributeValue == null)\npendingAttributeValue = new StringBuilder();\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn tagName;\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insert(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void insert(Element el) {\ninsertNode(el);\nstack.add(el);\n}",
+            "method_id": 99
+        }
+    ]
+}

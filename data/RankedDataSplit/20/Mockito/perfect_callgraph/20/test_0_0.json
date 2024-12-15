@@ -1,0 +1,109 @@
+{
+    "bug_id": 20,
+    "test_id": 0,
+    "test_name": "org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class",
+    "test_body": "public void should_spy_inner_class() throws Exception {\n126: class WithMockAndSpy {\n@Spy private InnerStrength strength;\n@Mock private List<String> list;\n130: abstract class InnerStrength {\nprivate final String name;\n133: InnerStrength() {\n// Make sure that @Mock fields are always injected before @Spy fields.\nassertNotNull(list);\n// Make sure constructor is indeed called.\nthis.name = \"inner\";\n}\n140: abstract String strength();\n142: String fullStrength() {\nreturn name + \" \" + strength();\n}\n}\n}\nWithMockAndSpy outer = new WithMockAndSpy();\nMockitoAnnotations.initMocks(outer);\nwhen(outer.strength.strength()).thenReturn(\"strength\");\nassertEquals(\"inner strength\", outer.strength.fullStrength());\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<[inner] strength> but was:<[null] strength>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class(SpyAnnotationTest.java:150)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.ByteBuddyMockMaker:createMock(Lorg/mockito/mock/MockCreationSettings;Lorg/mockito/invocation/MockHandler;)Ljava/lang/Object;",
+            "method_body": "public <T> T createMock(MockCreationSettings<T> settings, MockHandler handler) {\nif (settings.getSerializableMode() == SerializableMode.ACROSS_CLASSLOADERS) {\nClass<? extends T> mockedProxyType = cachingMockBytecodeGenerator.get(\nT mockInstance = null;\nmockInstance = classInstantiator.instantiate(mockedProxyType);\nMockMethodInterceptor.MockAccess mockAccess = (MockMethodInterceptor.MockAccess) mockInstance;\nmockAccess.setMockitoInterceptor(new MockMethodInterceptor(asInternalMockHandler(handler), settings));\nreturn ensureMockIsAssignableToMockedType(settings, mockInstance);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.mockito.MockitoAnnotations:initMocks(Ljava/lang/Object;)V",
+            "method_body": "public static void initMocks(Object testClass) {\nif (testClass == null) {\nAnnotationEngine annotationEngine = new GlobalConfiguration().getAnnotationEngine();\nClass<?> clazz = testClass.getClass();\nif (annotationEngine.getClass() != new DefaultMockitoConfiguration().getAnnotationEngine().getClass()) {\nwhile (clazz != Object.class) {\nscanDeprecatedWay(annotationEngine, testClass, clazz);\nclazz = clazz.getSuperclass();\nannotationEngine.process(testClass.getClass(), testClass);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.GlobalConfiguration:<init>()V",
+            "method_body": "public GlobalConfiguration() {\nif (GLOBAL_CONFIGURATION.get() == null) {\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.GlobalConfiguration:getAnnotationEngine()Lorg/mockito/configuration/AnnotationEngine;",
+            "method_body": "public AnnotationEngine getAnnotationEngine() {\nreturn GLOBAL_CONFIGURATION.get().getAnnotationEngine();\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.mockito.configuration.DefaultMockitoConfiguration:getAnnotationEngine()Lorg/mockito/configuration/AnnotationEngine;",
+            "method_body": "public AnnotationEngine getAnnotationEngine() {\nreturn new InjectingAnnotationEngine();\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:<init>()V",
+            "method_body": "public DefaultAnnotationEngine() {\nregisterAnnotationProcessor(Mock.class, new MockAnnotationProcessor());\nregisterAnnotationProcessor(MockitoAnnotations.Mock.class, new MockitoAnnotationsMockAnnotationProcessor());\nregisterAnnotationProcessor(Captor.class, new CaptorAnnotationProcessor());\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.FieldSetter:set(Ljava/lang/Object;)V",
+            "method_body": "public void set(Object value) {\nAccessibilityChanger changer = new AccessibilityChanger();\nchanger.enableAccess(field);\nfield.set(target, value);\n}\nchanger.safelyDisableAccess(field);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.mockito.Mockito:when(Ljava/lang/Object;)Lorg/mockito/stubbing/OngoingStubbing;",
+            "method_body": "public static <T> OngoingStubbing<T> when(T methodCall) {\nreturn MOCKITO_CORE.when(methodCall);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:when(Ljava/lang/Object;)Lorg/mockito/stubbing/OngoingStubbing;",
+            "method_body": "public <T> OngoingStubbing<T> when(T methodCall) {\nmockingProgress.stubbingStarted();\nreturn (OngoingStubbing) stub();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:stub()Lorg/mockito/internal/progress/IOngoingStubbing;",
+            "method_body": "public IOngoingStubbing stub() {\nIOngoingStubbing stubbing = mockingProgress.pullOngoingStubbing();\nif (stubbing == null) {\nreturn stubbing;\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.verification.DefaultRegisteredInvocations:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nsynchronized (invocations) {\nreturn invocations.isEmpty();\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationMatcher:<init>(Lorg/mockito/invocation/Invocation;Ljava/util/List;)V",
+            "method_body": "public InvocationMatcher(Invocation invocation, List<Matcher> matchers) {\nthis.invocation = invocation;\nif (matchers.isEmpty()) {\nthis.matchers = ArgumentsProcessor.argumentsToMatchers(invocation.getArguments());\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.InterceptedInvocation:getMock()Ljava/lang/Object;",
+            "method_body": "public Object getMock() {\nreturn mock;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:mock(Ljava/lang/Class;Lorg/mockito/MockSettings;)Ljava/lang/Object;",
+            "method_body": "public <T> T mock(Class<T> typeToMock, MockSettings settings) {\nif (!MockSettingsImpl.class.isInstance(settings)) {\nMockSettingsImpl impl = MockSettingsImpl.class.cast(settings);\nMockCreationSettings<T> creationSettings = impl.confirm(typeToMock);\nT mock = mockUtil.createMock(creationSettings);\nmockingProgress.mockingStarted(mock, typeToMock);\nreturn mock;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.MockSettingsImpl:prepareExtraInterfaces(Lorg/mockito/internal/creation/settings/CreationSettings;)Ljava/util/Set;",
+            "method_body": "private static Set<Class> prepareExtraInterfaces(CreationSettings settings) {\nSet<Class> interfaces = new HashSet<Class>(settings.getExtraInterfaces());\nif(settings.isSerializable()) {\nreturn interfaces;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.debugging.LocationImpl:<init>()V",
+            "method_body": "public LocationImpl() {\nthis(new StackTraceFilter());\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:isTypeMockable(Ljava/lang/Class;)Z",
+            "method_body": "public boolean isTypeMockable(Class<?> type) {\nreturn !type.isPrimitive() && !Modifier.isFinal(type.getModifiers());\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> clazz, Object testInstance) {\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nboolean alreadyAssigned = false;\nfor(Annotation annotation : field.getAnnotations()) {\nObject mock = createMockFor(annotation, field);\nif (mock != null) {\nthrowIfAlreadyAssigned(field, alreadyAssigned);\nalreadyAssigned = true;\nnew FieldSetter(testInstance, field).set(mock);\n}\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.mockito.internal.util.collections.HashCodeAndEqualsSafeSet:add(Ljava/lang/Object;)Z",
+            "method_body": "public boolean add(Object mock) {\nreturn backingHashSet.add(HashCodeAndEqualsMockWrapper.of(mock));\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.MockSettingsImpl:validatedSettings(Ljava/lang/Class;Lorg/mockito/internal/creation/settings/CreationSettings;)Lorg/mockito/internal/creation/settings/CreationSettings;",
+            "method_body": "private static <T> CreationSettings<T> validatedSettings(Class<T> typeToMock, CreationSettings<T> source) {\nMockCreationValidator validator = new MockCreationValidator();\nvalidator.validateType(typeToMock);\nvalidator.validateExtraInterfaces(typeToMock, source.getExtraInterfaces());\nvalidator.validateMockedType(typeToMock, source.getSpiedInstance());\nvalidator.validateSerializable(typeToMock, source.isSerializable());\nvalidator.validateConstructorUse(source.isUsingConstructor(), source.getSerializableMode());\nCreationSettings<T> settings = new CreationSettings<T>(source);\nsettings.setMockName(new MockNameImpl(source.getName(), typeToMock));\nsettings.setTypeToMock(typeToMock);\nsettings.setExtraInterfaces(prepareExtraInterfaces(source));\nreturn settings;\n}",
+            "method_id": 19
+        }
+    ]
+}

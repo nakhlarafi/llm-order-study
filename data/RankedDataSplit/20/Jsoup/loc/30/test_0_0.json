@@ -1,0 +1,129 @@
+{
+    "bug_id": 30,
+    "test_id": 0,
+    "test_name": "org.jsoup.safety.CleanerTest.testIsValid",
+    "test_body": "91: @Test public void testIsValid() {\n92: String ok = \"<p>Test <b><a href='http://example.com/'>OK</a></b></p>\";\n93: String nok1 = \"<p><script></script>Not <b>OK</b></p>\";\n94: String nok2 = \"<p align=right>Test Not <b>OK</b></p>\";\n95: String nok3 = \"<!-- comment --><p>Not OK</p>\"; // comments and the like will be cleaned\n96: assertTrue(Jsoup.isValid(ok, Whitelist.basic()));\n97: assertFalse(Jsoup.isValid(nok1, Whitelist.basic()));\n98: assertFalse(Jsoup.isValid(nok2, Whitelist.basic()));\n99: assertFalse(Jsoup.isValid(nok3, Whitelist.basic()));\n100: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$7:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nswitch (t.type) {\nToken.Character c = t.asCharacter();\nif (c.getData().equals(nullString)) {\n} else if (isWhitespace(c)) {\ntb.reconstructFormattingElements();\ntb.insert(c);\ntb.framesetOk(false);\nbreak;\ntb.insert(t.asComment());\nbreak;\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\", \"meta\", \"noframes\", \"script\", \"style\", \"title\")) {\nreturn tb.process(t, InHead);\n} else if (name.equals(\"body\")) {\n} else if (name.equals(\"frameset\")) {\n} else if (StringUtil.in(name,\nif (tb.inButtonScope(\"p\")) {\ntb.insert(startTag);\n} else if (StringUtil.in(name, \"h1\", \"h2\", \"h3\", \"h4\", \"h5\", \"h6\")) {\n} else if (StringUtil.in(name, \"pre\", \"listing\")) {\n} else if (name.equals(\"form\")) {\n} else if (name.equals(\"li\")) {\n} else if (StringUtil.in(name, \"dd\", \"dt\")) {\n} else if (name.equals(\"plaintext\")) {\n} else if (name.equals(\"button\")) {\n} else if (name.equals(\"a\")) {\nif (tb.getActiveFormattingElement(\"a\") != null) {\ntb.reconstructFormattingElements();\nElement a = tb.insert(startTag);\ntb.pushActiveFormattingElements(a);\n} else if (StringUtil.in(name,\ntb.reconstructFormattingElements();\nElement el = tb.insert(startTag);\ntb.pushActiveFormattingElements(el);\n} else if (name.equals(\"nobr\")) {\nToken.EndTag endTag = t.asEndTag();\nname = endTag.name();\nif (name.equals(\"body\")) {\n} else if (name.equals(\"html\")) {\n} else if (StringUtil.in(name,\n} else if (name.equals(\"form\")) {\n} else if (name.equals(\"p\")) {\nif (!tb.inButtonScope(name)) {\ntb.generateImpliedEndTags(name);\nif (!tb.currentElement().nodeName().equals(name))\ntb.popStackToClose(name);\n} else if (name.equals(\"li\")) {\n} else if (StringUtil.in(name, \"dd\", \"dt\")) {\n} else if (StringUtil.in(name, \"h1\", \"h2\", \"h3\", \"h4\", \"h5\", \"h6\")) {\n} else if (name.equals(\"sarcasm\")) {\n} else if (StringUtil.in(name,\nfor (int i = 0; i < 8; i++) {\nElement formatEl = tb.getActiveFormattingElement(name);\nif (formatEl == null)\nelse if (!tb.onStack(formatEl)) {\n} else if (!tb.inScope(formatEl.nodeName())) {\n} else if (tb.currentElement() != formatEl)\nElement furthestBlock = null;\nElement commonAncestor = null;\nboolean seenFormattingElement = false;\nLinkedList<Element> stack = tb.getStack();\nfor (int si = 0; si < stack.size(); si++) {\nElement el = stack.get(si);\nif (el == formatEl) {\ncommonAncestor = stack.get(si - 1);\nseenFormattingElement = true;\n} else if (seenFormattingElement && tb.isSpecial(el)) {\nif (furthestBlock == null) {\ntb.popStackToClose(formatEl.nodeName());\ntb.removeFromActiveFormattingElements(formatEl);\nreturn true;\nreturn true;\n}",
+            "method_id": 0,
+            "loc": 76
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:parseFragment(Ljava/lang/String;Lorg/jsoup/nodes/Element;Ljava/lang/String;Lorg/jsoup/parser/ParseErrorList;)Ljava/util/List;",
+            "method_body": "List<Node> parseFragment(String inputFragment, Element context, String baseUri, ParseErrorList errors) {\nstate = HtmlTreeBuilderState.Initial;\ninitialiseParse(inputFragment, baseUri, errors);\ncontextElement = context;\nfragmentParsing = true;\nElement root = null;\nif (context != null) {\nif (context.ownerDocument() != null) // quirks setup:\ndoc.quirksMode(context.ownerDocument().quirksMode());\nString contextTag = context.tagName();\nif (StringUtil.in(contextTag, \"title\", \"textarea\"))\nelse if (StringUtil.in(contextTag, \"iframe\", \"noembed\", \"noframes\", \"style\", \"xmp\"))\nelse if (contextTag.equals(\"script\"))\nelse if (contextTag.equals((\"noscript\")))\nelse if (contextTag.equals(\"plaintext\"))\ntokeniser.transition(TokeniserState.Data); // default\nroot = new Element(Tag.valueOf(\"html\"), baseUri);\ndoc.appendChild(root);\nstack.push(root);\nresetInsertionMode();\nrunParser();\nif (context != null)\nreturn root.childNodes();\n}",
+            "method_id": 1,
+            "loc": 24
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:copySafeNodes(Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Element;)I",
+            "method_body": "private int copySafeNodes(Element root, Element destination) {\nList<Node> sourceChildren = root.childNodes();\nint numDiscarded = 0;\nfor (Node source : sourceChildren) {\nif (source instanceof Element) {\nElement sourceEl = (Element) source;\nif (whitelist.isSafeTag(sourceEl.tagName())) { // safe, clone and copy safe attrs\nElementMeta meta = createSafeElement(sourceEl);\nElement destChild = meta.el;\ndestination.appendChild(destChild);\nnumDiscarded += meta.numAttribsDiscarded;\nnumDiscarded += copySafeNodes(sourceEl, destChild);\n} else {\nnumDiscarded++;\nnumDiscarded += copySafeNodes(sourceEl, destination);\n} else if (source instanceof TextNode) {\nTextNode sourceText = (TextNode) source;\nTextNode destText = new TextNode(sourceText.getWholeText(), source.baseUri());\ndestination.appendChild(destText);\n}\nreturn numDiscarded;\n}",
+            "method_id": 2,
+            "loc": 22
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:resetInsertionMode()V",
+            "method_body": "void resetInsertionMode() {\nboolean last = false;\nIterator<Element> it = stack.descendingIterator();\nwhile (it.hasNext()) {\nElement node = it.next();\nif (!it.hasNext()) {\nlast = true;\nnode = contextElement;\nString name = node.nodeName();\nif (\"select\".equals(name)) {\n} else if ((\"td\".equals(name) || \"td\".equals(name) && !last)) {\n} else if (\"tr\".equals(name)) {\n} else if (\"tbody\".equals(name) || \"thead\".equals(name) || \"tfoot\".equals(name)) {\n} else if (\"caption\".equals(name)) {\n} else if (\"colgroup\".equals(name)) {\n} else if (\"table\".equals(name)) {\n} else if (\"head\".equals(name)) {\n} else if (\"body\".equals(name)) {\ntransition(HtmlTreeBuilderState.InBody);\nbreak;\n}",
+            "method_id": 3,
+            "loc": 21
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState:<init>(Ljava/lang/String;I)V",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\ntb.insert(start);\ntb.tokeniser.transition(TokeniserState.ScriptData);\ntb.markInsertionMode();\ntb.transition(Text);\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 4,
+            "loc": 19
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$4:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\ntb.insert(start);\ntb.tokeniser.transition(TokeniserState.ScriptData);\ntb.markInsertionMode();\ntb.transition(Text);\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 5,
+            "loc": 19
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$24:<clinit>()V",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\ntb.insert(start);\ntb.tokeniser.transition(TokeniserState.ScriptData);\ntb.markInsertionMode();\ntb.transition(Text);\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 6,
+            "loc": 19
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:addProtocols(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Lorg/jsoup/safety/Whitelist;",
+            "method_body": "public Whitelist addProtocols(String tag, String key, String... protocols) {\nValidate.notEmpty(tag);\nValidate.notEmpty(key);\nValidate.notNull(protocols);\nTagName tagName = TagName.valueOf(tag);\nAttributeKey attrKey = AttributeKey.valueOf(key);\nif (this.protocols.containsKey(tagName)) {\nattrMap = new HashMap<AttributeKey, Set<Protocol>>();\nthis.protocols.put(tagName, attrMap);\nif (attrMap.containsKey(attrKey)) {\nprotSet = new HashSet<Protocol>();\nattrMap.put(attrKey, protSet);\nfor (String protocol : protocols) {\nValidate.notEmpty(protocol);\nProtocol prot = Protocol.valueOf(protocol);\nprotSet.add(prot);\nreturn this;\n}",
+            "method_id": 7,
+            "loc": 18
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:createSafeElement(Lorg/jsoup/nodes/Element;)Lorg/jsoup/safety/Cleaner$ElementMeta;",
+            "method_body": "private ElementMeta createSafeElement(Element sourceEl) {\nString sourceTag = sourceEl.tagName();\nAttributes destAttrs = new Attributes();\nElement dest = new Element(Tag.valueOf(sourceTag), sourceEl.baseUri(), destAttrs);\nint numDiscarded = 0;\nAttributes sourceAttrs = sourceEl.attributes();\nfor (Attribute sourceAttr : sourceAttrs) {\nif (whitelist.isSafeAttribute(sourceTag, sourceEl, sourceAttr))\ndestAttrs.put(sourceAttr);\nnumDiscarded++;\n}\nAttributes enforcedAttrs = whitelist.getEnforcedAttributes(sourceTag);\ndestAttrs.addAll(enforcedAttrs);\nreturn new ElementMeta(dest, numDiscarded);\n}",
+            "method_id": 8,
+            "loc": 15
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:addAttributes(Ljava/lang/String;[Ljava/lang/String;)Lorg/jsoup/safety/Whitelist;",
+            "method_body": "public Whitelist addAttributes(String tag, String... keys) {\nValidate.notEmpty(tag);\nValidate.notNull(keys);\nValidate.isTrue(keys.length > 0, \"No attributes supplied.\");\nTagName tagName = TagName.valueOf(tag);\nif (!tagNames.contains(tagName))\nSet<AttributeKey> attributeSet = new HashSet<AttributeKey>();\nfor (String key : keys) {\nValidate.notEmpty(key);\nattributeSet.add(AttributeKey.valueOf(key));\nif (attributes.containsKey(tagName)) {\nattributes.put(tagName, attributeSet);\nreturn this;\n}",
+            "method_id": 9,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:addEnforcedAttribute(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/safety/Whitelist;",
+            "method_body": "public Whitelist addEnforcedAttribute(String tag, String key, String value) {\nValidate.notEmpty(tag);\nValidate.notEmpty(key);\nValidate.notEmpty(value);\nTagName tagName = TagName.valueOf(tag);\nif (!tagNames.contains(tagName))\nAttributeKey attrKey = AttributeKey.valueOf(key);\nAttributeValue attrVal = AttributeValue.valueOf(value);\nif (enforcedAttributes.containsKey(tagName)) {\nMap<AttributeKey, AttributeValue> attrMap = new HashMap<AttributeKey, AttributeValue>();\nattrMap.put(attrKey, attrVal);\nenforcedAttributes.put(tagName, attrMap);\nreturn this;\n}",
+            "method_id": 10,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:loadEntities(Ljava/lang/String;)Ljava/util/Map;",
+            "method_body": "private static Map<String, Character> loadEntities(String filename) {\nProperties properties = new Properties();\nMap<String, Character> entities = new HashMap<String, Character>();\nInputStream in = Entities.class.getResourceAsStream(filename);\nproperties.load(in);\nin.close();\n}\nfor (Map.Entry entry: properties.entrySet()) {\nCharacter val = Character.valueOf((char) Integer.parseInt((String) entry.getValue(), 16));\nString name = (String) entry.getKey();\nentities.put(name, val);\n}\nreturn entities;\n}",
+            "method_id": 11,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$19:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.tagPending.appendTagName(name.toLowerCase());\nt.dataBuffer.append(name);\nreturn;\nif (t.isAppropriateEndTagToken() && !r.isEmpty()) {\nchar c = r.consume();\nswitch (c) {\nt.emitTagPending();\nt.transition(Data);\nbreak;\n} else {\n}",
+            "method_id": 12,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:valueOf(Ljava/lang/String;)Lorg/jsoup/parser/Tag;",
+            "method_body": "public static Tag valueOf(String tagName) {\nValidate.notNull(tagName);\nTag tag = tags.get(tagName);\nif (tag == null) {\ntagName = tagName.trim().toLowerCase();\nValidate.notEmpty(tagName);\ntag = tags.get(tagName);\nif (tag == null) {\ntag = new Tag(tagName);\ntag.isBlock = false;\ntag.canContainBlock = true;\nreturn tag;\n}",
+            "method_id": 13,
+            "loc": 13
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:toCharacterKey(Ljava/util/Map;)Ljava/util/Map;",
+            "method_body": "private static Map<Character, String> toCharacterKey(Map<String, Character> inMap) {\nMap<Character, String> outMap = new HashMap<Character, String>();\nfor (Map.Entry<String, Character> entry: inMap.entrySet()) {\nCharacter character = entry.getValue();\nString name = entry.getKey();\nif (outMap.containsKey(character)) {\nif (name.toLowerCase().equals(name))\noutMap.put(character, name);\noutMap.put(character, name);\n}\nreturn outMap;\n}",
+            "method_id": 14,
+            "loc": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(Lorg/jsoup/parser/Token;)V",
+            "method_body": "void emit(Token token) {\nValidate.isFalse(isEmitPending, \"There is an unread token pending!\");\nemitPending = token;\nisEmitPending = true;\nif (token.type == Token.TokenType.StartTag) {\nToken.StartTag startTag = (Token.StartTag) token;\nlastStartTag = startTag;\nif (startTag.selfClosing)\n} else if (token.type == Token.TokenType.EndTag) {\nToken.EndTag endTag = (Token.EndTag) token;\nif (endTag.attributes != null)\n}",
+            "method_id": 15,
+            "loc": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:pushActiveFormattingElements(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void pushActiveFormattingElements(Element in) {\nint numSeen = 0;\nIterator<Element> iter = formattingElements.descendingIterator();\nwhile (iter.hasNext()) {\nElement el =  iter.next();\nif (el == null) // marker\nif (isSameFormattingElement(in, el))\nif (numSeen == 3) {\n}\nformattingElements.add(in);\n}",
+            "method_id": 16,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:<init>(Ljava/lang/String;)V",
+            "method_body": "private static final Map<String, Tag> tags = new HashMap<String, Tag>(); // map of known tags\nprivate boolean isBlock = true; // block or inline\nprivate boolean formatAsBlock = true; // should be formatted as a block\nprivate boolean canContainBlock = true; // Can this tag hold block level tags?\nprivate boolean canContainInline = true; // only pcdata if not\nprivate boolean empty = false; // can hold nothing; e.g. img\nprivate boolean selfClosing = false; // can self close (<foo />). used for unknown tags that self close, without forcing them as empty.\nprivate boolean preserveWhitespace = false; // for pre, textarea, script etc\nprivate Tag(String tagName) {\nthis.tagName = tagName.toLowerCase();\n}",
+            "method_id": 17,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:read()Lorg/jsoup/parser/Token;",
+            "method_body": "Token read() {\nif (!selfClosingFlagAcknowledged) {\nwhile (!isEmitPending)\nstate.read(this, reader);\nif (charBuffer.length() > 0) {\nString str = charBuffer.toString();\ncharBuffer.delete(0, charBuffer.length());\nreturn new Token.Character(str);\nisEmitPending = false;\nreturn emitPending;\n}",
+            "method_id": 18,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Tag:<init>()V",
+            "method_body": "protected String tagName;\nboolean selfClosing = false;\nif (attributes == null)\nif (pendingAttributeName != null) {\nif (pendingAttributeValue == null)\nattribute = new Attribute(pendingAttributeName, pendingAttributeValue.toString());\nattributes.put(attribute);\npendingAttributeName = null;\nif (pendingAttributeValue != null)\npendingAttributeValue.delete(0, pendingAttributeValue.length());\n}",
+            "method_id": 19,
+            "loc": 11
+        }
+    ]
+}

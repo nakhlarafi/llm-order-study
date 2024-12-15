@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.google.gson.functional.CollectionTest.testIssue1107",
+    "test_body": "public void testIssue1107() {\nString json = \"{\\n\" +\n\"  \\\"inBig\\\": {\\n\" +\n\"    \\\"key\\\": [\\n\" +\n\"      { \\\"inSmall\\\": \\\"hello\\\" }\\n\" +\n\"    ]\\n\" +\n\"  }\\n\" +\n\"}\";\nBigClass bigClass = new Gson().fromJson(json, BigClass.class);\nSmallClass small = bigClass.inBig.get(\"key\").get(0);\nassertNotNull(small);",
+    "stack_trace": "java.lang.ClassCastException: com.google.gson.internal.LinkedTreeMap cannot be cast to com.google.gson.functional.CollectionTest$SmallClass\nat com.google.gson.functional.CollectionTest.testIssue1107(CollectionTest.java:410)",
+    "covered_methods": [
+        {
+            "method_signature": "com.google.gson.internal.bind.CollectionTypeAdapterFactory:create(Lcom/google/gson/Gson;Lcom/google/gson/reflect/TypeToken;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {\nType type = typeToken.getType();\nClass<? super T> rawType = typeToken.getRawType();\nif (!Collection.class.isAssignableFrom(rawType)) {\nreturn null;\nType elementType = $Gson$Types.getCollectionElementType(type, rawType);\nTypeAdapter<?> elementTypeAdapter = gson.getAdapter(TypeToken.get(elementType));\nObjectConstructor<T> constructor = constructorConstructor.get(typeToken);\nTypeAdapter<T> result = new Adapter(gson, elementType, elementTypeAdapter, constructor);\nreturn result;\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator$1:newInstance(Ljava/lang/Class;)Ljava/lang/Object;",
+            "method_body": "public abstract <T> T newInstance(Class<T> c) throws Exception;\nClass<?> unsafeClass = Class.forName(\"sun.misc.Unsafe\");\nField f = unsafeClass.getDeclaredField(\"theUnsafe\");\nf.setAccessible(true);\nfinal Object unsafe = f.get(null);\nfinal Method allocateInstance = unsafeClass.getMethod(\"allocateInstance\", Class.class);\nreturn new UnsafeAllocator() {\nassertInstantiable(c);\nreturn (T) allocateInstance.invoke(unsafe, c);\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.TimeTypeAdapter:<clinit>()V",
+            "method_body": "public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {\nreturn typeToken.getRawType() == Time.class ? (TypeAdapter<T>) new TimeTypeAdapter() : null;\n};",
+            "method_id": 92
+        },
+        {
+            "method_signature": "com.google.gson.internal.$Gson$Preconditions:checkNotNull(Ljava/lang/Object;)Ljava/lang/Object;",
+            "method_body": "public static <T> T checkNotNull(T obj) {\nif (obj == null) {\nreturn obj;\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ArrayTypeAdapter:<clinit>()V",
+            "method_body": "public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {\nType type = typeToken.getType();\nif (!(type instanceof GenericArrayType || type instanceof Class && ((Class<?>) type).isArray())) {\nreturn null;\n};",
+            "method_id": 94
+        },
+        {
+            "method_signature": "com.google.gson.Gson:atomicLongArrayAdapter(Lcom/google/gson/TypeAdapter;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "private static TypeAdapter<AtomicLongArray> atomicLongArrayAdapter(final TypeAdapter<Number> longAdapter) {\nreturn new TypeAdapter<AtomicLongArray>() {\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "com.google.gson.stream.JsonReader$1:promoteNameToValue(Lcom/google/gson/stream/JsonReader;)V",
+            "method_body": "@Override public void promoteNameToValue(JsonReader reader) throws IOException {\nif (reader instanceof JsonTreeReader) {\nint p = reader.peeked;\nif (p == PEEKED_NONE) {\nif (p == PEEKED_DOUBLE_QUOTED_NAME) {\nreader.peeked = PEEKED_DOUBLE_QUOTED;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "com.google.gson.internal.$Gson$Types:getSupertype(Ljava/lang/reflect/Type;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/reflect/Type;",
+            "method_body": "static Type getSupertype(Type context, Class<?> contextRawType, Class<?> supertype) {\ncheckArgument(supertype.isAssignableFrom(contextRawType));\nreturn resolve(context, contextRawType,\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ObjectTypeAdapter:read(Lcom/google/gson/stream/JsonReader;)Ljava/lang/Object;",
+            "method_body": "@Override public Object read(JsonReader in) throws IOException {\nJsonToken token = in.peek();\nswitch (token) {\nMap<String, Object> map = new LinkedTreeMap<String, Object>();\nin.beginObject();\nwhile (in.hasNext()) {\nmap.put(in.nextName(), read(in));\nin.endObject();\nreturn map;\nreturn in.nextString();\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "com.google.gson.stream.JsonReader:nextNonWhitespace(Z)I",
+            "method_body": "private int nextNonWhitespace(boolean throwOnEof) throws IOException {\nchar[] buffer = this.buffer;\nint p = pos;\nint l = limit;\nif (p == l) {\npos = p;\nif (!fillBuffer(1)) {\nbreak;\np = pos;\nl = limit;\nint c = buffer[p++];\nif (c == '\\n') {\nlineNumber++;\nlineStart = p;\ncontinue;\n} else if (c == ' ' || c == '\\r' || c == '\\t') {\nif (c == '/') {\n} else if (c == '#') {\npos = p;\nreturn c;\nif (throwOnEof) {\nreturn -1;\n}",
+            "method_id": 99
+        }
+    ]
+}

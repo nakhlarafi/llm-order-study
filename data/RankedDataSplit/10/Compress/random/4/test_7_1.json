@@ -1,0 +1,59 @@
+{
+    "bug_id": 4,
+    "test_id": 7,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testZipArchiveInputStreamReadsUnicodeFields",
+    "test_body": "177: public void testZipArchiveInputStreamReadsUnicodeFields()\n178: throws IOException {\n179: File file = File.createTempFile(\"unicode-test\", \".zip\");\n180: ZipFile zf = null;\n181: try {\n182: createTestFile(file, US_ASCII, false, true);\n183: zf = new ZipFile(file, US_ASCII, true);\n184: assertNotNull(zf.getEntry(ASCII_TXT));\n185: assertNotNull(zf.getEntry(EURO_FOR_DOLLAR_TXT));\n186: assertNotNull(zf.getEntry(OIL_BARREL_TXT));\n187: } finally {\n188: ZipFile.closeQuietly(zf);\n189: if (file.exists()) {\n190: file.delete();\n191: }\n192: }\n193: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:startsWithLocalFileHeader()Z",
+            "method_body": "private boolean startsWithLocalFileHeader() throws IOException {\narchive.seek(0);\nfinal byte[] start = new byte[WORD];\narchive.readFully(start);\nfor (int i = 0; i < start.length; i++) {\nif (start[i] != ZipArchiveOutputStream.LFH_SIG[i]) {\nreturn true;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:deflateUntilInputIsNeeded()V",
+            "method_body": "private void deflateUntilInputIsNeeded() throws IOException {\nwhile (!def.needsInput()) {\ndeflate();\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:setUseLanguageEncodingFlag(Z)V",
+            "method_body": "public void setUseLanguageEncodingFlag(boolean b) {\nuseEFS = b && ZipEncodingHelper.isUTF8(encoding);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.UnicodePathExtraField:<clinit>()V",
+            "method_body": "public static final ZipShort UPATH_ID = new ZipShort(0x7075);\npublic UnicodePathExtraField () {\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:getValue([BI)J",
+            "method_body": "public static long getValue(byte[] bytes, int offset) {\nlong value = (bytes[offset + BYTE_3] << BYTE_3_SHIFT) & BYTE_3_MASK;\nvalue += (bytes[offset + BYTE_2] << BYTE_2_SHIFT) & BYTE_2_MASK;\nvalue += (bytes[offset + BYTE_1] << BYTE_1_SHIFT) & BYTE_1_MASK;\nvalue += (bytes[offset] & BYTE_MASK);\nreturn value;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:finish()V",
+            "method_body": "public void finish() throws IOException {\nif(entry != null) {\ncdOffset = written;\nfor (Iterator i = entries.iterator(); i.hasNext(); ) {\nwriteCentralFileHeader((ZipArchiveEntry) i.next());\ncdLength = written - cdOffset;\nwriteCentralDirectoryEnd();\noffsets.clear();\nentries.clear();\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipShort:getBytes()[B",
+            "method_body": "public byte[] getBytes() {\nbyte[] result = new byte[2];\nresult[0] = (byte) (value & BYTE_MASK);\nresult[1] = (byte) ((value & BYTE_1_MASK) >> BYTE_1_SHIFT);\nreturn result;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipUtil:<clinit>()V",
+            "method_body": "private static final byte[] DOS_TIME_MIN = ZipLong.getBytes(0x00002100L);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:encode(Ljava/lang/String;)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer encode(String name) {\nCharsetEncoder enc = this.charset.newEncoder();\nenc.onMalformedInput(CodingErrorAction.REPORT);\nenc.onUnmappableCharacter(CodingErrorAction.REPORT);\nCharBuffer cb = CharBuffer.wrap(name);\nByteBuffer out = ByteBuffer.allocate(name.length()\nwhile (cb.remaining() > 0) {\nCoderResult res = enc.encode(cb, out,true);\nif (res.isUnmappable() || res.isMalformed()) {\nif (res.length() * 6 > out.remaining()) {\nfor (int i=0; i<res.length(); ++i) {\nZipEncodingHelper.appendSurrogate(out,cb.get());\n} else if (res.isOverflow()) {\nout = ZipEncodingHelper.growBuffer(out, 0);\n} else if (res.isUnderflow()) {\nenc.flush(out);\nbreak;\n}\nout.limit(out.position());\nout.rewind();\nreturn out;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipShort:hashCode()I",
+            "method_body": "public int hashCode() {\nreturn value;\n}",
+            "method_id": 19
+        }
+    ]
+}

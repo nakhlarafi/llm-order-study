@@ -1,0 +1,59 @@
+{
+    "bug_id": 58,
+    "test_id": 0,
+    "test_name": "org.jsoup.safety.CleanerTest.testIsValidBodyHtml",
+    "test_body": "145: @Test public void testIsValidBodyHtml() {\n146: String ok = \"<p>Test <b><a href='http://example.com/' rel='nofollow'>OK</a></b></p>\";\n147: String ok1 = \"<p>Test <b><a href='http://example.com/'>OK</a></b></p>\"; // missing enforced is OK because still needs run thru cleaner\n148: String nok1 = \"<p><script></script>Not <b>OK</b></p>\";\n149: String nok2 = \"<p align=right>Test Not <b>OK</b></p>\";\n150: String nok3 = \"<!-- comment --><p>Not OK</p>\"; // comments and the like will be cleaned\n151: String nok4 = \"<html><head>Foo</head><body><b>OK</b></body></html>\"; // not body html\n152: String nok5 = \"<p>Test <b><a href='http://example.com/' rel='nofollowme'>OK</a></b></p>\";\n153: String nok6 = \"<p>Test <b><a href='http://example.com/'>OK</b></p>\"; // missing close tag\n154: String nok7 = \"</div>What\";\n155: assertTrue(Jsoup.isValid(ok, Whitelist.basic()));\n156: assertTrue(Jsoup.isValid(ok1, Whitelist.basic()));\n157: assertFalse(Jsoup.isValid(nok1, Whitelist.basic()));\n158: assertFalse(Jsoup.isValid(nok2, Whitelist.basic()));\n159: assertFalse(Jsoup.isValid(nok3, Whitelist.basic()));\n160: assertFalse(Jsoup.isValid(nok4, Whitelist.basic()));\n161: assertFalse(Jsoup.isValid(nok5, Whitelist.basic()));\n162: assertFalse(Jsoup.isValid(nok6, Whitelist.basic()));\n163: assertFalse(Jsoup.isValid(ok, Whitelist.none()));\n164: assertFalse(Jsoup.isValid(nok7, Whitelist.basic()));\n165: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:addAttributes(Ljava/lang/String;[Ljava/lang/String;)Lorg/jsoup/safety/Whitelist;",
+            "method_body": "public Whitelist addAttributes(String tag, String... attributes) {\nValidate.notEmpty(tag);\nValidate.notNull(attributes);\nValidate.isTrue(attributes.length > 0, \"No attribute names supplied.\");\nTagName tagName = TagName.valueOf(tag);\nif (!tagNames.contains(tagName))\nSet<AttributeKey> attributeSet = new HashSet<AttributeKey>();\nfor (String key : attributes) {\nValidate.notEmpty(key);\nattributeSet.add(AttributeKey.valueOf(key));\nif (this.attributes.containsKey(tagName)) {\nthis.attributes.put(tagName, attributeSet);\nreturn this;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$AttributeKey:valueOf(Ljava/lang/String;)Lorg/jsoup/safety/Whitelist$AttributeKey;",
+            "method_body": "static AttributeKey valueOf(String value) {\nreturn new AttributeKey(value);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$AttributeKey:<init>(Ljava/lang/String;)V",
+            "method_body": "AttributeKey(String value) {\nsuper(value);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:addProtocols(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Lorg/jsoup/safety/Whitelist;",
+            "method_body": "public Whitelist addProtocols(String tag, String attribute, String... protocols) {\nValidate.notEmpty(tag);\nValidate.notEmpty(attribute);\nValidate.notNull(protocols);\nTagName tagName = TagName.valueOf(tag);\nAttributeKey attrKey = AttributeKey.valueOf(attribute);\nif (this.protocols.containsKey(tagName)) {\nattrMap = new HashMap<AttributeKey, Set<Protocol>>();\nthis.protocols.put(tagName, attrMap);\nif (attrMap.containsKey(attrKey)) {\nprotSet = new HashSet<Protocol>();\nattrMap.put(attrKey, protSet);\nfor (String protocol : protocols) {\nValidate.notEmpty(protocol);\nProtocol prot = Protocol.valueOf(protocol);\nprotSet.add(prot);\nreturn this;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$Protocol:valueOf(Ljava/lang/String;)Lorg/jsoup/safety/Whitelist$Protocol;",
+            "method_body": "static Protocol valueOf(String value) {\nreturn new Protocol(value);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$Protocol:<init>(Ljava/lang/String;)V",
+            "method_body": "Protocol(String value) {\nsuper(value);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist:addEnforcedAttribute(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/safety/Whitelist;",
+            "method_body": "public Whitelist addEnforcedAttribute(String tag, String attribute, String value) {\nValidate.notEmpty(tag);\nValidate.notEmpty(attribute);\nValidate.notEmpty(value);\nTagName tagName = TagName.valueOf(tag);\nif (!tagNames.contains(tagName))\nAttributeKey attrKey = AttributeKey.valueOf(attribute);\nAttributeValue attrVal = AttributeValue.valueOf(value);\nif (enforcedAttributes.containsKey(tagName)) {\nMap<AttributeKey, AttributeValue> attrMap = new HashMap<AttributeKey, AttributeValue>();\nattrMap.put(attrKey, attrVal);\nenforcedAttributes.put(tagName, attrMap);\nreturn this;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$AttributeValue:valueOf(Ljava/lang/String;)Lorg/jsoup/safety/Whitelist$AttributeValue;",
+            "method_body": "static AttributeValue valueOf(String value) {\nreturn new AttributeValue(value);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.safety.Whitelist$AttributeValue:<init>(Ljava/lang/String;)V",
+            "method_body": "AttributeValue(String value) {\nsuper(value);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.Jsoup:parseBodyFragment(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document parseBodyFragment(String bodyHtml, String baseUri) {\nreturn Parser.parseBodyFragment(bodyHtml, baseUri);\n}",
+            "method_id": 19
+        }
+    ]
+}

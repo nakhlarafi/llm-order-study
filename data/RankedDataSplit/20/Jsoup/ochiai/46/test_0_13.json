@@ -1,0 +1,34 @@
+{
+    "bug_id": 46,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.DocumentTest.testShiftJisRoundtrip",
+    "test_body": "public void testShiftJisRoundtrip() throws Exception {\nString input =\n\"<html>\"\n+   \"<head>\"\n+     \"<meta http-equiv=\\\"content-type\\\" content=\\\"text/html; charset=Shift_JIS\\\" />\"\n+   \"</head>\"\n+   \"<body>\"\n+     \"before&nbsp;after\"\n+   \"</body>\"\n+ \"</html>\";\nInputStream is = new ByteArrayInputStream(input.getBytes(Charset.forName(\"ASCII\")));\n401: Document doc = Jsoup.parse(is, null, \"http://example.com\");\ndoc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);\n404: String output = new String(doc.html().getBytes(doc.outputSettings().charset()), doc.outputSettings().charset());\n406: assertFalse(\"Should not have contained a '?'.\", output.contains(\"?\"));\nassertTrue(\"Should have contained a '&#xa0;' or a '&nbsp;'.\",",
+    "stack_trace": "junit.framework.AssertionFailedError: Should not have contained a '?'.\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertFalse(Assert.java:64)\nat org.jsoup.nodes.DocumentTest.testShiftJisRoundtrip(DocumentTest.java:406)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:load(Ljava/io/InputStream;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document load(InputStream in, String charsetName, String baseUri) throws IOException {\nByteBuffer byteData = readToByteBuffer(in);\nreturn parseByteData(byteData, charsetName, baseUri, Parser.htmlParser());\n}",
+            "method_id": 260
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:parseByteData(Ljava/nio/ByteBuffer;Ljava/lang/String;Ljava/lang/String;Lorg/jsoup/parser/Parser;)Lorg/jsoup/nodes/Document;",
+            "method_body": "static Document parseByteData(ByteBuffer byteData, String charsetName, String baseUri, Parser parser) {\nDocument doc = null;\nif (charsetName == null) { // determine from meta. safe parse as UTF-8\ndocData = Charset.forName(defaultCharset).decode(byteData).toString();\ndoc = parser.parseInput(docData, baseUri);\nElement meta = doc.select(\"meta[http-equiv=content-type], meta[charset]\").first();\nif (meta != null) { // if not found, will keep utf-8 as best attempt\nString foundCharset = null;\nif (meta.hasAttr(\"http-equiv\")) {\nfoundCharset = getCharsetFromContentType(meta.attr(\"content\"));\nif (foundCharset == null && meta.hasAttr(\"charset\")) {\nif (foundCharset != null && foundCharset.length() != 0 && !foundCharset.equals(defaultCharset)) { // need to re-decode\nfoundCharset = foundCharset.trim().replaceAll(\"[\\\"']\", \"\");\ncharsetName = foundCharset;\nbyteData.rewind();\ndocData = Charset.forName(foundCharset).decode(byteData).toString();\ndoc = null;\n} else { // specified by content type header (or by user on file load)\nif (docData.length() > 0 && docData.charAt(0) == UNICODE_BOM) {\nif (doc == null) {\ndoc = parser.parseInput(docData, baseUri);\ndoc.outputSettings().charset(charsetName);\nreturn doc;\n}",
+            "method_id": 261
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:readToByteBuffer(Ljava/io/InputStream;I)Ljava/nio/ByteBuffer;",
+            "method_body": "static ByteBuffer readToByteBuffer(InputStream inStream, int maxSize) throws IOException {\nValidate.isTrue(maxSize >= 0, \"maxSize must be 0 (unlimited) or larger\");\nfinal boolean capped = maxSize > 0;\nbyte[] buffer = new byte[bufferSize];\nByteArrayOutputStream outStream = new ByteArrayOutputStream(bufferSize);\nint remaining = maxSize;\nread = inStream.read(buffer);\nif (read == -1) break;\nif (capped) {\noutStream.write(buffer, 0, read);\nreturn ByteBuffer.wrap(outStream.toByteArray());\n}",
+            "method_id": 262
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:readToByteBuffer(Ljava/io/InputStream;)Ljava/nio/ByteBuffer;",
+            "method_body": "static ByteBuffer readToByteBuffer(InputStream inStream) throws IOException {\nreturn readToByteBuffer(inStream, 0);\n}",
+            "method_id": 263
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:getCharsetFromContentType(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String getCharsetFromContentType(String contentType) {\nif (contentType == null) return null;\nMatcher m = charsetPattern.matcher(contentType);\nif (m.find()) {\nString charset = m.group(1).trim();\ncharset = charset.replace(\"charset=\", \"\");\nif (charset.length() == 0) return null;\nif (Charset.isSupported(charset)) return charset;\n}",
+            "method_id": 264
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.google.gson.functional.CollectionTest.testIssue1107",
+    "test_body": "public void testIssue1107() {\nString json = \"{\\n\" +\n\"  \\\"inBig\\\": {\\n\" +\n\"    \\\"key\\\": [\\n\" +\n\"      { \\\"inSmall\\\": \\\"hello\\\" }\\n\" +\n\"    ]\\n\" +\n\"  }\\n\" +\n\"}\";\nBigClass bigClass = new Gson().fromJson(json, BigClass.class);\nSmallClass small = bigClass.inBig.get(\"key\").get(0);\nassertNotNull(small);",
+    "stack_trace": "java.lang.ClassCastException: com.google.gson.internal.LinkedTreeMap cannot be cast to com.google.gson.functional.CollectionTest$SmallClass\nat com.google.gson.functional.CollectionTest.testIssue1107(CollectionTest.java:410)",
+    "covered_methods": [
+        {
+            "method_signature": "com.google.gson.internal.Excluder:create(Lcom/google/gson/Gson;Lcom/google/gson/reflect/TypeToken;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "public <T> TypeAdapter<T> create(final Gson gson, final TypeToken<T> type) {\nClass<?> rawType = type.getRawType();\nfinal boolean skipSerialize = excludeClass(rawType, true);\nfinal boolean skipDeserialize = excludeClass(rawType, false);\nif (!skipSerialize && !skipDeserialize) {\nreturn null;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "com.google.gson.internal.Excluder:excludeField(Ljava/lang/reflect/Field;Z)Z",
+            "method_body": "public boolean excludeField(Field field, boolean serialize) {\nif ((modifiers & field.getModifiers()) != 0) {\nif (version != Excluder.IGNORE_VERSIONS\nif (field.isSynthetic()) {\nreturn true;\nif (requireExpose) {\nif (!serializeInnerClasses && isInnerClass(field.getType())) {\nif (isAnonymousOrLocal(field.getType())) {\nList<ExclusionStrategy> list = serialize ? serializationStrategies : deserializationStrategies;\nif (!list.isEmpty()) {\nreturn false;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "com.google.gson.internal.Excluder:excludeClass(Ljava/lang/Class;Z)Z",
+            "method_body": "public boolean excludeClass(Class<?> clazz, boolean serialize) {\nif (version != Excluder.IGNORE_VERSIONS\nif (!serializeInnerClasses && isInnerClass(clazz)) {\nif (isAnonymousOrLocal(clazz)) {\nList<ExclusionStrategy> list = serialize ? serializationStrategies : deserializationStrategies;\nfor (ExclusionStrategy exclusionStrategy : list) {\nreturn false;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "com.google.gson.internal.Excluder:isAnonymousOrLocal(Ljava/lang/Class;)Z",
+            "method_body": "private boolean isAnonymousOrLocal(Class<?> clazz) {\nreturn !Enum.class.isAssignableFrom(clazz)\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "com.google.gson.FieldNamingPolicy$1:translateName(Ljava/lang/reflect/Field;)Ljava/lang/String;",
+            "method_body": "@Override public String translateName(Field f) {\nreturn f.getName();\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor:<init>(Ljava/util/Map;)V",
+            "method_body": "public ConstructorConstructor(Map<Type, InstanceCreator<?>> instanceCreators) {\nthis.instanceCreators = instanceCreators;\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor:get(Lcom/google/gson/reflect/TypeToken;)Lcom/google/gson/internal/ObjectConstructor;",
+            "method_body": "public <T> ObjectConstructor<T> get(TypeToken<T> typeToken) {\nfinal Type type = typeToken.getType();\nfinal Class<? super T> rawType = typeToken.getRawType();\nfinal InstanceCreator<T> typeCreator = (InstanceCreator<T>) instanceCreators.get(type);\nif (typeCreator != null) {\nfinal InstanceCreator<T> rawTypeCreator =\nif (rawTypeCreator != null) {\nObjectConstructor<T> defaultConstructor = newDefaultConstructor(rawType);\nif (defaultConstructor != null) {\nObjectConstructor<T> defaultImplementation = newDefaultImplementationConstructor(type, rawType);\nif (defaultImplementation != null) {\nreturn defaultImplementation;\nreturn newUnsafeAllocator(type, rawType);\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor:newDefaultConstructor(Ljava/lang/Class;)Lcom/google/gson/internal/ObjectConstructor;",
+            "method_body": "private <T> ObjectConstructor<T> newDefaultConstructor(Class<? super T> rawType) {\nfinal Constructor<? super T> constructor = rawType.getDeclaredConstructor();\n} catch (NoSuchMethodException e) {\nreturn null;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor:newDefaultImplementationConstructor(Ljava/lang/reflect/Type;Ljava/lang/Class;)Lcom/google/gson/internal/ObjectConstructor;",
+            "method_body": "private <T> ObjectConstructor<T> newDefaultImplementationConstructor(\nif (Collection.class.isAssignableFrom(rawType)) {\nif (SortedSet.class.isAssignableFrom(rawType)) {\n} else if (EnumSet.class.isAssignableFrom(rawType)) {\n} else if (Set.class.isAssignableFrom(rawType)) {\n} else if (Queue.class.isAssignableFrom(rawType)) {\nreturn new ObjectConstructor<T>() {\nreturn (T) new ArrayList<Object>();\nif (Map.class.isAssignableFrom(rawType)) {\nif (ConcurrentNavigableMap.class.isAssignableFrom(rawType)) {\n} else if (ConcurrentMap.class.isAssignableFrom(rawType)) {\n} else if (SortedMap.class.isAssignableFrom(rawType)) {\n} else if (type instanceof ParameterizedType && !(String.class.isAssignableFrom(\nreturn new ObjectConstructor<T>() {\nreturn (T) new LinkedTreeMap<String, Object>();\nreturn null;\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor:newUnsafeAllocator(Ljava/lang/reflect/Type;Ljava/lang/Class;)Lcom/google/gson/internal/ObjectConstructor;",
+            "method_body": "private <T> ObjectConstructor<T> newUnsafeAllocator(\nreturn new ObjectConstructor<T>() {\nObject newInstance = unsafeAllocator.newInstance(rawType);\nreturn (T) newInstance;\n}",
+            "method_id": 89
+        }
+    ]
+}

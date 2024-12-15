@@ -1,0 +1,109 @@
+{
+    "bug_id": 42,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.FormElementTest.createsFormData",
+    "test_body": "27: @Test public void createsFormData() {\n28: String html = \"<form><input name='one' value='two'><select name='three'><option value='not'>\" +\n29: \"<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>\" +\n30: \"<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>\" +\n31: \"<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>\" +\n32: \"<input name='ten' value='text' disabled>\" +\n33: \"</form>\";\n34: Document doc = Jsoup.parse(html);\n35: FormElement form = (FormElement) doc.select(\"form\").first();\n36: List<Connection.KeyVal> data = form.formData();\n37: 38: assertEquals(6, data.size());\n39: assertEquals(\"one=two\", data.get(0).toString());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<6> but was:<7>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:118)\nat org.junit.Assert.assertEquals(Assert.java:555)\nat org.junit.Assert.assertEquals(Assert.java:542)\nat org.jsoup.nodes.FormElementTest.createsFormData(FormElementTest.java:38)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.FormElement:formData()Ljava/util/List;",
+            "method_body": "public List<Connection.KeyVal> formData() {\nArrayList<Connection.KeyVal> data = new ArrayList<Connection.KeyVal>();\nfor (Element el: elements) {\nif (!el.tag().isFormSubmittable()) continue; // contents are form listable, superset of submitable\nString name = el.attr(\"name\");\nif (name.length() == 0) continue;\nString type = el.attr(\"type\");\nif (\"select\".equals(el.tagName())) {\nElements options = el.select(\"option[selected]\");\nboolean set = false;\nfor (Element option: options) {\ndata.add(HttpConnection.KeyVal.create(name, option.val()));\nset = true;\n}\nif (!set) {\n} else if (\"checkbox\".equalsIgnoreCase(type) || \"radio\".equalsIgnoreCase(type)) {\nif (el.hasAttr(\"checked\")) {\nfinal String val = el.val();\ndata.add(HttpConnection.KeyVal.create(name, val));\n}\ndata.add(HttpConnection.KeyVal.create(name, el.val()));\n}\nreturn data;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.nodes.FormElement:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "private final Elements elements = new Elements();\nsuper(tag, baseUri, attributes);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:setFormElement(Lorg/jsoup/nodes/FormElement;)V",
+            "method_body": "void setFormElement(FormElement formElement) {\nthis.formElement = formElement;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.nodes.FormElement:addElement(Lorg/jsoup/nodes/Element;)Lorg/jsoup/nodes/FormElement;",
+            "method_body": "public FormElement addElement(Element element) {\nelements.add(element);\nreturn this;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:val()Ljava/lang/String;",
+            "method_body": "public String val() {\nif (tagName().equals(\"textarea\"))\nreturn text();\nreturn attr(\"value\");\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insertForm(Lorg/jsoup/parser/Token$StartTag;Z)Lorg/jsoup/nodes/FormElement;",
+            "method_body": "FormElement insertForm(Token.StartTag startTag, boolean onStack) {\nTag tag = Tag.valueOf(startTag.name());\nFormElement el = new FormElement(tag, baseUri, startTag.attributes);\nsetFormElement(el);\ninsertNode(el);\nif (onStack)\nstack.add(el);\nreturn el;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$KeyVal:value(Ljava/lang/String;)Lorg/jsoup/helper/HttpConnection$KeyVal;",
+            "method_body": "public KeyVal value(String value) {\nValidate.notNull(value, \"Data value must not be null\");\nthis.value = value;\nreturn this;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:text()Ljava/lang/String;",
+            "method_body": "public String text() {\nfinal StringBuilder accum = new StringBuilder();\nnew NodeTraversor(new NodeVisitor() {\nif (node instanceof TextNode) {\nTextNode textNode = (TextNode) node;\nappendNormalisedText(accum, textNode);\n} else if (node instanceof Element) {\nElement element = (Element) node;\nif (accum.length() > 0 &&\n}\n}\nreturn accum.toString().trim();\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element$1:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public String text() {\nfinal StringBuilder accum = new StringBuilder();\nnew NodeTraversor(new NodeVisitor() {\nif (node instanceof TextNode) {\nTextNode textNode = (TextNode) node;\nappendNormalisedText(accum, textNode);\n} else if (node instanceof Element) {\nElement element = (Element) node;\nif (accum.length() > 0 &&\n}\n}\nreturn accum.toString().trim();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendNormalisedText(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/TextNode;)V",
+            "method_body": "private static void appendNormalisedText(StringBuilder accum, TextNode textNode) {\nString text = textNode.getWholeText();\nif (preserveWhitespace(textNode.parentNode))\naccum.append(text);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:valueOf(Ljava/lang/String;)Lorg/jsoup/parser/Tag;",
+            "method_body": "public static Tag valueOf(String tagName) {\nValidate.notNull(tagName);\nTag tag = tags.get(tagName);\nif (tag == null) {\ntagName = tagName.trim().toLowerCase();\nValidate.notEmpty(tagName);\ntag = tags.get(tagName);\nif (tag == null) {\ntag = new Tag(tagName);\ntag.isBlock = false;\ntag.canContainBlock = true;\nreturn tag;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "public Element(Tag tag, String baseUri, Attributes attributes) {\nsuper(baseUri, attributes);\nValidate.notNull(tag);\nthis.tag = tag;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$16:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\"))\nelse if (name.equals(\"option\")) {\ntb.processEndTag(\"option\");\ntb.insert(start);\n} else if (name.equals(\"optgroup\")) {\n} else if (name.equals(\"select\")) {\n} else if (StringUtil.in(name, \"input\", \"keygen\", \"textarea\")) {\ntb.error(this);\nif (!tb.inSelectScope(\"select\"))\ntb.processEndTag(\"select\");\nreturn tb.process(start);\nToken.EndTag end = t.asEndTag();\nname = end.name();\nif (name.equals(\"optgroup\")) {\n} else if (name.equals(\"option\")) {\nif (tb.currentElement().nodeName().equals(\"option\"))\ntb.pop();\ntb.error(this);\n} else if (name.equals(\"select\")) {\nif (!tb.inSelectScope(name)) {\ntb.popStackToClose(name);\ntb.resetInsertionMode();\nreturn true;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:setHeadElement(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void setHeadElement(Element headElement) {\nthis.headElement = headElement;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;)V",
+            "method_body": "public Element(Tag tag, String baseUri) {\nthis(tag, baseUri, new Attributes());\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:getFormElement()Lorg/jsoup/nodes/FormElement;",
+            "method_body": "FormElement getFormElement() {\nreturn formElement;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendChild(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendChild(Node child) {\nValidate.notNull(child);\nreparentChild(child);\nchildNodes.add(child);\nchild.setSiblingIndex(childNodes.size() - 1);\nreturn this;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:preserveWhitespace(Lorg/jsoup/nodes/Node;)Z",
+            "method_body": "static boolean preserveWhitespace(Node node) {\nif (node != null && node instanceof Element) {\nElement element = (Element) node;\nreturn element.tag.preserveWhitespace() ||\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:select(Ljava/lang/String;)Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements select(String cssQuery) {\nreturn Selector.select(cssQuery, this);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:tag()Lorg/jsoup/parser/Tag;",
+            "method_body": "public Tag tag() {\nreturn tag;\n}",
+            "method_id": 19
+        }
+    ]
+}

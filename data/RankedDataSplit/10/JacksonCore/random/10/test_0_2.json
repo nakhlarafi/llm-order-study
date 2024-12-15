@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207",
+    "test_body": "public void testIssue207() throws Exception\n{\nByteQuadsCanonicalizer nc = ByteQuadsCanonicalizer.createRoot(-523743345);\nField byteSymbolCanonicalizerField = JsonFactory.class.getDeclaredField(\"_byteSymbolCanonicalizer\");\nbyteSymbolCanonicalizerField.setAccessible(true);\nJsonFactory jsonF = new JsonFactory();\nbyteSymbolCanonicalizerField.set(jsonF, nc);\n110: StringBuilder stringBuilder = new StringBuilder();\nstringBuilder.append(\"{\\n\");\nstringBuilder.append(\"    \\\"expectedGCperPosition\\\": null\");\nfor (int i = 0; i < 60; ++i) {\nstringBuilder.append(\",\\n    \\\"\").append(i + 1).append(\"\\\": null\");\n}\nstringBuilder.append(\"\\n}\");\n118: JsonParser p = jsonF.createParser(stringBuilder.toString().getBytes(\"UTF-8\"));\nwhile (p.nextToken() != null) { }\np.close();",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 256\nat com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer.addName(ByteQuadsCanonicalizer.java:853)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.addName(UTF8StreamJsonParser.java:2340)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.parseEscapedName(UTF8StreamJsonParser.java:1980)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.slowParseName(UTF8StreamJsonParser.java:1867)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._parseName(UTF8StreamJsonParser.java:1651)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:740)\nat com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207(TestByteBasedSymbols.java:119)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:nukeSymbols(Z)V",
+            "method_body": "private void nukeSymbols(boolean fill) {\n_count = 0;\n_spilloverEnd = _spilloverStart();\n_longNameOffset = _hashSize << 3;\nif (fill) {\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) {\n_defaultState = defaultState;\n_mask = (1 << ordinal());\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:makeChild(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public ByteQuadsCanonicalizer makeChild(int flags) {\nreturn new ByteQuadsCanonicalizer(this,\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:findName([II)Ljava/lang/String;",
+            "method_body": "public String findName(int[] q, int qlen)\nif (qlen < 4) { // another sanity check\nif (qlen == 3) {\nif (qlen == 2) {\nreturn findName(q[0]);\nfinal int hash = calcHash(q, qlen);\nint offset = _calcOffset(hash);\nfinal int[] hashArea = _hashArea;\nfinal int len = hashArea[offset+3];\nif ((hash == hashArea[offset]) && (len == qlen)) {\nif (len == 0) { // empty slot; unlikely but avoid further lookups if so\nreturn null;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:<init>()V",
+            "method_body": "public JsonFactory() { this(null); }\npublic JsonFactory() { this(null); }",
+            "method_id": 24
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_spilloverStart()I",
+            "method_body": "private final int _spilloverStart() {\nint offset = _hashSize;\nreturn (offset << 3) - offset;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_findOffsetForAdd(I)I",
+            "method_body": "private int _findOffsetForAdd(int hash)\nint offset = _calcOffset(hash);\nfinal int[] hashArea = _hashArea;\nif (hashArea[offset+3] == 0) {\nreturn offset;\nint offset2 = _secondaryStart + ((offset >> 3) << 2);\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset2 = _tertiaryStart + ((offset >> (_tertiaryShift + 2)) << _tertiaryShift);\nfinal int bucketSize = (1 << _tertiaryShift);\nfor (int end = offset2 + bucketSize; offset2 < end; offset2 += 4) {\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset = _spilloverEnd;\n_spilloverEnd += 4;\nif (_spilloverEnd >= hashArea.length) {\nif (_failOnDoS) {\n_reportTooManyCollisions();\n_needRehash = true;\nreturn offset;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.CharTypes:getInputCodeUtf8()[I",
+            "method_body": "public static int[] getInputCodeUtf8() { return sInputCodesUTF8; }\npublic static int[] getInputCodeUtf8() { return sInputCodesUTF8; }",
+            "method_id": 27
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:isEnabled(Lcom/fasterxml/jackson/core/JsonFactory$Feature;)Z",
+            "method_body": "public final boolean isEnabled(JsonFactory.Feature f) {\nreturn (_factoryFeatures & f.getMask()) != 0;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper:constructParser(ILcom/fasterxml/jackson/core/ObjectCodec;Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;I)Lcom/fasterxml/jackson/core/JsonParser;",
+            "method_body": "public JsonParser constructParser(int parserFeatures, ObjectCodec codec,\nJsonEncoding enc = detectEncoding();\nif (enc == JsonEncoding.UTF8) {\nif (JsonFactory.Feature.CANONICALIZE_FIELD_NAMES.enabledIn(factoryFeatures)) {\nByteQuadsCanonicalizer can = rootByteSymbols.makeChild(factoryFeatures);\nreturn new UTF8StreamJsonParser(_context, parserFeatures, _in, codec, can,\n}",
+            "method_id": 29
+        }
+    ]
+}

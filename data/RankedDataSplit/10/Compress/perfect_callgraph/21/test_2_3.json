@@ -1,0 +1,59 @@
+{
+    "bug_id": 21,
+    "test_id": 2,
+    "test_name": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFileTest.testNineFilesSomeNotEmpty",
+    "test_body": "202: public void testNineFilesSomeNotEmpty() throws Exception {\n203: testCompress252(9, 2);\n204: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeHeader(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeHeader(final DataOutput header) throws IOException {\nheader.write(NID.kHeader);\nheader.write(NID.kMainStreamsInfo);\nwriteStreamsInfo(header);\nwriteFilesInfo(header);\nheader.write(NID.kEnd);\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeStreamsInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeStreamsInfo(final DataOutput header) throws IOException {\nif (numNonEmptyStreams > 0) {\nwritePackInfo(header);\nwriteUnpackInfo(header);\nwriteSubStreamsInfo(header);\nheader.write(NID.kEnd);\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeSubStreamsInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeSubStreamsInfo(final DataOutput header) throws IOException {\nheader.write(NID.kSubStreamsInfo);\nheader.write(NID.kEnd);\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFilesInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFilesInfo(final DataOutput header) throws IOException {\nheader.write(NID.kFilesInfo);\nwriteUint64(header, files.size());\nwriteFileEmptyStreams(header);\nwriteFileEmptyFiles(header);\nwriteFileAntiItems(header);\nwriteFileNames(header);\nwriteFileCTimes(header);\nwriteFileATimes(header);\nwriteFileMTimes(header);\nwriteFileWindowsAttributes(header);\nheader.write(0);\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileEmptyStreams(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileEmptyStreams(final DataOutput header) throws IOException {\nboolean hasEmptyStreams = false;\nfor (final SevenZArchiveEntry entry : files) {\nif (!entry.hasStream()) {\nhasEmptyStreams = true;\nbreak;\nif (hasEmptyStreams) {\nheader.write(NID.kEmptyStream);\nfinal BitSet emptyStreams = new BitSet(files.size());\nfor (int i = 0; i < files.size(); i++) {\nemptyStreams.set(i, !files.get(i).hasStream());\nfinal ByteArrayOutputStream baos = new ByteArrayOutputStream();\nfinal DataOutputStream out = new DataOutputStream(baos);\nwriteBits(out, emptyStreams, files.size());\nout.flush();\nfinal byte[] contents = baos.toByteArray();\nwriteUint64(header, contents.length);\nheader.write(contents);\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileEmptyFiles(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileEmptyFiles(final DataOutput header) throws IOException {\nboolean hasEmptyFiles = false;\nint emptyStreamCounter = 0;\nfinal BitSet emptyFiles = new BitSet(0);\nfor (int i = 0; i < files.size(); i++) {\nif (!files.get(i).hasStream()) {\nboolean isDir = files.get(i).isDirectory();\nemptyFiles.set(emptyStreamCounter++, !isDir);\nhasEmptyFiles |= !isDir;\nif (hasEmptyFiles) {\nheader.write(NID.kEmptyFile);\nfinal ByteArrayOutputStream baos = new ByteArrayOutputStream();\nfinal DataOutputStream out = new DataOutputStream(baos);\nwriteBits(out, emptyFiles, emptyStreamCounter);\nout.flush();\nfinal byte[] contents = baos.toByteArray();\nwriteUint64(header, contents.length);\nheader.write(contents);\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileAntiItems(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileAntiItems(final DataOutput header) throws IOException {\nboolean hasAntiItems = false;\nfinal BitSet antiItems = new BitSet(0);\nint antiItemCounter = 0;\nfor (int i = 0; i < files.size(); i++) {\nif (!files.get(i).hasStream()) {\nboolean isAnti = files.get(i).isAntiItem();\nantiItems.set(antiItemCounter++, isAnti);\nhasAntiItems |= isAnti;\nif (hasAntiItems) {\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileNames(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileNames(final DataOutput header) throws IOException {\nheader.write(NID.kName);\nfinal ByteArrayOutputStream baos = new ByteArrayOutputStream();\nfinal DataOutputStream out = new DataOutputStream(baos);\nout.write(0);\nfor (final SevenZArchiveEntry entry : files) {\nout.write(entry.getName().getBytes(\"UTF-16LE\"));\nout.writeShort(0);\n}\nout.flush();\nfinal byte[] contents = baos.toByteArray();\nwriteUint64(header, contents.length);\nheader.write(contents);\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileCTimes(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileCTimes(final DataOutput header) throws IOException {\nint numCreationDates = 0;\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.getHasCreationDate()) {\n}\nif (numCreationDates > 0) {\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileATimes(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileATimes(final DataOutput header) throws IOException {\nint numAccessDates = 0;\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.getHasAccessDate()) {\n}\nif (numAccessDates > 0) {\n}",
+            "method_id": 39
+        }
+    ]
+}

@@ -1,0 +1,209 @@
+{
+    "bug_id": 73,
+    "test_id": 0,
+    "test_name": "org.jsoup.helper.W3CDomTest.namespacePreservation",
+    "test_body": "66: public void namespacePreservation() throws IOException {\n67: File in = ParseTest.getFile(\"/htmltests/namespaces.xhtml\");\n68: org.jsoup.nodes.Document jsoupDoc;\n69: jsoupDoc = Jsoup.parse(in, \"UTF-8\");\n70: 71: Document doc;\n72: org.jsoup.helper.W3CDom jDom = new org.jsoup.helper.W3CDom();\n73: doc = jDom.fromJsoup(jsoupDoc);\n74: 75: Node htmlEl = doc.getChildNodes().item(0);\n76: assertEquals(\"http://www.w3.org/1999/xhtml\", htmlEl.getNamespaceURI());\n77: assertEquals(\"html\", htmlEl.getLocalName());\n78: assertEquals(\"html\", htmlEl.getNodeName());\n79: 80: // inherits default namespace\n81: Node head = htmlEl.getFirstChild();\n82: assertEquals(\"http://www.w3.org/1999/xhtml\", head.getNamespaceURI());\n83: assertEquals(\"head\", head.getLocalName());\n84: assertEquals(\"head\", head.getNodeName());\n85: 86: Node epubTitle = htmlEl.getChildNodes().item(2).getChildNodes().item(3);\n87: assertEquals(\"Check\", epubTitle.getTextContent());\n88: assertEquals(\"http://www.idpf.org/2007/ops\", epubTitle.getNamespaceURI());\n89: assertEquals(\"title\", epubTitle.getLocalName());\n90: assertEquals(\"epub:title\", epubTitle.getNodeName());\n91: 92: Node xSection = epubTitle.getNextSibling().getNextSibling();\n93: assertEquals(\"urn:test\", xSection.getNamespaceURI());\n94: assertEquals(\"section\", xSection.getLocalName());\n95: assertEquals(\"x:section\", xSection.getNodeName());\n96: 97: // https://github.com/jhy/jsoup/issues/977\n98: // does not keep last set namespace\n99: Node svg = xSection.getNextSibling().getNextSibling();\n100: assertEquals(\"http://www.w3.org/2000/svg\", svg.getNamespaceURI());\n101: assertEquals(\"svg\", svg.getLocalName());\n102: assertEquals(\"svg\", svg.getNodeName());\n103: 104: Node path = svg.getChildNodes().item(1);\n105: assertEquals(\"http://www.w3.org/2000/svg\", path.getNamespaceURI());\n106: assertEquals(\"path\", path.getLocalName());\n107: assertEquals(\"path\", path.getNodeName());\n108: 109: Node clip = path.getChildNodes().item(1);\n110: assertEquals(\"http://example.com/clip\", clip.getNamespaceURI());\n111: assertEquals(\"clip\", clip.getLocalName());\n112: assertEquals(\"clip\", clip.getNodeName());\n113: assertEquals(\"456\", clip.getTextContent());\n114: 115: Node picture = svg.getNextSibling().getNextSibling();\n116: assertEquals(\"http://www.w3.org/1999/xhtml\", picture.getNamespaceURI());\n117: assertEquals(\"picture\", picture.getLocalName());\n118: assertEquals(\"picture\", picture.getNodeName());\n119: 120: Node img = picture.getFirstChild();\n121: assertEquals(\"http://www.w3.org/1999/xhtml\", img.getNamespaceURI());\n122: assertEquals(\"img\", img.getLocalName());\n123: assertEquals(\"img\", img.getNodeName());\n124: 125: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:read()Lorg/jsoup/parser/Token;",
+            "method_body": "Token read() {\nwhile (!isEmitPending)\nstate.read(this, reader);\nif (charsBuilder.length() > 0) {\n} else if (charsString != null) {\nToken token = charPending.data(charsString);\ncharsString = null;\nreturn token;\nisEmitPending = false;\nreturn emitPending;\n}",
+            "method_id": 160
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(Lorg/jsoup/parser/Token;)V",
+            "method_body": "void emit(Token token) {\nValidate.isFalse(isEmitPending, \"There is an unread token pending!\");\nemitPending = token;\nisEmitPending = true;\nif (token.type == Token.TokenType.StartTag) {\nToken.StartTag startTag = (Token.StartTag) token;\nlastStartTag = startTag.tagName;\n} else if (token.type == Token.TokenType.EndTag) {\nToken.EndTag endTag = (Token.EndTag) token;\nif (endTag.attributes != null)\n}",
+            "method_id": 161
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(Ljava/lang/String;)V",
+            "method_body": "void emit(final String str) {\nif (charsString == null) {\ncharsString = str;\n}",
+            "method_id": 162
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:transition(Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "void transition(TokeniserState state) {\nthis.state = state;\n}",
+            "method_id": 163
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:advanceTransition(Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "void advanceTransition(TokeniserState state) {\nreader.advance();\nthis.state = state;\n}",
+            "method_id": 164
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createTagPending(Z)Lorg/jsoup/parser/Token$Tag;",
+            "method_body": "Token.Tag createTagPending(boolean start) {\ntagPending = start ? startPending.reset() : endPending.reset();\nreturn tagPending;\n}",
+            "method_id": 165
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emitTagPending()V",
+            "method_body": "void emitTagPending() {\ntagPending.finaliseTag();\nemit(tagPending);\n}",
+            "method_id": 166
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createTempBuffer()V",
+            "method_body": "void createTempBuffer() {\nToken.reset(dataBuffer);\n}",
+            "method_id": 167
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:isAppropriateEndTagToken()Z",
+            "method_body": "boolean isAppropriateEndTagToken() {\nreturn lastStartTag != null && tagPending.name().equalsIgnoreCase(lastStartTag);\n}",
+            "method_id": 168
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:<clinit>()V",
+            "method_body": "static final char[] attributeValueUnquoted = new char[]{nullChar, '\\t', '\\n', '\\f', '\\r', ' ', '\"', '&', '\\'', '<', '=', '>', '`'};\nstatic final char[] attributeValueUnquoted = new char[]{nullChar, '\\t', '\\n', '\\f', '\\r', ' ', '\"', '&', '\\'', '<', '=', '>', '`'};",
+            "method_id": 169
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:handleDataEndTag(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void handleDataEndTag(Tokeniser t, CharacterReader r, TokeniserState elseTransition) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.tagPending.appendTagName(name);\nt.dataBuffer.append(name);\nreturn;\nboolean needsExitTransition = false;\nif (t.isAppropriateEndTagToken() && !r.isEmpty()) {\nchar c = r.consume();\nswitch (c) {\nt.emitTagPending();\nt.transition(Data);\nbreak;\n} else {\nif (needsExitTransition) {\n}",
+            "method_id": 170
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:readData(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void readData(Tokeniser t, CharacterReader r, TokeniserState current, TokeniserState advance) {\nswitch (r.current()) {\nt.advanceTransition(advance);\nbreak;\nString data = r.consumeToAny('<', nullChar); // todo - why hunt for null here? Just consumeTo'<'?\nt.emit(data);\n}",
+            "method_id": 171
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:readEndTag(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void readEndTag(Tokeniser t, CharacterReader r, TokeniserState a, TokeniserState b) {\nif (r.matchesLetter()) {\nt.createTagPending(false);\nt.transition(a);\n}",
+            "method_id": 172
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$1:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(TagOpen);\nbreak;\nt.emit(new Token.EOF());\nbreak;\nString data = r.consumeData();\nt.emit(data);\n}",
+            "method_id": 173
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$3:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(RcdataLessthanSign);\nbreak;\nString data = r.consumeToAny('&', '<', nullChar);\nt.emit(data);\n}",
+            "method_id": 174
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$5:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nreadData(t, r, this, RawtextLessthanSign);\n}",
+            "method_id": 175
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$8:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(EndTagOpen);\nbreak;\nt.advanceTransition(BogusComment);\nbreak;\nif (r.matchesLetter()) {\nt.createTagPending(true);\nt.transition(TagName);\n}",
+            "method_id": 176
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$9:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.isEmpty()) {\n} else if (r.matchesLetter()) {\nt.createTagPending(false);\nt.transition(TagName);\n}",
+            "method_id": 177
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$10:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString tagName = r.consumeTagName();\nt.tagPending.appendTagName(tagName);\nchar c = r.consume();\nswitch (c) {\nt.transition(BeforeAttributeName);\nbreak;\nt.emitTagPending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 178
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$11:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matches('/')) {\nt.createTempBuffer();\nt.advanceTransition(RCDATAEndTagOpen);\n}",
+            "method_id": 179
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$12:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nt.createTagPending(false);\nt.tagPending.appendTagName(r.current());\nt.dataBuffer.append(r.current());\nt.advanceTransition(RCDATAEndTagName);\n}",
+            "method_id": 180
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$13:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.tagPending.appendTagName(name);\nt.dataBuffer.append(name);\nreturn;\nchar c = r.consume();\nswitch (c) {\nif (t.isAppropriateEndTagToken()) {\nt.emitTagPending();\nt.transition(Data);\n}",
+            "method_id": 181
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$14:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matches('/')) {\nt.createTempBuffer();\nt.advanceTransition(RawtextEndTagOpen);\n}",
+            "method_id": 182
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$15:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nreadEndTag(t, r, RawtextEndTagName, Rawtext);\n}",
+            "method_id": 183
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$16:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nhandleDataEndTag(t, r, Rawtext);\n}",
+            "method_id": 184
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$34:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.transition(SelfClosingStartTag);\nbreak;\nt.tagPending.newAttribute();\nr.unconsume();\nt.transition(AttributeName);\n}",
+            "method_id": 185
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$35:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString name = r.consumeToAnySorted(attributeNameCharsSorted);\nt.tagPending.appendAttributeName(name);\nchar c = r.consume();\nswitch (c) {\nt.transition(BeforeAttributeValue);\nbreak;\n}",
+            "method_id": 186
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$37:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.transition(AttributeValue_doubleQuoted);\nbreak;\n}",
+            "method_id": 187
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$38:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString value = r.consumeToAny(attributeDoubleValueCharsSorted);\nif (value.length() > 0)\nt.tagPending.appendAttributeValue(value);\nchar c = r.consume();\nswitch (c) {\nt.transition(AfterAttributeValue_quoted);\nbreak;\n}",
+            "method_id": 188
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$41:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.transition(BeforeAttributeName);\nbreak;\nt.transition(SelfClosingStartTag);\nbreak;\nt.emitTagPending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 189
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$42:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.tagPending.selfClosing = true;\nt.emitTagPending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 190
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$43:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nr.unconsume();\nToken.Comment comment = new Token.Comment();\ncomment.bogus = true;\ncomment.data.append(r.consumeTo('>'));\nt.emit(comment);\nt.advanceTransition(Data);\n}",
+            "method_id": 191
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Character:<init>()V",
+            "method_body": "Character() {\nsuper();\ntype = TokenType.Character;\n}",
+            "method_id": 192
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Character:reset()Lorg/jsoup/parser/Token;",
+            "method_body": "Token reset() {\ndata = null;\nreturn this;\n}",
+            "method_id": 193
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Character:data(Ljava/lang/String;)Lorg/jsoup/parser/Token$Character;",
+            "method_body": "Character data(String data) {\nthis.data = data;\nreturn this;\n}",
+            "method_id": 194
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Character:getData()Ljava/lang/String;",
+            "method_body": "String getData() {\nreturn data;\n}",
+            "method_id": 195
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Doctype:<init>()V",
+            "method_body": "Doctype() {\ntype = TokenType.Doctype;\n}",
+            "method_id": 196
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Comment:<init>()V",
+            "method_body": "final StringBuilder data = new StringBuilder();\nboolean bogus = false;\nreset(data);\nbogus = false;\nreturn this;\n}",
+            "method_id": 197
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Comment:reset()Lorg/jsoup/parser/Token;",
+            "method_body": "Token reset() {\nreset(data);\nbogus = false;\nreturn this;\n}",
+            "method_id": 198
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Comment:getData()Ljava/lang/String;",
+            "method_body": "String getData() {\nreturn data.toString();\n}",
+            "method_id": 199
+        }
+    ]
+}

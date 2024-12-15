@@ -1,0 +1,109 @@
+{
+    "bug_id": 47,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.EntitiesTest.escapesGtInXmlAttributesButNotInHtml",
+    "test_body": "90: @Test public void escapesGtInXmlAttributesButNotInHtml() {\n91: // https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML\n92: 93: 94: String docHtml = \"<a title='<p>One</p>'>One</a>\";\n95: Document doc = Jsoup.parse(docHtml);\n96: Element element = doc.select(\"a\").first();\n97: 98: doc.outputSettings().escapeMode(base);\n99: assertEquals(\"<a title=\\\"<p>One</p>\\\">One</a>\", element.outerHtml());\n100: 101: doc.outputSettings().escapeMode(xhtml);\n102: assertEquals(\"<a title=\\\"&lt;p>One&lt;/p>\\\">One</a>\", element.outerHtml());\n103: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<<a title=\"[&lt;p>One&lt;]/p>\">One</a>> but was:<<a title=\"[<p>One<]/p>\">One</a>>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.jsoup.nodes.EntitiesTest.escapesGtInXmlAttributesButNotInHtml(EntitiesTest.java:102)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/StringBuilder;Ljava/lang/String;Lorg/jsoup/nodes/Document$OutputSettings;ZZZ)V",
+            "method_body": "static void escape(StringBuilder accum, String string, Document.OutputSettings out,\nboolean lastWasWhite = false;\nboolean reachedNonWhite = false;\nfinal EscapeMode escapeMode = out.escapeMode();\nfinal CharsetEncoder encoder = out.encoder();\nfinal CoreCharset coreCharset = CoreCharset.byName(encoder.charset().name());\nfinal Map<Character, String> map = escapeMode.getMap();\nfinal int length = string.length();\nfor (int offset = 0; offset < length; offset += Character.charCount(codePoint)) {\ncodePoint = string.codePointAt(offset);\nif (normaliseWhite) {\nif (StringUtil.isWhitespace(codePoint)) {\nlastWasWhite = false;\nreachedNonWhite = true;\nif (codePoint < Character.MIN_SUPPLEMENTARY_CODE_POINT) {\nfinal char c = (char) codePoint;\nswitch (c) {\nif (!inAttribute)\naccum.append(c);\nbreak;\nif (!inAttribute)\naccum.append(c);\nbreak;\nif (canEncode(coreCharset, c, encoder))\naccum.append(c);\n} else {\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:html(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void html(StringBuilder accum, Document.OutputSettings out) {\nif (attributes == null)\nfor (Map.Entry<String, Attribute> entry : attributes.entrySet()) {\nAttribute attribute = entry.getValue();\naccum.append(\" \");\nattribute.html(accum, out);\n}\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:html(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "protected void html(StringBuilder accum, Document.OutputSettings out) {\naccum.append(key);\nif (!shouldCollapseAttribute(out)) {\naccum.append(\"=\\\"\");\nEntities.escape(accum, value, out, true, false, false);\naccum.append('\"');\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:loadEntities(Ljava/lang/String;)Ljava/util/Map;",
+            "method_body": "private static Map<String, Character> loadEntities(String filename) {\nProperties properties = new Properties();\nMap<String, Character> entities = new HashMap<String, Character>();\nInputStream in = Entities.class.getResourceAsStream(filename);\nproperties.load(in);\nin.close();\n}\nfor (Map.Entry entry: properties.entrySet()) {\nCharacter val = Character.valueOf((char) Integer.parseInt((String) entry.getValue(), 16));\nString name = (String) entry.getKey();\nentities.put(name, val);\n}\nreturn entities;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$7:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nswitch (t.type) {\nToken.Character c = t.asCharacter();\nif (c.getData().equals(nullString)) {\n} else if (tb.framesetOk() && isWhitespace(c)) { // don't check if whitespace if frames already closed\ntb.reconstructFormattingElements();\ntb.insert(c);\ntb.framesetOk(false);\nbreak;\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, Constants.InBodyStartToHead)) {\n} else if (name.equals(\"body\")) {\n} else if (name.equals(\"frameset\")) {\n} else if (StringUtil.in(name, Constants.InBodyStartPClosers)) {\n} else if (StringUtil.in(name, Constants.Headings)) {\n} else if (StringUtil.in(name, Constants.InBodyStartPreListing)) {\n} else if (name.equals(\"form\")) {\n} else if (name.equals(\"li\")) {\n} else if (StringUtil.in(name, Constants.DdDt)) {\n} else if (name.equals(\"plaintext\")) {\n} else if (name.equals(\"button\")) {\n} else if (name.equals(\"a\")) {\nif (tb.getActiveFormattingElement(\"a\") != null) {\ntb.reconstructFormattingElements();\nElement a = tb.insert(startTag);\ntb.pushActiveFormattingElements(a);\n} else if (StringUtil.in(name, Constants.Formatters)) {\nToken.EndTag endTag = t.asEndTag();\nname = endTag.name();\nif (name.equals(\"body\")) {\n} else if (name.equals(\"html\")) {\n} else if (StringUtil.in(name, Constants.InBodyEndClosers)) {\n} else if (name.equals(\"form\")) {\n} else if (name.equals(\"p\")) {\n} else if (name.equals(\"li\")) {\n} else if (StringUtil.in(name, Constants.DdDt)) {\n} else if (StringUtil.in(name, Constants.Headings)) {\n} else if (name.equals(\"sarcasm\")) {\n} else if (StringUtil.in(name, Constants.InBodyEndAdoptionFormatters)) {\nfor (int i = 0; i < 8; i++) {\nElement formatEl = tb.getActiveFormattingElement(name);\nif (formatEl == null)\nelse if (!tb.onStack(formatEl)) {\n} else if (!tb.inScope(formatEl.nodeName())) {\n} else if (tb.currentElement() != formatEl)\nElement furthestBlock = null;\nElement commonAncestor = null;\nboolean seenFormattingElement = false;\nArrayList<Element> stack = tb.getStack();\nfinal int stackSize = stack.size();\nfor (int si = 0; si < stackSize && si < 64; si++) {\nElement el = stack.get(si);\nif (el == formatEl) {\ncommonAncestor = stack.get(si - 1);\nseenFormattingElement = true;\n} else if (seenFormattingElement && tb.isSpecial(el)) {\nif (furthestBlock == null) {\ntb.popStackToClose(formatEl.nodeName());\ntb.removeFromActiveFormattingElements(formatEl);\nreturn true;\nreturn true;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:outerHtml()Ljava/lang/String;",
+            "method_body": "public String outerHtml() {\nStringBuilder accum = new StringBuilder(128);\nouterHtml(accum);\nreturn accum.toString();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:put(Lorg/jsoup/nodes/Attribute;)V",
+            "method_body": "public void put(Attribute attribute) {\nValidate.notNull(attribute);\nif (attributes == null)\nattributes = new LinkedHashMap<String, Attribute>(2);\nattributes.put(attribute.getKey(), attribute);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:inSpecificScope([Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "private boolean inSpecificScope(String[] targetNames, String[] baseTypes, String[] extraTypes) {\nfor (int pos = stack.size() -1; pos >= 0; pos--) {\nElement el = stack.get(pos);\nString elName = el.nodeName();\nif (StringUtil.in(elName, targetNames))\nreturn true;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:isElementInQueue(Ljava/util/ArrayList;Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "private boolean isElementInQueue(ArrayList<Element> queue, Element element) {\nfor (int pos = queue.size() -1; pos >= 0; pos--) {\nElement next = queue.get(pos);\nif (next == element) {\nreturn true;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:inSpecificScope(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "private boolean inSpecificScope(String targetName, String[] baseTypes, String[] extraTypes) {\nspecificScopeTarget[0] = targetName;\nreturn inSpecificScope(specificScopeTarget, baseTypes, extraTypes);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:inScope(Ljava/lang/String;)Z",
+            "method_body": "boolean inScope(String targetName) {\nreturn inScope(targetName, null);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:inScope(Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "boolean inScope(String targetName, String[] extras) {\nreturn inSpecificScope(targetName, TagsSearchInScope, extras);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:outerHtmlHead(Ljava/lang/StringBuilder;ILorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void outerHtmlHead(StringBuilder accum, int depth, Document.OutputSettings out) {\nif (accum.length() > 0 && out.prettyPrint() && (tag.formatAsBlock() || (parent() != null && parent().tag().formatAsBlock()) || out.outline()) )\naccum\nattributes.html(accum, out);\nif (childNodes.isEmpty() && tag.isSelfClosing()) {\naccum.append(\">\");\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:outerHtml(Ljava/lang/StringBuilder;)V",
+            "method_body": "protected void outerHtml(StringBuilder accum) {\nnew NodeTraversor(new OuterHtmlVisitor(accum, getOutputSettings())).traverse(this);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.helper.Validate:notNull(Ljava/lang/Object;Ljava/lang/String;)V",
+            "method_body": "public static void notNull(Object obj, String msg) {\nif (obj == null)\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.helper.Validate:notEmpty(Ljava/lang/String;)V",
+            "method_body": "public static void notEmpty(String string) {\nif (string == null || string.length() == 0)\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:outerHtmlTail(Ljava/lang/StringBuilder;ILorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void outerHtmlTail(StringBuilder accum, int depth, Document.OutputSettings out) {\nif (!(childNodes.isEmpty() && tag.isSelfClosing())) {\nif (out.prettyPrint() && (!childNodes.isEmpty() && (\naccum.append(\"</\").append(tagName()).append(\">\");\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.helper.Validate:notNull(Ljava/lang/Object;)V",
+            "method_body": "public static void notNull(Object obj) {\nif (obj == null)\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:in(Ljava/lang/String;[Ljava/lang/String;)Z",
+            "method_body": "public static boolean in(String needle, String... haystack) {\nfor (String hay : haystack) {\nif (hay.equals(needle))\nreturn true;\nreturn false;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:canEncode(Lorg/jsoup/nodes/Entities$CoreCharset;CLjava/nio/charset/CharsetEncoder;)Z",
+            "method_body": "private static boolean canEncode(final CoreCharset charset, final char c, final CharsetEncoder fallback) {\nswitch (charset) {\nreturn true; // real is:!(Character.isLowSurrogate(c) || Character.isHighSurrogate(c)); - but already check above\n}",
+            "method_id": 19
+        }
+    ]
+}

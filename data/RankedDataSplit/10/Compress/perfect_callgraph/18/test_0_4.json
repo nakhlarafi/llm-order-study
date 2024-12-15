@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStreamTest.testWriteNonAsciiDirectoryNamePosixMode",
+    "test_body": "412: public void testWriteNonAsciiDirectoryNamePosixMode() throws Exception {\n413: String n = \"f\\u00f6\\u00f6/\";\n414: TarArchiveEntry t = new TarArchiveEntry(n);\n415: ByteArrayOutputStream bos = new ByteArrayOutputStream();\n416: TarArchiveOutputStream tos = new TarArchiveOutputStream(bos);\n417: tos.setAddPaxHeadersForNonAsciiNames(true);\n418: tos.putArchiveEntry(t);\n419: tos.closeArchiveEntry();\n420: tos.close();\n421: byte[] data = bos.toByteArray();\n422: TarArchiveInputStream tin =\n423: new TarArchiveInputStream(new ByteArrayInputStream(data));\n424: TarArchiveEntry e = tin.getNextTarEntry();\n425: assertEquals(n, e.getName());\n426: assertTrue(e.isDirectory());\n427: tin.close();\n428: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:writeEntryHeader([BLorg/apache/commons/compress/archivers/zip/ZipEncoding;Z)V",
+            "method_body": "public void writeEntryHeader(byte[] outbuf, ZipEncoding encoding,\nint offset = 0;\noffset = TarUtils.formatNameBytes(name, outbuf, offset, NAMELEN,\noffset = writeEntryHeaderField(mode, outbuf, offset, MODELEN, starMode);\noffset = writeEntryHeaderField(userId, outbuf, offset, UIDLEN,\noffset = writeEntryHeaderField(groupId, outbuf, offset, GIDLEN,\noffset = writeEntryHeaderField(size, outbuf, offset, SIZELEN, starMode);\noffset = writeEntryHeaderField(modTime, outbuf, offset, MODTIMELEN,\nint csOffset = offset;\nfor (int c = 0; c < CHKSUMLEN; ++c) {\noutbuf[offset++] = (byte) ' ';\noutbuf[offset++] = linkFlag;\noffset = TarUtils.formatNameBytes(linkName, outbuf, offset, NAMELEN,\noffset = TarUtils.formatNameBytes(magic, outbuf, offset, MAGICLEN);\noffset = TarUtils.formatNameBytes(version, outbuf, offset, VERSIONLEN);\noffset = TarUtils.formatNameBytes(userName, outbuf, offset, UNAMELEN,\noffset = TarUtils.formatNameBytes(groupName, outbuf, offset, GNAMELEN,\noffset = writeEntryHeaderField(devMajor, outbuf, offset, DEVLEN,\noffset = writeEntryHeaderField(devMinor, outbuf, offset, DEVLEN,\nwhile (offset < outbuf.length) {\noutbuf[offset++] = 0;\nlong chk = TarUtils.computeCheckSum(outbuf);\nTarUtils.formatCheckSumOctalBytes(chk, outbuf, csOffset, CHKSUMLEN);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:writeEntryHeaderField(J[BIIZ)I",
+            "method_body": "private int writeEntryHeaderField(long value, byte[] outbuf, int offset,\nif (!starMode && (value < 0\nreturn TarUtils.formatLongOctalOrBinaryBytes(value, outbuf, offset,\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:normalizeFileName(Ljava/lang/String;Z)Ljava/lang/String;",
+            "method_body": "private static String normalizeFileName(String fileName,\nString osname = System.getProperty(\"os.name\").toLowerCase(Locale.ENGLISH);\nif (osname != null) {\nif (osname.startsWith(\"windows\")) {\n} else if (osname.indexOf(\"netware\") > -1) {\nfileName = fileName.replace(File.separatorChar, '/');\nwhile (!preserveLeadingSlashes && fileName.startsWith(\"/\")) {\nreturn fileName;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:<clinit>()V",
+            "method_body": "private static final int BYTE_MASK = 255;\nstatic final ZipEncoding DEFAULT_ENCODING =\nstatic final ZipEncoding FALLBACK_ENCODING = new ZipEncoding() {\n};",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatNameBytes(Ljava/lang/String;[BII)I",
+            "method_body": "public static int formatNameBytes(String name, byte[] buf, final int offset, final int length) {\nreturn formatNameBytes(name, buf, offset, length, DEFAULT_ENCODING);\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatNameBytes(Ljava/lang/String;[BIILorg/apache/commons/compress/archivers/zip/ZipEncoding;)I",
+            "method_body": "public static int formatNameBytes(String name, byte[] buf, final int offset,\nint len = name.length();\nByteBuffer b = encoding.encode(name);\nwhile (b.limit() > length && len > 0) {\nfinal int limit = b.limit() - b.position();\nSystem.arraycopy(b.array(), b.arrayOffset(), buf, offset, limit);\nfor (int i = limit; i < length; ++i) {\nbuf[offset + i] = 0;\nreturn offset + length;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatUnsignedOctalString(J[BII)V",
+            "method_body": "public static void formatUnsignedOctalString(final long value, byte[] buffer,\nint remaining = length;\nremaining--;\nif (value == 0) {\nbuffer[offset + remaining--] = (byte) '0';\nlong val = value;\nfor (; remaining >= 0 && val != 0; --remaining) {\nbuffer[offset + remaining] = (byte) ((byte) '0' + (byte) (val & 7));\nval = val >>> 3;\nif (val != 0){\nfor (; remaining >= 0; --remaining) { // leading zeros\nbuffer[offset + remaining] = (byte) '0';\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatLongOctalBytes(J[BII)I",
+            "method_body": "public static int formatLongOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-1; // For space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx] = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatLongOctalOrBinaryBytes(J[BII)I",
+            "method_body": "public static int formatLongOctalOrBinaryBytes(\nfinal long maxAsOctalChar = length == TarConstants.UIDLEN ? TarConstants.MAXID : TarConstants.MAXSIZE;\nfinal boolean negative = value < 0;\nif (!negative && value <= maxAsOctalChar) { // OK to store as octal chars\nreturn formatLongOctalBytes(value, buf, offset, length);\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatCheckSumOctalBytes(J[BII)I",
+            "method_body": "public static int formatCheckSumOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-2; // for NUL and space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx++]   = 0; // Trailing null\nbuf[offset + idx]     = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 49
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 74,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.ElementTest.testNormalizesInvisiblesInText",
+    "test_body": "1204: @Test public void testNormalizesInvisiblesInText() {\n1205: // return Character.getType(c) == 16 && (c == 8203 || c == 8204 || c == 8205 || c == 173);\n1206: String escaped = \"This&shy;is&#x200b;one&#x200c;long&#x200d;word\";\n1207: String decoded = \"This\\u00ADis\\u200Bone\\u200Clong\\u200Dword\"; // browser would not display those soft hyphens / other chars, so we don't want them in the text\n1208: 1209: Document doc = Jsoup.parse(\"<p>\" + escaped);\n1210: Element p = doc.select(\"p\").first();\n1211: doc.outputSettings().charset(\"ascii\"); // so that the outer html is easier to see with escaped invisibles\n1212: assertEquals(\"Thisisonelongword\", p.text()); // text is normalized\n1213: assertEquals(\"<p>\" + escaped + \"</p>\", p.outerHtml()); // html / whole text keeps &shy etc;\n1214: assertEquals(decoded, p.textNodes().get(0).getWholeText());\n1215: 1216: Element matched = doc.select(\"p:contains(Thisisonelongword)\").first(); // really just oneloneword, no invisibles\n1217: assertEquals(\"p\", matched.nodeName());\n1218: assertTrue(matched.is(\":containsOwn(Thisisonelongword)\"));\n1219: 1220: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchConsume(Ljava/lang/String;)Z",
+            "method_body": "boolean matchConsume(String seq) {\nbufferUp();\nif (matches(seq)) {\nbufPos += seq.length();\nreturn true;\nreturn false;\n}",
+            "method_id": 150
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchConsumeIgnoreCase(Ljava/lang/String;)Z",
+            "method_body": "boolean matchConsumeIgnoreCase(String seq) {\nif (matchesIgnoreCase(seq)) {\nbufPos += seq.length();\nreturn true;\n}",
+            "method_id": 151
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:cacheString([C[Ljava/lang/String;II)Ljava/lang/String;",
+            "method_body": "private static String cacheString(final char[] charBuf, final String[] stringCache, final int start, final int count) {\nif (count > maxStringCacheLen)\nreturn new String(charBuf, start, count);\nif (count < 1)\nint hash = 0;\nint offset = start;\nfor (int i = 0; i < count; i++) {\nhash = 31 * hash + charBuf[offset++];\nfinal int index = hash & stringCache.length - 1;\nString cached = stringCache[index];\nif (cached == null) { // miss, add\ncached = new String(charBuf, start, count);\nstringCache[index] = cached;\nif (rangeEquals(charBuf, start, count, cached)) { // hit\nreturn cached;\ncached = new String(charBuf, start, count);\nstringCache[index] = cached; // update the cache, as recently used strings are more likely to show up again\nreturn cached;\n}",
+            "method_id": 152
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:rangeEquals([CIILjava/lang/String;)Z",
+            "method_body": "static boolean rangeEquals(final char[] charBuf, final int start, int count, final String cached) {\nif (count == cached.length()) {\nint i = start;\nint j = 0;\nwhile (count-- != 0) {\nif (charBuf[i++] != cached.charAt(j++))\nreturn false;\nreturn true;\nreturn false;\n}",
+            "method_id": 153
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:<init>(Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/ParseErrorList;)V",
+            "method_body": "Tokeniser(CharacterReader reader, ParseErrorList errors) {\nthis.reader = reader;\nthis.errors = errors;\n}",
+            "method_id": 154
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:<clinit>()V",
+            "method_body": "static final char replacementChar = '\\uFFFD'; // replaces null character\nprivate static final char[] notCharRefCharsSorted = new char[]{'\\t', '\\n', '\\r', '\\f', ' ', '<', '&'};",
+            "method_id": 155
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(Lorg/jsoup/parser/Token;)V",
+            "method_body": "void emit(Token token) {\nValidate.isFalse(isEmitPending, \"There is an unread token pending!\");\nemitPending = token;\nisEmitPending = true;\nif (token.type == Token.TokenType.StartTag) {\nToken.StartTag startTag = (Token.StartTag) token;\nlastStartTag = startTag.tagName;\n} else if (token.type == Token.TokenType.EndTag) {\n}",
+            "method_id": 156
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(Ljava/lang/String;)V",
+            "method_body": "void emit(final String str) {\nif (charsString == null) {\ncharsString = str;\nif (charsBuilder.length() == 0) { // switching to string builder as more than one emit before read\ncharsBuilder.append(charsString);\ncharsBuilder.append(str);\n}",
+            "method_id": 157
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit([I)V",
+            "method_body": "void emit(int[] codepoints) {\nemit(new String(codepoints, 0, codepoints.length));\n}",
+            "method_id": 158
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:transition(Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "void transition(TokeniserState state) {\nthis.state = state;\n}",
+            "method_id": 159
+        }
+    ]
+}

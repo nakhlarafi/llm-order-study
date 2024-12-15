@@ -1,0 +1,109 @@
+{
+    "bug_id": 67,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.handlesDeepStack",
+    "test_body": "904: @Test public void handlesDeepStack() {\n905: // inspired by http://sv.stargate.wikia.com/wiki/M2J and https://github.com/jhy/jsoup/issues/955\n906: // I didn't put it in the integration tests, because explorer and intellij kept dieing trying to preview/index it\n907: 908: // Arrange\n909: StringBuilder longBody = new StringBuilder(500000);\n910: for (int i = 0; i < 25000; i++) {\n911: longBody.append(i).append(\"<dl><dd>\");\n912: }\n913: for (int i = 0; i < 25000; i++) {\n914: longBody.append(i).append(\"</dd></dl>\");\n915: }\n916: 917: // Act\n918: long start = System.currentTimeMillis();\n919: Document doc = Parser.parseBodyFragment(longBody.toString(), \"\");\n920: 921: // Assert\n922: assertEquals(2, doc.body().childNodeSize());\n923: assertEquals(25000, doc.select(\"dd\").size());\n924: assertTrue(System.currentTimeMillis() - start < 1000);\n925: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.jsoup.parser.HtmlParserTest.handlesDeepStack(HtmlParserTest.java:924)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Element:accumulateParents(Lorg/jsoup/nodes/Element;Lorg/jsoup/select/Elements;)V",
+            "method_body": "private static void accumulateParents(Element el, Elements parents) {\nElement parent = el.parent();\nif (parent != null && !parent.tagName().equals(\"#root\")) {\nparents.add(parent);\naccumulateParents(parent, parents);\n}",
+            "method_id": 120
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:removeChild(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void removeChild(Node out) {\nValidate.isTrue(out.parentNode == this);\nfinal int index = out.siblingIndex;\nensureChildNodes().remove(index);\nreindexChildren(index);\nout.parentNode = null;\n}",
+            "method_id": 121
+        },
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:traverse(Lorg/jsoup/select/NodeVisitor;Lorg/jsoup/nodes/Node;)V",
+            "method_body": "public static void traverse(NodeVisitor visitor, Node root) {\nNode node = root;\nint depth = 0;\nwhile (node != null) {\nvisitor.head(node, depth);\nif (node.childNodeSize() > 0) {\nnode = node.childNode(0);\ndepth++;\nwhile (node.nextSibling() == null && depth > 0) {\nvisitor.tail(node, depth);\nnode = node.parentNode();\ndepth--;\nvisitor.tail(node, depth);\nif (node == root)\nbreak;\nnode = node.nextSibling();\n}",
+            "method_id": 122
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendElement(Ljava/lang/String;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendElement(String tagName) {\nElement child = new Element(Tag.valueOf(tagName), baseUri());\nappendChild(child);\nreturn child;\n}",
+            "method_id": 123
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:parents()Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements parents() {\nElements parents = new Elements();\naccumulateParents(this, parents);\nreturn parents;\n}",
+            "method_id": 124
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:findFirstElementByTagName(Ljava/lang/String;Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "private Element findFirstElementByTagName(String tag, Node node) {\nif (node.nodeName().equals(tag))\nreturn (Element) node;\nint size = node.childNodeSize();\nfor (int i = 0; i < size; i++) {\nElement found = findFirstElementByTagName(tag, node.childNode(i));\nif (found != null)\nreturn found;\nreturn null;\n}",
+            "method_id": 125
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:setParentNode(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void setParentNode(Node parentNode) {\nValidate.notNull(parentNode);\nif (this.parentNode != null)\nthis.parentNode.removeChild(this);\nthis.parentNode = parentNode;\n}",
+            "method_id": 126
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector$Accumulator:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(Node node, int depth) {\nif (node instanceof Element) {\nElement el = (Element) node;\nif (eval.matches(root, el))\nelements.add(el);\n}",
+            "method_id": 127
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "public Element(Tag tag, String baseUri, Attributes attributes) {\nValidate.notNull(tag);\nValidate.notNull(baseUri);\nchildNodes = EMPTY_NODES;\nthis.baseUri = baseUri;\nthis.attributes = attributes;\nthis.tag = tag;\n}",
+            "method_id": 128
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:quirksMode(Lorg/jsoup/nodes/Document$QuirksMode;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document quirksMode(QuirksMode quirksMode) {\nthis.quirksMode = quirksMode;\nreturn this;\n}",
+            "method_id": 129
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:reindexChildren(I)V",
+            "method_body": "private void reindexChildren(int start) {\nfinal List<Node> childNodes = ensureChildNodes();\nfor (int i = start; i < childNodes.size(); i++) {\n}",
+            "method_id": 130
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector$Accumulator:<init>(Lorg/jsoup/nodes/Element;Lorg/jsoup/select/Elements;Lorg/jsoup/select/Evaluator;)V",
+            "method_body": "Accumulator(Element root, Elements elements, Evaluator eval) {\nthis.root = root;\nthis.elements = elements;\nthis.eval = eval;\n}",
+            "method_id": 131
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendChild(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendChild(Node child) {\nValidate.notNull(child);\nreparentChild(child);\nensureChildNodes();\nchildNodes.add(child);\nchild.setSiblingIndex(childNodes.size() - 1);\nreturn this;\n}",
+            "method_id": 132
+        },
+        {
+            "method_signature": "org.jsoup.helper.ChangeNotifyingArrayList:remove(I)Ljava/lang/Object;",
+            "method_body": "public E remove(int index) {\nonContentsChanged();\nreturn super.remove(index);\n}",
+            "method_id": 133
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:root()Lorg/jsoup/nodes/Node;",
+            "method_body": "public Node root() {\nNode node = this;\nwhile (node.parentNode != null)\nnode = node.parentNode;\nreturn node;\n}",
+            "method_id": 134
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:<init>(Ljava/lang/String;)V",
+            "method_body": "public Document(String baseUri) {\nsuper(Tag.valueOf(\"#root\", ParseSettings.htmlDefault), baseUri);\nthis.location = baseUri;\n}",
+            "method_id": 135
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document$OutputSettings:<init>()V",
+            "method_body": "private Entities.EscapeMode escapeMode = Entities.EscapeMode.base;\nprivate boolean prettyPrint = true;\nprivate boolean outline = false;\nprivate int indentAmount = 1;\nprivate Syntax syntax = Syntax.html;\npublic OutputSettings() {\ncharset(Charset.forName(\"UTF8\"));\n}",
+            "method_id": 136
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:nextSibling()Lorg/jsoup/nodes/Node;",
+            "method_body": "public Node nextSibling() {\nif (parentNode == null)\nreturn null; // root\nfinal List<Node> siblings = parentNode.ensureChildNodes();\nfinal int index = siblingIndex+1;\nif (siblings.size() > index)\nreturn siblings.get(index);\nreturn null;\n}",
+            "method_id": 137
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select(Lorg/jsoup/select/Evaluator;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements select(Evaluator evaluator, Element root) {\nValidate.notNull(evaluator);\nValidate.notNull(root);\nreturn Collector.collect(evaluator, root);\n}",
+            "method_id": 138
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector:collect(Lorg/jsoup/select/Evaluator;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements collect (Evaluator eval, Element root) {\nElements elements = new Elements();\nNodeTraversor.traverse(new Accumulator(root, elements, eval), root);\nreturn elements;\n}",
+            "method_id": 139
+        }
+    ]
+}

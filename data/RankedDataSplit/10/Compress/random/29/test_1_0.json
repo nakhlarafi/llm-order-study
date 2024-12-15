@@ -1,0 +1,59 @@
+{
+    "bug_id": 29,
+    "test_id": 1,
+    "test_name": "org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.testEncodingOutputStream",
+    "test_body": "324: public void testEncodingOutputStream() throws Exception {\n325: int failed = 0;\n326: for(int i = 1; i <= TESTS.length; i++) {\n327: TestData test = TESTS[i-1];\n328: if (test.hasOutputStream) {\n329: ArchiveOutputStream ais = getOutputStreamFor(test.type, test.fac);\n330: final String field = getField(ais, test.fieldName);\n331: if (!eq(test.expectedEncoding, field)) {\n332: System.out.println(\"Failed test \" + i + \". expected: \" + test.expectedEncoding + \" actual: \" + field + \" type: \" + test.type);\n333: failed++;\n334: }\n335: }\n336: }\n337: if (failed > 0) {\n338: fail(\"Tests failed: \" + failed);\n339: }\n340: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:setEncoding(Ljava/lang/String;)V",
+            "method_body": "public void setEncoding(final String encoding) {\nthis.encoding = encoding;\nthis.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);\nif (useUTF8Flag && !ZipEncodingHelper.isUTF8(encoding)) {\nuseUTF8Flag = false;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:read8(Ljava/io/DataInputStream;)I",
+            "method_body": "private int read8(final DataInputStream dataIn) throws IOException {\nint value = dataIn.readUnsignedByte();\ncount(1);\nreturn value;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveUtil:convert64([BI)J",
+            "method_body": "public static final long convert64(byte[] buffer, int offset) {\nlong i = 0;\ni += (((long) buffer[offset + 7]) << 56);\ni += (((long) buffer[offset + 6] << 48) & 0x00FF000000000000L);\ni += (((long) buffer[offset + 5] << 40) & 0x0000FF0000000000L);\ni += (((long) buffer[offset + 4] << 32) & 0x000000FF00000000L);\ni += (((long) buffer[offset + 3] << 24) & 0x00000000FF000000L);\ni += (((long) buffer[offset + 2] << 16) & 0x0000000000FF0000L);\ni += (((long) buffer[offset + 1] << 8) & 0x000000000000FF00L);\ni += (buffer[offset] & 0x00000000000000FFL);\nreturn i;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.jar.JarArchiveInputStream:<init>(Ljava/io/InputStream;)V",
+            "method_body": "public JarArchiveInputStream( final InputStream inputStream ) {\nsuper(inputStream);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:readHeader()[B",
+            "method_body": "private byte[] readHeader() throws IOException {\nboolean found = false;\nbyte[] basicHeaderBytes = null;\nint first = 0;\nint second = read8(in);\nfirst = second;\nsecond = read8(in);\n} while (first != ARJ_MAGIC_1 && second != ARJ_MAGIC_2);\nfinal int basicHeaderSize = read16(in);\nif (basicHeaderSize == 0) {\nif (basicHeaderSize <= 2600) {\nbasicHeaderBytes = new byte[basicHeaderSize];\nreadFully(in, basicHeaderBytes);\nfinal long basicHeaderCrc32 = read32(in) & 0xFFFFFFFFL;\nfinal CRC32 crc32 = new CRC32();\ncrc32.update(basicHeaderBytes);\nif (basicHeaderCrc32 == crc32.getValue()) {\nfound = true;\n} while (!found);\nreturn basicHeaderBytes;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:<init>(Ljava/io/OutputStream;)V",
+            "method_body": "public ZipArchiveOutputStream(OutputStream out) {\nthis.out = out;\nthis.raf = null;\ndef = new Deflater(level, true);\nstreamCompressor = StreamCompressor.create(out, def);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:readString(Ljava/io/DataInputStream;)Ljava/lang/String;",
+            "method_body": "private String readString(final DataInputStream dataIn) throws IOException {\nfinal ByteArrayOutputStream buffer = new ByteArrayOutputStream();\nwhile ((nextByte = dataIn.readUnsignedByte()) != 0) {\nbuffer.write(nextByte);\nif (charsetName != null) {\nreturn new String(buffer.toByteArray(), charsetName);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:getHeaderType()Lorg/apache/commons/compress/archivers/dump/DumpArchiveConstants$SEGMENT_TYPE;",
+            "method_body": "public DumpArchiveConstants.SEGMENT_TYPE getHeaderType() {\nreturn header.getType();\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveInputStream:readCLRI()V",
+            "method_body": "private void readCLRI() throws IOException {\nbyte[] buffer = raw.readRecord();\nif (!DumpArchiveUtil.verify(buffer)) {\nactive = DumpArchiveEntry.parse(buffer);\nif (DumpArchiveConstants.SEGMENT_TYPE.CLRI != active.getHeaderType()) {\nif (raw.skip(DumpArchiveConstants.TP_SIZE * active.getHeaderCount())\nreadIdx = active.getHeaderCount();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:<clinit>()V",
+            "method_body": "public static final int LONGFILE_ERROR = 0;\nprivate int       longFileMode = LONGFILE_ERROR;\nprivate int       bigNumberMode = BIGNUMBER_ERROR;\nprivate boolean closed = false;\nprivate boolean haveUnclosedEntry = false;\nprivate boolean finished = false;\nprivate boolean addPaxHeadersForNonAsciiNames = false;\nprivate static final ZipEncoding ASCII =\nthis(os, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE);\n}",
+            "method_id": 9
+        }
+    ]
+}

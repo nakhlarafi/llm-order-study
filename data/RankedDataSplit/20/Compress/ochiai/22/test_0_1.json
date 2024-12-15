@@ -1,0 +1,109 @@
+{
+    "bug_id": 22,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.compressors.bzip2.PythonTruncatedBzip2Test.testPartialReadTruncatedData",
+    "test_body": "85: public void testPartialReadTruncatedData() throws IOException {\n86: //with BZ2File(self.filename) as f:\n87: //    self.assertEqual(f.read(len(self.TEXT)), self.TEXT)\n88: //    self.assertRaises(EOFError, f.read, 1)\n89: 90: final int length = TEXT.length();\n91: ByteBuffer buffer = ByteBuffer.allocate(length);\n92: bz2Channel.read(buffer);\n93: 94: assertArrayEquals(Arrays.copyOfRange(TEXT.getBytes(), 0, length),\n95: buffer.array());\n96: 97: // subsequent read should throw\n98: buffer = ByteBuffer.allocate(1);\n99: try {\n100: bz2Channel.read(buffer);\n101: Assert.fail(\"The read should have thrown.\");\n102: } catch (IOException e) {\n103: // pass\n104: }\n105: }\n",
+    "stack_trace": "java.io.IOException: unexpected end of stream\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.bsR(BZip2CompressorInputStream.java:384)\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.bsGetUByte(BZip2CompressorInputStream.java:419)\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.initBlock(BZip2CompressorInputStream.java:276)\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.setupNoRandPartA(BZip2CompressorInputStream.java:878)\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.setupNoRandPartB(BZip2CompressorInputStream.java:928)\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.read0(BZip2CompressorInputStream.java:222)\nat org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream.read(BZip2CompressorInputStream.java:174)\nat java.nio.channels.Channels$ReadableByteChannelImpl.read(Channels.java:385)\nat org.apache.commons.compress.compressors.bzip2.PythonTruncatedBzip2Test.testPartialReadTruncatedData(PythonTruncatedBzip2Test.java:92)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues()V",
+            "method_body": "private void sendMTFValues() throws IOException {\nfinal byte[][] len = this.data.sendMTFValues_len;\nfinal int alphaSize = this.nInUse + 2;\nfor (int t = N_GROUPS; --t >= 0;) {\nbyte[] len_t = len[t];\nfor (int v = alphaSize; --v >= 0;) {\nlen_t[v] = GREATER_ICOST;\n}\nfinal int nGroups = (this.nMTF < 200) ? 2 : (this.nMTF < 600) ? 3\nsendMTFValues0(nGroups, alphaSize);\nfinal int nSelectors = sendMTFValues1(nGroups, alphaSize);\nsendMTFValues2(nGroups, nSelectors);\nsendMTFValues3(nGroups, alphaSize);\nsendMTFValues4();\nsendMTFValues5(nGroups, nSelectors);\nsendMTFValues6(nGroups, alphaSize);\nsendMTFValues7();\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues0(II)V",
+            "method_body": "private void sendMTFValues0(final int nGroups, final int alphaSize) {\nfinal byte[][] len = this.data.sendMTFValues_len;\nfinal int[] mtfFreq = this.data.mtfFreq;\nint remF = this.nMTF;\nint gs = 0;\nfor (int nPart = nGroups; nPart > 0; nPart--) {\nfinal int tFreq = remF / nPart;\nint ge = gs - 1;\nint aFreq = 0;\nfor (final int a = alphaSize - 1; (aFreq < tFreq) && (ge < a);) {\naFreq += mtfFreq[++ge];\nif ((ge > gs) && (nPart != nGroups) && (nPart != 1)\naFreq -= mtfFreq[ge--];\nfinal byte[] len_np = len[nPart - 1];\nfor (int v = alphaSize; --v >= 0;) {\nif ((v >= gs) && (v <= ge)) {\nlen_np[v] = LESSER_ICOST;\nlen_np[v] = GREATER_ICOST;\ngs = ge + 1;\nremF -= aFreq;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues1(II)I",
+            "method_body": "private int sendMTFValues1(final int nGroups, final int alphaSize) {\nfinal Data dataShadow = this.data;\nfinal int[][] rfreq = dataShadow.sendMTFValues_rfreq;\nfinal int[] fave = dataShadow.sendMTFValues_fave;\nfinal short[] cost = dataShadow.sendMTFValues_cost;\nfinal char[] sfmap = dataShadow.sfmap;\nfinal byte[] selector = dataShadow.selector;\nfinal byte[][] len = dataShadow.sendMTFValues_len;\nfinal byte[] len_0 = len[0];\nfinal byte[] len_1 = len[1];\nfinal byte[] len_2 = len[2];\nfinal byte[] len_3 = len[3];\nfinal byte[] len_4 = len[4];\nfinal byte[] len_5 = len[5];\nfinal int nMTFShadow = this.nMTF;\nint nSelectors = 0;\nfor (int iter = 0; iter < N_ITERS; iter++) {\nfor (int t = nGroups; --t >= 0;) {\nfave[t] = 0;\nint[] rfreqt = rfreq[t];\nfor (int i = alphaSize; --i >= 0;) {\nrfreqt[i] = 0;\n}\nnSelectors = 0;\nfor (int gs = 0; gs < this.nMTF;) {\nfinal int ge = Math.min(gs + G_SIZE - 1, nMTFShadow - 1);\nif (nGroups == N_GROUPS) {\nfor (int t = nGroups; --t >= 0;) {\ncost[t] = 0;\nfor (int i = gs; i <= ge; i++) {\nfinal int icv = sfmap[i];\nfor (int t = nGroups; --t >= 0;) {\ncost[t] += len[t][icv] & 0xff;\nint bt = -1;\nfor (int t = nGroups, bc = 999999999; --t >= 0;) {\nfinal int cost_t = cost[t];\nif (cost_t < bc) {\nbc = cost_t;\nbt = t;\n}\nfave[bt]++;\nselector[nSelectors] = (byte) bt;\nnSelectors++;\nfinal int[] rfreq_bt = rfreq[bt];\nfor (int i = gs; i <= ge; i++) {\nrfreq_bt[sfmap[i]]++;\ngs = ge + 1;\n}\nfor (int t = 0; t < nGroups; t++) {\nhbMakeCodeLengths(len[t], rfreq[t], this.data, alphaSize, 20);\nreturn nSelectors;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues2(II)V",
+            "method_body": "private void sendMTFValues2(final int nGroups, final int nSelectors) {\nfinal Data dataShadow = this.data;\nbyte[] pos = dataShadow.sendMTFValues2_pos;\nfor (int i = nGroups; --i >= 0;) {\npos[i] = (byte) i;\nfor (int i = 0; i < nSelectors; i++) {\nfinal byte ll_i = dataShadow.selector[i];\nbyte tmp = pos[0];\nint j = 0;\nwhile (ll_i != tmp) {\nj++;\nbyte tmp2 = tmp;\ntmp = pos[j];\npos[j] = tmp2;\n}\npos[0] = tmp;\ndataShadow.selectorMtf[i] = (byte) j;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues3(II)V",
+            "method_body": "private void sendMTFValues3(final int nGroups, final int alphaSize) {\nint[][] code = this.data.sendMTFValues_code;\nbyte[][] len = this.data.sendMTFValues_len;\nfor (int t = 0; t < nGroups; t++) {\nint minLen = 32;\nint maxLen = 0;\nfinal byte[] len_t = len[t];\nfor (int i = alphaSize; --i >= 0;) {\nfinal int l = len_t[i] & 0xff;\nif (l > maxLen) {\nmaxLen = l;\nif (l < minLen) {\nminLen = l;\n}\nhbAssignCodes(code[t], len[t], minLen, maxLen, alphaSize);\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues4()V",
+            "method_body": "private void sendMTFValues4() throws IOException {\nfinal boolean[] inUse = this.data.inUse;\nfinal boolean[] inUse16 = this.data.sentMTFValues4_inUse16;\nfor (int i = 16; --i >= 0;) {\ninUse16[i] = false;\nfinal int i16 = i * 16;\nfor (int j = 16; --j >= 0;) {\nif (inUse[i16 + j]) {\ninUse16[i] = true;\n}\nfor (int i = 0; i < 16; i++) {\nbsW(1, inUse16[i] ? 1 : 0);\nfinal OutputStream outShadow = this.out;\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nfor (int i = 0; i < 16; i++) {\nif (inUse16[i]) {\nfinal int i16 = i * 16;\nfor (int j = 0; j < 16; j++) {\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nif (inUse[i16 + j]) {\nbsBuffShadow |= 1 << (32 - bsLiveShadow - 1);\nbsLiveShadow++;\nthis.bsBuff = bsBuffShadow;\nthis.bsLive = bsLiveShadow;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues5(II)V",
+            "method_body": "private void sendMTFValues5(final int nGroups, final int nSelectors)\nbsW(3, nGroups);\nbsW(15, nSelectors);\nfinal OutputStream outShadow = this.out;\nfinal byte[] selectorMtf = this.data.selectorMtf;\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nfor (int i = 0; i < nSelectors; i++) {\nfor (int j = 0, hj = selectorMtf[i] & 0xff; j < hj; j++) {\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24);\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= 1 << (32 - bsLiveShadow - 1);\nbsLiveShadow++;\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24);\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsLiveShadow++;\nthis.bsBuff = bsBuffShadow;\nthis.bsLive = bsLiveShadow;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues6(II)V",
+            "method_body": "private void sendMTFValues6(final int nGroups, final int alphaSize)\nfinal byte[][] len = this.data.sendMTFValues_len;\nfinal OutputStream outShadow = this.out;\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nfor (int t = 0; t < nGroups; t++) {\nbyte[] len_t = len[t];\nint curr = len_t[0] & 0xff;\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= curr << (32 - bsLiveShadow - 5);\nbsLiveShadow += 5;\nfor (int i = 0; i < alphaSize; i++) {\nint lti = len_t[i] & 0xff;\nwhile (curr < lti) {\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= 2 << (32 - bsLiveShadow - 2);\nbsLiveShadow += 2;\ncurr++; /* 10 */\nwhile (curr > lti) {\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= 3 << (32 - bsLiveShadow - 2);\nbsLiveShadow += 2;\ncurr--; /* 11 */\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsLiveShadow++;\nthis.bsBuff = bsBuffShadow;\nthis.bsLive = bsLiveShadow;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues7()V",
+            "method_body": "private void sendMTFValues7() throws IOException {\nfinal Data dataShadow = this.data;\nfinal byte[][] len = dataShadow.sendMTFValues_len;\nfinal int[][] code = dataShadow.sendMTFValues_code;\nfinal OutputStream outShadow = this.out;\nfinal byte[] selector = dataShadow.selector;\nfinal char[] sfmap = dataShadow.sfmap;\nfinal int nMTFShadow = this.nMTF;\nint selCtr = 0;\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nfor (int gs = 0; gs < nMTFShadow;) {\nfinal int ge = Math.min(gs + G_SIZE - 1, nMTFShadow - 1);\nfinal int selector_selCtr = selector[selCtr] & 0xff;\nfinal int[] code_selCtr = code[selector_selCtr];\nfinal byte[] len_selCtr = len[selector_selCtr];\nwhile (gs <= ge) {\nfinal int sfmap_i = sfmap[gs];\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24);\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nfinal int n = len_selCtr[sfmap_i] & 0xFF;\nbsBuffShadow |= code_selCtr[sfmap_i] << (32 - bsLiveShadow - n);\nbsLiveShadow += n;\ngs++;\n}\ngs = ge + 1;\nselCtr++;\n}\nthis.bsBuff = bsBuffShadow;\nthis.bsLive = bsLiveShadow;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:moveToFrontCodeAndSend()V",
+            "method_body": "private void moveToFrontCodeAndSend() throws IOException {\nbsW(24, this.data.origPtr);\ngenerateMTFValues();\nsendMTFValues();\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:blockSort()V",
+            "method_body": "private void blockSort() {\nblockSorter.blockSort(data, last);\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:generateMTFValues()V",
+            "method_body": "private void generateMTFValues() {\nfinal int lastShadow = this.last;\nfinal Data dataShadow = this.data;\nfinal boolean[] inUse = dataShadow.inUse;\nfinal byte[] block = dataShadow.block;\nfinal int[] fmap = dataShadow.fmap;\nfinal char[] sfmap = dataShadow.sfmap;\nfinal int[] mtfFreq = dataShadow.mtfFreq;\nfinal byte[] unseqToSeq = dataShadow.unseqToSeq;\nfinal byte[] yy = dataShadow.generateMTFValues_yy;\nint nInUseShadow = 0;\nfor (int i = 0; i < 256; i++) {\nif (inUse[i]) {\nunseqToSeq[i] = (byte) nInUseShadow;\nnInUseShadow++;\nthis.nInUse = nInUseShadow;\nfinal int eob = nInUseShadow + 1;\nfor (int i = eob; i >= 0; i--) {\nmtfFreq[i] = 0;\nfor (int i = nInUseShadow; --i >= 0;) {\nyy[i] = (byte) i;\nint wr = 0;\nint zPend = 0;\nfor (int i = 0; i <= lastShadow; i++) {\nfinal byte ll_i = unseqToSeq[block[fmap[i]] & 0xff];\nbyte tmp = yy[0];\nint j = 0;\nwhile (ll_i != tmp) {\nj++;\nbyte tmp2 = tmp;\ntmp = yy[j];\nyy[j] = tmp2;\n}\nyy[0] = tmp;\nif (j == 0) {\nzPend++;\nif (zPend > 0) {\nzPend--;\nif ((zPend & 1) == 0) {\nsfmap[wr] = RUNA;\nwr++;\nmtfFreq[RUNA]++;\nsfmap[wr] = RUNB;\nwr++;\nmtfFreq[RUNB]++;\nif (zPend >= 2) {\nzPend = (zPend - 2) >> 1;\nzPend = 0;\nsfmap[wr] = (char) (j + 1);\nwr++;\nmtfFreq[j + 1]++;\nif (zPend > 0) {\nzPend--;\nif ((zPend & 1) == 0) {\nsfmap[wr] = RUNA;\nwr++;\nmtfFreq[RUNA]++;\nif (zPend >= 2) {\nsfmap[wr] = (char) eob;\nmtfFreq[eob]++;\nthis.nMTF = wr + 1;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:read([BII)I",
+            "method_body": "public int read(final byte[] dest, final int offs, final int len)\nif (offs < 0) {\nif (len < 0) {\nif (offs + len > dest.length) {\nif (this.in == null) {\nfinal int hi = offs + len;\nint destOffs = offs;\nwhile (destOffs < hi && ((b = read0()) >= 0)) {\ndest[destOffs++] = (byte) b;\ncount(1);\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:finish()V",
+            "method_body": "public void finish() throws IOException {\nif (out != null) {\nif (this.runLength > 0) {\nwriteRun();\nthis.currentChar = -1;\nendBlock();\nendCompression();\nthis.out = null;\nthis.data = null;\nthis.blockSorter = null;\n}\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BlockSort:blockSort(Lorg/apache/commons/compress/compressors/bzip2/BZip2CompressorOutputStream$Data;I)V",
+            "method_body": "void blockSort(final BZip2CompressorOutputStream.Data data, final int last) {\nthis.workLimit = WORK_FACTOR * last;\nthis.workDone = 0;\nthis.firstAttempt = true;\nif (last + 1 < 10000) {\nfallbackSort(data, last);\nfinal int[] fmap = data.fmap;\ndata.origPtr = -1;\nfor (int i = 0; i <= last; i++) {\nif (fmap[i] == 0) {\ndata.origPtr = i;\nbreak;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BlockSort:fallbackSimpleSort([I[III)V",
+            "method_body": "private void fallbackSimpleSort(int[] fmap,\nif (lo == hi) {\nreturn;\nif (hi - lo > 3) {\nfor (int i = hi - 4; i >= lo; i--) {\nint tmp = fmap[i];\nint ec_tmp = eclass[tmp];\nfor (j = i + 4; j <= hi && ec_tmp > eclass[fmap[j]];\nj += 4) {\nfmap[j - 4] = fmap[j];\nfmap[j - 4] = tmp;\nfor (int i = hi - 1; i >= lo; i--) {\nint tmp = fmap[i];\nint ec_tmp = eclass[tmp];\nfor (j = i + 1; j <= hi && ec_tmp > eclass[fmap[j]]; j++) {\nfmap[j - 1] = fmap[j];\nfmap[j-1] = tmp;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BlockSort:fpush(III)V",
+            "method_body": "private void fpush(int sp, int lz, int hz) {\nstack_ll[sp] = lz;\nstack_hh[sp] = hz;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BlockSort:fpop(I)[I",
+            "method_body": "private int[] fpop(int sp) {\nreturn new int[] { stack_ll[sp], stack_hh[sp] };\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BlockSort:fallbackQSort3([I[III)V",
+            "method_body": "private void fallbackQSort3(int[] fmap,\nlong r = 0;\nint sp = 0;\nfpush(sp++, loSt, hiSt);\nwhile (sp > 0) {\nint[] s = fpop(--sp);\nlo = s[0]; hi = s[1];\nif (hi - lo < FALLBACK_QSORT_SMALL_THRESH) {\nfallbackSimpleSort(fmap, eclass, lo, hi);\ncontinue;\nr = ((r * 7621) + 1) % 32768;\nlong r3 = r % 3, med;\nif (r3 == 0) {\nmed = eclass[fmap[lo]];\n} else if (r3 == 1) {\nmed = eclass[fmap[(lo + hi) >>> 1]];\nmed = eclass[fmap[hi]];\nunLo = ltLo = lo;\nunHi = gtHi = hi;\nif (unLo > unHi) {\nbreak;\nn = eclass[fmap[unLo]] - (int) med;\nif (n == 0) {\nfswap(fmap, unLo, ltLo);\nltLo++; unLo++;\ncontinue;\nif (n > 0) {\nbreak;\nunLo++;\nif (unLo > unHi) {\nbreak;\nn = eclass[fmap[unHi]] - (int) med;\nif (n == 0) {\nfswap(fmap, unHi, gtHi);\ngtHi--; unHi--;\ncontinue;\nif (n < 0) {\nbreak;\nunHi--;\nif (unLo > unHi) {\nbreak;\nfswap(fmap, unLo, unHi); unLo++; unHi--;\nif (gtHi < ltLo) {\ncontinue;\nn = fmin(ltLo - lo, unLo - ltLo);\nfvswap(fmap, lo, unLo - n, n);\nint m = fmin(hi - gtHi, gtHi - unHi);\nfvswap(fmap, unHi + 1, hi - m + 1, m);\nn = lo + unLo - ltLo - 1;\nm = hi - (gtHi - unHi) + 1;\nif (n - lo > hi - m) {\nfpush(sp++, lo, n);\nfpush(sp++, m, hi);\nfpush(sp++, m, hi);\nfpush(sp++, lo, n);\n}\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:endBlock()V",
+            "method_body": "private void endBlock() throws IOException {\nthis.computedBlockCRC = this.crc.getFinalCRC();\nif (this.storedBlockCRC != this.computedBlockCRC) {\nthis.computedCombinedCRC = (this.computedCombinedCRC << 1)\nthis.computedCombinedCRC ^= this.computedBlockCRC;\n}",
+            "method_id": 39
+        }
+    ]
+}

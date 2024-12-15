@@ -1,0 +1,59 @@
+{
+    "bug_id": 76,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math.linear.SingularValueSolverTest.testMath320A",
+    "test_body": "public void testMath320A() {\nRealMatrix rm = new Array2DRowRealMatrix(new double[][] {\n{ 1.0, 2.0, 3.0 }, { 2.0, 3.0, 4.0 }, { 3.0, 5.0, 7.0 }\n});\ndouble s439  = Math.sqrt(439.0);\ndouble[] reference = new double[] {\nMath.sqrt(3.0 * (21.0 + s439)), Math.sqrt(3.0 * (21.0 - s439))\n};\nSingularValueDecomposition svd =\nnew SingularValueDecompositionImpl(rm);\n179: // check we get the expected theoretical singular values\ndouble[] singularValues = svd.getSingularValues();\nAssert.assertEquals(reference.length, singularValues.length);\nfor (int i = 0; i < reference.length; ++i) {\nAssert.assertEquals(reference[i], singularValues[i], 4.0e-13);\n}\n186: // check the decomposition allows to recover the original matrix\nRealMatrix recomposed = svd.getU().multiply(svd.getS()).multiply(svd.getVT());\nAssert.assertEquals(0.0, recomposed.subtract(rm).getNorm(), 5.0e-13);\n190: // check we can solve a singular system\ndouble[] b = new double[] { 5.0, 6.0, 7.0 };\ndouble[] resSVD = svd.getSolver().solve(b);\nAssert.assertEquals(rm.getColumnDimension(), resSVD.length);\n195: // check the solution really minimizes the residuals\ndouble svdMinResidual = residual(rm, resSVD, b);\ndouble epsilon = 2 * Math.ulp(svdMinResidual);\ndouble h = 0.1;\nint    k = 3;\nfor (double d0 = -k * h; d0 <= k * h; d0 += h) {\nfor (double d1 = -k * h ; d1 <= k * h; d1 += h) {\nfor (double d2 = -k * h; d2 <= k * h; d2 += h) {\ndouble[] x = new double[] { resSVD[0] + d0, resSVD[1] + d1, resSVD[2] + d2 };\nAssert.assertTrue((residual(rm, x, b) - svdMinResidual) > -epsilon);\n}\n}\n}\n209: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<0.09336767546650937>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.linear.SingularValueSolverTest.testMath320A(SingularValueSolverTest.java:188)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:<init>([D[DD)V",
+            "method_body": "public EigenDecompositionImpl(final double[] main, double[] secondary,\nthrows InvalidMatrixException {\nthis.main      = main.clone();\nthis.secondary = secondary.clone();\ntransformer    = null;\nsquaredSecondary = new double[secondary.length];\nfor (int i = 0; i < squaredSecondary.length; ++i) {\nfinal double s = secondary[i];\nsquaredSecondary[i] = s * s;\nthis.splitTolerance = splitTolerance;\ndecompose();\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$1:end()D",
+            "method_body": "public double getNorm() {\nreturn walkInColumnOrder(new RealMatrixPreservingVisitor() {\nthis.endRow = endRow;\ncolumnSum   = 0;\nmaxColSum   = 0;\n}\ncolumnSum += Math.abs(value);\nif (row == endRow) {\nmaxColSum = Math.max(maxColSum, columnSum);\ncolumnSum = 0;\n}\nreturn maxColSum;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:getColumnDimension()I",
+            "method_body": "public int getColumnDimension() {\nreturn ((data == null) || (data[0] == null)) ? 0 : data[0].length;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:copyIn([[D)V",
+            "method_body": "private void copyIn(final double[][] in) {\nsetSubMatrix(in, 0, 0);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:checkColumnIndex(Lorg/apache/commons/math/linear/AnyMatrix;I)V",
+            "method_body": "public static void checkColumnIndex(final AnyMatrix m, final int column)\nif (column < 0 || column >= m.getColumnDimension()) {\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:walkInColumnOrder(Lorg/apache/commons/math/linear/RealMatrixPreservingVisitor;)D",
+            "method_body": "public double walkInColumnOrder(final RealMatrixPreservingVisitor visitor)\nfinal int rows    = getRowDimension();\nfinal int columns = getColumnDimension();\nvisitor.start(rows, columns, 0, rows - 1, 0, columns - 1);\nfor (int j = 0; j < columns; ++j) {\nfor (int i = 0; i < rows; ++i) {\nvisitor.visit(i, j, data[i][j]);\nreturn visitor.end();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$5:visit(IID)V",
+            "method_body": "public RealMatrix transpose() {\nfinal int nRows = getRowDimension();\nfinal int nCols = getColumnDimension();\nfinal RealMatrix out = createMatrix(nCols, nRows);\nwalkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {\nout.setEntry(column, row, value);\n}\nreturn out;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:computeGershgorinCircles()V",
+            "method_body": "private void computeGershgorinCircles() {\nfinal int m     = main.length;\nfinal int lowerStart = 4 * m;\nfinal int upperStart = 5 * m;\nlowerSpectra = Double.POSITIVE_INFINITY;\nupperSpectra = Double.NEGATIVE_INFINITY;\ndouble eMax = 0;\ndouble eCurrent = 0;\nfor (int i = 0; i < m - 1; ++i) {\nfinal double dCurrent = main[i];\nfinal double ePrevious = eCurrent;\neCurrent = Math.abs(secondary[i]);\neMax = Math.max(eMax, eCurrent);\nfinal double radius = ePrevious + eCurrent;\nfinal double lower = dCurrent - radius;\nwork[lowerStart + i] = lower;\nlowerSpectra = Math.min(lowerSpectra, lower);\nfinal double upper = dCurrent + radius;\nwork[upperStart + i] = upper;\nupperSpectra = Math.max(upperSpectra, upper);\nfinal double dCurrent = main[m - 1];\nfinal double lower = dCurrent - eCurrent;\nwork[lowerStart + m - 1] = lower;\nlowerSpectra = Math.min(lowerSpectra, lower);\nfinal double upper = dCurrent + eCurrent;\nwork[upperStart + m - 1] = upper;\nupperSpectra = Math.max(upperSpectra, upper);\nminPivot = MathUtils.SAFE_MIN * Math.max(1.0, eMax * eMax);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.BiDiagonalTransformer:transformToUpperBiDiagonal()V",
+            "method_body": "private void transformToUpperBiDiagonal() {\nfinal int m = householderVectors.length;\nfinal int n = householderVectors[0].length;\nfor (int k = 0; k < n; k++) {\ndouble xNormSqr = 0;\nfor (int i = k; i < m; ++i) {\nfinal double c = householderVectors[i][k];\nxNormSqr += c * c;\nfinal double[] hK = householderVectors[k];\nfinal double a = (hK[k] > 0) ? -Math.sqrt(xNormSqr) : Math.sqrt(xNormSqr);\nmain[k] = a;\nif (a != 0.0) {\nhK[k] -= a;\nfor (int j = k + 1; j < n; ++j) {\ndouble alpha = 0;\nfor (int i = k; i < m; ++i) {\nfinal double[] hI = householderVectors[i];\nalpha -= hI[j] * hI[k];\nalpha /= a * householderVectors[k][k];\nfor (int i = k; i < m; ++i) {\nfinal double[] hI = householderVectors[i];\nhI[j] -= alpha * hI[k];\nif (k < n - 1) {\nxNormSqr = 0;\nfor (int j = k + 1; j < n; ++j) {\nfinal double c = hK[j];\nxNormSqr += c * c;\nfinal double b = (hK[k + 1] > 0) ? -Math.sqrt(xNormSqr) : Math.sqrt(xNormSqr);\nsecondary[k] = b;\nif (b != 0.0) {\nhK[k + 1] -= b;\nfor (int i = k + 1; i < m; ++i) {\nfinal double[] hI = householderVectors[i];\ndouble beta = 0;\nfor (int j = k + 1; j < n; ++j) {\nbeta -= hI[j] * hK[j];\nbeta /= b * hK[k + 1];\nfor (int j = k + 1; j < n; ++j) {\nhI[j] -= beta * hK[j];\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getSingularValues()[D",
+            "method_body": "public double[] getSingularValues()\nreturn singularValues.clone();\n}",
+            "method_id": 9
+        }
+    ]
+}

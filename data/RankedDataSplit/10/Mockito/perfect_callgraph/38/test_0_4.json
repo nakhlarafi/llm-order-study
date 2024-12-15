@@ -1,0 +1,59 @@
+{
+    "bug_id": 38,
+    "test_id": 0,
+    "test_name": "org.mockitousage.bugs.ActualInvocationHasNullArgumentNPEBugTest.shouldAllowPassingNullArgument",
+    "test_body": "public void shouldAllowPassingNullArgument() {\n//given\nFun mockFun = mock(Fun.class);\nwhen(mockFun.doFun((String) anyObject())).thenReturn(\"value\");\n25: //when\nmockFun.doFun(null);\n28: //then\ntry {\nverify(mockFun).doFun(\"hello\");\n} catch(AssertionError r) {",
+    "stack_trace": "java.lang.NullPointerException\nat org.mockito.internal.verification.argumentmatching.ArgumentMatchingTool.toStringEquals(ArgumentMatchingTool.java:48)\nat org.mockito.internal.verification.argumentmatching.ArgumentMatchingTool.getSuspiciouslyNotMatchingArgsIndexes(ArgumentMatchingTool.java:30)\nat org.mockito.internal.verification.checkers.MissingInvocationChecker.check(MissingInvocationChecker.java:38)\nat org.mockito.internal.verification.Times.verify(Times.java:34)\nat org.mockito.internal.MockHandler.intercept(MockHandler.java:74)\nat org.mockito.internal.creation.MethodInterceptorFilter.intercept(MethodInterceptorFilter.java:46)\nat org.mockitousage.bugs.ActualInvocationHasNullArgumentNPEBugTest$Fun$$EnhancerByMockitoWithCGLIB$$9a91cf77.doFun(<generated>)\nat org.mockitousage.bugs.ActualInvocationHasNullArgumentNPEBugTest.shouldAllowPassingNullArgument(ActualInvocationHasNullArgumentNPEBugTest.java:30)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.MockHandler:intercept(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;Lorg/mockito/cglib/proxy/MethodProxy;)Ljava/lang/Object;",
+            "method_body": "public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {\nif (mockitoStubber.hasAnswersForStubbing()) {\nVerificationMode verificationMode = mockingProgress.pullVerificationMode();\nInvocation invocation = new Invocation(proxy, method, args, SequenceNumber.next(), new FilteredCGLIBProxyRealMethod(methodProxy));\nInvocationMatcher invocationMatcher = matchersBinder.bindMatchers(mockingProgress.getArgumentMatcherStorage(), invocation);\nmockingProgress.validateState();\nif (verificationMode != null) {\nVerificationDataImpl data = new VerificationDataImpl(registeredInvocations.getAll(), invocationMatcher);\nverificationMode.verify(data);\nreturn null;\nregisteredInvocations.add(invocationMatcher.getInvocation());\nmockitoStubber.setInvocationForPotentialStubbing(invocationMatcher);\nOngoingStubbingImpl<T> ongoingStubbing = new OngoingStubbingImpl<T>(mockitoStubber, registeredInvocations);\nmockingProgress.reportOngoingStubbing(ongoingStubbing);\nAnswer<?> stubbedAnswer = mockitoStubber.findAnswerFor(invocation);\nif (!invocation.isVoid() && stubbedAnswer == null) {\nmockingProgress.getDebuggingInfo().addPotentiallyUnstubbed(invocationMatcher);\nif (stubbedAnswer != null) {\nmockingProgress.getDebuggingInfo().reportUsedStub(invocationMatcher);\nreturn stubbedAnswer.answer(invocation);\nObject ret = mockSettings.getDefaultAnswer().answer(invocation);\nmockitoStubber.setInvocationForPotentialStubbing(invocationMatcher);\nreturn ret;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.Invocation:getMock()Ljava/lang/Object;",
+            "method_body": "public Object getMock() {\nreturn mock;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:verify(Ljava/lang/Object;Lorg/mockito/internal/verification/api/VerificationMode;)Ljava/lang/Object;",
+            "method_body": "public <T> T verify(T mock, VerificationMode mode) {\nif (mock == null) {\n} else if (!mockUtil.isMock(mock)) {\nmockingProgress.verificationStarted(mode);\nreturn mock;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationsFinder:findInvocations(Ljava/util/List;Lorg/mockito/internal/invocation/InvocationMatcher;)Ljava/util/List;",
+            "method_body": "public List<Invocation> findInvocations(List<Invocation> invocations, InvocationMatcher wanted) {\nreturn ListUtil.filter(invocations, new RemoveNotMatching(wanted));\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.ThreadSafeMockingProgress:verificationStarted(Lorg/mockito/internal/verification/api/VerificationMode;)V",
+            "method_body": "public void verificationStarted(VerificationMode verify) {\nthreadSafely().verificationStarted(verify);\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.ClassImposterizer$3:<init>(Lorg/mockito/internal/creation/jmock/ClassImposterizer;)V",
+            "method_body": "private <T> Class<?> createProxyClass(Class<?> mockedType, Class<?>...interfaces) {\nif (mockedType == Object.class) {\nEnhancer enhancer = new Enhancer() {\n}\nenhancer.setClassLoader(SearchingClassLoader.combineLoadersOf(mockedType));\nenhancer.setUseFactory(true);\nif (mockedType.isInterface()) {\nenhancer.setSuperclass(Object.class);\nenhancer.setInterfaces(prepend(mockedType, interfaces));\nenhancer.setCallbackTypes(new Class[]{MethodInterceptor.class, NoOp.class});\nenhancer.setCallbackFilter(IGNORE_BRIDGE_METHODS);\nif (mockedType.getSigners() != null) {\nenhancer.setNamingPolicy(MockitoNamingPolicy.INSTANCE);\nreturn enhancer.createClass();\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.mockito.internal.verification.Times:verify(Lorg/mockito/internal/verification/api/VerificationData;)V",
+            "method_body": "public void verify(VerificationData data) {\nif (wantedCount > 0) {\nMissingInvocationChecker missingInvocation = new MissingInvocationChecker();\nmissingInvocation.check(data.getAllInvocations(), data.getWanted());\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.SearchingClassLoader:combineLoadersOf(Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/ClassLoader;",
+            "method_body": "private static ClassLoader combineLoadersOf(Class<?> first, Class<?>... others) {\nList<ClassLoader> loaders = new ArrayList<ClassLoader>();\naddIfNewElement(loaders, first.getClassLoader());\nfor (Class<?> c : others) {\naddIfNewElement(loaders, c.getClassLoader());\naddIfNewElement(loaders, SearchingClassLoader.class.getClassLoader());\naddIfNewElement(loaders, currentThread().getContextClassLoader());\nreturn combine(loaders);\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.mockito.internal.stubbing.answers.Returns:getReturnType()Ljava/lang/Class;",
+            "method_body": "public Class<?> getReturnType() {\nreturn value.getClass();\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.mockito.internal.matchers.Equals:quoting()Ljava/lang/String;",
+            "method_body": "private String quoting() {\nif (wanted instanceof String) {\nreturn \"\\\"\";\n} else if (wanted instanceof Character) {\nreturn \"\";\n}",
+            "method_id": 49
+        }
+    ]
+}

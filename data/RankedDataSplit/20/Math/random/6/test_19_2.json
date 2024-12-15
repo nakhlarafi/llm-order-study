@@ -1,0 +1,109 @@
+{
+    "bug_id": 6,
+    "test_id": 19,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizerTest.testTrivial",
+    "test_body": "public void testTrivial() {\nLinearProblem problem\n= new LinearProblem(new double[][] { { 2 } }, new double[] { 3 });\nNonLinearConjugateGradientOptimizer optimizer\n= new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,\nnew SimpleValueChecker(1e-6, 1e-6));\nPointValuePair optimum\n= optimizer.optimize(new MaxEval(100),\nproblem.getObjectiveFunction(),\nproblem.getObjectiveFunctionGradient(),\nGoalType.MINIMIZE,\nnew InitialGuess(new double[] { 0 }));\nAssert.assertEquals(1.5, optimum.getPoint()[0], 1.0e-10);\nAssert.assertEquals(0.0, optimum.getValue(), 1.0e-10);\n140: // Check that the number of iterations is updated (MATH-949).\nAssert.assertTrue(optimizer.getIterations() > 0);\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizerTest.testTrivial(NonLinearConjugateGradientOptimizerTest.java:141)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseMultivariateOptimizer:getStartPoint()[D",
+            "method_body": "public double[] getStartPoint() {\nreturn start == null ? null : start.clone();\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer:parseOptimizationData([Lorg/apache/commons/math3/optim/OptimizationData;)V",
+            "method_body": "protected void parseOptimizationData(OptimizationData... optData) {\nsuper.parseOptimizationData(optData);\nfor (OptimizationData data : optData) {\nif  (data instanceof BracketingStep) {\ncheckParameters();\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseMultivariateOptimizer:<init>(Lorg/apache/commons/math3/optim/ConvergenceChecker;)V",
+            "method_body": "protected BaseMultivariateOptimizer(ConvergenceChecker<PAIR> checker) {\nsuper(checker);\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:<init>([[D)V",
+            "method_body": "public BlockRealMatrix(final double[][] rawData)\nthis(rawData.length, rawData[0].length, toBlocksLayout(rawData), false);\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:createBlocksLayout(II)[[D",
+            "method_body": "public static double[][] createBlocksLayout(final int rows, final int columns) {\nfinal int blockRows = (rows    + BLOCK_SIZE - 1) / BLOCK_SIZE;\nfinal int blockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nfinal double[][] blocks = new double[blockRows * blockColumns][];\nint blockIndex = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int pStart = iBlock * BLOCK_SIZE;\nfinal int pEnd = FastMath.min(pStart + BLOCK_SIZE, rows);\nfinal int iHeight = pEnd - pStart;\nfor (int jBlock = 0; jBlock < blockColumns; ++jBlock) {\nfinal int qStart = jBlock * BLOCK_SIZE;\nfinal int qEnd = FastMath.min(qStart + BLOCK_SIZE, columns);\nfinal int jWidth = qEnd - qStart;\nblocks[blockIndex] = new double[iHeight * jWidth];\n++blockIndex;\nreturn blocks;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer:findUpperBound(Lorg/apache/commons/math3/analysis/UnivariateFunction;DD)D",
+            "method_body": "private double findUpperBound(final UnivariateFunction f,\nfinal double yA = f.value(a);\ndouble yB = yA;\nfor (double step = h; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {\nfinal double b = a + step;\nyB = f.value(b);\nif (yA * yB <= 0) {\nreturn b;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getFunctionValueAccuracy()D",
+            "method_body": "public double getFunctionValueAccuracy() {\nreturn functionValueAccuracy;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer$LineSearchFunction:value(D)D",
+            "method_body": "public double value(double x) {\nfinal double[] shiftedPoint = currentPoint.clone();\nfor (int i = 0; i < shiftedPoint.length; ++i) {\nshiftedPoint[i] += x * searchDirection[i];\nfinal double[] gradient = computeObjectiveGradient(shiftedPoint);\ndouble dotProduct = 0;\nfor (int i = 0; i < gradient.length; ++i) {\ndotProduct += gradient[i] * searchDirection[i];\nreturn dotProduct;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:transpose()Lorg/apache/commons/math3/linear/BlockRealMatrix;",
+            "method_body": "public BlockRealMatrix transpose() {\nfinal int nRows = getRowDimension();\nfinal int nCols = getColumnDimension();\nfinal BlockRealMatrix out = new BlockRealMatrix(nCols, nRows);\nint blockIndex = 0;\nfor (int iBlock = 0; iBlock < blockColumns; ++iBlock) {\nfor (int jBlock = 0; jBlock < blockRows; ++jBlock) {\nfinal double[] outBlock = out.blocks[blockIndex];\nfinal double[] tBlock = blocks[jBlock * blockColumns + iBlock];\nfinal int pStart = iBlock * BLOCK_SIZE;\nfinal int pEnd = FastMath.min(pStart + BLOCK_SIZE, columns);\nfinal int qStart = jBlock * BLOCK_SIZE;\nfinal int qEnd = FastMath.min(qStart + BLOCK_SIZE, rows);\nint k = 0;\nfor (int p = pStart; p < pEnd; ++p) {\nfinal int lInc = pEnd - pStart;\nint l = p - pStart;\nfor (int q = qStart; q < qEnd; ++q) {\noutBlock[k] = tBlock[l];\n++k;\nl+= lInc;\n++blockIndex;\nreturn out;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseOptimizer:<init>(Lorg/apache/commons/math3/optim/ConvergenceChecker;)V",
+            "method_body": "protected BaseOptimizer(ConvergenceChecker<PAIR> checker) {\nthis.checker = checker;\nevaluations = new Incrementor(0, new MaxEvalCallback());\niterations = new Incrementor(0, new MaxIterCallback());\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:getCount()I",
+            "method_body": "public int getCount() {\nreturn count;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:<init>(II)V",
+            "method_body": "public BlockRealMatrix(final int rows, final int columns)\nsuper(rows, columns);\nthis.rows = rows;\nthis.columns = columns;\nblockRows = (rows + BLOCK_SIZE - 1) / BLOCK_SIZE;\nblockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nblocks = createBlocksLayout(rows, columns);\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer:doOptimize()Lorg/apache/commons/math3/optim/PointValuePair;",
+            "method_body": "protected PointValuePair doOptimize() {\nfinal ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();\nfinal double[] point = getStartPoint();\nfinal GoalType goal = getGoalType();\nfinal int n = point.length;\ndouble[] r = computeObjectiveGradient(point);\nif (goal == GoalType.MINIMIZE) {\nfor (int i = 0; i < n; i++) {\nr[i] = -r[i];\ndouble[] steepestDescent = preconditioner.precondition(point, r);\ndouble[] searchDirection = steepestDescent.clone();\ndouble delta = 0;\nfor (int i = 0; i < n; ++i) {\ndelta += r[i] * searchDirection[i];\nPointValuePair current = null;\nint iter = 0;\nint maxEval = getMaxEvaluations();\n++iter;\nfinal double objective = computeObjectiveValue(point);\nPointValuePair previous = current;\ncurrent = new PointValuePair(point, objective);\nif (previous != null) {\nif (checker.converged(iter, previous, current)) {\nreturn current;\nfinal UnivariateFunction lsf = new LineSearchFunction(point, searchDirection);\nfinal double uB = findUpperBound(lsf, 0, initialStep);\nfinal double step = solver.solve(maxEval, lsf, 0, uB, 1e-15);\nmaxEval -= solver.getEvaluations(); // Subtract used up evaluations.\nfor (int i = 0; i < point.length; ++i) {\npoint[i] += step * searchDirection[i];\nr = computeObjectiveGradient(point);\nif (goal == GoalType.MINIMIZE) {\nfor (int i = 0; i < n; ++i) {\nr[i] = -r[i];\nfinal double deltaOld = delta;\nfinal double[] newSteepestDescent = preconditioner.precondition(point, r);\ndelta = 0;\nfor (int i = 0; i < n; ++i) {\ndelta += r[i] * newSteepestDescent[i];\nswitch (updateFormula) {\ndouble deltaMid = 0;\nfor (int i = 0; i < r.length; ++i) {\ndeltaMid += r[i] * steepestDescent[i];\nbeta = (delta - deltaMid) / deltaOld;\nbreak;\nsteepestDescent = newSteepestDescent;\nif (iter % n == 0 ||\nsearchDirection = steepestDescent.clone();\n}\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.InitialGuess:<init>([D)V",
+            "method_body": "public InitialGuess(double[] startPoint) {\ninit = startPoint.clone();\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:abs(D)D",
+            "method_body": "public static double abs(double x) {\nreturn (x < 0.0) ? -x : (x == 0.0) ? 0.0 : x; // -0.0 => +0.0\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptimizer:parseOptimizationData([Lorg/apache/commons/math3/optim/OptimizationData;)V",
+            "method_body": "protected void parseOptimizationData(OptimizationData... optData) {\nsuper.parseOptimizationData(optData);\nfor (OptimizationData data : optData) {\nif  (data instanceof ObjectiveFunctionGradient) {\ngradient = ((ObjectiveFunctionGradient) data).getObjectiveFunctionGradient();\nbreak;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.MaxEval:getMaxEval()I",
+            "method_body": "public int getMaxEval() {\nreturn maxEval;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:<init>(D)V",
+            "method_body": "protected BaseAbstractUnivariateSolver(final double absoluteAccuracy) {\nthis(DEFAULT_RELATIVE_ACCURACY,\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getAbsoluteAccuracy()D",
+            "method_body": "public double getAbsoluteAccuracy() {\nreturn absoluteAccuracy;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:<init>(II[[DZ)V",
+            "method_body": "public BlockRealMatrix(final int rows, final int columns,\nsuper(rows, columns);\nthis.rows = rows;\nthis.columns = columns;\nblockRows = (rows + BLOCK_SIZE - 1) / BLOCK_SIZE;\nblockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nif (copyArray) {\nblocks = blockData;\nint index = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int iHeight = blockHeight(iBlock);\nfor (int jBlock = 0; jBlock < blockColumns; ++jBlock, ++index) {\nif (blockData[index].length != iHeight * blockWidth(jBlock)) {\nif (copyArray) {\n}",
+            "method_id": 59
+        }
+    ]
+}

@@ -1,0 +1,309 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207",
+    "test_body": "public void testIssue207() throws Exception\n{\nByteQuadsCanonicalizer nc = ByteQuadsCanonicalizer.createRoot(-523743345);\nField byteSymbolCanonicalizerField = JsonFactory.class.getDeclaredField(\"_byteSymbolCanonicalizer\");\nbyteSymbolCanonicalizerField.setAccessible(true);\nJsonFactory jsonF = new JsonFactory();\nbyteSymbolCanonicalizerField.set(jsonF, nc);\n110: StringBuilder stringBuilder = new StringBuilder();\nstringBuilder.append(\"{\\n\");\nstringBuilder.append(\"    \\\"expectedGCperPosition\\\": null\");\nfor (int i = 0; i < 60; ++i) {\nstringBuilder.append(\",\\n    \\\"\").append(i + 1).append(\"\\\": null\");\n}\nstringBuilder.append(\"\\n}\");\n118: JsonParser p = jsonF.createParser(stringBuilder.toString().getBytes(\"UTF-8\"));\nwhile (p.nextToken() != null) { }\np.close();",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 256\nat com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer.addName(ByteQuadsCanonicalizer.java:853)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.addName(UTF8StreamJsonParser.java:2340)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.parseEscapedName(UTF8StreamJsonParser.java:1980)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.slowParseName(UTF8StreamJsonParser.java:1867)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._parseName(UTF8StreamJsonParser.java:1651)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:740)\nat com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207(TestByteBasedSymbols.java:119)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonParser$Feature:collectDefaults()I",
+            "method_body": "public static int collectDefaults()\nint flags = 0;\nfor (Feature f : values()) {\nif (f.enabledByDefault()) {\nflags |= f.getMask();\nreturn flags;\n}",
+            "method_id": 50,
+            "loc": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:collectDefaults()I",
+            "method_body": "public static int collectDefaults()\nint flags = 0;\nfor (Feature f : values()) {\nif (f.enabledByDefault()) {\nflags |= f.getMask();\nreturn flags;\n}",
+            "method_id": 51,
+            "loc": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper:constructParser(ILcom/fasterxml/jackson/core/ObjectCodec;Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;I)Lcom/fasterxml/jackson/core/JsonParser;",
+            "method_body": "public JsonParser constructParser(int parserFeatures, ObjectCodec codec,\nJsonEncoding enc = detectEncoding();\nif (enc == JsonEncoding.UTF8) {\nif (JsonFactory.Feature.CANONICALIZE_FIELD_NAMES.enabledIn(factoryFeatures)) {\nByteQuadsCanonicalizer can = rootByteSymbols.makeChild(factoryFeatures);\nreturn new UTF8StreamJsonParser(_context, parserFeatures, _in, codec, can,\n}",
+            "method_id": 52,
+            "loc": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(I)I",
+            "method_body": "public int calcHash(int q1)\nint hash = q1 ^ _seed;\nhash += (hash >>> 16); // to xor hi- and low- 16-bits\nhash ^= (hash >>> 12);\nreturn hash;\n}",
+            "method_id": 53,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:collectDefaults()I",
+            "method_body": "public static int collectDefaults() {\nint flags = 0;\nfor (Feature f : values()) {\nif (f.enabledByDefault()) { flags |= f.getMask(); }\nreturn flags;\n}",
+            "method_id": 54,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifyNeedForRehash()V",
+            "method_body": "private void _verifyNeedForRehash() {\nif (_count > (_hashSize >> 1)) { // over 50%\nint spillCount = (_spilloverEnd - _spilloverStart()) >> 2;\nif ((spillCount > (1 + _count >> 7))\n_needRehash = true;\n}",
+            "method_id": 55,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:nukeSymbols(Z)V",
+            "method_body": "private void nukeSymbols(boolean fill) {\n_count = 0;\n_spilloverEnd = _spilloverStart();\n_longNameOffset = _hashSize << 3;\nif (fill) {\n}",
+            "method_id": 56,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:<init>(Lcom/fasterxml/jackson/core/JsonFactory;Lcom/fasterxml/jackson/core/ObjectCodec;)V",
+            "method_body": "protected final transient com.fasterxml.jackson.core.sym.BytesToNameCanonicalizer _rootByteSymbols\nprotected int _factoryFeatures = DEFAULT_FACTORY_FEATURE_FLAGS;\nprotected int _parserFeatures = DEFAULT_PARSER_FEATURE_FLAGS;\nprotected int _generatorFeatures = DEFAULT_GENERATOR_FEATURE_FLAGS;\nprotected SerializableString _rootValueSeparator = DEFAULT_ROOT_VALUE_SEPARATOR;\npublic JsonFactory() { this(null); }",
+            "method_id": 57,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:<clinit>()V",
+            "method_body": "public final static String FORMAT_NAME_JSON = \"JSON\";\nprotected final static int DEFAULT_FACTORY_FEATURE_FLAGS = JsonFactory.Feature.collectDefaults();\nprotected final static int DEFAULT_PARSER_FEATURE_FLAGS = JsonParser.Feature.collectDefaults();\nprotected final static int DEFAULT_GENERATOR_FEATURE_FLAGS = JsonGenerator.Feature.collectDefaults();\nprivate final static SerializableString DEFAULT_ROOT_VALUE_SEPARATOR = DefaultPrettyPrinter.DEFAULT_ROOT_VALUE_SEPARATOR;\n* This <code>ThreadLocal</code> contains a {@link java.lang.ref.SoftReference}",
+            "method_id": 58,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonEncoding:<init>(Ljava/lang/String;ILjava/lang/String;ZI)V",
+            "method_body": "JsonEncoding(String javaName, boolean bigEndian, int bits)\n{\n_javaName = javaName;\n_bigEndian = bigEndian;\n_bits = bits;\n}",
+            "method_id": 59,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:createChildObjectContext(II)Lcom/fasterxml/jackson/core/json/JsonReadContext;",
+            "method_body": "public JsonReadContext createChildObjectContext(int lineNr, int colNr) {\nJsonReadContext ctxt = _child;\nif (ctxt == null) {\n_child = ctxt = new JsonReadContext(this,\nreturn ctxt;\n}",
+            "method_id": 60,
+            "loc": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:createInitial(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;",
+            "method_body": "public static TableInfo createInitial(int sz) {\nint hashAreaSize = sz << 3;\nint tertShift = _calcTertiaryShift(sz);\nreturn new TableInfo(sz, // hashSize\n}",
+            "method_id": 61,
+            "loc": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "public static CharsToNameCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 62,
+            "loc": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public static ByteQuadsCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 63,
+            "loc": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.BytesToNameCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/BytesToNameCanonicalizer;",
+            "method_body": "public static BytesToNameCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 64,
+            "loc": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:createParser([B)Lcom/fasterxml/jackson/core/JsonParser;",
+            "method_body": "public JsonParser createParser(byte[] data) throws IOException, JsonParseException {\nIOContext ctxt = _createContext(data, true);\nif (_inputDecorator != null) {\nreturn _createParser(data, 0, data.length, ctxt);\n}",
+            "method_id": 65,
+            "loc": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:<init>(II)V",
+            "method_body": "protected BufferRecycler(int bbCount, int cbCount) {\n_byteBuffers = new byte[bbCount][];\n_charBuffers = new char[cbCount][];\n}",
+            "method_id": 66,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_calcOffset(I)I",
+            "method_body": "private final int _calcOffset(int hash)\nint ix = hash & (_hashSize-1);\nreturn (ix << 2);\n}",
+            "method_id": 67,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_spilloverStart()I",
+            "method_body": "private final int _spilloverStart() {\nint offset = _hashSize;\nreturn (offset << 3) - offset;\n}",
+            "method_id": 68,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:<init>()V",
+            "method_body": "private final static int MAX_ENTRIES = 180;\npublic final static InternCache instance = new InternCache();\nprivate final Object lock = new Object();\nprivate InternCache() { super(MAX_ENTRIES, 0.8f, 4); }",
+            "method_id": 69,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:<clinit>()V",
+            "method_body": "private final static int MAX_ENTRIES = 180;\npublic final static InternCache instance = new InternCache();\nprivate final Object lock = new Object();\nprivate InternCache() { super(MAX_ENTRIES, 0.8f, 4); }",
+            "method_id": 70,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonParser$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) {\n_mask = (1 << ordinal());\n_defaultState = defaultState;\n}",
+            "method_id": 71,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) {\n_defaultState = defaultState;\n_mask = (1 << ordinal());\n}",
+            "method_id": 72,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.SerializedString:<init>(Ljava/lang/String;)V",
+            "method_body": "public SerializedString(String v) {\nif (v == null) {\n_value = v;\n}",
+            "method_id": 73,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.TextBuffer:buf(I)[C",
+            "method_body": "private char[] buf(int needed)\nif (_allocator != null) {\nreturn _allocator.allocCharBuffer(BufferRecycler.CHAR_TEXT_BUFFER, needed);\n}",
+            "method_id": 74,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:expectComma()Z",
+            "method_body": "public boolean expectComma() {\nint ix = ++_index; // starts from -1\nreturn (_type != TYPE_ROOT && ix > 0);\n}",
+            "method_id": 75,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:setCurrentName(Ljava/lang/String;)V",
+            "method_body": "public void setCurrentName(String name) throws JsonProcessingException {\n_currentName = name;\nif (_dups != null) { _checkDup(_dups, name); }\n}",
+            "method_id": 76,
+            "loc": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "protected static ByteQuadsCanonicalizer createRoot(int seed) {\nreturn new ByteQuadsCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 77,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "protected static CharsToNameCanonicalizer createRoot(int hashSeed) {\nreturn sBootstrapSymbolTable.makeOrphan(hashSeed);\n}",
+            "method_id": 78,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:makeOrphan(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "private CharsToNameCanonicalizer makeOrphan(int seed) {\nreturn new CharsToNameCanonicalizer(null, -1, _symbols, _buckets, _size, seed, _longestCollisionList);\n}",
+            "method_id": 79,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.BytesToNameCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/BytesToNameCanonicalizer;",
+            "method_body": "protected static BytesToNameCanonicalizer createRoot(int seed) {\nreturn new BytesToNameCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 80,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:<init>()V",
+            "method_body": "public BufferRecycler() {\nthis(4, 4);\n}",
+            "method_id": 81,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:makeChild(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public ByteQuadsCanonicalizer makeChild(int flags) {\nreturn new ByteQuadsCanonicalizer(this,\n}",
+            "method_id": 82,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:isEnabled(Lcom/fasterxml/jackson/core/JsonFactory$Feature;)Z",
+            "method_body": "public final boolean isEnabled(JsonFactory.Feature f) {\nreturn (_factoryFeatures & f.getMask()) != 0;\n}",
+            "method_id": 83,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:_createParser([BIILcom/fasterxml/jackson/core/io/IOContext;)Lcom/fasterxml/jackson/core/JsonParser;",
+            "method_body": "protected JsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException\nreturn new ByteSourceJsonBootstrapper(ctxt, data, offset, len).constructParser(_parserFeatures,\n}",
+            "method_id": 84,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:_createContext(Ljava/lang/Object;Z)Lcom/fasterxml/jackson/core/io/IOContext;",
+            "method_body": "protected IOContext _createContext(Object srcRef, boolean resourceManaged) {\nreturn new IOContext(_getBufferRecycler(), srcRef, resourceManaged);\n}",
+            "method_id": 85,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.DefaultPrettyPrinter:<clinit>()V",
+            "method_body": "private static final long serialVersionUID = 1;\npublic final static SerializedString DEFAULT_ROOT_VALUE_SEPARATOR = new SerializedString(\" \");\n}",
+            "method_id": 86,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:<clinit>()V",
+            "method_body": "public final static int HASH_MULT = 33;\nfinal static CharsToNameCanonicalizer sBootstrapSymbolTable = new CharsToNameCanonicalizer();\n* Method called to create root canonicalizer for a {@link com.fasterxml.jackson.core.JsonFactory}",
+            "method_id": 87,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.BytesToNameCanonicalizer:initTableInfo(I)Lcom/fasterxml/jackson/core/sym/BytesToNameCanonicalizer$TableInfo;",
+            "method_body": "private TableInfo initTableInfo(int sz) {\nreturn new TableInfo(0, // count\n}",
+            "method_id": 88,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:setEncoding(Lcom/fasterxml/jackson/core/JsonEncoding;)V",
+            "method_body": "public void setEncoding(JsonEncoding enc) {\n_encoding = enc;\n}",
+            "method_id": 89,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:constructTextBuffer()Lcom/fasterxml/jackson/core/util/TextBuffer;",
+            "method_body": "public TextBuffer constructTextBuffer() {\nreturn new TextBuffer(_bufferRecycler);\n}",
+            "method_id": 90,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:charBufferLength(I)I",
+            "method_body": "protected int charBufferLength(int ix) {\nreturn CHAR_BUFFER_LENGTHS[ix];\n}",
+            "method_id": 91,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.TextBuffer:<init>(Lcom/fasterxml/jackson/core/util/BufferRecycler;)V",
+            "method_body": "public TextBuffer(BufferRecycler allocator) {\n_allocator = allocator;\n}",
+            "method_id": 92,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.TextBuffer:<clinit>()V",
+            "method_body": "final static char[] NO_CHARS = new char[0];\nprivate boolean _hasSegments = false;\n* Amount of characters in segments in {@link _segments}",
+            "method_id": 93,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:createRootContext(Lcom/fasterxml/jackson/core/json/DupDetector;)Lcom/fasterxml/jackson/core/json/JsonReadContext;",
+            "method_body": "public static JsonReadContext createRootContext(DupDetector dups) {\nreturn new JsonReadContext(null, dups, TYPE_ROOT, 1, 0);\n}",
+            "method_id": 94,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.UTF8StreamJsonParser:pad(II)I",
+            "method_body": "private final static int pad(int q, int bytes) {\nreturn (bytes == 4) ? q : (q | (-1 << (bytes << 3)));\n}",
+            "method_id": 95,
+            "loc": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:<init>()V",
+            "method_body": "public JsonFactory() { this(null); }\npublic JsonFactory() { this(null); }",
+            "method_id": 96,
+            "loc": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:getMask()I",
+            "method_body": "public int getMask() { return (1 << ordinal()); }\npublic int getMask() { return (1 << ordinal()); }",
+            "method_id": 97,
+            "loc": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledIn(I)Z",
+            "method_body": "public boolean enabledIn(int flags) { return (flags & getMask()) != 0; }\npublic boolean enabledIn(int flags) { return (flags & getMask()) != 0; }",
+            "method_id": 98,
+            "loc": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) { _defaultState = defaultState; }\nprivate Feature(boolean defaultState) { _defaultState = defaultState; }",
+            "method_id": 99,
+            "loc": 2
+        }
+    ]
+}

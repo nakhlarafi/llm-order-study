@@ -1,0 +1,49 @@
+{
+    "bug_id": 28,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.shouldThrowAnExceptionOnTruncatedEntries",
+    "test_body": "213: public void shouldThrowAnExceptionOnTruncatedEntries() throws Exception {\n214: File dir = mkdir(\"COMPRESS-279\");\n215: TarArchiveInputStream is = getTestStream(\"/COMPRESS-279.tar\");\n216: FileOutputStream out = null;\n217: try {\n218: TarArchiveEntry entry = is.getNextTarEntry();\n219: int count = 0;\n220: while (entry != null) {\n221: out = new FileOutputStream(new File(dir, String.valueOf(count)));\n222: IOUtils.copy(is, out);\n223: out.close();\n224: out = null;\n225: count++;\n226: entry = is.getNextTarEntry();\n227: }\n228: } finally {\n229: is.close();\n230: if (out != null) {\n231: out.close();\n232: }\n233: }\n234: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:skip(Ljava/io/InputStream;J)J",
+            "method_body": "public static long skip(InputStream input, long numToSkip) throws IOException {\nlong available = numToSkip;\nwhile (numToSkip > 0) {\nlong skipped = input.skip(numToSkip);\nif (skipped == 0) {\nnumToSkip -= skipped;\n}\nwhile (numToSkip > 0) {\nreturn available - numToSkip;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.FallbackZipEncoding:decode([B)Ljava/lang/String;",
+            "method_body": "public String decode(byte[] data) throws IOException {\nif (this.charsetName == null) { // i.e. use default charset, see no-args constructor\nreturn new String(data,this.charsetName);\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:verifyCheckSum([B)Z",
+            "method_body": "public static boolean verifyCheckSum(byte[] header) {\nlong storedSum = 0;\nlong unsignedSum = 0;\nlong signedSum = 0;\nint digits = 0;\nfor (int i = 0; i < header.length; i++) {\nbyte b = header[i];\nif (CHKSUM_OFFSET  <= i && i < CHKSUM_OFFSET + CHKSUMLEN) {\nif ('0' <= b && b <= '7' && digits++ < 6) {\nstoredSum = storedSum * 8 + b - '0';\n} else if (digits > 0) {\ndigits = 6; // only look at the first octal digit sequence\nb = ' ';\nunsignedSum += 0xff & b;\nsignedSum += b;\nreturn storedSum == unsignedSum || storedSum == signedSum\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;IILjava/lang/String;)V",
+            "method_body": "public TarArchiveInputStream(InputStream is, int blockSize, int recordSize,\nString encoding) {\nthis.is = is;\nthis.hasHitEOF = false;\nthis.encoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.recordSize = recordSize;\nthis.blockSize = blockSize;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;)V",
+            "method_body": "public TarArchiveInputStream(InputStream is) {\nthis(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE);\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:getNextTarEntry()Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;",
+            "method_body": "public TarArchiveEntry getNextTarEntry() throws IOException {\nif (hasHitEOF) {\nreturn null;\nif (currEntry != null) {\nskip(Long.MAX_VALUE);\nskipRecordPadding();\nbyte[] headerBuf = getRecord();\nif (headerBuf == null) {\ncurrEntry = new TarArchiveEntry(headerBuf, encoding);\n}\nentryOffset = 0;\nentrySize = currEntry.getSize();\nif (currEntry.isGNULongLinkEntry()) {\nif (currEntry.isGNULongNameEntry()) {\nif (currEntry.isPaxHeader()){ // Process Pax headers\nif (currEntry.isGNUSparse()){ // Process sparse files\nentrySize = currEntry.getSize();\nreturn currEntry;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:skipRecordPadding()V",
+            "method_body": "private void skipRecordPadding() throws IOException {\nif (this.entrySize > 0 && this.entrySize % this.recordSize != 0) {\nlong numRecords = (this.entrySize / this.recordSize) + 1;\nlong padding = (numRecords * this.recordSize) - this.entrySize;\nlong skipped = IOUtils.skip(is, padding);\ncount(skipped);\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ArchiveUtils:matchAsciiBuffer(Ljava/lang/String;[BII)Z",
+            "method_body": "public static boolean matchAsciiBuffer(\nbuffer1 = expected.getBytes(CharsetNames.US_ASCII);\n}\nreturn isEqual(buffer1, 0, buffer1.length, buffer, offset, length, false);\n}",
+            "method_id": 47
+        }
+    ]
+}

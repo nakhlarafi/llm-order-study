@@ -1,0 +1,109 @@
+{
+    "bug_id": 17,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug3476684_adjustOffset",
+    "test_body": "1249: public void testBug3476684_adjustOffset() {\n1250: final DateTimeZone zone = DateTimeZone.forID(\"America/Sao_Paulo\");\n1251: DateTime base = new DateTime(2012, 2, 25, 22, 15, zone);\n1252: DateTime baseBefore = base.plusHours(1);  // 23:15 (first)\n1253: DateTime baseAfter = base.plusHours(2);  // 23:15 (second)\n1254: 1255: assertSame(base, base.withEarlierOffsetAtOverlap());\n1256: assertSame(base, base.withLaterOffsetAtOverlap());\n1257: 1258: assertSame(baseBefore, baseBefore.withEarlierOffsetAtOverlap());\n1259: assertEquals(baseAfter, baseBefore.withLaterOffsetAtOverlap());\n1260: 1261: assertSame(baseAfter, baseAfter.withLaterOffsetAtOverlap());\n1262: assertEquals(baseBefore, baseAfter.withEarlierOffsetAtOverlap());\n1263: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2012-02-25T23:15:00.000-03:00> but was:<2012-02-25T23:15:00.000-02:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug3476684_adjustOffset(TestDateTimeZoneCutover.java:1259)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.DateTimeZone:adjustOffset(JZ)J",
+            "method_body": "public long adjustOffset(long instant, boolean earlierOrLater) {\nlong instantBefore = convertUTCToLocal(instant - 3 * DateTimeConstants.MILLIS_PER_HOUR);\nlong instantAfter = convertUTCToLocal(instant + 3 * DateTimeConstants.MILLIS_PER_HOUR);\nif (instantBefore == instantAfter) {\nlong local = convertUTCToLocal(instant);\nreturn convertLocalToUTC(local, false, earlierOrLater ? instantAfter : instantBefore);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:withEarlierOffsetAtOverlap()Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime withEarlierOffsetAtOverlap() {\nlong newMillis = getZone().adjustOffset(getMillis(), false);\nreturn withMillis(newMillis);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:withLaterOffsetAtOverlap()Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime withLaterOffsetAtOverlap() {\nlong newMillis = getZone().adjustOffset(getMillis(), true);\nreturn withMillis(newMillis);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:<init>(IIIIILorg/joda/time/DateTimeZone;)V",
+            "method_body": "public DateTime(\nsuper(year, monthOfYear, dayOfMonth,\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:plusHours(I)Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime plusHours(int hours) {\nif (hours == 0) {\nlong instant = getChronology().hours().add(getMillis(), hours);\nreturn withMillis(instant);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractInstant:getZone()Lorg/joda/time/DateTimeZone;",
+            "method_body": "public DateTimeZone getZone() {\nreturn getChronology().getZone();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:withMillis(J)Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime withMillis(long newMillis) {\nreturn (newMillis == getMillis() ? this : new DateTime(newMillis, getChronology()));\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDurationField:add(JI)J",
+            "method_body": "public long add(long instant, int value) {\nint offset = getOffsetToAdd(instant);\ninstant = iField.add(instant + offset, value);\nreturn instant - (iTimeField ? offset : getOffsetFromLocalToSubtract(instant));\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractInstant:toString()Ljava/lang/String;",
+            "method_body": "public String toString() {\nreturn ISODateTimeFormat.dateTime().print(this);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDurationField:getOffsetToAdd(J)I",
+            "method_body": "private int getOffsetToAdd(long instant) {\nint offset = this.iZone.getOffset(instant);\nlong sum = instant + offset;\nif ((instant ^ sum) < 0 && (instant ^ offset) >= 0) {\nreturn offset;\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.joda.time.base.BaseDateTime:<init>(IIIIIIILorg/joda/time/DateTimeZone;)V",
+            "method_body": "public BaseDateTime(\nthis(year, monthOfYear, dayOfMonth, hourOfDay,\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.joda.time.format.ISODateTimeFormat:dateTime()Lorg/joda/time/format/DateTimeFormatter;",
+            "method_body": "public static DateTimeFormatter dateTime() {\nif (dt == null) {\nreturn dt;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$Fraction:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;ILorg/joda/time/DateTimeZone;Ljava/util/Locale;)V",
+            "method_body": "public void printTo(\nprintTo(buf, null, instant, chrono);\n}\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$TimeZoneOffset:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;ILorg/joda/time/DateTimeZone;Ljava/util/Locale;)V",
+            "method_body": "public void printTo(\nif (displayZone == null) {\nif (displayOffset == 0 && iZeroOffsetPrintText != null) {\nif (displayOffset >= 0) {\nbuf.append('-');\ndisplayOffset = -displayOffset;\nint hours = displayOffset / DateTimeConstants.MILLIS_PER_HOUR;\nFormatUtils.appendPaddedInteger(buf, hours, 2);\nif (iMaxFields == 1) {\ndisplayOffset -= hours * (int)DateTimeConstants.MILLIS_PER_HOUR;\nif (displayOffset == 0 && iMinFields <= 1) {\nint minutes = displayOffset / DateTimeConstants.MILLIS_PER_MINUTE;\nif (iShowSeparators) {\nbuf.append(':');\nFormatUtils.appendPaddedInteger(buf, minutes, 2);\nif (iMaxFields == 2) {\ndisplayOffset -= minutes * DateTimeConstants.MILLIS_PER_MINUTE;\nif (displayOffset == 0 && iMinFields <= 2) {\nreturn;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$Fraction:printTo(Ljava/lang/StringBuffer;Ljava/io/Writer;JLorg/joda/time/Chronology;)V",
+            "method_body": "protected void printTo(StringBuffer buf, Writer out, long instant, Chronology chrono)\nDateTimeField field = iFieldType.getField(chrono);\nint minDigits = iMinDigits;\nfraction = field.remainder(instant);\n}\nif (fraction == 0) {\nif (buf != null) {\nwhile (--minDigits >= 0) {\nbuf.append('0');\nreturn;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationDateTimeField:remainder(J)J",
+            "method_body": "public long remainder(long instant) {\nif (instant >= 0) {\nreturn instant % iUnitMillis;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$CharacterLiteral:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;ILorg/joda/time/DateTimeZone;Ljava/util/Locale;)V",
+            "method_body": "public void printTo(\nbuf.append(iValue);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$PaddedNumber:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;ILorg/joda/time/DateTimeZone;Ljava/util/Locale;)V",
+            "method_body": "public void printTo(\nDateTimeField field = iFieldType.getField(chrono);\nFormatUtils.appendPaddedInteger(buf, field.get(instant), iMinPrintedDigits);\n}\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$Composite:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;ILorg/joda/time/DateTimeZone;Ljava/util/Locale;)V",
+            "method_body": "public void printTo(\nDateTimePrinter[] elements = iPrinters;\nif (elements == null) {\nif (locale == null) {\nlocale = Locale.getDefault();\nint len = elements.length;\nfor (int i = 0; i < len; i++) {\nelements[i].printTo(buf, instant, chrono, displayOffset, displayZone, locale);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatter:print(Lorg/joda/time/ReadableInstant;)Ljava/lang/String;",
+            "method_body": "public String print(ReadableInstant instant) {\nStringBuffer buf = new StringBuffer(requirePrinter().estimatePrintedLength());\nprintTo(buf, instant);\nreturn buf.toString();\n}",
+            "method_id": 19
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 43,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.zip.DataDescriptorTest.doesntWriteDataDescriptorWhenAddingRawEntries",
+    "test_body": "135: public void doesntWriteDataDescriptorWhenAddingRawEntries() throws IOException {\n136: ByteArrayOutputStream init = new ByteArrayOutputStream();\n137: try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(init)) {\n138: zos.putArchiveEntry(new ZipArchiveEntry(\"test1.txt\"));\n139: zos.write(\"foo\".getBytes(\"UTF-8\"));\n140: zos.closeArchiveEntry();\n141: }\n142: 143: File f = new File(dir, \"test.zip\");\n144: try (FileOutputStream fos = new FileOutputStream(f)) {\n145: fos.write(init.toByteArray());\n146: }\n147: 148: ByteArrayOutputStream o = new ByteArrayOutputStream();\n149: ZipArchiveEntry zae;\n150: try (ZipFile zf = new ZipFile(f);\n151: ZipArchiveOutputStream zos = new ZipArchiveOutputStream(o)) {\n152: zae = zf.getEntry(\"test1.txt\");\n153: zos.addRawArchiveEntry(zae, zf.getRawInputStream(zae));\n154: }\n155: 156: byte[] data = o.toByteArray();\n157: byte[] versionInLFH = Arrays.copyOfRange(data, 4, 6);\n158: // still 2.0 because of Deflate\n159: assertArrayEquals(new byte[] { 20, 0 }, versionInLFH);\n160: byte[] gpbInLFH = Arrays.copyOfRange(data, 6, 8);\n161: // no DD but EFS flag\n162: assertArrayEquals(new byte[] { 0, 8 }, gpbInLFH);\n163: 164: int cdhStart = findCentralDirectory(data);\n165: byte[] versionInCDH = Arrays.copyOfRange(data, cdhStart + 6, cdhStart + 8);\n166: assertArrayEquals(new byte[] { 20, 0 }, versionInCDH);\n167: byte[] gpbInCDH = Arrays.copyOfRange(data, cdhStart + 8, cdhStart + 10);\n168: assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);\n169: 170: int ddStart = cdhStart - 16;\n171: assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));\n172: long crcFromLFH = ZipLong.getValue(data, 14);\n173: long cSizeFromLFH = ZipLong.getValue(data, 18);\n174: long sizeFromLFH = ZipLong.getValue(data, 22);\n175: assertEquals(3, sizeFromLFH);\n176: 177: long crcFromCDH = ZipLong.getValue(data, cdhStart + 16);\n178: assertEquals(crcFromLFH, crcFromCDH);\n179: long cSizeFromCDH = ZipLong.getValue(data, cdhStart + 20);\n180: assertEquals(cSizeFromLFH, cSizeFromCDH);\n181: long sizeFromCDH = ZipLong.getValue(data, cdhStart + 24);\n182: assertEquals(sizeFromLFH, sizeFromCDH);\n183: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:<init>(Ljava/util/zip/ZipEntry;)V",
+            "method_body": "private long size = SIZE_UNKNOWN;\nprivate int internalAttributes = 0;\nprivate int platform = PLATFORM_FAT;\nprivate long externalAttributes = 0;\nprivate int alignment = 0;\nprivate UnparseableExtraFieldData unparseableExtra = null;\nprivate String name = null;\nprivate byte[] rawName = null;\nprivate GeneralPurposeBit gpb = new GeneralPurposeBit();\nprivate static final ZipExtraField[] noExtraFields = new ZipExtraField[0];\nprivate long localHeaderOffset = OFFSET_UNKNOWN;\nprivate long dataOffset = OFFSET_UNKNOWN;\nprivate boolean isStreamContiguous = false;\nsuper(name);\nsetName(name);\n}",
+            "method_id": 140
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.GeneralPurposeBit:clone()Ljava/lang/Object;",
+            "method_body": "public Object clone() {\nreturn super.clone();\n}",
+            "method_id": 141
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setStreamContiguous(Z)V",
+            "method_body": "protected void setStreamContiguous(boolean isStreamContiguous) {\nthis.isStreamContiguous = isStreamContiguous;\n}",
+            "method_id": 142
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveOutputStream:count(I)V",
+            "method_body": "protected void count(final int written) {\ncount((long) written);\n}",
+            "method_id": 143
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Zip64ExtendedInformationExtraField:getHeaderId()Lorg/apache/commons/compress/archivers/zip/ZipShort;",
+            "method_body": "public ZipShort getHeaderId() {\nreturn HEADER_ID;\n}",
+            "method_id": 144
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:getUnparseableOnly()[Lorg/apache/commons/compress/archivers/zip/ZipExtraField;",
+            "method_body": "private ZipExtraField[] getUnparseableOnly() {\nreturn unparseableExtra == null ? noExtraFields : new ZipExtraField[] { unparseableExtra };\n}",
+            "method_id": 145
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ExtraFieldUtils:register(Ljava/lang/Class;)V",
+            "method_body": "public static void register(final Class<?> c) {\nfinal ZipExtraField ze = (ZipExtraField) c.newInstance();\nimplementations.put(ze.getHeaderId(), c);\n}\n}",
+            "method_id": 146
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.X000A_NTFS:<clinit>()V",
+            "method_body": "private static final ZipShort HEADER_ID = new ZipShort(0x000a);\nprivate static final ZipShort TIME_ATTR_TAG = new ZipShort(0x0001);\nprivate static final ZipShort TIME_ATTR_SIZE = new ZipShort(3 * 8);\nprivate ZipEightByteInteger modifyTime = ZipEightByteInteger.ZERO;\nprivate ZipEightByteInteger accessTime = ZipEightByteInteger.ZERO;\nprivate ZipEightByteInteger createTime = ZipEightByteInteger.ZERO;\nreturn HEADER_ID;\n}",
+            "method_id": 147
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.StreamCompressor:create(Ljava/io/OutputStream;Ljava/util/zip/Deflater;)Lorg/apache/commons/compress/archivers/zip/StreamCompressor;",
+            "method_body": "static StreamCompressor create(final OutputStream os, final Deflater deflater) {\nreturn new OutputStreamCompressor(deflater, os);\n}",
+            "method_id": 148
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeZip64CentralDirectory()V",
+            "method_body": "protected void writeZip64CentralDirectory() throws IOException {\nif (zip64Mode == Zip64Mode.Never) {\nif (!hasUsedZip64\nif (!hasUsedZip64) {\nreturn;\n}",
+            "method_id": 149
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:<init>(Ljava/io/File;Ljava/lang/String;Z)V",
+            "method_body": "public ZipFile(final File f, final String encoding, final boolean useUnicodeExtraFields)\nthis(Files.newByteChannel(f.toPath(), EnumSet.of(StandardOpenOption.READ)),\n}",
+            "method_id": 150
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:createBoundedInputStream(JJ)Lorg/apache/commons/compress/archivers/zip/ZipFile$BoundedInputStream;",
+            "method_body": "private BoundedInputStream createBoundedInputStream(long start, long remaining) {\nreturn archive instanceof FileChannel ?\n}",
+            "method_id": 151
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ExtraFieldUtils:<clinit>()V",
+            "method_body": "private static final int WORD = 4;\nimplementations = new ConcurrentHashMap<>();\nregister(AsiExtraField.class);\nregister(X5455_ExtendedTimestamp.class);\nregister(X7875_NewUnix.class);\nregister(JarMarker.class);\nregister(UnicodePathExtraField.class);\nregister(UnicodeCommentExtraField.class);\nregister(Zip64ExtendedInformationExtraField.class);\nregister(X000A_NTFS.class);\nregister(X0014_X509Certificates.class);\nregister(X0015_CertificateIdForFile.class);\nregister(X0016_CertificateIdForCentralDirectory.class);\nregister(X0017_StrongEncryptionHeader.class);\nregister(X0019_EncryptionRecipientCertificateList.class);\nregister(ResourceAlignmentExtraField.class);\n}",
+            "method_id": 152
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setPlatform(I)V",
+            "method_body": "protected void setPlatform(final int platform) {\nthis.platform = platform;\n}",
+            "method_id": 153
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ResourceAlignmentExtraField:<init>()V",
+            "method_body": "public ResourceAlignmentExtraField() {\n}",
+            "method_id": 154
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:<init>()V",
+            "method_body": "protected ZipArchiveEntry() {\nthis(\"\");\n}",
+            "method_id": 155
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.StreamCompressor:writeCounted([BII)V",
+            "method_body": "public void writeCounted(final byte[] data, final int offset, final int length) throws IOException {\nwriteOut(data, offset, length);\nwrittenToOutputStreamForLastEntry += length;\ntotalWrittenToOutputStream += length;\n}",
+            "method_id": 156
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.GeneralPurposeBit:encode([BI)V",
+            "method_body": "public void encode(final byte[] buf, final int offset) {\nZipShort.putShort((dataDescriptorFlag ? DATA_DESCRIPTOR_FLAG : 0)\n}",
+            "method_id": 157
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:getEntry(Ljava/lang/String;)Lorg/apache/commons/compress/archivers/zip/ZipArchiveEntry;",
+            "method_body": "public ZipArchiveEntry getEntry(final String name) {\nfinal LinkedList<ZipArchiveEntry> entriesOfThatName = nameMap.get(name);\nreturn entriesOfThatName != null ? entriesOfThatName.getFirst() : null;\n}",
+            "method_id": 158
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:usesDataDescriptor(I)Z",
+            "method_body": "private boolean usesDataDescriptor(final int zipMethod) {\nreturn zipMethod == DEFLATED && channel == null;\n}",
+            "method_id": 159
+        }
+    ]
+}

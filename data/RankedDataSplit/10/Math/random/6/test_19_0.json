@@ -1,0 +1,59 @@
+{
+    "bug_id": 6,
+    "test_id": 19,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizerTest.testTrivial",
+    "test_body": "public void testTrivial() {\nLinearProblem problem\n= new LinearProblem(new double[][] { { 2 } }, new double[] { 3 });\nNonLinearConjugateGradientOptimizer optimizer\n= new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,\nnew SimpleValueChecker(1e-6, 1e-6));\nPointValuePair optimum\n= optimizer.optimize(new MaxEval(100),\nproblem.getObjectiveFunction(),\nproblem.getObjectiveFunctionGradient(),\nGoalType.MINIMIZE,\nnew InitialGuess(new double[] { 0 }));\nAssert.assertEquals(1.5, optimum.getPoint()[0], 1.0e-10);\nAssert.assertEquals(0.0, optimum.getValue(), 1.0e-10);\n140: // Check that the number of iterations is updated (MATH-949).\nAssert.assertTrue(optimizer.getIterations() > 0);\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizerTest.testTrivial(NonLinearConjugateGradientOptimizerTest.java:141)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer:parseOptimizationData([Lorg/apache/commons/math3/optim/OptimizationData;)V",
+            "method_body": "protected void parseOptimizationData(OptimizationData... optData) {\nsuper.parseOptimizationData(optData);\nfor (OptimizationData data : optData) {\nif (data instanceof GoalType) {\ngoal = (GoalType) data;\ncontinue;\nif (data instanceof ObjectiveFunction) {\nfunction = ((ObjectiveFunction) data).getObjectiveFunction();\ncontinue;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:<init>(I)V",
+            "method_body": "public Incrementor(int max) {\nthis(max,\nnew MaxCountExceededCallback() {\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseOptimizer:getMaxEvaluations()I",
+            "method_body": "public int getMaxEvaluations() {\nreturn evaluations.getMaximalCount();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:<init>()V",
+            "method_body": "public Incrementor() {\nthis(0);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Precision:equals(DDI)Z",
+            "method_body": "public static boolean equals(double x, double y, int maxUlps) {\nlong xInt = Double.doubleToLongBits(x);\nlong yInt = Double.doubleToLongBits(y);\nif (xInt < 0) {\nxInt = SGN_MASK - xInt;\nif (yInt < 0) {\nyInt = SGN_MASK - yInt;\nfinal boolean isEqual = FastMath.abs(xInt - yInt) <= maxUlps;\nreturn isEqual && !Double.isNaN(x) && !Double.isNaN(y);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction:getObjectiveFunction()Lorg/apache/commons/math3/analysis/MultivariateFunction;",
+            "method_body": "public MultivariateFunction getObjectiveFunction() {\nreturn function;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:computeObjectiveValue(D)D",
+            "method_body": "protected double computeObjectiveValue(double point)\nincrementEvaluationCount();\nreturn function.value(point);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.SimpleValueChecker:converged(ILorg/apache/commons/math3/optim/PointValuePair;Lorg/apache/commons/math3/optim/PointValuePair;)Z",
+            "method_body": "public boolean converged(final int iteration,\nif (maxIterationCount != ITERATION_CHECK_DISABLED) {\nfinal double p = previous.getValue();\nfinal double c = current.getValue();\nfinal double difference = FastMath.abs(p - c);\nfinal double size = FastMath.max(FastMath.abs(p), FastMath.abs(c));\nreturn difference <= size * getRelativeThreshold() ||\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:toBlocksLayout([[D)[[D",
+            "method_body": "public static double[][] toBlocksLayout(final double[][] rawData)\nfinal int rows = rawData.length;\nfinal int columns = rawData[0].length;\nfinal int blockRows = (rows    + BLOCK_SIZE - 1) / BLOCK_SIZE;\nfinal int blockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nfor (int i = 0; i < rawData.length; ++i) {\nfinal int length = rawData[i].length;\nif (length != columns) {\nfinal double[][] blocks = new double[blockRows * blockColumns][];\nint blockIndex = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int pStart = iBlock * BLOCK_SIZE;\nfinal int pEnd = FastMath.min(pStart + BLOCK_SIZE, rows);\nfinal int iHeight = pEnd - pStart;\nfor (int jBlock = 0; jBlock < blockColumns; ++jBlock) {\nfinal int qStart = jBlock * BLOCK_SIZE;\nfinal int qEnd = FastMath.min(qStart + BLOCK_SIZE, columns);\nfinal int jWidth = qEnd - qStart;\nfinal double[] block = new double[iHeight * jWidth];\nblocks[blockIndex] = block;\nint index = 0;\nfor (int p = pStart; p < pEnd; ++p) {\nSystem.arraycopy(rawData[p], qStart, block, index, jWidth);\nindex += jWidth;\n++blockIndex;\nreturn blocks;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction:<init>(Lorg/apache/commons/math3/analysis/MultivariateFunction;)V",
+            "method_body": "public ObjectiveFunction(MultivariateFunction f) {\nfunction = f;\n}",
+            "method_id": 9
+        }
+    ]
+}

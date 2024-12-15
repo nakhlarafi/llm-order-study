@@ -1,0 +1,59 @@
+{
+    "bug_id": 76,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math.linear.SingularValueSolverTest.testMath320A",
+    "test_body": "public void testMath320A() {\nRealMatrix rm = new Array2DRowRealMatrix(new double[][] {\n{ 1.0, 2.0, 3.0 }, { 2.0, 3.0, 4.0 }, { 3.0, 5.0, 7.0 }\n});\ndouble s439  = Math.sqrt(439.0);\ndouble[] reference = new double[] {\nMath.sqrt(3.0 * (21.0 + s439)), Math.sqrt(3.0 * (21.0 - s439))\n};\nSingularValueDecomposition svd =\nnew SingularValueDecompositionImpl(rm);\n179: // check we get the expected theoretical singular values\ndouble[] singularValues = svd.getSingularValues();\nAssert.assertEquals(reference.length, singularValues.length);\nfor (int i = 0; i < reference.length; ++i) {\nAssert.assertEquals(reference[i], singularValues[i], 4.0e-13);\n}\n186: // check the decomposition allows to recover the original matrix\nRealMatrix recomposed = svd.getU().multiply(svd.getS()).multiply(svd.getVT());\nAssert.assertEquals(0.0, recomposed.subtract(rm).getNorm(), 5.0e-13);\n190: // check we can solve a singular system\ndouble[] b = new double[] { 5.0, 6.0, 7.0 };\ndouble[] resSVD = svd.getSolver().solve(b);\nAssert.assertEquals(rm.getColumnDimension(), resSVD.length);\n195: // check the solution really minimizes the residuals\ndouble svdMinResidual = residual(rm, resSVD, b);\ndouble epsilon = 2 * Math.ulp(svdMinResidual);\ndouble h = 0.1;\nint    k = 3;\nfor (double d0 = -k * h; d0 <= k * h; d0 += h) {\nfor (double d1 = -k * h ; d1 <= k * h; d1 += h) {\nfor (double d2 = -k * h; d2 <= k * h; d2 += h) {\ndouble[] x = new double[] { resSVD[0] + d0, resSVD[1] + d1, resSVD[2] + d2 };\nAssert.assertTrue((residual(rm, x, b) - svdMinResidual) > -epsilon);\n}\n}\n}\n209: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<0.09336767546650937>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.linear.SingularValueSolverTest.testMath320A(SingularValueSolverTest.java:188)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$5:visit(IID)V",
+            "method_body": "public RealMatrix transpose() {\nfinal int nRows = getRowDimension();\nfinal int nCols = getColumnDimension();\nfinal RealMatrix out = createMatrix(nCols, nRows);\nwalkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {\nout.setEntry(column, row, value);\n}\nreturn out;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$1:visit(IID)V",
+            "method_body": "public double getNorm() {\nreturn walkInColumnOrder(new RealMatrixPreservingVisitor() {\nthis.endRow = endRow;\ncolumnSum   = 0;\nmaxColSum   = 0;\n}\ncolumnSum += Math.abs(value);\nif (row == endRow) {\nmaxColSum = Math.max(maxColSum, columnSum);\ncolumnSum = 0;\n}\nreturn maxColSum;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$5:<init>(Lorg/apache/commons/math/linear/AbstractRealMatrix;Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "public RealMatrix transpose() {\nfinal int nRows = getRowDimension();\nfinal int nCols = getColumnDimension();\nfinal RealMatrix out = createMatrix(nCols, nRows);\nwalkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {\nout.setEntry(column, row, value);\n}\nreturn out;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:getData()[[D",
+            "method_body": "public double[][] getData() {\nreturn copyOut();\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getSingularValues()[D",
+            "method_body": "public double[] getSingularValues()\nreturn singularValues.clone();\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:multiply(Lorg/apache/commons/math/linear/RealMatrix;)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix multiply(final RealMatrix m)\nreturn multiply((Array2DRowRealMatrix) m);\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:createRealMatrix(II)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealMatrix(final int rows, final int columns) {\nreturn (rows * columns <= 4096) ?\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:checkColumnIndex(Lorg/apache/commons/math/linear/AnyMatrix;I)V",
+            "method_body": "public static void checkColumnIndex(final AnyMatrix m, final int column)\nif (column < 0 || column >= m.getColumnDimension()) {\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:progressiveQuotientDifferenceWithShift([D[DD)V",
+            "method_body": "private void progressiveQuotientDifferenceWithShift(final double[] d, final double[] l,\nfinal int nM1 = d.length - 1;\ndouble pi = d[nM1] - lambda;\nint sixI = 6 * (nM1 - 1);\nfor (int i = nM1 - 1; i >= 0; --i) {\nfinal double di   = d[i];\nfinal double li   = l[i];\nfinal double diP1 = di * li * li + pi;\nfinal double t    = di / diP1;\nwork[sixI +  9]   = pi;\nwork[sixI + 10]   = diP1;\nwork[sixI +  5]   = li * t;\npi = pi * t - lambda;\nsixI -= 6;\nif (Double.isNaN(pi)) {\nwork[3] = pi;\nwork[4] = pi;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:setEntry(IID)V",
+            "method_body": "public void setEntry(final int row, final int column, final double value)\ndata[row][column] = value;\n}\n}",
+            "method_id": 39
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "bug_id": 13,
+    "test_id": 0,
+    "test_name": "org.apache.commons.cli2.bug.BugLoopingOptionLookAlikeTest.testLoopingOptionLookAlike2",
+    "test_body": "public void testLoopingOptionLookAlike2() {\nfinal ArgumentBuilder abuilder = new ArgumentBuilder();\nfinal GroupBuilder gbuilder = new GroupBuilder();\nfinal Argument inputfile_opt = abuilder.withName(\"input\").withMinimum(1).withMaximum(1).create();\nfinal Argument outputfile_opt = abuilder.withName(\"output\").withMinimum(1).withMaximum(1).create();\nfinal Argument targets = new SourceDestArgument(inputfile_opt, outputfile_opt);\nfinal Group options = gbuilder.withOption(targets).create();\nfinal Parser parser = new Parser();\nparser.setGroup(options);\ntry {\nparser.parse(new String[] { \"testfile.txt\", \"testfile.txt\", \"testfile.txt\", \"testfile.txt\" });\nfail(\"OptionException\");\n} catch (OptionException e) {\nassertEquals(\"Unexpected testfile.txt while processing \", e.getMessage());\n}",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<Unexpected [testfile.txt while processing ]> but was:<Unexpected [value \"testfile.txt\" found while processing  input]>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat junit.framework.TestCase.assertEquals(TestCase.java:269)\nat org.apache.commons.cli2.bug.BugLoopingOptionLookAlikeTest.testLoopingOptionLookAlike2(BugLoopingOptionLookAlikeTest.java:76)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli2.option.SourceDestArgument:validate(Lorg/apache/commons/cli2/WriteableCommandLine;Lorg/apache/commons/cli2/Option;)V",
+            "method_body": "public void validate(WriteableCommandLine commandLine,\nfinal List values = commandLine.getValues(option);\nfinal int limit = values.size() - dest.getMinimum();\nint count = 0;\nfinal Iterator i = values.iterator();\nwhile (count++ < limit) {\ncommandLine.addValue(source, i.next());\nwhile (i.hasNext()) {\ncommandLine.addValue(dest, i.next());\nsource.validate(commandLine, source);\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.SourceDestArgument:canProcess(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/lang/String;)Z",
+            "method_body": "public boolean canProcess(final WriteableCommandLine commandLine,\nreturn source.canProcess(commandLine, arg) || dest.canProcess(commandLine, arg);\n}",
+            "method_id": 71
+        }
+    ]
+}

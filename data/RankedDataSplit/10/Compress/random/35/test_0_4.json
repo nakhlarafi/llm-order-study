@@ -1,0 +1,59 @@
+{
+    "bug_id": 35,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.DetectArchiverTestCase.testCOMPRESS335",
+    "test_body": "59: public void testCOMPRESS335() throws Exception {\n60: final ArchiveInputStream tar = getStreamFor(\"COMPRESS-335.tar\");\n61: assertNotNull(tar);\n62: assertTrue(tar instanceof TarArchiveInputStream);\n63: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:verifyCheckSum([B)Z",
+            "method_body": "public static boolean verifyCheckSum(byte[] header) {\nlong storedSum = 0;\nlong unsignedSum = 0;\nlong signedSum = 0;\nint digits = 0;\nfor (int i = 0; i < header.length; i++) {\nbyte b = header[i];\nif (CHKSUM_OFFSET  <= i && i < CHKSUM_OFFSET + CHKSUMLEN) {\nif ('0' <= b && b <= '7' && digits++ < 6) {\nstoredSum = storedSum * 8 + b - '0';\n} else if (digits > 0) {\ndigits = 6;\nb = ' ';\nunsignedSum += 0xff & b;\nsignedSum += b;\nreturn storedSum == unsignedSum || storedSum == signedSum;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ArchiveUtils:isEqual([BII[BIIZ)Z",
+            "method_body": "public static boolean isEqual(\nint minLen=length1 < length2 ? length1 : length2;\nfor (int i=0; i < minLen; i++){\nif (buffer1[offset1+i] != buffer2[offset2+i]){\nreturn false;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:isDirectory()Z",
+            "method_body": "public boolean isDirectory() {\nif (file != null) {\nif (linkFlag == LF_DIR) {\nif (getName().endsWith(\"/\")) {\nreturn false;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:parseTarHeader([BLorg/apache/commons/compress/archivers/zip/ZipEncoding;Z)V",
+            "method_body": "private void parseTarHeader(byte[] header, ZipEncoding encoding,\nint offset = 0;\nname = oldStyle ? TarUtils.parseName(header, offset, NAMELEN)\noffset += NAMELEN;\nmode = (int) TarUtils.parseOctalOrBinary(header, offset, MODELEN);\noffset += MODELEN;\nuserId = (int) TarUtils.parseOctalOrBinary(header, offset, UIDLEN);\noffset += UIDLEN;\ngroupId = (int) TarUtils.parseOctalOrBinary(header, offset, GIDLEN);\noffset += GIDLEN;\nsize = TarUtils.parseOctalOrBinary(header, offset, SIZELEN);\noffset += SIZELEN;\nmodTime = TarUtils.parseOctalOrBinary(header, offset, MODTIMELEN);\noffset += MODTIMELEN;\ncheckSumOK = TarUtils.verifyCheckSum(header);\noffset += CHKSUMLEN;\nlinkFlag = header[offset++];\nlinkName = oldStyle ? TarUtils.parseName(header, offset, NAMELEN)\noffset += NAMELEN;\nmagic = TarUtils.parseName(header, offset, MAGICLEN);\noffset += MAGICLEN;\nversion = TarUtils.parseName(header, offset, VERSIONLEN);\noffset += VERSIONLEN;\nuserName = oldStyle ? TarUtils.parseName(header, offset, UNAMELEN)\noffset += UNAMELEN;\ngroupName = oldStyle ? TarUtils.parseName(header, offset, GNAMELEN)\noffset += GNAMELEN;\ndevMajor = (int) TarUtils.parseOctalOrBinary(header, offset, DEVLEN);\noffset += DEVLEN;\ndevMinor = (int) TarUtils.parseOctalOrBinary(header, offset, DEVLEN);\noffset += DEVLEN;\nint type = evaluateType(header);\nswitch (type) {\nString prefix = oldStyle\nif (isDirectory() && !name.endsWith(\"/\")){\nif (prefix.length() > 0){\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper$SimpleEncodingHolder:<init>([C)V",
+            "method_body": "SimpleEncodingHolder(char [] highChars) {\nthis.highChars = highChars;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ArchiveUtils:isArrayZero([BI)Z",
+            "method_body": "public static boolean isArrayZero(byte[] a, int size) {\nfor (int i = 0; i < size; i++) {\nif (a[i] != 0) {\nreturn false;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveStreamFactory:createArchiveInputStream(Ljava/io/InputStream;)Lorg/apache/commons/compress/archivers/ArchiveInputStream;",
+            "method_body": "public ArchiveInputStream createArchiveInputStream(final InputStream in)\nif (in == null) {\nif (!in.markSupported()) {\nfinal byte[] signature = new byte[12];\nin.mark(signature.length);\nint signatureLength = IOUtils.readFully(in, signature);\nin.reset();\nif (ZipArchiveInputStream.matches(signature, signatureLength)) {\n} else if (JarArchiveInputStream.matches(signature, signatureLength)) {\n} else if (ArArchiveInputStream.matches(signature, signatureLength)) {\n} else if (CpioArchiveInputStream.matches(signature, signatureLength)) {\n} else if (ArjArchiveInputStream.matches(signature, signatureLength)) {\n} else if (SevenZFile.matches(signature, signatureLength)) {\nfinal byte[] dumpsig = new byte[32];\nin.mark(dumpsig.length);\nsignatureLength = IOUtils.readFully(in, dumpsig);\nin.reset();\nif (DumpArchiveInputStream.matches(dumpsig, signatureLength)) {\nfinal byte[] tarheader = new byte[512];\nin.mark(tarheader.length);\nsignatureLength = IOUtils.readFully(in, tarheader);\nin.reset();\nif (TarArchiveInputStream.matches(tarheader, signatureLength)) {\nif (signatureLength >= 512) {\nTarArchiveInputStream tais = null;\ntais = new TarArchiveInputStream(new ByteArrayInputStream(tarheader));\nif (tais.getNextTarEntry().isCheckSumOK()) {\nIOUtils.closeQuietly(tais);\n}\n}\nthrow new ArchiveException(\"No Archiver found for the stream signature\");\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:getZipEncoding(Ljava/lang/String;)Lorg/apache/commons/compress/archivers/zip/ZipEncoding;",
+            "method_body": "public static ZipEncoding getZipEncoding(String name) {\nif (isUTF8(name)) {\nreturn UTF8_ZIP_ENCODING;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ar.ArArchiveInputStream:matches([BI)Z",
+            "method_body": "public static boolean matches(byte[] signature, int length) {\nif (length < 8) {\nif (signature[0] != 0x21) {\nreturn false;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.jar.JarArchiveInputStream:matches([BI)Z",
+            "method_body": "public static boolean matches(byte[] signature, int length ) {\nreturn ZipArchiveInputStream.matches(signature, length);\n}",
+            "method_id": 49
+        }
+    ]
+}

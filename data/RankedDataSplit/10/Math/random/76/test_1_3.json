@@ -1,0 +1,59 @@
+{
+    "bug_id": 76,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math.linear.SingularValueSolverTest.testMath320A",
+    "test_body": "public void testMath320A() {\nRealMatrix rm = new Array2DRowRealMatrix(new double[][] {\n{ 1.0, 2.0, 3.0 }, { 2.0, 3.0, 4.0 }, { 3.0, 5.0, 7.0 }\n});\ndouble s439  = Math.sqrt(439.0);\ndouble[] reference = new double[] {\nMath.sqrt(3.0 * (21.0 + s439)), Math.sqrt(3.0 * (21.0 - s439))\n};\nSingularValueDecomposition svd =\nnew SingularValueDecompositionImpl(rm);\n179: // check we get the expected theoretical singular values\ndouble[] singularValues = svd.getSingularValues();\nAssert.assertEquals(reference.length, singularValues.length);\nfor (int i = 0; i < reference.length; ++i) {\nAssert.assertEquals(reference[i], singularValues[i], 4.0e-13);\n}\n186: // check the decomposition allows to recover the original matrix\nRealMatrix recomposed = svd.getU().multiply(svd.getS()).multiply(svd.getVT());\nAssert.assertEquals(0.0, recomposed.subtract(rm).getNorm(), 5.0e-13);\n190: // check we can solve a singular system\ndouble[] b = new double[] { 5.0, 6.0, 7.0 };\ndouble[] resSVD = svd.getSolver().solve(b);\nAssert.assertEquals(rm.getColumnDimension(), resSVD.length);\n195: // check the solution really minimizes the residuals\ndouble svdMinResidual = residual(rm, resSVD, b);\ndouble epsilon = 2 * Math.ulp(svdMinResidual);\ndouble h = 0.1;\nint    k = 3;\nfor (double d0 = -k * h; d0 <= k * h; d0 += h) {\nfor (double d1 = -k * h ; d1 <= k * h; d1 += h) {\nfor (double d2 = -k * h; d2 <= k * h; d2 += h) {\ndouble[] x = new double[] { resSVD[0] + d0, resSVD[1] + d1, resSVD[2] + d2 };\nAssert.assertTrue((residual(rm, x, b) - svdMinResidual) > -epsilon);\n}\n}\n}\n209: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<0.09336767546650937>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.linear.SingularValueSolverTest.testMath320A(SingularValueSolverTest.java:188)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:transpose()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix transpose() {\nfinal int nRows = getRowDimension();\nfinal int nCols = getColumnDimension();\nfinal RealMatrix out = createMatrix(nCols, nRows);\nwalkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {\nout.setEntry(column, row, value);\n}\nreturn out;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:createRealMatrix([[D)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealMatrix(double[][] data) {\nreturn (data.length * data[0].length <= 4096) ?\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:createRealMatrix(II)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealMatrix(final int rows, final int columns) {\nreturn (rows * columns <= 4096) ?\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:setEntry(IID)V",
+            "method_body": "public void setEntry(final int row, final int column, final double value)\ndata[row][column] = value;\n}\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getV()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getV()\nif (cachedV == null) {\nfinal int p = singularValues.length;\nif (m >= n) {\nfinal RealMatrix e =\ncachedV = transformer.getV().multiply(e);\n} else {\nreturn cachedV;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:findEigenvector(D[D[D)Lorg/apache/commons/math/linear/ArrayRealVector;",
+            "method_body": "private ArrayRealVector findEigenvector(final double eigenvalue,\nfinal int m = main.length;\nstationaryQuotientDifferenceWithShift(d, l, eigenvalue);\nprogressiveQuotientDifferenceWithShift(d, l, eigenvalue);\nint r = m - 1;\ndouble minG = Math.abs(work[6 * r] + work[6 * r + 3] + eigenvalue);\nint sixI = 0;\nfor (int i = 0; i < m - 1; ++i) {\nfinal double absG = Math.abs(work[sixI] + d[i] * work[sixI + 9] / work[sixI + 10]);\nif (absG < minG) {\nr = i;\nminG = absG;\nsixI += 6;\ndouble[] eigenvector = new double[m];\ndouble n2 = 1;\neigenvector[r] = 1;\ndouble z = 1;\nfor (int i = r - 1; i >= 0; --i) {\nz *= -work[6 * i + 2];\neigenvector[i] = z;\nn2 += z * z;\nz = 1;\nfor (int i = r + 1; i < m; ++i) {\nz *= -work[6 * i - 1];\neigenvector[i] = z;\nn2 += z * z;\nfinal double inv = 1.0 / Math.sqrt(n2);\nfor (int i = 0; i < m; ++i) {\neigenvector[i] *= inv;\nreturn (transformer == null) ?\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:checkSubMatrixIndex(Lorg/apache/commons/math/linear/AnyMatrix;IIII)V",
+            "method_body": "public static void checkSubMatrixIndex(final AnyMatrix m,\ncheckRowIndex(m, startRow);\ncheckRowIndex(m, endRow);\nif (startRow > endRow) {\ncheckColumnIndex(m, startColumn);\ncheckColumnIndex(m, endColumn);\nif (startColumn > endColumn) {\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:getRealEigenvalues()[D",
+            "method_body": "public double[] getRealEigenvalues()\nreturn realEigenvalues.clone();\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:copyOut()[[D",
+            "method_body": "private double[][] copyOut() {\nfinal int nRows = this.getRowDimension();\nfinal double[][] out = new double[nRows][this.getColumnDimension()];\nfor (int i = 0; i < nRows; i++) {\nSystem.arraycopy(data[i], 0, out[i], 0, data[i].length);\nreturn out;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$1:visit(IID)V",
+            "method_body": "public double getNorm() {\nreturn walkInColumnOrder(new RealMatrixPreservingVisitor() {\nthis.endRow = endRow;\ncolumnSum   = 0;\nmaxColSum   = 0;\n}\ncolumnSum += Math.abs(value);\nif (row == endRow) {\nmaxColSum = Math.max(maxColSum, columnSum);\ncolumnSum = 0;\n}\nreturn maxColSum;\n}",
+            "method_id": 39
+        }
+    ]
+}

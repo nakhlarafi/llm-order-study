@@ -1,0 +1,59 @@
+{
+    "bug_id": 6,
+    "test_id": 17,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.testCigarWithBoundaries",
+    "test_body": "public void testCigarWithBoundaries() {\ndouble[] startPoint = point(DIM,1.0);\ndouble[] insigma = point(DIM,0.1);\ndouble[][] boundaries = boundaries(DIM, -1e100, Double.POSITIVE_INFINITY);\nPointValuePair expected =\nnew PointValuePair(point(DIM,0.0),0.0);\ndoTest(new Cigar(), startPoint, insigma, boundaries,\nGoalType.MINIMIZE, LAMBDA, true, 0, 1e-13,",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.doTest(CMAESOptimizerTest.java:514)\nat org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.testCigarWithBoundaries(CMAESOptimizerTest.java:213)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:updateBD(D)V",
+            "method_body": "private void updateBD(double negccov) {\nif (ccov1 + ccovmu + negccov > 0 &&\nC = triu(C, 0).add(triu(C, 1).transpose());\nfinal EigenDecomposition eig = new EigenDecomposition(C);\nB = eig.getV(); // eigen decomposition, B==normalized eigenvectors\nD = eig.getD();\ndiagD = diag(D);\nif (min(diagD) <= 0) {\nif (max(diagD) > 1e14 * min(diagD)) {\nfinal double tfac = max(diagD) / 1e14 - min(diagD);\nC = C.add(eye(dimension, dimension).scalarMultiply(tfac));\ndiagD = diagD.add(ones(dimension, 1).scalarMultiply(tfac));\ndiagC = diag(C);\ndiagD = sqrt(diagD); // D contains standard deviations now\nBD = times(B, repmat(diagD.transpose(), dimension, 1)); // O(n^2)\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.Array2DRowRealMatrix:createMatrix(II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix createMatrix(final int rowDimension,\nreturn new Array2DRowRealMatrix(rowDimension, columnDimension);\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.SimpleBounds:getLower()[D",
+            "method_body": "public double[] getLower() {\nreturn lower.clone();\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:repmat(Lorg/apache/commons/math3/linear/RealMatrix;II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix repmat(final RealMatrix mat, int n, int m) {\nfinal int rd = mat.getRowDimension();\nfinal int cd = mat.getColumnDimension();\nfinal double[][] d = new double[n * rd][m * cd];\nfor (int r = 0; r < n * rd; r++) {\nfor (int c = 0; c < m * cd; c++) {\nd[r][c] = mat.getEntry(r % rd, c % cd);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.AbstractRealMatrix:multiply(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix multiply(final RealMatrix m)\nMatrixUtils.checkMultiplicationCompatible(this, m);\nfinal int nRows = getRowDimension();\nfinal int nCols = m.getColumnDimension();\nfinal int nSum  = getColumnDimension();\nfinal RealMatrix out = createMatrix(nRows, nCols);\nfor (int row = 0; row < nRows; ++row) {\nfor (int col = 0; col < nCols; ++col) {\ndouble sum = 0;\nfor (int i = 0; i < nSum; ++i) {\nsum += getEntry(row, i) * m.getEntry(i, col);\nout.setEntry(row, col, sum);\nreturn out;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:updateCovariance(ZLorg/apache/commons/math3/linear/RealMatrix;Lorg/apache/commons/math3/linear/RealMatrix;[ILorg/apache/commons/math3/linear/RealMatrix;)V",
+            "method_body": "private void updateCovariance(boolean hsig, final RealMatrix bestArx,\ndouble negccov = 0;\nif (ccov1 + ccovmu > 0) {\nfinal RealMatrix arpos = bestArx.subtract(repmat(xold, 1, mu))\nfinal RealMatrix roneu = pc.multiply(pc.transpose())\ndouble oldFac = hsig ? 0 : ccov1 * cc * (2 - cc);\noldFac += 1 - ccov1 - ccovmu;\nif (isActiveCMA) {\nnegccov = (1 - ccovmu) * 0.25 * mueff /\nfinal double negminresidualvariance = 0.66;\nfinal double negalphaold = 0.5;\nfinal int[] arReverseIndex = reverse(arindex);\nRealMatrix arzneg = selectColumns(arz, MathArrays.copyOf(arReverseIndex, mu));\nRealMatrix arnorms = sqrt(sumRows(square(arzneg)));\nfinal int[] idxnorms = sortedIndices(arnorms.getRow(0));\nfinal RealMatrix arnormsSorted = selectColumns(arnorms, idxnorms);\nfinal int[] idxReverse = reverse(idxnorms);\nfinal RealMatrix arnormsReverse = selectColumns(arnorms, idxReverse);\narnorms = divide(arnormsReverse, arnormsSorted);\nfinal int[] idxInv = inverse(idxnorms);\nfinal RealMatrix arnormsInv = selectColumns(arnorms, idxInv);\nfinal double negcovMax = (1 - negminresidualvariance) /\nif (negccov > negcovMax) {\narzneg = times(arzneg, repmat(arnormsInv, dimension, 1));\nfinal RealMatrix artmp = BD.multiply(arzneg);\nfinal RealMatrix Cneg = artmp.multiply(diag(weights)).multiply(artmp.transpose());\noldFac += negalphaold * negccov;\nC = C.scalarMultiply(oldFac)\n} else {\nupdateBD(negccov);\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:sinQ(DD)D",
+            "method_body": "private static double sinQ(double xa, double xb) {\nint idx = (int) ((xa * 8.0) + 0.5);\nfinal double epsilon = xa - EIGHTHS[idx]; //idx*0.125;\nfinal double sintA = SINE_TABLE_A[idx];\nfinal double sintB = SINE_TABLE_B[idx];\nfinal double costA = COSINE_TABLE_A[idx];\nfinal double costB = COSINE_TABLE_B[idx];\ndouble sinEpsA = epsilon;\ndouble sinEpsB = polySine(epsilon);\nfinal double cosEpsA = 1.0;\nfinal double cosEpsB = polyCosine(epsilon);\nfinal double temp = sinEpsA * HEX_40000000;\ndouble temp2 = (sinEpsA + temp) - temp;\nsinEpsB +=  sinEpsA - temp2;\nsinEpsA = temp2;\ndouble a = 0;\ndouble b = 0;\ndouble t = sintA;\ndouble c = a + t;\ndouble d = -(c - a - t);\na = c;\nb = b + d;\nt = costA * sinEpsA;\nc = a + t;\nd = -(c - a - t);\na = c;\nb = b + d;\nb = b + sintA * cosEpsB + costA * sinEpsB;\nb = b + sintB + costB * sinEpsA + sintB * cosEpsB + costB * sinEpsB;\nif (xb != 0.0) {\nt = ((costA + costB) * (cosEpsA + cosEpsB) -\nc = a + t;\nd = -(c - a - t);\na = c;\nb = b + d;\nresult = a + b;\nreturn result;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer:computeObjectiveValue([D)D",
+            "method_body": "protected double computeObjectiveValue(double[] params) {\nsuper.incrementEvaluationCount();\nreturn function.value(params);\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseOptimizer:optimize([Lorg/apache/commons/math3/optim/OptimizationData;)Ljava/lang/Object;",
+            "method_body": "public PAIR optimize(OptimizationData... optData)\nparseOptimizationData(optData);\nevaluations.resetCount();\niterations.resetCount();\nreturn doOptimize();\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseOptimizer:<init>(Lorg/apache/commons/math3/optim/ConvergenceChecker;)V",
+            "method_body": "protected BaseOptimizer(ConvergenceChecker<PAIR> checker) {\nthis.checker = checker;\nevaluations = new Incrementor(0, new MaxEvalCallback());\niterations = new Incrementor(0, new MaxIterCallback());\n}",
+            "method_id": 39
+        }
+    ]
+}

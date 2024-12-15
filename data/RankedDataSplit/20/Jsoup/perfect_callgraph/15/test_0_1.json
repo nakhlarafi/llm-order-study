@@ -1,0 +1,109 @@
+{
+    "bug_id": 15,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.ParserTest.handlesDataOnlyTags",
+    "test_body": "155: @Test public void handlesDataOnlyTags() {\n156: String t = \"<style>font-family: bold</style>\";\n157: List<Element> tels = Jsoup.parse(t).getElementsByTag(\"style\");\n158: assertEquals(\"font-family: bold\", tels.get(0).data());\n159: assertEquals(\"\", tels.get(0).text());\n160: 161: String s = \"<p>Hello</p><script>obj.insert('<a rel=\\\"none\\\" />');\\ni++;</script><p>There</p>\";\n162: Document doc = Jsoup.parse(s);\n163: assertEquals(\"Hello There\", doc.text());\n164: assertEquals(\"obj.insert('<a rel=\\\"none\\\" />');\\ni++;\", doc.data());\n165: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:normaliseWhitespace(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String normaliseWhitespace(String text) {\ntext = StringUtil.normaliseWhitespace(text);\nreturn text;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:normaliseWhitespace(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public static String normaliseWhitespace(String string) {\nStringBuilder sb = new StringBuilder(string.length());\nboolean lastWasWhite = false;\nboolean modified = false;\nint l = string.length();\nfor (int i = 0; i < l; i++) {\nint c = string.codePointAt(i);\nif (Character.isWhitespace(c)) {\nif (lastWasWhite) {\nif (c != ' ')\nmodified = true;\nsb.append(' ');\nlastWasWhite = true;\nsb.appendCodePoint(c);\nlastWasWhite = false;\nreturn modified ? sb.toString() : string;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:stripLeadingWhitespace(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String stripLeadingWhitespace(String text) {\nreturn text.replaceFirst(\"^\\\\s+\", \"\");\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:isBlock()Z",
+            "method_body": "public boolean isBlock() {\nreturn tag.isBlock();\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:process(Lorg/jsoup/parser/Token;)Z",
+            "method_body": "boolean process(Token token) {\ncurrentToken = token;\nreturn this.state.process(token, this);\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:transition(Lorg/jsoup/parser/TreeBuilderState;)V",
+            "method_body": "void transition(TreeBuilderState state) {\nthis.state = state;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:markInsertionMode()V",
+            "method_body": "void markInsertionMode() {\noriginalState = state;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:originalState()Lorg/jsoup/parser/TreeBuilderState;",
+            "method_body": "TreeBuilderState originalState() {\nreturn originalState;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:framesetOk(Z)V",
+            "method_body": "void framesetOk(boolean framesetOk) {\nthis.framesetOk = framesetOk;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:currentElement()Lorg/jsoup/nodes/Element;",
+            "method_body": "Element currentElement() {\nreturn stack.getLast();\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:error(Lorg/jsoup/parser/TreeBuilderState;)V",
+            "method_body": "void error(TreeBuilderState state) {\nif (trackErrors)\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:insert(Lorg/jsoup/parser/Token$StartTag;)Lorg/jsoup/nodes/Element;",
+            "method_body": "Element insert(Token.StartTag startTag) {\nif (startTag.isSelfClosing() && !Tag.isKnownTag(startTag.name())) {\nElement el = new Element(Tag.valueOf(startTag.name()), baseUri, startTag.attributes);\ninsert(el);\nreturn el;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:insert(Ljava/lang/String;)Lorg/jsoup/nodes/Element;",
+            "method_body": "Element insert(String startTagName) {\nElement el = new Element(Tag.valueOf(startTagName), baseUri);\ninsert(el);\nreturn el;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:insert(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void insert(Element el) {\ninsertNode(el);\nstack.add(el);\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:insert(Lorg/jsoup/parser/Token$Character;)V",
+            "method_body": "void insert(Token.Character characterToken) {\nif (StringUtil.in(currentElement().tagName(), \"script\", \"style\"))\nnode = new DataNode(characterToken.getData(), baseUri);\nnode = new TextNode(characterToken.getData(), baseUri);\ncurrentElement().appendChild(node); // doesn't use insertNode, because we don't foster these; and will always have a stack.\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:insertNode(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "private void insertNode(Node node) {\nif (stack.size() == 0)\ndoc.appendChild(node);\nelse if (isFosterInserts())\ncurrentElement().appendChild(node);\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:pop()Lorg/jsoup/nodes/Element;",
+            "method_body": "Element pop() {\nif (stack.peekLast().nodeName().equals(\"td\") && !state.name().equals(\"InCell\"))\nif (stack.peekLast().nodeName().equals(\"html\"))\nreturn stack.pollLast();\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:getStack()Lorg/jsoup/helper/DescendableLinkedList;",
+            "method_body": "DescendableLinkedList<Element> getStack() {\nreturn stack;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:onStack(Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "boolean onStack(Element el) {\nreturn isElementInQueue(stack, el);\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:isElementInQueue(Lorg/jsoup/helper/DescendableLinkedList;Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "private boolean isElementInQueue(DescendableLinkedList<Element> queue, Element element) {\nIterator<Element> it = queue.descendingIterator();\nwhile (it.hasNext()) {\nElement next = it.next();\nif (next == element) {\nreturn true;\n}\nreturn false;\n}",
+            "method_id": 39
+        }
+    ]
+}

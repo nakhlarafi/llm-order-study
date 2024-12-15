@@ -1,0 +1,59 @@
+{
+    "bug_id": 14,
+    "test_id": 0,
+    "test_name": "org.apache.commons.cli2.bug.BugCLI144Test.testFileValidator",
+    "test_body": "public void testFileValidator() {\nfinal DefaultOptionBuilder obuilder = new DefaultOptionBuilder();\nfinal ArgumentBuilder abuilder = new ArgumentBuilder();\nfinal GroupBuilder gbuilder = new GroupBuilder();\nDefaultOption fileNameOption = obuilder.withShortName(\"f\")\n.withLongName(\"file-name\").withRequired(true).withDescription(\n\"name of an existing file\").withArgument(\nabuilder.withName(\"file-name\").withValidator(\nFileValidator.getExistingFileInstance())\n.create()).create();\nGroup options = gbuilder.withName(\"options\").withOption(fileNameOption)\n.create();\nParser parser = new Parser();\nparser.setHelpTrigger(\"--help\");\nparser.setGroup(options);\n60: final String fileName = \"src/test/org/apache/commons/cli2/bug/BugCLI144Test.java\";\nCommandLine cl = parser\n.parseAndHelp(new String[] { \"--file-name\", fileName });",
+    "stack_trace": "java.lang.ClassCastException: java.io.File cannot be cast to java.lang.String\nat org.apache.commons.cli2.validation.FileValidator.validate(FileValidator.java:123)\nat org.apache.commons.cli2.option.ArgumentImpl.validate(ArgumentImpl.java:251)\nat org.apache.commons.cli2.option.ParentImpl.validate(ParentImpl.java:124)\nat org.apache.commons.cli2.option.DefaultOption.validate(DefaultOption.java:176)\nat org.apache.commons.cli2.option.GroupImpl.validate(GroupImpl.java:262)\nat org.apache.commons.cli2.commandline.Parser.parse(Parser.java:104)\nat org.apache.commons.cli2.commandline.Parser.parseAndHelp(Parser.java:124)\nat org.apache.commons.cli2.bug.BugCLI144Test.testFileValidator(BugCLI144Test.java:61)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli2.option.OptionImpl:checkPrefix(Ljava/util/Set;Ljava/lang/String;)V",
+            "method_body": "private void checkPrefix(final Set prefixes,\nfor (final Iterator i = prefixes.iterator(); i.hasNext();) {\nString prefix = (String) i.next();\nif (trigger.startsWith(prefix)) {\nreturn;\n}\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ParentImpl:<init>(Lorg/apache/commons/cli2/Argument;Lorg/apache/commons/cli2/Group;Ljava/lang/String;IZ)V",
+            "method_body": "protected ParentImpl(final Argument argument,\nsuper(id, required);\nthis.children = children;\nthis.argument = argument;\nthis.description = description;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ParentImpl:process(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/util/ListIterator;)V",
+            "method_body": "public void process(final WriteableCommandLine commandLine,\nif (argument != null) {\nhandleInitialSeparator(arguments, argument.getInitialSeparator());\nprocessParent(commandLine, arguments);\nif (argument != null) {\nargument.processValues(commandLine, arguments, this);\nif ((children != null) && children.canProcess(commandLine, arguments)) {\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ParentImpl:validate(Lorg/apache/commons/cli2/WriteableCommandLine;)V",
+            "method_body": "public void validate(WriteableCommandLine commandLine)\nif (commandLine.hasOption(this)) {\nif (argument != null) {\nargument.validate(commandLine, this);\nif (children != null) {\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ParentImpl:getDescription()Ljava/lang/String;",
+            "method_body": "public String getDescription() {\nreturn description;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ParentImpl:handleInitialSeparator(Ljava/util/ListIterator;C)V",
+            "method_body": "private void handleInitialSeparator(final ListIterator arguments,\nfinal String newArgument = (String) arguments.next();\nfinal int initialIndex = newArgument.indexOf(separator);\nif (initialIndex > 0) {\narguments.previous();\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ParentImpl:defaults(Lorg/apache/commons/cli2/WriteableCommandLine;)V",
+            "method_body": "public void defaults(final WriteableCommandLine commandLine) {\nsuper.defaults(commandLine);\nif (argument != null) {\nargument.defaultValues(commandLine, this);\nif (children != null) {\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.DefaultOption:<init>(Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ZLorg/apache/commons/cli2/Argument;Lorg/apache/commons/cli2/Group;I)V",
+            "method_body": "public DefaultOption(final String shortPrefix,\nsuper(argument, children, description, id, required);\nthis.shortPrefix = shortPrefix;\nthis.burstEnabled = burstEnabled;\nthis.burstLength = shortPrefix.length() + 1;\nthis.preferredName = preferredName;\nthis.aliases =\nthis.burstAliases =\nfinal Set newTriggers = new HashSet();\nnewTriggers.add(preferredName);\nnewTriggers.addAll(this.aliases);\nnewTriggers.addAll(this.burstAliases);\nthis.triggers = Collections.unmodifiableSet(newTriggers);\nfinal Set newPrefixes = new HashSet(super.getPrefixes());\nnewPrefixes.add(shortPrefix);\nnewPrefixes.add(longPrefix);\nthis.prefixes = Collections.unmodifiableSet(newPrefixes);\ncheckPrefixes(newPrefixes);\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.DefaultOption:processParent(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/util/ListIterator;)V",
+            "method_body": "public void processParent(WriteableCommandLine commandLine,\nfinal String argument = (String) arguments.next();\nif (triggers.contains(argument)) {\ncommandLine.addOption(this);\narguments.set(preferredName);\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.DefaultOption:getTriggers()Ljava/util/Set;",
+            "method_body": "public Set getTriggers() {\nreturn triggers;\n}",
+            "method_id": 49
+        }
+    ]
+}

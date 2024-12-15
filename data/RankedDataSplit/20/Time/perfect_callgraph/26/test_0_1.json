@@ -1,0 +1,109 @@
+{
+    "bug_id": 26,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral",
+    "test_body": "public void testBug2182444_usCentral() {\nChronology chronUSCentral = GregorianChronology.getInstance(DateTimeZone.forID(\"US/Central\"));\nChronology chronUTC = GregorianChronology.getInstance(DateTimeZone.UTC);\nDateTime usCentralStandardInUTC = new DateTime(2008, 11, 2, 7, 0, 0, 0, chronUTC);\nDateTime usCentralDaylightInUTC = new DateTime(2008, 11, 2, 6, 0, 0, 0, chronUTC);\nassertTrue(\"Should be standard time\", chronUSCentral.getZone().isStandardOffset(usCentralStandardInUTC.getMillis()));\nassertFalse(\"Should be daylight time\", chronUSCentral.getZone().isStandardOffset(usCentralDaylightInUTC.getMillis()));\n1161: DateTime usCentralStandardInUSCentral = usCentralStandardInUTC.toDateTime(chronUSCentral);\nDateTime usCentralDaylightInUSCentral = usCentralDaylightInUTC.toDateTime(chronUSCentral);\nassertEquals(1, usCentralStandardInUSCentral.getHourOfDay());\nassertEquals(usCentralStandardInUSCentral.getHourOfDay(), usCentralDaylightInUSCentral.getHourOfDay());\nassertTrue(usCentralStandardInUSCentral.getMillis() != usCentralDaylightInUSCentral.getMillis());\nassertEquals(usCentralStandardInUSCentral, usCentralStandardInUSCentral.withHourOfDay(1));\nassertEquals(usCentralStandardInUSCentral.getMillis() + 3, usCentralStandardInUSCentral.withMillisOfSecond(3).getMillis());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2008-11-02T01:00:00.000-06:00> but was:<2008-11-02T01:00:00.000-05:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral(TestDateTimeZoneCutover.java:1166)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence:getSaveMillis()I",
+            "method_body": "public int getSaveMillis() {\nreturn iSaveMillis;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfMonth(J)I",
+            "method_body": "abstract int getMonthOfYear(long millis, int year);\nint year = getYear(millis);\nint month = getMonthOfYear(millis, year);\nreturn getDayOfMonth(millis, year, month);\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone:getOffset(J)I",
+            "method_body": "public int getOffset(long instant) {\nreturn getInfo(instant).getOffset(instant);\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence:readFrom(Ljava/io/DataInput;)Lorg/joda/time/tz/DateTimeZoneBuilder$Recurrence;",
+            "method_body": "static Recurrence readFrom(DataInput in) throws IOException {\nreturn new Recurrence(OfYear.readFrom(in), in.readUTF(), (int)readMillis(in));\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:secondOfDay()Lorg/joda/time/DateTimeField;",
+            "method_body": "public final DateTimeField secondOfDay() {\nreturn iSecondOfDay;\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDateTimeField:get(J)I",
+            "method_body": "public int get(long instant) {\nif (instant >= 0) {\nreturn (int) ((instant / getUnitMillis()) % iRange);\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$OfYear:setDayOfWeek(Lorg/joda/time/Chronology;J)J",
+            "method_body": "private long setDayOfWeek(Chronology chrono, long instant) {\nint dayOfWeek = chrono.dayOfWeek().get(instant);\nint daysToAdd = iDayOfWeek - dayOfWeek;\nif (daysToAdd != 0) {\nif (iAdvance) {\nif (daysToAdd < 0) {\nif (daysToAdd > 0) {\ndaysToAdd -= 7;\ninstant = chrono.dayOfWeek().add(instant, daysToAdd);\nreturn instant;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearInfo(I)Lorg/joda/time/chrono/BasicChronology$YearInfo;",
+            "method_body": "abstract long getAverageMillisPerYear();\nYearInfo info = iYearInfoCache[year & CACHE_MASK];\nif (info == null || info.iYear != year) {\nreturn info;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.joda.time.tz.FixedDateTimeZone:hashCode()I",
+            "method_body": "public int hashCode() {\nreturn getID().hashCode() + 37 * iStandardOffset + 31 * iWallOffset;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:getStandardOffset(J)I",
+            "method_body": "public int getStandardOffset(long instant) {\nlong[] transitions = iTransitions;\nint i = Arrays.binarySearch(transitions, instant);\nif (i >= 0) {\nreturn iStandardOffsets[i];\ni = ~i;\nif (i < transitions.length) {\nif (i > 0) {\nreturn iStandardOffsets[i - 1];\nif (iTailZone == null) {\nreturn iTailZone.getStandardOffset(instant);\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.joda.time.field.MillisDurationField:isSupported()Z",
+            "method_body": "public boolean isSupported() {\nreturn true;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getInstance(Lorg/joda/time/DateTimeZone;)Lorg/joda/time/chrono/GregorianChronology;",
+            "method_body": "public static GregorianChronology getInstance(DateTimeZone zone) {\nreturn getInstance(zone, 4);\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicWeekyearDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn null;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfMonth(JII)I",
+            "method_body": "int getDayOfMonth(long millis, int year, int month) {\nlong dateMillis = getYearMillis(year);\ndateMillis += getTotalMillisByYearMonth(year, month);\nreturn (int) ((millis - dateMillis) / DateTimeConstants.MILLIS_PER_DAY) + 1;\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationDateTimeField:getMinimumValue()I",
+            "method_body": "public int getMinimumValue() {\nreturn 0;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:getID()Ljava/lang/String;",
+            "method_body": "public final String getID() {\nreturn iID;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.joda.time.field.ImpreciseDateTimeField:getDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField getDurationField() {\nreturn iDurationField;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeFieldType:hourOfDay()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public static DateTimeFieldType hourOfDay() {\nreturn HOUR_OF_DAY_TYPE;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getAverageMillisPerYearDividedByTwo()J",
+            "method_body": "long getAverageMillisPerYearDividedByTwo() {\nreturn MILLIS_PER_YEAR / 2;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.joda.time.field.OffsetDateTimeField:getLeapDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getLeapDurationField() {\nreturn getWrappedField().getLeapDurationField();\n}",
+            "method_id": 39
+        }
+    ]
+}

@@ -1,0 +1,129 @@
+{
+    "bug_id": 15,
+    "test_id": 0,
+    "test_name": "org.mockitousage.bugs.InjectMocksShouldTryPropertySettersFirstBeforeFieldAccessTest.shouldInjectUsingPropertySetterIfAvailable",
+    "test_body": "public void shouldInjectUsingPropertySetterIfAvailable() {\nassertTrue(awaitingInjection.propertySetterUsed);\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.mockitousage.bugs.InjectMocksShouldTryPropertySettersFirstBeforeFieldAccessTest.shouldInjectUsingPropertySetterIfAvailable(InjectMocksShouldTryPropertySettersFirstBeforeFieldAccessTest.java:25)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:createMock(Ljava/lang/Class;Lorg/mockito/internal/creation/MockSettingsImpl;)Ljava/lang/Object;",
+            "method_body": "public <T> T createMock(Class<T> classToMock, MockSettingsImpl settings) {\ncreationValidator.validateType(classToMock);\ncreationValidator.validateExtraInterfaces(classToMock, settings.getExtraInterfaces());\ncreationValidator.validateMockedType(classToMock, settings.getSpiedInstance());\nsettings.initiateMockName(classToMock);\nMockHandler<T> mockHandler = new MockHandler<T>(settings);\nMethodInterceptorFilter filter = new MethodInterceptorFilter(mockHandler, settings);\nClass<?>[] interfaces = settings.getExtraInterfaces();\nif (settings.isSerializable()) {\nancillaryTypes = interfaces == null ? new Class<?>[0] : interfaces;\nObject spiedInstance = settings.getSpiedInstance();\nT mock = ClassImposterizer.INSTANCE.imposterise(filter, classToMock, ancillaryTypes);\nif (spiedInstance != null) {\nreturn mock;\n}",
+            "method_id": 0,
+            "loc": 15
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.ClassImposterizer$3:<init>(Lorg/mockito/internal/creation/jmock/ClassImposterizer;)V",
+            "method_body": "private Class<?> createProxyClass(Class<?> mockedType, Class<?>...interfaces) {\nif (mockedType == Object.class) {\nEnhancer enhancer = new Enhancer() {\nenhancer.setClassLoader(SearchingClassLoader.combineLoadersOf(mockedType));\nenhancer.setUseFactory(true);\nif (mockedType.isInterface()) {\nenhancer.setSuperclass(Object.class);\nenhancer.setInterfaces(prepend(mockedType, interfaces));\nenhancer.setCallbackTypes(new Class[]{MethodInterceptor.class, NoOp.class});\nenhancer.setCallbackFilter(IGNORE_BRIDGE_METHODS);\nif (mockedType.getSigners() != null) {\nenhancer.setNamingPolicy(MockitoNamingPolicy.INSTANCE);\nreturn enhancer.createClass();\n}",
+            "method_id": 1,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:scanMocks(Ljava/lang/Object;Ljava/lang/Class;)Ljava/util/Set;",
+            "method_body": "private static Set<Object> scanMocks(Object testClass, Class<?> clazz) {\nSet<Object> mocks = new HashSet<Object>();\nfor (Field field : clazz.getDeclaredFields()) {\nif (null != field.getAnnotation(Spy.class) || null != field.getAnnotation(org.mockito.Mock.class)\nObject fieldInstance = null;\nboolean wasAccessible = field.isAccessible();\nfield.setAccessible(true);\nfieldInstance = field.get(testClass);\nfield.setAccessible(wasAccessible);\n}\nif (fieldInstance != null) {\nmocks.add(fieldInstance);\nreturn mocks;\n}",
+            "method_id": 2,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.ClassImposterizer:createProxyClass(Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/Class;",
+            "method_body": "private Class<?> createProxyClass(Class<?> mockedType, Class<?>...interfaces) {\nif (mockedType == Object.class) {\nEnhancer enhancer = new Enhancer() {\nenhancer.setClassLoader(SearchingClassLoader.combineLoadersOf(mockedType));\nenhancer.setUseFactory(true);\nif (mockedType.isInterface()) {\nenhancer.setSuperclass(Object.class);\nenhancer.setInterfaces(prepend(mockedType, interfaces));\nenhancer.setCallbackTypes(new Class[]{MethodInterceptor.class, NoOp.class});\nenhancer.setCallbackFilter(IGNORE_BRIDGE_METHODS);\nif (mockedType.getSigners() != null) {\nenhancer.setNamingPolicy(MockitoNamingPolicy.INSTANCE);\nreturn enhancer.createClass();\n}",
+            "method_id": 3,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> clazz, Object testClass) {\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nboolean alreadyAssigned = false;\nfor(Annotation annotation : field.getAnnotations()) {\nObject mock = createMockFor(annotation, field);\nif (mock != null) {\nthrowIfAlreadyAssigned(field, alreadyAssigned);\nalreadyAssigned = true;\nnew FieldSetter(testClass, field).set(mock);\n}\n}",
+            "method_id": 4,
+            "loc": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultInjectionEngine:injectMocksOnFields(Ljava/util/Set;Ljava/util/Set;Ljava/lang/Object;)V",
+            "method_body": "public void injectMocksOnFields(Set<Field> testClassFields, Set<Object> mocks, Object testClass) {\nfor (Field field : testClassFields) {\nObject fieldInstance = null;\nfieldInstance = new FieldInitializer(testClass, field).initialize();\n}\nClass<?> fieldClass = fieldInstance.getClass();\nwhile (fieldClass != Object.class) {\ninjectMockCandidate(fieldClass, mocks, fieldInstance);\nfieldClass = fieldClass.getSuperclass();\n}\n}",
+            "method_id": 5,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.FieldInitializer:initializeField(Ljava/lang/Object;Ljava/lang/reflect/Field;)V",
+            "method_body": "private void initializeField(Object testClass, Field field) {\nfinal AccessibilityChanger changer = new AccessibilityChanger();\nConstructor<?> constructor = null;\nconstructor = field.getType().getDeclaredConstructor();\nchanger.enableAccess(constructor);\nfinal Object[] noArg = new Object[0];\nObject newFieldInstance = constructor.newInstance(noArg);\nnew FieldSetter(testClass, field).set(newFieldInstance);\nif(constructor != null) {\nchanger.safelyDisableAccess(constructor);\n}",
+            "method_id": 6,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter:filterCandidate(Ljava/util/Collection;Ljava/lang/reflect/Field;Ljava/lang/Object;)Lorg/mockito/internal/configuration/injection/OngoingInjecter;",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 7,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter$2:<init>(Lorg/mockito/internal/configuration/injection/FinalMockCandidateFilter;)V",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 8,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.MockitoAnnotations:processAnnotationDeprecatedWay(Lorg/mockito/configuration/AnnotationEngine;Ljava/lang/Object;Ljava/lang/reflect/Field;)V",
+            "method_body": "static void processAnnotationDeprecatedWay(AnnotationEngine annotationEngine, Object testClass, Field field) {\nboolean alreadyAssigned = false;\nfor(Annotation annotation : field.getAnnotations()) {\nObject mock = annotationEngine.createMockFor(annotation, field);\nif (mock != null) {\nthrowIfAlreadyAssigned(field, alreadyAssigned);\nalreadyAssigned = true;\nnew FieldSetter(testClass, field).set(mock);\n}\n}",
+            "method_id": 9,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter$1:<init>(Lorg/mockito/internal/configuration/injection/FinalMockCandidateFilter;Ljava/lang/Object;Ljava/lang/reflect/Field;Ljava/lang/Object;)V",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 10,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.NameBasedCandidateFilter:filterCandidate(Ljava/util/Collection;Ljava/lang/reflect/Field;Ljava/lang/Object;)Lorg/mockito/internal/configuration/injection/OngoingInjecter;",
+            "method_body": "public OngoingInjecter filterCandidate(Collection<Object> mocks, Field field, Object fieldInstance) {\nList<Object> mockNameMatches = new ArrayList<Object>();\nif(mocks.size() > 1) {\nfor (Object mock : mocks) {\nif (field.getName().equals(mockUtil.getMockName(mock).toString())) {\nmockNameMatches.add(mock);\n}\nreturn next.filterCandidate(mockNameMatches, field, fieldInstance);\nreturn next.filterCandidate(mocks, field, fieldInstance);\n}",
+            "method_id": 11,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter$1:thenInject()Z",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 12,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter$2:thenInject()Z",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 13,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:injectMocks(Ljava/lang/Object;)V",
+            "method_body": "public void injectMocks(Object testClass) {\nClass<?> clazz = testClass.getClass();\nSet<Field> mockDependents = new HashSet<Field>();\nSet<Object> mocks = new HashSet<Object>();\nwhile (clazz != Object.class) {\nmockDependents.addAll(scanForInjection(testClass, clazz));\nmocks.addAll(scanMocks(testClass, clazz));\nclazz = clazz.getSuperclass();\nnew DefaultInjectionEngine().injectMocksOnFields(mockDependents, mocks, testClass);\n}",
+            "method_id": 14,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> context, Object testClass) {\ndelegate.process(context, testClass);\nspyAnnotationEngine.process(context, testClass);\nField[] fields = context.getDeclaredFields();\nfor (Field field : fields) {\nif (field.isAnnotationPresent(InjectMocks.class)) {\nassertNoAnnotations(field, Mock.class, org.mockito.MockitoAnnotations.Mock.class, Captor.class);\ninjectMocks(testClass);\n}",
+            "method_id": 15,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.FieldInitializer:<init>(Ljava/lang/Object;Ljava/lang/reflect/Field;)V",
+            "method_body": "public FieldInitializer(Object testClass, Field field) {\nif(new FieldReader(testClass, field).isNull()) {\ncheckNotLocal(field);\ncheckNotInner(field);\ncheckNotInterface(field);\ncheckNotAbstract(field);\nthis.testClass = testClass;\nthis.field = field;\n}",
+            "method_id": 16,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.SearchingClassLoader:combineLoadersOf(Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/ClassLoader;",
+            "method_body": "private static ClassLoader combineLoadersOf(Class<?> first, Class<?>... others) {\nList<ClassLoader> loaders = new ArrayList<ClassLoader>();\naddIfNewElement(loaders, first.getClassLoader());\nfor (Class<?> c : others) {\naddIfNewElement(loaders, c.getClassLoader());\naddIfNewElement(loaders, SearchingClassLoader.class.getClassLoader());\naddIfNewElement(loaders, currentThread().getContextClassLoader());\nreturn combine(loaders);\n}",
+            "method_id": 17,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:processAnnotationOn(Lorg/mockito/Mock;Ljava/lang/reflect/Field;)Ljava/lang/Object;",
+            "method_body": "private Object processAnnotationOn(Mock annotation, Field field) {\nMockSettings mockSettings = Mockito.withSettings();\nif (annotation.extraInterfaces().length > 0) { // never null\nif (\"\".equals(annotation.name())) {\nmockSettings.name(field.getName());\nmockSettings.defaultAnswer(annotation.answer().get());\nreturn Mockito.mock(field.getType(), mockSettings);\n}",
+            "method_id": 18,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.mockito.MockitoAnnotations:scan(Ljava/lang/Object;Ljava/lang/Class;)V",
+            "method_body": "static void scan(Object testClass, Class<?> clazz) {\nAnnotationEngine annotationEngine = new GlobalConfiguration().getAnnotationEngine();\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nif (annotationEngine.getClass() != new DefaultMockitoConfiguration().getAnnotationEngine().getClass()) {\nprocessAnnotationDeprecatedWay(annotationEngine, testClass, field);\nannotationEngine.process(clazz, testClass);\n}",
+            "method_id": 19,
+            "loc": 8
+        }
+    ]
+}

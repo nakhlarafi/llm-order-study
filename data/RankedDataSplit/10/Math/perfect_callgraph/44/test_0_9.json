@@ -1,0 +1,59 @@
+{
+    "bug_id": 44,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.events.EventStateTest.testIssue695",
+    "test_body": "public void testIssue695() {\n82: FirstOrderDifferentialEquations equation = new FirstOrderDifferentialEquations() {\n84: public int getDimension() {\nreturn 1;\n}\n88: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] = 1.0;\n}\n};\n93: DormandPrince853Integrator integrator = new DormandPrince853Integrator(0.001, 1000, 1.0e-14, 1.0e-14);\nintegrator.addEventHandler(new ResettingEvent(10.99), 0.1, 1.0e-9, 1000);\nintegrator.addEventHandler(new ResettingEvent(11.01), 0.1, 1.0e-9, 1000);\nintegrator.setInitialStepSize(3.0);\n98: double target = 30.0;\ndouble[] y = new double[1];\ndouble tEnd = integrator.integrate(equation, 0.0, y, target, y);\nAssert.assertEquals(target, tEnd, 1.0e-10);",
+    "stack_trace": "junit.framework.AssertionFailedError: going backard in time! (7.796578226186635 < 10.99)\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.apache.commons.math.ode.events.EventStateTest$ResettingEvent.g(EventStateTest.java:120)\nat org.apache.commons.math.ode.events.EventState.evaluateStep(EventState.java:214)\nat org.apache.commons.math.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:302)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:296)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:213)\nat org.apache.commons.math.ode.events.EventStateTest.testIssue695(EventStateTest.java:100)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.util.Precision:equals(DDI)Z",
+            "method_body": "public static boolean equals(double x, double y, int maxUlps) {\nlong xInt = Double.doubleToLongBits(x);\nlong yInt = Double.doubleToLongBits(y);\nif (xInt < 0) {\nxInt = SGN_MASK - xInt;\nif (yInt < 0) {\nfinal boolean isEqual = FastMath.abs(xInt - yInt) <= maxUlps;\nreturn isEqual && !Double.isNaN(x) && !Double.isNaN(y);\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator$1:compare(Ljava/lang/Object;Ljava/lang/Object;)I",
+            "method_body": "protected double acceptStep(final AbstractStepInterpolator interpolator,\ndouble previousT = interpolator.getGlobalPreviousTime();\nfinal double currentT = interpolator.getGlobalCurrentTime();\nresetOccurred = false;\nif (! statesInitialized) {\nfor (EventState state : eventsStates) {\nstate.reinitializeBegin(interpolator);\nstatesInitialized = true;\nfinal int orderingSign = interpolator.isForward() ? +1 : -1;\nSortedSet<EventState> occuringEvents = new TreeSet<EventState>(new Comparator<EventState>() {\nreturn orderingSign * Double.compare(es0.getEventTime(), es1.getEventTime());\nfor (final EventState state : eventsStates) {\nif (state.evaluateStep(interpolator)) {\noccuringEvents.add(state);\nwhile (!occuringEvents.isEmpty()) {\nfinal Iterator<EventState> iterator = occuringEvents.iterator();\nfinal EventState currentEvent = iterator.next();\niterator.remove();\nfinal double eventT = currentEvent.getEventTime();\ninterpolator.setSoftPreviousTime(previousT);\ninterpolator.setSoftCurrentTime(eventT);\ninterpolator.setInterpolatedTime(eventT);\nfinal double[] eventY = interpolator.getInterpolatedState();\ncurrentEvent.stepAccepted(eventT, eventY);\nisLastStep = currentEvent.stop();\nfor (final StepHandler handler : stepHandlers) {\nif (isLastStep) {\nif (currentEvent.reset(eventT, eventY)) {\nSystem.arraycopy(eventY, 0, y, 0, y.length);\ncomputeDerivatives(eventT, y, yDot);\nresetOccurred = true;\nreturn eventT;\ninterpolator.setInterpolatedTime(currentT);\nfinal double[] currentY = interpolator.getInterpolatedState();\nfor (final EventState state : eventsStates) {\nstate.stepAccepted(currentT, currentY);\nisLastStep = isLastStep || state.stop();\nisLastStep = isLastStep || Precision.equals(currentT, tEnd, 1);\nfor (StepHandler handler : stepHandlers) {\nreturn currentT;\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:min(DD)D",
+            "method_body": "public static double min(final double a, final double b) {\nif (a > b) {\nreturn b;\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:verifySequence(DDD)V",
+            "method_body": "protected void verifySequence(final double lower,\nUnivariateRealSolverUtils.verifySequence(lower, initial, upper);\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:max(DD)D",
+            "method_body": "public static double max(final double a, final double b) {\nif (a > b) {\nreturn a;\nif (a < b) {\nreturn b;\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolver:guessX(D[D[DII)D",
+            "method_body": "private double guessX(final double targetY, final double[] x, final double[] y,\nfor (int i = start; i < end - 1; ++i) {\nfinal int delta = i + 1 - start;\nfor (int j = end - 1; j > i; --j) {\nx[j] = (x[j] - x[j-1]) / (y[j] - y[j - delta]);\ndouble x0 = 0;\nfor (int j = end - 1; j >= start; --j) {\nx0 = x[j] + x0 * (targetY - y[j]);\nreturn x0;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:setInterpolatedTime(D)V",
+            "method_body": "public void setInterpolatedTime(final double time) {\ninterpolatedTime = time;\ndirtyState       = true;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.events.EventState:reinitializeBegin(Lorg/apache/commons/math/ode/sampling/StepInterpolator;)V",
+            "method_body": "public void reinitializeBegin(final StepInterpolator interpolator) {\nt0 = interpolator.getPreviousTime();\ninterpolator.setInterpolatedTime(t0);\ng0 = handler.g(t0, interpolator.getInterpolatedState());\nif (g0 == 0) {\ng0Positive = g0 >= 0;\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator:setSafety(D)V",
+            "method_body": "public void setSafety(final double safety) {\nthis.safety = safety;\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:solve(ILorg/apache/commons/math/analysis/UnivariateRealFunction;DDD)D",
+            "method_body": "public double solve(int maxEval, FUNC f, double min, double max, double startValue) {\nsetup(maxEval, f, min, max, startValue);\nreturn doSolve();\n}",
+            "method_id": 99
+        }
+    ]
+}

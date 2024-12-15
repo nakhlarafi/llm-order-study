@@ -1,0 +1,59 @@
+{
+    "bug_id": 92,
+    "test_id": 2,
+    "test_name": "org.jsoup.parser.HtmlParserTest.dropsDuplicateAttributes",
+    "test_body": "58: @Test public void dropsDuplicateAttributes() {\n59: String html = \"<p One=One ONE=Two Two=two one=Three One=Four two=Five>Text</p>\";\n60: Parser parser = Parser.htmlParser().setTrackErrors(10);\n61: Document doc = parser.parseInput(html, \"\");\n62: 63: Element p = doc.selectFirst(\"p\");\n64: assertEquals(\"<p one=\\\"One\\\" two=\\\"two\\\">Text</p>\", p.outerHtml()); // normalized names due to lower casing\n65: 66: assertEquals(1, parser.getErrors().size());\n67: assertEquals(\"Duplicate attribute\", parser.getErrors().get(0).getErrorMessage());\n68: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$24:<clinit>()V",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.normalName();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\n} else if (name.equals(\"head\")) {\nreturn anythingElse(t, tb);\nToken.EndTag end = t.asEndTag();\nname = end.normalName();\nif (name.equals(\"head\")) {\ntb.pop();\ntb.transition(AfterHead);\nreturn true;\n}",
+            "method_id": 210
+        },
+        {
+            "method_signature": "org.jsoup.nodes.LeafNode:<clinit>()V",
+            "method_body": "private static final List<Node> EmptyNodes = Collections.emptyList();\nreturn value instanceof Attributes;\n}",
+            "method_id": 211
+        },
+        {
+            "method_signature": "org.jsoup.nodes.LeafNode:hasAttributes()Z",
+            "method_body": "protected final boolean hasAttributes() {\nreturn value instanceof Attributes;\n}",
+            "method_id": 212
+        },
+        {
+            "method_signature": "org.jsoup.nodes.LeafNode:coreValue()Ljava/lang/String;",
+            "method_body": "String coreValue() {\nreturn attr(nodeName());\n}",
+            "method_id": 213
+        },
+        {
+            "method_signature": "org.jsoup.nodes.LeafNode:attr(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String attr(String key) {\nValidate.notNull(key);\nif (!hasAttributes()) {\nreturn key.equals(nodeName()) ? (String) value : EmptyString;\n}",
+            "method_id": 214
+        },
+        {
+            "method_signature": "org.jsoup.nodes.LeafNode:childNodeSize()I",
+            "method_body": "public int childNodeSize() {\nreturn 0;\n}",
+            "method_id": 215
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:<init>(Ljava/lang/String;)V",
+            "method_body": "public TextNode(String text) {\nvalue = text;\n}",
+            "method_id": 216
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:nodeName()Ljava/lang/String;",
+            "method_body": "public String nodeName() {\nreturn \"#text\";\n}",
+            "method_id": 217
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:outerHtmlHead(Ljava/lang/Appendable;ILorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void outerHtmlHead(Appendable accum, int depth, Document.OutputSettings out) throws IOException {\nif (out.prettyPrint() && ((siblingIndex() == 0 && parentNode instanceof Element && ((Element) parentNode).tag().formatAsBlock() && !isBlank()) || (out.outline() && siblingNodes().size()>0 && !isBlank()) ))\nboolean normaliseWhite = out.prettyPrint() && parent() instanceof Element\nEntities.escape(accum, coreValue(), out, false, normaliseWhite, false);\n}",
+            "method_id": 218
+        },
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:traverse(Lorg/jsoup/select/NodeVisitor;Lorg/jsoup/nodes/Node;)V",
+            "method_body": "public static void traverse(NodeVisitor visitor, Node root) {\nNode node = root;\nint depth = 0;\nwhile (node != null) {\nvisitor.head(node, depth);\nif (node.childNodeSize() > 0) {\nnode = node.childNode(0);\ndepth++;\nwhile (node.nextSibling() == null && depth > 0) {\nvisitor.tail(node, depth);\nnode = node.parentNode();\ndepth--;\nvisitor.tail(node, depth);\nif (node == root)\nbreak;\n}",
+            "method_id": 219
+        }
+    ]
+}

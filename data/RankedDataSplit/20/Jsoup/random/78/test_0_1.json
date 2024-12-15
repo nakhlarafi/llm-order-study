@@ -1,0 +1,109 @@
+{
+    "bug_id": 78,
+    "test_id": 0,
+    "test_name": "org.jsoup.integration.ConnectTest.handlesEmptyStreamDuringParseRead",
+    "test_body": "391: public void handlesEmptyStreamDuringParseRead() throws IOException {\n392: // this handles situations where the remote server sets a content length greater than it actually writes\n393: 394: Connection.Response res = Jsoup.connect(InterruptedServlet.Url)\n395: .timeout(200)\n396: .execute();\n397: 398: boolean threw = false;\n399: try {\n400: Document document = res.parse();\n401: assertEquals(\"Something\", document.title());\n402: } catch (IOException e) {\n403: threw = true;\n404: }\n405: assertEquals(true, threw);\n406: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$3:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(RcdataLessthanSign);\nbreak;\nString data = r.consumeToAny('&', '<', nullChar);\nt.emit(data);\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$StartTag:<init>()V",
+            "method_body": "StartTag() {\nsuper();\nattributes = new Attributes();\ntype = TokenType.StartTag;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Response:parse()Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document parse() throws IOException {\nValidate.isTrue(executed, \"Request must be executed (with .execute(), .get(), or .post() before parsing response\");\nif (byteData != null) { // bytes have been read in to the buffer, parse that\nValidate.isFalse(inputStreamRead, \"Input stream already read and parsed, cannot re-read.\");\nDocument doc = DataUtil.parseInputStream(bodyStream, charset, url.toExternalForm(), req.parser());\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:defaultSettings()Lorg/jsoup/parser/ParseSettings;",
+            "method_body": "ParseSettings defaultSettings() {\nreturn ParseSettings.htmlDefault;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:markInsertionMode()V",
+            "method_body": "void markInsertionMode() {\noriginalState = state;\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document$OutputSettings:<init>()V",
+            "method_body": "private Entities.EscapeMode escapeMode = Entities.EscapeMode.base;\nprivate ThreadLocal<CharsetEncoder> encoderThreadLocal = new ThreadLocal<>(); // initialized by start of OuterHtmlVisitor\nprivate boolean prettyPrint = true;\nprivate boolean outline = false;\nprivate int indentAmount = 1;\nprivate Syntax syntax = Syntax.html;\npublic OutputSettings() {\ncharset(Charset.forName(\"UTF8\"));\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Response:execute(Lorg/jsoup/Connection$Request;Lorg/jsoup/helper/HttpConnection$Response;)Lorg/jsoup/helper/HttpConnection$Response;",
+            "method_body": "static Response execute(Connection.Request req, Response previousResponse) throws IOException {\nValidate.notNull(req, \"Request must not be null\");\nString protocol = req.url().getProtocol();\nif (!protocol.equals(\"http\") && !protocol.equals(\"https\"))\nfinal boolean methodHasBody = req.method().hasBody();\nfinal boolean hasRequestBody = req.requestBody() != null;\nif (!methodHasBody)\nValidate.isFalse(hasRequestBody, \"Cannot set a request body for HTTP method \" + req.method());\nString mimeBoundary = null;\nif (req.data().size() > 0 && (!methodHasBody || hasRequestBody))\nelse if (methodHasBody)\nlong startTime = System.nanoTime();\nHttpURLConnection conn = createConnection(req);\nconn.connect();\nif (conn.getDoOutput())\nint status = conn.getResponseCode();\nres = new Response(previousResponse);\nres.setupFromConnection(conn, previousResponse);\nres.req = req;\nif (res.hasHeader(LOCATION) && req.followRedirects()) {\nif ((status < 200 || status >= 400) && !req.ignoreHttpErrors())\nString contentType = res.contentType();\nif (contentType != null\nif (contentType != null && xmlContentTypeRxp.matcher(contentType).matches()) {\nres.charset = DataUtil.getCharsetFromContentType(res.contentType); // may be null, readInputStream deals with it\nif (conn.getContentLength() != 0 && req.method() != HEAD) { // -1 means unknown, chunked. sun throws an IO exception on 500 response with no content when trying to read body\nres.bodyStream = null;\nres.bodyStream = conn.getErrorStream() != null ? conn.getErrorStream() : conn.getInputStream();\nif (res.hasHeaderWithValue(CONTENT_ENCODING, \"gzip\")) {\n} else if (res.hasHeaderWithValue(CONTENT_ENCODING, \"deflate\")) {\nres.bodyStream = ConstrainableInputStream\n}\nres.executed = true;\nreturn res;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.jsoup.parser.ParseSettings:<clinit>()V",
+            "method_body": "public static final ParseSettings htmlDefault;\nhtmlDefault = new ParseSettings(false, false);\npreserveCase = new ParseSettings(true, true);\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Response:createHeaderMap(Ljava/net/HttpURLConnection;)Ljava/util/LinkedHashMap;",
+            "method_body": "private static LinkedHashMap<String, List<String>> createHeaderMap(HttpURLConnection conn) {\nfinal LinkedHashMap<String, List<String>> headers = new LinkedHashMap<>();\nint i = 0;\nfinal String key = conn.getHeaderFieldKey(i);\nfinal String val = conn.getHeaderField(i);\nif (key == null && val == null)\nbreak;\ni++;\nif (key == null || val == null)\nif (headers.containsKey(key))\nfinal ArrayList<String> vals = new ArrayList<>();\nvals.add(val);\nheaders.put(key, vals);\n}\nreturn headers;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:nodelistChanged()V",
+            "method_body": "void nodelistChanged() {\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$11:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matches('/')) {\nt.createTempBuffer();\nt.advanceTransition(RCDATAEndTagOpen);\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:isFosterInserts()Z",
+            "method_body": "boolean isFosterInserts() {\nreturn fosterInserts;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:<clinit>()V",
+            "method_body": "private static final Pattern charsetPattern = Pattern.compile(\"(?i)\\\\bcharset=\\\\s*(?:[\\\"'])?([^\\\\s,;\\\"']*)\");\nprivate static final char[] mimeBoundaryChars =\nprivate DataUtil() {}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:<clinit>()V",
+            "method_body": "static final String[] TagSearchSpecial = new String[]{\"address\", \"applet\", \"area\", \"article\", \"aside\", \"base\", \"basefont\", \"bgsound\",\n\"title\", \"tr\", \"ul\", \"wbr\", \"xmp\"};",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:<init>(Ljava/lang/String;)V",
+            "method_body": "public CharacterReader(String input) {\nthis(new StringReader(input), input.length());\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:<init>()V",
+            "method_body": "private Base() {\nheaders = new LinkedHashMap<>();\ncookies = new LinkedHashMap<>();\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emitTagPending()V",
+            "method_body": "void emitTagPending() {\ntagPending.finaliseTag();\nemit(tagPending);\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token:isStartTag()Z",
+            "method_body": "final boolean isStartTag() {\nreturn type == TokenType.StartTag;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:normalize()V",
+            "method_body": "public void normalize() {\nfor (int i = 0; i < size; i++) {\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Response:setupFromConnection(Ljava/net/HttpURLConnection;Lorg/jsoup/Connection$Response;)V",
+            "method_body": "private void setupFromConnection(HttpURLConnection conn, Connection.Response previousResponse) throws IOException {\nmethod = Method.valueOf(conn.getRequestMethod());\nurl = conn.getURL();\nstatusCode = conn.getResponseCode();\nstatusMessage = conn.getResponseMessage();\ncontentType = conn.getContentType();\nMap<String, List<String>> resHeaders = createHeaderMap(conn);\nprocessResponseHeaders(resHeaders);\nif (previousResponse != null) {\n}",
+            "method_id": 39
+        }
+    ]
+}

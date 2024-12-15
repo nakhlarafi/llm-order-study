@@ -1,0 +1,59 @@
+{
+    "bug_id": 65,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.testTemplateInsideTable",
+    "test_body": "1038: @Test public void testTemplateInsideTable() throws IOException {\n1039: File in = ParseTest.getFile(\"/htmltests/table-polymer-template.html\");\n1040: Document doc = Jsoup.parse(in, \"UTF-8\");\n1041: doc.outputSettings().prettyPrint(true);\n1042: 1043: Elements templates = doc.body().getElementsByTag(\"template\");\n1044: for (Element template : templates) {\n1045: assertTrue(template.childNodes().size() > 1);\n1046: }\n1047: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.select.Collector$Accumulator:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(Node node, int depth) {\nif (node instanceof Element) {\nElement el = (Element) node;\nif (eval.matches(root, el))\nelements.add(el);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:checkCapacity(I)V",
+            "method_body": "private void checkCapacity(int minNewSize) {\nValidate.isTrue(minNewSize >= size);\nint curSize = keys.length;\nif (curSize >= minNewSize)\nreturn;\nint newSize = curSize >= InitialCapacity ? size * GrowthFactor : InitialCapacity;\nif (minNewSize > newSize)\nkeys = Arrays.copyOf(keys, newSize);\nvals = Arrays.copyOf(vals, newSize);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:getStack()Ljava/util/ArrayList;",
+            "method_body": "ArrayList<Element> getStack() {\nreturn stack;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendChild(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendChild(Node child) {\nValidate.notNull(child);\nreparentChild(child);\nensureChildNodes();\nchildNodes.add(child);\nchild.setSiblingIndex(childNodes.size() - 1);\nreturn this;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeTagName()Ljava/lang/String;",
+            "method_body": "String consumeTagName() {\nbufferUp();\nfinal int start = bufPos;\nfinal int remaining = bufLength;\nfinal char[] val = charBuf;\nwhile (bufPos < remaining) {\nfinal char c = val[bufPos];\nif (c == '\\t'|| c ==  '\\n'|| c ==  '\\r'|| c ==  '\\f'|| c ==  ' '|| c ==  '/'|| c ==  '>'|| c ==  TokeniserState.nullChar)\nbufPos++;\n}\nreturn bufPos > start ? cacheString(charBuf, stringCache, start, bufPos -start) : \"\";\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:popStackToClose(Ljava/lang/String;)V",
+            "method_body": "void popStackToClose(String elName) {\nfor (int pos = stack.size() -1; pos >= 0; pos--) {\nElement next = stack.get(pos);\nstack.remove(pos);\nif (next.nodeName().equals(elName))\nbreak;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.select.Evaluator$Tag:matches(Lorg/jsoup/nodes/Element;Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "public abstract boolean matches(Element root, Element element);\npublic Tag(String tagName) {\nthis.tagName = tagName;\n}\nreturn (element.tagName().equalsIgnoreCase(tagName));\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$1:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(TagOpen);\nbreak;\nt.emit(new Token.EOF());\nbreak;\nString data = r.consumeData();\nt.emit(data);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$14:anythingElse(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "private boolean anythingElse(Token t, HtmlTreeBuilder tb) {\nreturn tb.process(t, InTable);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$9:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (t.isCharacter()) {\ntb.newPendingTableCharacters();\ntb.markInsertionMode();\ntb.transition(InTableText);\nreturn tb.process(t);\n} else if (t.isComment()) {\n} else if (t.isDoctype()) {\n} else if (t.isStartTag()) {\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.normalName();\nif (name.equals(\"caption\")) {\n} else if (name.equals(\"colgroup\")) {\n} else if (name.equals(\"col\")) {\n} else if (StringUtil.in(name, \"tbody\", \"tfoot\", \"thead\")) {\ntb.clearStackToTableContext();\ntb.insert(startTag);\ntb.transition(InTableBody);\n} else if (StringUtil.in(name, \"td\", \"th\", \"tr\")) {\n} else if (name.equals(\"table\")) {\n} else if (StringUtil.in(name, \"style\", \"script\")) {\n} else if (name.equals(\"input\")) {\n} else if (name.equals(\"form\")) {\nreturn anythingElse(t, tb);\nreturn true; // todo: check if should return processed http://www.whatwg.org/specs/web-apps/current-work/multipage/tree-construction.html#parsing-main-intable\n} else if (t.isEndTag()) {\nToken.EndTag endTag = t.asEndTag();\nString name = endTag.normalName();\nif (name.equals(\"table\")) {\nif (!tb.inTableScope(name)) {\ntb.popStackToClose(\"table\");\ntb.resetInsertionMode();\n} else if (StringUtil.in(name,\nreturn anythingElse(t, tb);\nreturn true; // todo: as above todo\n}",
+            "method_id": 19
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 26,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral",
+    "test_body": "public void testBug2182444_usCentral() {\nChronology chronUSCentral = GregorianChronology.getInstance(DateTimeZone.forID(\"US/Central\"));\nChronology chronUTC = GregorianChronology.getInstance(DateTimeZone.UTC);\nDateTime usCentralStandardInUTC = new DateTime(2008, 11, 2, 7, 0, 0, 0, chronUTC);\nDateTime usCentralDaylightInUTC = new DateTime(2008, 11, 2, 6, 0, 0, 0, chronUTC);\nassertTrue(\"Should be standard time\", chronUSCentral.getZone().isStandardOffset(usCentralStandardInUTC.getMillis()));\nassertFalse(\"Should be daylight time\", chronUSCentral.getZone().isStandardOffset(usCentralDaylightInUTC.getMillis()));\n1161: DateTime usCentralStandardInUSCentral = usCentralStandardInUTC.toDateTime(chronUSCentral);\nDateTime usCentralDaylightInUSCentral = usCentralDaylightInUTC.toDateTime(chronUSCentral);\nassertEquals(1, usCentralStandardInUSCentral.getHourOfDay());\nassertEquals(usCentralStandardInUSCentral.getHourOfDay(), usCentralDaylightInUSCentral.getHourOfDay());\nassertTrue(usCentralStandardInUSCentral.getMillis() != usCentralDaylightInUSCentral.getMillis());\nassertEquals(usCentralStandardInUSCentral, usCentralStandardInUSCentral.withHourOfDay(1));\nassertEquals(usCentralStandardInUSCentral.getMillis() + 3, usCentralStandardInUSCentral.withMillisOfSecond(3).getMillis());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2008-11-02T01:00:00.000-06:00> but was:<2008-11-02T01:00:00.000-05:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral(TestDateTimeZoneCutover.java:1166)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatter:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;)V",
+            "method_body": "private void printTo(StringBuffer buf, long instant, Chronology chrono) {\nDateTimePrinter printer = requirePrinter();\nchrono = selectChronology(chrono);\nDateTimeZone zone = chrono.getZone();\nint offset = zone.getOffset(instant);\nlong adjustedInstant = instant + offset;\nif ((instant ^ adjustedInstant) < 0 && (instant ^ offset) >= 0) {\nprinter.printTo(buf, adjustedInstant, chrono.withUTC(), offset, zone, iLocale);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearInfo(I)Lorg/joda/time/chrono/BasicChronology$YearInfo;",
+            "method_body": "abstract long getAverageMillisPerYear();\nYearInfo info = iYearInfoCache[year & CACHE_MASK];\nif (info == null || info.iYear != year) {\nreturn info;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.joda.time.field.BaseDateTimeField:getLeapDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getLeapDurationField() {\nreturn null;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.joda.time.field.UnsupportedDurationField:isSupported()Z",
+            "method_body": "public boolean isSupported() {\nreturn false;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeFieldType:monthOfYear()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public static DateTimeFieldType monthOfYear() {\nreturn MONTH_OF_YEAR_TYPE;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDateTimeField:set(JI)J",
+            "method_body": "public long set(long instant, int value) {\nlong localInstant = iZone.convertUTCToLocal(instant);\nlocalInstant = iField.set(localInstant, value);\nlong result = iZone.convertLocalToUTC(localInstant, false);\nif (get(result) != value) {\nreturn result;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology$Fields:copyFieldsFrom(Lorg/joda/time/Chronology;)V",
+            "method_body": "public void copyFieldsFrom(Chronology chrono) {\nif (isSupported(f = chrono.millis())) {\nmillis = f;\nif (isSupported(f = chrono.seconds())) {\nseconds = f;\nif (isSupported(f = chrono.minutes())) {\nminutes = f;\nif (isSupported(f = chrono.hours())) {\nhours = f;\nif (isSupported(f = chrono.halfdays())) {\nhalfdays = f;\nif (isSupported(f = chrono.days())) {\ndays = f;\nif (isSupported(f = chrono.weeks())) {\nweeks = f;\nif (isSupported(f = chrono.weekyears())) {\nweekyears = f;\nif (isSupported(f = chrono.months())) {\nmonths = f;\nif (isSupported(f = chrono.years())) {\nyears = f;\nif (isSupported(f = chrono.centuries())) {\ncenturies = f;\nif (isSupported(f = chrono.eras())) {\nif (isSupported(f = chrono.millisOfSecond())) {\nmillisOfSecond = f;\nif (isSupported(f = chrono.millisOfDay())) {\nmillisOfDay = f;\nif (isSupported(f = chrono.secondOfMinute())) {\nsecondOfMinute = f;\nif (isSupported(f = chrono.secondOfDay())) {\nsecondOfDay = f;\nif (isSupported(f = chrono.minuteOfHour())) {\nminuteOfHour = f;\nif (isSupported(f = chrono.minuteOfDay())) {\nminuteOfDay = f;\nif (isSupported(f = chrono.hourOfDay())) {\nhourOfDay = f;\nif (isSupported(f = chrono.clockhourOfDay())) {\nclockhourOfDay = f;\nif (isSupported(f = chrono.hourOfHalfday())) {\nhourOfHalfday = f;\nif (isSupported(f = chrono.clockhourOfHalfday())) {\nclockhourOfHalfday = f;\nif (isSupported(f = chrono.halfdayOfDay())) {\nhalfdayOfDay = f;\nif (isSupported(f = chrono.dayOfWeek())) {\ndayOfWeek = f;\nif (isSupported(f = chrono.dayOfMonth())) {\ndayOfMonth = f;\nif (isSupported(f = chrono.dayOfYear())) {\ndayOfYear = f;\nif (isSupported(f = chrono.weekOfWeekyear())) {\nweekOfWeekyear = f;\nif (isSupported(f = chrono.weekyear())) {\nweekyear = f;\nif (isSupported(f = chrono.weekyearOfCentury())) {\nweekyearOfCentury = f;\nif (isSupported(f = chrono.monthOfYear())) {\nmonthOfYear = f;\nif (isSupported(f = chrono.year())) {\nyear = f;\nif (isSupported(f = chrono.yearOfEra())) {\nyearOfEra = f;\nif (isSupported(f = chrono.yearOfCentury())) {\nyearOfCentury = f;\nif (isSupported(f = chrono.centuryOfEra())) {\ncenturyOfEra = f;\nif (isSupported(f = chrono.era())) {\nera = f;\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$OfYear:readFrom(Ljava/io/DataInput;)Lorg/joda/time/tz/DateTimeZoneBuilder$OfYear;",
+            "method_body": "static OfYear readFrom(DataInput in) throws IOException {\nreturn new OfYear((char)in.readUnsignedByte(),\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.joda.time.field.FieldUtils:verifyValueBounds(Lorg/joda/time/DateTimeField;III)V",
+            "method_body": "public static void verifyValueBounds(DateTimeField field,\nif ((value < lowerBound) || (value > upperBound)) {\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone$Info:getOffset(J)I",
+            "method_body": "public int getOffset(long millis) {\nif (iNextInfo == null || millis < iNextInfo.iPeriodStart) {\nif (iOffset == Integer.MIN_VALUE) {\niOffset = iZoneRef.getOffset(iPeriodStart);\nreturn iOffset;\nreturn iNextInfo.getOffset(millis);\n}",
+            "method_id": 19
+        }
+    ]
+}

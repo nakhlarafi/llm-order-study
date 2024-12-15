@@ -1,0 +1,59 @@
+{
+    "bug_id": 93,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.FormElementTest.createsFormData",
+    "test_body": "27: @Test public void createsFormData() {\n28: String html = \"<form><input name='one' value='two'><select name='three'><option value='not'>\" +\n29: \"<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>\" +\n30: \"<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>\" +\n31: \"<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>\" +\n32: \"<input name='ten' value='text' disabled>\" +\n33: \"<input name='eleven' value='text' type='button'>\" +\n34: \"</form>\";\n35: Document doc = Jsoup.parse(html);\n36: FormElement form = (FormElement) doc.select(\"form\").first();\n37: List<Connection.KeyVal> data = form.formData();\n38: 39: assertEquals(6, data.size());\n40: assertEquals(\"one=two\", data.get(0).toString());\n41: assertEquals(\"three=four\", data.get(1).toString());\n42: assertEquals(\"three=five\", data.get(2).toString());\n43: assertEquals(\"six=seven\", data.get(3).toString());\n44: assertEquals(\"seven=on\", data.get(4).toString()); // set\n45: assertEquals(\"eight=on\", data.get(5).toString()); // default\n46: // nine should not appear, not checked checkbox\n47: // ten should not appear, disabled\n48: // eleven should not appear, button\n49: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:bufferUp()V",
+            "method_body": "private void bufferUp() {\nfinal int pos = bufPos;\nif (pos < bufSplitPoint)\nreturn;\nfinal long skipped = reader.skip(pos);\nreader.mark(maxBufferLen);\nfinal int read = reader.read(charBuf);\nreader.reset();\nif (read != -1) {\nValidate.isTrue(skipped == pos); // Previously asserted that there is room in buf to skip, so this will be a WTF\nbufLength = read;\nreaderPos += pos;\nbufPos = 0;\nbufMark = -1;\nbufSplitPoint = bufLength > readAheadLimit ? readAheadLimit : bufLength;\n}\n}",
+            "method_id": 170
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nbufferUp();\nreturn bufPos >= bufLength;\n}",
+            "method_id": 171
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:isEmptyNoBufferUp()Z",
+            "method_body": "private boolean isEmptyNoBufferUp() {\nreturn bufPos >= bufLength;\n}",
+            "method_id": 172
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:current()C",
+            "method_body": "public char current() {\nbufferUp();\nreturn isEmptyNoBufferUp() ? EOF : charBuf[bufPos];\n}",
+            "method_id": 173
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consume()C",
+            "method_body": "char consume() {\nbufferUp();\nchar val = isEmptyNoBufferUp() ? EOF : charBuf[bufPos];\nbufPos++;\nreturn val;\n}",
+            "method_id": 174
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:unconsume()V",
+            "method_body": "void unconsume() {\nif (bufPos < 1)\nbufPos--;\n}",
+            "method_id": 175
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:advance()V",
+            "method_body": "public void advance() {\nbufPos++;\n}",
+            "method_id": 176
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:nextIndexOf(C)I",
+            "method_body": "int nextIndexOf(char c) {\nbufferUp();\nfor (int i = bufPos; i < bufLength; i++) {\nif (c == charBuf[i])\nreturn i - bufPos;\n}",
+            "method_id": 177
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeTo(C)Ljava/lang/String;",
+            "method_body": "public String consumeTo(char c) {\nint offset = nextIndexOf(c);\nif (offset != -1) {\nString consumed = cacheString(charBuf, stringCache, bufPos, offset);\nbufPos += offset;\nreturn consumed;\n}",
+            "method_id": 178
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeToAny([C)Ljava/lang/String;",
+            "method_body": "public String consumeToAny(final char... chars) {\nbufferUp();\nint pos = bufPos;\nfinal int start = pos;\nfinal int remaining = bufLength;\nfinal char[] val = charBuf;\nfinal int charLen = chars.length;\nOUTER: while (pos < remaining) {\nfor (i = 0; i < charLen; i++) {\nif (val[pos] == chars[i])\nbreak OUTER;\npos++;\nbufPos = pos;\nreturn pos > start ? cacheString(charBuf, stringCache, start, pos -start) : \"\";\n}",
+            "method_id": 179
+        }
+    ]
+}

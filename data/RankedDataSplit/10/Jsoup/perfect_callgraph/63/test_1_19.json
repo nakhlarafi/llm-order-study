@@ -1,0 +1,59 @@
+{
+    "bug_id": 63,
+    "test_id": 1,
+    "test_name": "org.jsoup.parser.HtmlParserTest.tracksErrorsWhenRequested",
+    "test_body": "689: @Test public void tracksErrorsWhenRequested() {\n690: String html = \"<p>One</p href='no'><!DOCTYPE html>&arrgh;<font /><br /><foo\";\n691: Parser parser = Parser.htmlParser().setTrackErrors(500);\n692: Document doc = Jsoup.parse(html, \"http://example.com\", parser);\n693: 694: List<ParseError> errors = parser.getErrors();\n695: assertEquals(5, errors.size());\n696: assertEquals(\"20: Attributes incorrectly present on end tag\", errors.get(0).toString());\n697: assertEquals(\"35: Unexpected token [Doctype] when in state [InBody]\", errors.get(1).toString());\n698: assertEquals(\"36: Invalid character reference: invalid named referenece 'arrgh'\", errors.get(2).toString());\n699: assertEquals(\"50: Tag cannot be self closing; not a void tag\", errors.get(3).toString());\n700: assertEquals(\"61: Unexpectedly reached end of file (EOF) in input state [TagName]\", errors.get(4).toString());\n701: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeToAnySorted([C)Ljava/lang/String;",
+            "method_body": "String consumeToAnySorted(final char... chars) {\nbufferUp();\nfinal int start = bufPos;\nfinal int remaining = bufLength;\nfinal char[] val = charBuf;\nwhile (bufPos < remaining) {\nif (Arrays.binarySearch(chars, val[bufPos]) >= 0)\nbreak;\nbufPos++;\nreturn bufPos > start ? cacheString(charBuf, stringCache, start, bufPos -start) : \"\";\n}",
+            "method_id": 190
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeLetterSequence()Ljava/lang/String;",
+            "method_body": "String consumeLetterSequence() {\nbufferUp();\nint start = bufPos;\nwhile (bufPos < bufLength) {\nchar c = charBuf[bufPos];\nif ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || Character.isLetter(c))\nbufPos++;\n}\nreturn cacheString(charBuf, stringCache, start, bufPos - start);\n}",
+            "method_id": 191
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeLetterThenDigitSequence()Ljava/lang/String;",
+            "method_body": "String consumeLetterThenDigitSequence() {\nbufferUp();\nint start = bufPos;\nwhile (bufPos < bufLength) {\nchar c = charBuf[bufPos];\nif ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || Character.isLetter(c))\nbufPos++;\n}\nwhile (!isEmpty()) {\nchar c = charBuf[bufPos];\nif (c >= '0' && c <= '9')\nreturn cacheString(charBuf, stringCache, start, bufPos - start);\n}",
+            "method_id": 192
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matches(C)Z",
+            "method_body": "boolean matches(char c) {\nreturn !isEmpty() && charBuf[bufPos] == c;\n}",
+            "method_id": 193
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matches(Ljava/lang/String;)Z",
+            "method_body": "boolean matches(String seq) {\nbufferUp();\nint scanLength = seq.length();\nif (scanLength > bufLength - bufPos)\nfor (int offset = 0; offset < scanLength; offset++)\nif (seq.charAt(offset) != charBuf[bufPos +offset])\nreturn false;\n}",
+            "method_id": 194
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchesIgnoreCase(Ljava/lang/String;)Z",
+            "method_body": "boolean matchesIgnoreCase(String seq) {\nbufferUp();\nint scanLength = seq.length();\nif (scanLength > bufLength - bufPos)\nfor (int offset = 0; offset < scanLength; offset++) {\nchar upScan = Character.toUpperCase(seq.charAt(offset));\nchar upTarget = Character.toUpperCase(charBuf[bufPos + offset]);\nif (upScan != upTarget)\nreturn true;\n}",
+            "method_id": 195
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchesAnySorted([C)Z",
+            "method_body": "boolean matchesAnySorted(char[] seq) {\nbufferUp();\nreturn !isEmpty() && Arrays.binarySearch(seq, charBuf[bufPos]) >= 0;\n}",
+            "method_id": 196
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchConsume(Ljava/lang/String;)Z",
+            "method_body": "boolean matchConsume(String seq) {\nbufferUp();\nif (matches(seq)) {\nreturn false;\n}",
+            "method_id": 197
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchConsumeIgnoreCase(Ljava/lang/String;)Z",
+            "method_body": "boolean matchConsumeIgnoreCase(String seq) {\nif (matchesIgnoreCase(seq)) {\nbufPos += seq.length();\nreturn true;\n}",
+            "method_id": 198
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(C)V",
+            "method_body": "void emit(char c) {\nemit(String.valueOf(c));\n}",
+            "method_id": 199
+        }
+    ]
+}

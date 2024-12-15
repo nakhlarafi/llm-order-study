@@ -1,0 +1,109 @@
+{
+    "bug_id": 33,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.optimization.linear.SimplexSolverTest.testMath781",
+    "test_body": "33: public void testMath781() {\n34: LinearObjectiveFunction f = new LinearObjectiveFunction(new double[] { 2, 6, 7 }, 0);\n35: 36: ArrayList<LinearConstraint> constraints = new ArrayList<LinearConstraint>();\n37: constraints.add(new LinearConstraint(new double[] { 1, 2, 1 }, Relationship.LEQ, 2));\n38: constraints.add(new LinearConstraint(new double[] { -1, 1, 1 }, Relationship.LEQ, -1));\n39: constraints.add(new LinearConstraint(new double[] { 2, -3, 1 }, Relationship.LEQ, -1));\n40: 41: double epsilon = 1e-6;\n42: SimplexSolver solver = new SimplexSolver();\n43: PointValuePair solution = solver.optimize(f, constraints, GoalType.MAXIMIZE, false);\n44: 45: Assert.assertTrue(Precision.compareTo(solution.getPoint()[0], 0.0d, epsilon) > 0);\n46: Assert.assertTrue(Precision.compareTo(solution.getPoint()[1], 0.0d, epsilon) > 0);",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optimization.linear.SimplexSolverTest.testMath781(SimplexSolverTest.java:45)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.SimplexSolver:getPivotColumn(Lorg/apache/commons/math3/optimization/linear/SimplexTableau;)Ljava/lang/Integer;",
+            "method_body": "private Integer getPivotColumn(SimplexTableau tableau) {\ndouble minValue = 0;\nInteger minPos = null;\nfor (int i = tableau.getNumObjectiveFunctions(); i < tableau.getWidth() - 1; i++) {\nfinal double entry = tableau.getEntry(0, i);\nif (Precision.compareTo(entry, minValue, maxUlps) < 0) {\nminValue = entry;\nminPos = i;\nreturn minPos;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.SimplexSolver:getPivotRow(Lorg/apache/commons/math3/optimization/linear/SimplexTableau;I)Ljava/lang/Integer;",
+            "method_body": "private Integer getPivotRow(SimplexTableau tableau, final int col) {\nList<Integer> minRatioPositions = new ArrayList<Integer>();\ndouble minRatio = Double.MAX_VALUE;\nfor (int i = tableau.getNumObjectiveFunctions(); i < tableau.getHeight(); i++) {\nfinal double rhs = tableau.getEntry(i, tableau.getWidth() - 1);\nfinal double entry = tableau.getEntry(i, col);\nif (Precision.compareTo(entry, 0d, maxUlps) > 0) {\nfinal double ratio = rhs / entry;\nfinal int cmp = Precision.compareTo(ratio, minRatio, maxUlps);\nif (cmp == 0) {\n} else if (cmp < 0) {\nminRatio = ratio;\nminRatioPositions = new ArrayList<Integer>();\nminRatioPositions.add(i);\nif (minRatioPositions.size() == 0) {\n} else if (minRatioPositions.size() > 1) {\nreturn minRatioPositions.get(0);\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.SimplexSolver:doIteration(Lorg/apache/commons/math3/optimization/linear/SimplexTableau;)V",
+            "method_body": "protected void doIteration(final SimplexTableau tableau)\nincrementIterationsCounter();\nInteger pivotCol = getPivotColumn(tableau);\nInteger pivotRow = getPivotRow(tableau, pivotCol);\nif (pivotRow == null) {\ndouble pivotVal = tableau.getEntry(pivotRow, pivotCol);\ntableau.divideRow(pivotRow, pivotVal);\nfor (int i = 0; i < tableau.getHeight(); i++) {\nif (i != pivotRow) {\ndouble multiplier = tableau.getEntry(i, pivotCol);\ntableau.subtractRow(i, pivotRow, multiplier);\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:<init>()V",
+            "method_body": "protected AbstractLinearOptimizer() {\nsetMaxIterations(DEFAULT_MAX_ITERATIONS);\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:restrictToNonNegative()Z",
+            "method_body": "protected boolean restrictToNonNegative() {\nreturn nonNegative;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:getGoalType()Lorg/apache/commons/math3/optimization/GoalType;",
+            "method_body": "protected GoalType getGoalType() {\nreturn goal;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:getFunction()Lorg/apache/commons/math3/optimization/linear/LinearObjectiveFunction;",
+            "method_body": "protected LinearObjectiveFunction getFunction() {\nreturn function;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:getConstraints()Ljava/util/Collection;",
+            "method_body": "protected Collection<LinearConstraint> getConstraints() {\nreturn Collections.unmodifiableCollection(linearConstraints);\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:setMaxIterations(I)V",
+            "method_body": "public void setMaxIterations(int maxIterations) {\nthis.maxIterations = maxIterations;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.AbstractLinearOptimizer:optimize(Lorg/apache/commons/math3/optimization/linear/LinearObjectiveFunction;Ljava/util/Collection;Lorg/apache/commons/math3/optimization/GoalType;Z)Lorg/apache/commons/math3/optimization/PointValuePair;",
+            "method_body": "public PointValuePair optimize(final LinearObjectiveFunction f,\nthis.function          = f;\nthis.linearConstraints = constraints;\nthis.goal              = goalType;\nthis.nonNegative       = restrictToNonNegative;\niterations  = 0;\nreturn doOptimize();\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.SimplexSolver:solvePhase1(Lorg/apache/commons/math3/optimization/linear/SimplexTableau;)V",
+            "method_body": "protected void solvePhase1(final SimplexTableau tableau)\nif (tableau.getNumArtificialVariables() == 0) {\nwhile (!tableau.isOptimal()) {\ndoIteration(tableau);\nif (!Precision.equals(tableau.getEntry(0, tableau.getRhsOffset()), 0d, epsilon)) {\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.SimplexSolver:doOptimize()Lorg/apache/commons/math3/optimization/PointValuePair;",
+            "method_body": "public PointValuePair doOptimize()\nfinal SimplexTableau tableau =\nsolvePhase1(tableau);\ntableau.dropPhase1Objective();\nwhile (!tableau.isOptimal()) {\nreturn tableau.getSolution();\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.LinearObjectiveFunction:getCoefficients()Lorg/apache/commons/math3/linear/RealVector;",
+            "method_body": "public RealVector getCoefficients() {\nreturn coefficients;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.LinearObjectiveFunction:getConstantTerm()D",
+            "method_body": "public double getConstantTerm() {\nreturn constantTerm;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.LinearConstraint:getCoefficients()Lorg/apache/commons/math3/linear/RealVector;",
+            "method_body": "public RealVector getCoefficients() {\nreturn coefficients;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.LinearConstraint:getRelationship()Lorg/apache/commons/math3/optimization/linear/Relationship;",
+            "method_body": "public Relationship getRelationship() {\nreturn relationship;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optimization.linear.LinearConstraint:getValue()D",
+            "method_body": "public double getValue() {\nreturn value;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.AbstractRealMatrix:getRowVector(I)Lorg/apache/commons/math3/linear/RealVector;",
+            "method_body": "public RealVector getRowVector(final int row) {\nreturn new ArrayRealVector(getRow(row), false);\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.AbstractRealMatrix:setRowVector(ILorg/apache/commons/math3/linear/RealVector;)V",
+            "method_body": "public void setRowVector(final int row, final RealVector vector) {\nMatrixUtils.checkRowIndex(this, row);\nfinal int nCols = getColumnDimension();\nif (vector.getDimension() != nCols) {\nfor (int i = 0; i < nCols; ++i) {\nsetEntry(row, i, vector.getEntry(i));\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.Array2DRowRealMatrix:getDataRef()[[D",
+            "method_body": "public double[][] getDataRef() {\nreturn data;\n}",
+            "method_id": 59
+        }
+    ]
+}

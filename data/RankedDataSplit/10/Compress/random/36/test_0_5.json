@@ -1,0 +1,59 @@
+{
+    "bug_id": 36,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.sevenz.SevenZFileTest.readEntriesOfSize0",
+    "test_body": "267: public void readEntriesOfSize0() throws IOException {\n268: final SevenZFile sevenZFile = new SevenZFile(getFile(\"COMPRESS-348.7z\"));\n269: try {\n270: int entries = 0;\n271: SevenZArchiveEntry entry = sevenZFile.getNextEntry();\n272: while (entry != null) {\n273: entries++;\n274: int b = sevenZFile.read();\n275: if (\"2.txt\".equals(entry.getName()) || \"5.txt\".equals(entry.getName())) {\n276: assertEquals(-1, b);\n277: } else {\n278: assertNotEquals(-1, b);\n279: }\n280: entry = sevenZFile.getNextEntry();\n281: }\n282: assertEquals(5, entries);\n283: } finally {\n284: sevenZFile.close();\n285: }\n286: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:getContentMethods()Ljava/lang/Iterable;",
+            "method_body": "public Iterable<? extends SevenZMethodConfiguration> getContentMethods() {\nreturn contentMethods;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:close()V",
+            "method_body": "public void close() {\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:read()I",
+            "method_body": "public int read() throws IOException {\nreturn getCurrentStream().read();\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Coders$BCJDecoder:<init>(Lorg/tukaani/xz/FilterOptions;)V",
+            "method_body": "BCJDecoder(final FilterOptions opts) {\nthis.opts = opts;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readFilesInfo(Ljava/io/DataInput;Lorg/apache/commons/compress/archivers/sevenz/Archive;)V",
+            "method_body": "private void readFilesInfo(final DataInput header, final Archive archive) throws IOException {\nfinal long numFiles = readUint64(header);\nfinal SevenZArchiveEntry[] files = new SevenZArchiveEntry[(int)numFiles];\nfor (int i = 0; i < files.length; i++) {\nfiles[i] = new SevenZArchiveEntry();\nBitSet isEmptyStream = null;\nBitSet isEmptyFile = null;\nBitSet isAnti = null;\nfinal int propertyType = header.readUnsignedByte();\nif (propertyType == 0) {\nbreak;\nfinal long size = readUint64(header);\nswitch (propertyType) {\nisEmptyStream = readBits(header, files.length);\nbreak;\nif (isEmptyStream == null) { // protect against NPE\nisEmptyFile = readBits(header, isEmptyStream.cardinality());\nbreak;\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nif (((size - 1) & 1) != 0) {\nfinal byte[] names = new byte[(int)(size - 1)];\nheader.readFully(names);\nint nextFile = 0;\nint nextName = 0;\nfor (int i = 0; i < names.length; i += 2) {\nif (names[i] == 0 && names[i+1] == 0) {\nfiles[nextFile++].setName(new String(names, nextName, i-nextName, CharsetNames.UTF_16LE));\nnextName = i + 2;\nif (nextName != names.length || nextFile != files.length) {\nfinal BitSet timesDefined = readAllOrBits(header, files.length);\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nfor (int i = 0; i < files.length; i++) {\nfiles[i].setHasLastModifiedDate(timesDefined.get(i));\nif (files[i].getHasLastModifiedDate()) {\nfiles[i].setLastModifiedDate(Long.reverseBytes(header.readLong()));\nbreak;\nfinal BitSet attributesDefined = readAllOrBits(header, files.length);\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nfor (int i = 0; i < files.length; i++) {\nfiles[i].setHasWindowsAttributes(attributesDefined.get(i));\nif (files[i].getHasWindowsAttributes()) {\nfiles[i].setWindowsAttributes(Integer.reverseBytes(header.readInt()));\nbreak;\n}\nint nonEmptyFileCounter = 0;\nint emptyFileCounter = 0;\nfor (int i = 0; i < files.length; i++) {\nfiles[i].setHasStream(isEmptyStream == null ? true : !isEmptyStream.get(i));\nif (files[i].hasStream()) {\nfiles[i].setDirectory(false);\nfiles[i].setAntiItem(false);\nfiles[i].setHasCrc(archive.subStreamsInfo.hasCrc.get(nonEmptyFileCounter));\nfiles[i].setCrcValue(archive.subStreamsInfo.crcs[nonEmptyFileCounter]);\nfiles[i].setSize(archive.subStreamsInfo.unpackSizes[nonEmptyFileCounter]);\n++nonEmptyFileCounter;\nfiles[i].setDirectory(isEmptyFile == null ? true : !isEmptyFile.get(emptyFileCounter));\nfiles[i].setAntiItem(isAnti == null ? false : isAnti.get(emptyFileCounter));\nfiles[i].setHasCrc(false);\nfiles[i].setSize(0);\n++emptyFileCounter;\narchive.files = files;\ncalculateStreamMap(archive);\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZMethod:<init>(Ljava/lang/String;I[B)V",
+            "method_body": "private SevenZMethod(final byte[] id) {\nthis.id = id;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readUnpackInfo(Ljava/io/DataInput;Lorg/apache/commons/compress/archivers/sevenz/Archive;)V",
+            "method_body": "private void readUnpackInfo(final DataInput header, final Archive archive) throws IOException {\nint nid = header.readUnsignedByte();\nif (nid != NID.kFolder) {\nfinal long numFolders = readUint64(header);\nfinal Folder[] folders = new Folder[(int)numFolders];\narchive.folders = folders;\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nfor (int i = 0; i < (int)numFolders; i++) {\nfolders[i] = readFolder(header);\nnid = header.readUnsignedByte();\nif (nid != NID.kCodersUnpackSize) {\nfor (final Folder folder : folders) {\nfolder.unpackSizes = new long[(int)folder.totalOutputStreams];\nfor (int i = 0; i < folder.totalOutputStreams; i++) {\nfolder.unpackSizes[i] = readUint64(header);\nnid = header.readUnsignedByte();\nif (nid == NID.kCRC) {\nfinal BitSet crcsDefined = readAllOrBits(header, (int)numFolders);\nfor (int i = 0; i < (int)numFolders; i++) {\nif (crcsDefined.get(i)) {\nfolders[i].hasCrc = true;\nfolders[i].crc = 0xffffFFFFL & Integer.reverseBytes(header.readInt());\nnid = header.readUnsignedByte();\nif (nid != NID.kEnd) {\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:getCrcValue()J",
+            "method_body": "public long getCrcValue() {\nreturn crc;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Coders$DeflateDecoder:<init>()V",
+            "method_body": "DeflateDecoder() {\nsuper(Number.class);\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.CoderBase:<clinit>()V",
+            "method_body": "private final Class<?>[] acceptableOptions;\nprivate static final byte[] NONE = new byte[0];\nprotected CoderBase(final Class<?>... acceptableOptions) {\nthis.acceptableOptions = acceptableOptions;\n}",
+            "method_id": 59
+        }
+    ]
+}

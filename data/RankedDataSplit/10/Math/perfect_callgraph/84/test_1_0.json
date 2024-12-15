@@ -1,0 +1,59 @@
+{
+    "bug_id": 84,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math.optimization.direct.MultiDirectionalTest.testMinimizeMaximize",
+    "test_body": "public void testMinimizeMaximize()\nthrows FunctionEvaluationException, ConvergenceException {\n73: // the following function has 4 local extrema:\nfinal double xM        = -3.841947088256863675365;\nfinal double yM        = -1.391745200270734924416;\nfinal double xP        =  0.2286682237349059125691;\nfinal double yP        = -yM;\nfinal double valueXmYm =  0.2373295333134216789769; // local  maximum\nfinal double valueXmYp = -valueXmYm;                // local  minimum\nfinal double valueXpYm = -0.7290400707055187115322; // global minimum\nfinal double valueXpYp = -valueXpYm;                // global maximum\nMultivariateRealFunction fourExtrema = new MultivariateRealFunction() {\nprivate static final long serialVersionUID = -7039124064449091152L;\npublic double value(double[] variables) throws FunctionEvaluationException {\nfinal double x = variables[0];\nfinal double y = variables[1];\nreturn ((x == 0) || (y == 0)) ? 0 : (Math.atan(x) * Math.atan(x + 2) * Math.atan(y) * Math.atan(y) / (x * y));\n}\n};\n91: MultiDirectional optimizer = new MultiDirectional();\noptimizer.setConvergenceChecker(new SimpleScalarValueChecker(1.0e-11, 1.0e-30));\noptimizer.setMaxIterations(200);\noptimizer.setStartConfiguration(new double[] { 0.2, 0.2 });\nRealPointValuePair optimum;\n97: // minimization\noptimum = optimizer.optimize(fourExtrema, GoalType.MINIMIZE, new double[] { -3.0, 0 });\nAssert.assertEquals(xM,        optimum.getPoint()[0], 4.0e-6);\nAssert.assertEquals(yP,        optimum.getPoint()[1], 3.0e-6);\nAssert.assertEquals(valueXmYp, optimum.getValue(),    8.0e-13);\nAssert.assertTrue(optimizer.getEvaluations() > 120);\nAssert.assertTrue(optimizer.getEvaluations() < 150);\n105: optimum = optimizer.optimize(fourExtrema, GoalType.MINIMIZE, new double[] { +1, 0 });\nAssert.assertEquals(xP,        optimum.getPoint()[0], 2.0e-8);\nAssert.assertEquals(yM,        optimum.getPoint()[1], 3.0e-6);\nAssert.assertEquals(valueXpYm, optimum.getValue(),    2.0e-12);              \nAssert.assertTrue(optimizer.getEvaluations() > 120);\nAssert.assertTrue(optimizer.getEvaluations() < 150);\n112: // maximization\noptimum = optimizer.optimize(fourExtrema, GoalType.MAXIMIZE, new double[] { -3.0, 0.0 });\nAssert.assertEquals(xM,        optimum.getPoint()[0], 7.0e-7);\nAssert.assertEquals(yM,        optimum.getPoint()[1], 3.0e-7);\nAssert.assertEquals(valueXmYm, optimum.getValue(),    2.0e-14);\nAssert.assertTrue(optimizer.getEvaluations() > 120);\nAssert.assertTrue(optimizer.getEvaluations() < 150);\n120: optimizer.setConvergenceChecker(new SimpleScalarValueChecker(1.0e-15, 1.0e-30));\noptimum = optimizer.optimize(fourExtrema, GoalType.MAXIMIZE, new double[] { +1, 0 });\nAssert.assertEquals(xP,        optimum.getPoint()[0], 2.0e-8);\nAssert.assertEquals(yP,        optimum.getPoint()[1], 3.0e-6);\nAssert.assertEquals(valueXpYp, optimum.getValue(),    2.0e-12);\nAssert.assertTrue(optimizer.getEvaluations() > 180);\nAssert.assertTrue(optimizer.getEvaluations() < 220);\n128: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math.optimization.direct.MultiDirectionalTest.testMinimizeMaximize(MultiDirectionalTest.java:103)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.optimization.direct.MultiDirectional:iterateSimplex(Ljava/util/Comparator;)V",
+            "method_body": "protected void iterateSimplex(final Comparator<RealPointValuePair> comparator)\nincrementIterationsCounter();\nfinal RealPointValuePair[] original = simplex;\nfinal RealPointValuePair best = original[0];\nfinal RealPointValuePair reflected = evaluateNewSimplex(original, 1.0, comparator);\nif (comparator.compare(reflected, best) < 0) {\nfinal RealPointValuePair[] reflectedSimplex = simplex;\nfinal RealPointValuePair expanded = evaluateNewSimplex(original, khi, comparator);\nif (comparator.compare(reflected, expanded) <= 0) {\nsimplex = reflectedSimplex;\nreturn;\nfinal RealPointValuePair contracted = evaluateNewSimplex(original, gamma, comparator);\nif (comparator.compare(contracted, best) < 0) {\nreturn;\n}\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.direct.MultiDirectional:<init>()V",
+            "method_body": "public MultiDirectional() {\nthis.khi   = 2.0;\nthis.gamma = 0.5;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.direct.DirectSearchOptimizer:<init>()V",
+            "method_body": "protected DirectSearchOptimizer() {\nsetConvergenceChecker(new SimpleScalarValueChecker());\nsetMaxIterations(Integer.MAX_VALUE);\nsetMaxEvaluations(Integer.MAX_VALUE);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.SimpleScalarValueChecker:<init>()V",
+            "method_body": "public SimpleScalarValueChecker() {\nthis.relativeThreshold = DEFAULT_RELATIVE_THRESHOLD;\nthis.absoluteThreshold = DEFAULT_ABSOLUTE_THRESHOLD;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.SimpleScalarValueChecker:<init>(DD)V",
+            "method_body": "public SimpleScalarValueChecker(final double relativeThreshold,\nfinal double absoluteThreshold) {\nthis.relativeThreshold = relativeThreshold;\nthis.absoluteThreshold = absoluteThreshold;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.RealPointValuePair:getPoint()[D",
+            "method_body": "public double[] getPoint() {\nreturn point.clone();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.RealPointValuePair:getValue()D",
+            "method_body": "public double getValue() {\nreturn value;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.direct.MultiDirectional:evaluateNewSimplex([Lorg/apache/commons/math/optimization/RealPointValuePair;DLjava/util/Comparator;)Lorg/apache/commons/math/optimization/RealPointValuePair;",
+            "method_body": "private RealPointValuePair evaluateNewSimplex(final RealPointValuePair[] original,\nfinal double[] xSmallest = original[0].getPointRef();\nfinal int n = xSmallest.length;\nsimplex = new RealPointValuePair[n + 1];\nsimplex[0] = original[0];\nfor (int i = 1; i <= n; ++i) {\nfinal double[] xOriginal    = original[i].getPointRef();\nfinal double[] xTransformed = new double[n];\nfor (int j = 0; j < n; ++j) {\nxTransformed[j] = xSmallest[j] + coeff * (xSmallest[j] - xOriginal[j]);\nsimplex[i] = new RealPointValuePair(xTransformed, Double.NaN, false);\nevaluateSimplex(comparator);\nreturn simplex[0];\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.direct.DirectSearchOptimizer:getEvaluations()I",
+            "method_body": "public int getEvaluations() {\nreturn evaluations;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.direct.DirectSearchOptimizer:evaluate([D)D",
+            "method_body": "protected abstract void iterateSimplex(final Comparator<RealPointValuePair> comparator)\nif (++evaluations > maxEvaluations) {\nreturn f.value(x);\n}",
+            "method_id": 9
+        }
+    ]
+}

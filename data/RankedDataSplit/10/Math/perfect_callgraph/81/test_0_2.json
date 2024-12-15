@@ -1,0 +1,59 @@
+{
+    "bug_id": 81,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.linear.EigenDecompositionImplTest.testMath308",
+    "test_body": "public void testMath308() {\n114: double[] mainTridiagonal = {\n22.330154644539597, 46.65485522478641, 17.393672330044705, 54.46687435351116, 80.17800767709437\n};\ndouble[] secondaryTridiagonal = {\n13.04450406501361, -5.977590941539671, 2.9040909856707517, 7.1570352792841225\n};\n121: // the reference values have been computed using routine DSTEMR\n// from the fortran library LAPACK version 3.2.1\ndouble[] refEigenValues = {\n82.044413207204002, 53.456697699894512, 52.536278520113882, 18.847969733754262, 14.138204224043099\n};\nRealVector[] refEigenVectors = {\nnew ArrayRealVector(new double[] { -0.000462690386766, -0.002118073109055,  0.011530080757413,  0.252322434584915,  0.967572088232592 }),\nnew ArrayRealVector(new double[] {  0.314647769490148,  0.750806415553905, -0.167700312025760, -0.537092972407375,  0.143854968127780 }),\nnew ArrayRealVector(new double[] {  0.222368839324646,  0.514921891363332, -0.021377019336614,  0.801196801016305, -0.207446991247740 }),\nnew ArrayRealVector(new double[] {  0.713933751051495, -0.190582113553930,  0.671410443368332, -0.056056055955050,  0.006541576993581 }),\nnew ArrayRealVector(new double[] {  0.584677060845929, -0.367177264979103, -0.721453187784497,  0.052971054621812, -0.005740715188257 })\n};\n134: EigenDecomposition decomposition =\nnew EigenDecompositionImpl(mainTridiagonal, secondaryTridiagonal, MathUtils.SAFE_MIN);",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: -1\nat org.apache.commons.math.linear.EigenDecompositionImpl.computeShiftIncrement(EigenDecompositionImpl.java:1544)\nat org.apache.commons.math.linear.EigenDecompositionImpl.goodStep(EigenDecompositionImpl.java:1071)\nat org.apache.commons.math.linear.EigenDecompositionImpl.processGeneralBlock(EigenDecompositionImpl.java:893)\nat org.apache.commons.math.linear.EigenDecompositionImpl.findEigenvalues(EigenDecompositionImpl.java:657)\nat org.apache.commons.math.linear.EigenDecompositionImpl.decompose(EigenDecompositionImpl.java:246)\nat org.apache.commons.math.linear.EigenDecompositionImpl.<init>(EigenDecompositionImpl.java:205)\nat org.apache.commons.math.linear.EigenDecompositionImplTest.testMath308(EigenDecompositionImplTest.java:134)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:createRealMatrix([[D)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealMatrix(double[][] data) {\nreturn (data.length * data[0].length <= 4096) ?\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:flipIfWarranted(II)Z",
+            "method_body": "private boolean flipIfWarranted(final int n, final int step) {\nif (1.5 * work[pingPong] < work[4 * (n - 1) + pingPong]) {\nreturn false;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:dqds(II)V",
+            "method_body": "private void dqds(final int start, final int end) {\neMin = work[4 * start + pingPong + 4];\ndouble d = work[4 * start + pingPong] - tau;\ndMin = d;\ndMin1 = -work[4 * start + pingPong];\nif (pingPong == 0) {\nfor (int j4 = 4 * start + 3; j4 <= 4 * (end - 3); j4 += 4) {\nwork[j4 - 2] = d + work[j4 - 1];\nfinal double tmp = work[j4 + 1] / work[j4 - 2];\nd = d * tmp - tau;\ndMin = Math.min(dMin, d);\nwork[j4] = work[j4 - 1] * tmp;\neMin = Math.min(work[j4], eMin);\nfor (int j4 = 4 * start + 3; j4 <= 4 * (end - 3); j4 += 4) {\nwork[j4 - 3] = d + work[j4];\nfinal double tmp = work[j4 + 2] / work[j4 - 3];\nd = d * tmp - tau;\ndMin = Math.min(dMin, d);\nwork[j4 - 1] = work[j4] * tmp;\neMin = Math.min(work[j4 - 1], eMin);\ndN2 = d;\ndMin2 = dMin;\nint j4 = 4 * (end - 2) - pingPong - 1;\nint j4p2 = j4 + 2 * pingPong - 1;\nwork[j4 - 2] = dN2 + work[j4p2];\nwork[j4] = work[j4p2 + 2] * (work[j4p2] / work[j4 - 2]);\ndN1 = work[j4p2 + 2] * (dN2 / work[j4 - 2]) - tau;\ndMin = Math.min(dMin, dN1);\ndMin1 = dMin;\nj4 = j4 + 4;\nj4p2 = j4 + 2 * pingPong - 1;\nwork[j4 - 2] = dN1 + work[j4p2];\nwork[j4] = work[j4p2 + 2] * (work[j4p2] / work[j4 - 2]);\ndN = work[j4p2 + 2] * (dN1 / work[j4 - 2]) - tau;\ndMin = Math.min(dMin, dN);\nwork[j4 + 2] = dN;\nwork[4 * end - pingPong - 1] = eMin;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:walkInRowOrder(Lorg/apache/commons/math/linear/RealMatrixPreservingVisitor;)D",
+            "method_body": "public double walkInRowOrder(final RealMatrixPreservingVisitor visitor)\nfinal int rows    = getRowDimension();\nfinal int columns = getColumnDimension();\nvisitor.start(rows, columns, 0, rows - 1, 0, columns - 1);\nfor (int i = 0; i < rows; ++i) {\nfinal double[] rowI = data[i];\nfor (int j = 0; j < columns; ++j) {\nvisitor.visit(i, j, rowI[j]);\nreturn visitor.end();\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:multiply(Lorg/apache/commons/math/linear/Array2DRowRealMatrix;)Lorg/apache/commons/math/linear/Array2DRowRealMatrix;",
+            "method_body": "public Array2DRowRealMatrix multiply(final Array2DRowRealMatrix m)\nMatrixUtils.checkMultiplicationCompatible(this, m);\nfinal int nRows = this.getRowDimension();\nfinal int nCols = m.getColumnDimension();\nfinal int nSum = this.getColumnDimension();\nfinal double[][] outData = new double[nRows][nCols];\nfor (int row = 0; row < nRows; row++) {\nfinal double[] dataRow    = data[row];\nfinal double[] outDataRow = outData[row];\nfor (int col = 0; col < nCols; col++) {\ndouble sum = 0;\nfor (int i = 0; i < nSum; i++) {\nsum += dataRow[i] * m.data[i][col];\noutDataRow[col] = sum;\nreturn new Array2DRowRealMatrix(outData, false);\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:walkInOptimizedOrder(Lorg/apache/commons/math/linear/RealMatrixPreservingVisitor;)D",
+            "method_body": "public double walkInOptimizedOrder(final RealMatrixPreservingVisitor visitor)\nreturn walkInRowOrder(visitor);\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:getColumnDimension()I",
+            "method_body": "public int getColumnDimension() {\nreturn ((data == null) || (data[0] == null)) ? 0 : data[0].length;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:dqd(II)V",
+            "method_body": "private void dqd(final int start, final int end) {\neMin = work[4 * start + pingPong + 4];\ndouble d = work[4 * start + pingPong];\ndMin = d;\nif (pingPong == 0) {\nfor (int j4 = 4 * start + 3; j4 < 4 * (end - 3); j4 += 4) {\nwork[j4 - 2] = d + work[j4 - 1];\nif (work[j4 - 2] == 0.0) {\n} else if ((MathUtils.SAFE_MIN * work[j4 + 1] < work[j4 - 2]) &&\nfinal double tmp = work[j4 + 1] / work[j4 - 2];\nwork[j4] = work[j4 - 1] * tmp;\nd *= tmp;\n} else {\ndMin = Math.min(dMin, d);\neMin = Math.min(eMin, work[j4]);\ndN2   = d;\ndMin2 = dMin;\nint j4 = 4 * (end - 2) - pingPong - 1;\nint j4p2 = j4 + 2 * pingPong - 1;\nwork[j4 - 2] = dN2 + work[j4p2];\nif (work[j4 - 2] == 0.0) {\n} else if ((MathUtils.SAFE_MIN * work[j4p2 + 2] < work[j4 - 2]) &&\nfinal double tmp = work[j4p2 + 2] / work[j4 - 2];\nwork[j4] = work[j4p2] * tmp;\ndN1 = dN2 * tmp;\n} else {\ndMin = Math.min(dMin, dN1);\ndMin1 = dMin;\nj4 = j4 + 4;\nj4p2 = j4 + 2 * pingPong - 1;\nwork[j4 - 2] = dN1 + work[j4p2];\nif (work[j4 - 2] == 0.0) {\n} else if ((MathUtils.SAFE_MIN * work[j4p2 + 2] < work[j4 - 2]) &&\nfinal double tmp = work[j4p2 + 2] / work[j4 - 2];\nwork[j4] = work[j4p2] * tmp;\ndN = dN1 * tmp;\n} else {\ndMin = Math.min(dMin, dN);\nwork[j4 + 2] = dN;\nwork[4 * end - pingPong - 1] = eMin;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:<init>(II)V",
+            "method_body": "protected AbstractRealMatrix(final int rowDimension, final int columnDimension)\nthrows IllegalArgumentException {\nif (rowDimension <= 0 ) {\nif (columnDimension <= 0) {\nlu = null;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:initialSplits(I)V",
+            "method_body": "private void initialSplits(final int n) {\npingPong = 0;\nfor (int k = 0; k < 2; ++k) {\ndouble d = work[4 * (n - 1) + pingPong];\nfor (int i = 4 * (n - 2) + pingPong; i >= 0; i -= 4) {\nif (work[i + 2] <= TOLERANCE_2 * d) {\nd *= work[i] / (d + work[i + 2]);\nd = work[pingPong];\nfor (int i = 2 + pingPong; i < 4 * n - 2; i += 4) {\nfinal int j = i - 2 * pingPong - 1;\nwork[j] = d + work[i];\nif (work[i] <= TOLERANCE_2 * d) {\n} else if ((MathUtils.SAFE_MIN * work[i + 2] < work[j]) &&\nfinal double tmp = work[i + 2] / work[j];\nwork[j + 2] = work[i] * tmp;\nd *= tmp;\n} else {\nwork[4 * n - 3 - pingPong] = d;\npingPong = 1 - pingPong;\n}",
+            "method_id": 29
+        }
+    ]
+}

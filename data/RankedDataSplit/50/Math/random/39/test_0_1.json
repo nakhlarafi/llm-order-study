@@ -1,0 +1,104 @@
+{
+    "bug_id": 39,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.nonstiff.DormandPrince853IntegratorTest.testTooLargeFirstStep",
+    "test_body": "public void testTooLargeFirstStep() {\n182: AdaptiveStepsizeIntegrator integ =\nnew DormandPrince853Integrator(0, Double.POSITIVE_INFINITY, Double.NaN, Double.NaN);\nfinal double start = 0.0;\nfinal double end   = 0.001;\nFirstOrderDifferentialEquations equations = new FirstOrderDifferentialEquations() {\n188: public int getDimension() {\nreturn 1;\n}\n192: public void computeDerivatives(double t, double[] y, double[] yDot) {\nAssert.assertTrue(t >= FastMath.nextAfter(start, Double.NEGATIVE_INFINITY));\nAssert.assertTrue(t <= FastMath.nextAfter(end,   Double.POSITIVE_INFINITY));\nyDot[0] = -100.0 * y[0];\n}\n198: };\n200: integ.setStepSizeControl(0, 1.0, 1.0e-6, 1.0e-8);\ninteg.integrate(equations, start, new double[] { 1.0 }, end, new double[1]);\n203: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math.ode.nonstiff.DormandPrince853IntegratorTest$3.computeDerivatives(DormandPrince853IntegratorTest.java:194)\nat org.apache.commons.math.ode.ExpandableStatefulODE.computeDerivatives(ExpandableStatefulODE.java:115)\nat org.apache.commons.math.ode.AbstractIntegrator.computeDerivatives(AbstractIntegrator.java:265)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:262)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math.ode.nonstiff.DormandPrince853IntegratorTest.testTooLargeFirstStep(DormandPrince853IntegratorTest.java:201)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:setTime(D)V",
+            "method_body": "public void setTime(final double time) {\nthis.time = time;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.RungeKuttaStepInterpolator:reinitialize(Lorg/apache/commons/math/ode/AbstractIntegrator;[D[[DZLorg/apache/commons/math/ode/EquationsMapper;[Lorg/apache/commons/math/ode/EquationsMapper;)V",
+            "method_body": "public void reinitialize(final AbstractIntegrator rkIntegrator,\nreinitialize(y, forward, primaryMapper, secondaryMappers);\nthis.previousState = null;\nthis.yDotK = yDotArray;\nthis.integrator = rkIntegrator;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.DormandPrince853StepInterpolator:doCopy()Lorg/apache/commons/math/ode/sampling/StepInterpolator;",
+            "method_body": "protected StepInterpolator doCopy() {\nreturn new DormandPrince853StepInterpolator(this);\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:incrementCount()V",
+            "method_body": "public void incrementCount() {\nif (++count > maximalCount) {\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:sqrt(D)D",
+            "method_body": "public static double sqrt(final double a) {\nreturn Math.sqrt(a);\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator:<init>(Ljava/lang/String;Z[D[[D[DLorg/apache/commons/math/ode/nonstiff/RungeKuttaStepInterpolator;DDDD)V",
+            "method_body": "protected EmbeddedRungeKuttaIntegrator(final String name, final boolean fsal,\nsuper(name, minStep, maxStep, scalAbsoluteTolerance, scalRelativeTolerance);\nthis.fsal      = fsal;\nthis.c         = c;\nthis.a         = a;\nthis.b         = b;\nthis.prototype = prototype;\nexp = -1.0 / getOrder();\nsetSafety(0.9);\nsetMinReduction(0.2);\nsetMaxGrowth(10.0);\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdaptiveStepsizeIntegrator:initializeStep(ZI[DD[D[D[D[D)D",
+            "method_body": "public double initializeStep(final boolean forward, final int order, final double[] scale,\nif (initialStep > 0) {\ndouble yOnScale2 = 0;\ndouble yDotOnScale2 = 0;\nfor (int j = 0; j < scale.length; ++j) {\nratio         = y0[j] / scale[j];\nyOnScale2    += ratio * ratio;\nratio         = yDot0[j] / scale[j];\nyDotOnScale2 += ratio * ratio;\ndouble h = ((yOnScale2 < 1.0e-10) || (yDotOnScale2 < 1.0e-10)) ?\nif (! forward) {\nfor (int j = 0; j < y0.length; ++j) {\ny1[j] = y0[j] + h * yDot0[j];\ncomputeDerivatives(t0 + h, y1, yDot1);\ndouble yDDotOnScale = 0;\nfor (int j = 0; j < scale.length; ++j) {\nratio         = (yDot1[j] - yDot0[j]) / scale[j];\nyDDotOnScale += ratio * ratio;\nyDDotOnScale = FastMath.sqrt(yDDotOnScale) / h;\nfinal double maxInv2 = FastMath.max(FastMath.sqrt(yDotOnScale2), yDDotOnScale);\nfinal double h1 = (maxInv2 < 1.0e-15) ?\nh = FastMath.min(100.0 * FastMath.abs(h), h1);\nh = FastMath.max(h, 1.0e-12 * FastMath.abs(t0));  // avoids cancellation when computing t1 - t0\nif (h < getMinStep()) {\nif (h > getMaxStep()) {\nif (! forward) {\nreturn h;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.RungeKuttaStepInterpolator:<init>(Lorg/apache/commons/math/ode/nonstiff/RungeKuttaStepInterpolator;)V",
+            "method_body": "public RungeKuttaStepInterpolator(final RungeKuttaStepInterpolator interpolator) {\nsuper(interpolator);\nif (interpolator.currentState != null) {\npreviousState = null;\nyDotK = null;\nintegrator = null;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator:setMinReduction(D)V",
+            "method_body": "public void setMinReduction(final double minReduction) {\nthis.minReduction = minReduction;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.DormandPrince853StepInterpolator:<init>(Lorg/apache/commons/math/ode/nonstiff/DormandPrince853StepInterpolator;)V",
+            "method_body": "public DormandPrince853StepInterpolator(final DormandPrince853StepInterpolator interpolator) {\nsuper(interpolator);\nif (interpolator.currentState == null) {\nyDotKLast = null;\nv         = null;\nvectorsInitialized = false;\n}",
+            "method_id": 59
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:<init>()V",
+            "method_body": "public Incrementor() {\nthis(0);\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:nextAfter(DD)D",
+            "method_body": "public static double nextAfter(double d, double direction) {\nif (Double.isNaN(d) || Double.isNaN(direction)) {\n} else if (d == direction) {\n} else if (Double.isInfinite(d)) {\n} else if (d == 0) {\nreturn (direction < 0) ? -Double.MIN_VALUE : Double.MIN_VALUE;\nfinal long bits = Double.doubleToLongBits(d);\nfinal long sign = bits & 0x8000000000000000L;\nif ((direction < d) ^ (sign == 0L)) {\nreturn Double.longBitsToDouble(sign | ((bits & 0x7fffffffffffffffL) + 1));\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator:setMaxGrowth(D)V",
+            "method_body": "public void setMaxGrowth(final double maxGrowth) {\nthis.maxGrowth = maxGrowth;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.DormandPrince853StepInterpolator:storeTime(D)V",
+            "method_body": "public void storeTime(final double t) {\nsuper.storeTime(t);\nvectorsInitialized = false;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.EquationsMapper:getDimension()I",
+            "method_body": "public int getDimension() {\nreturn dimension;\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:integrate(Lorg/apache/commons/math/ode/FirstOrderDifferentialEquations;D[DD[D)D",
+            "method_body": "public double integrate(final FirstOrderDifferentialEquations equations,\nif (y0.length != equations.getDimension()) {\nif (y.length != equations.getDimension()) {\nfinal ExpandableStatefulODE expandableODE = new ExpandableStatefulODE(equations);\nexpandableODE.setTime(t0);\nexpandableODE.setPrimaryState(y0);\nintegrate(expandableODE, t);\nSystem.arraycopy(expandableODE.getPrimaryState(), 0, y, 0, y.length);\nreturn expandableODE.getTime();\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.DormandPrince853Integrator:getOrder()I",
+            "method_body": "public int getOrder() {\nreturn 8;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:min(DD)D",
+            "method_body": "public static double min(final double a, final double b) {\nif (a > b) {\nif (a < b) {\nreturn a;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:max(DD)D",
+            "method_body": "public static double max(final double a, final double b) {\nif (a > b) {\nreturn a;\nif (a < b) {\nreturn b;\n}",
+            "method_id": 68
+        }
+    ]
+}

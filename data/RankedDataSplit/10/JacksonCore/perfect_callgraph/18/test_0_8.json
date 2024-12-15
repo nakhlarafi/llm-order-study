@@ -1,0 +1,34 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal",
+    "test_body": "public void testTooBigBigDecimal() throws Exception\n{\nJsonFactory f = new JsonFactory();\nf.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);\n116: // 24-Aug-2016, tatu: Initial check limits scale to [-9999,+9999]\nBigDecimal BIG = new BigDecimal(\"1E+9999\");\nBigDecimal TOO_BIG = new BigDecimal(\"1E+10000\");\nBigDecimal SMALL = new BigDecimal(\"1E-9999\");\nBigDecimal TOO_SMALL = new BigDecimal(\"1E-10000\");\n122: for (boolean useBytes : new boolean[] { false, true } ) {\nfor (boolean asString : new boolean[] { false, true } ) {\nJsonGenerator g;\n126: if (useBytes) {\ng = f.createGenerator(new ByteArrayOutputStream());\n} else {\ng = f.createGenerator(new StringWriter());\n}\nif (asString) {\ng.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n}\n135: // first, ok cases:\ng.writeStartArray();\ng.writeNumber(BIG);\ng.writeNumber(SMALL);\ng.writeEndArray();\ng.close();\n142: // then invalid\nfor (BigDecimal input : new BigDecimal[] { TOO_BIG, TOO_SMALL }) {\nif (useBytes) {\ng = f.createGenerator(new ByteArrayOutputStream());\n} else {\ng = f.createGenerator(new StringWriter());\n}\nif (asString) {\ng.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n}\ntry {\ng.writeNumber(input);\nfail(\"Should not have written without exception: \"+input);\n} catch (JsonGenerationException e) {",
+    "stack_trace": "junit.framework.AssertionFailedError: Should not have written without exception: 1E+10000\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.TestCase.fail(TestCase.java:227)\nat com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal(TestJsonGeneratorFeatures.java:154)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.WriterBasedJsonGenerator:writeRawLong(Ljava/lang/String;)V",
+            "method_body": "private void writeRawLong(String text) throws IOException\nint room = _outputEnd - _outputTail;\ntext.getChars(0, room, _outputBuffer, _outputTail);\n_outputTail += room;\n_flushBuffer();\nint offset = room;\nint len = text.length() - room;\nwhile (len > _outputEnd) {\nint amount = _outputEnd;\ntext.getChars(offset, offset+amount, _outputBuffer, 0);\n_outputHead = 0;\n_outputTail = amount;\n_flushBuffer();\noffset += amount;\nlen -= amount;\n}\ntext.getChars(offset, offset+len, _outputBuffer, 0);\n_outputHead = 0;\n_outputTail = len;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.WriterBasedJsonGenerator:_verifyValueWrite(Ljava/lang/String;)V",
+            "method_body": "protected void _verifyValueWrite(String typeMsg) throws IOException\nif (_cfgPrettyPrinter != null) {\nfinal int status = _writeContext.writeValue();\nif (status == JsonWriteContext.STATUS_EXPECT_NAME) {\nswitch (status) {\nc = ',';\nbreak;\nreturn;\nif (_outputTail >= _outputEnd) {\n_outputBuffer[_outputTail] = c;\n++_outputTail;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.WriterBasedJsonGenerator:close()V",
+            "method_body": "public void close() throws IOException\nsuper.close();\nif (_outputBuffer != null\nJsonStreamContext ctxt = getOutputContext();\nif (ctxt.inArray()) {\n} else if (ctxt.inObject()) {\n_flushBuffer();\n_outputHead = 0;\n_outputTail = 0;\nif (_writer != null) {\nif (_ioContext.isResourceManaged() || isEnabled(Feature.AUTO_CLOSE_TARGET)) {\n_writer.close();\n_releaseBuffers();\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.WriterBasedJsonGenerator:_releaseBuffers()V",
+            "method_body": "protected void _releaseBuffers()\nchar[] buf = _outputBuffer;\nif (buf != null) {\n_outputBuffer = null;\n_ioContext.releaseConcatBuffer(buf);\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.WriterBasedJsonGenerator:_flushBuffer()V",
+            "method_body": "protected void _flushBuffer() throws IOException\nint len = _outputTail - _outputHead;\nif (len > 0) {\nint offset = _outputHead;\n_outputTail = _outputHead = 0;\n_writer.write(_outputBuffer, offset, len);\n}",
+            "method_id": 84
+        }
+    ]
+}

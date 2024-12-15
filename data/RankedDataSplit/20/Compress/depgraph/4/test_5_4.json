@@ -1,0 +1,29 @@
+{
+    "bug_id": 4,
+    "test_id": 5,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testASCIIFileRoundtripImplicitUnicodeExtra",
+    "test_body": "78: public void testASCIIFileRoundtripImplicitUnicodeExtra()\n79: throws IOException {\n80: testFileRoundtrip(US_ASCII, false, false);\n81: }\n",
+    "stack_trace": "java.io.IOException: central directory is empty, can't expand corrupt archive.\nat org.apache.commons.compress.archivers.zip.ZipFile.populateFromCentralDirectory(ZipFile.java:318)\nat org.apache.commons.compress.archivers.zip.ZipFile.<init>(ZipFile.java:181)\nat org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testFile(UTF8ZipFilesTest.java:291)\nat org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testFileRoundtrip(UTF8ZipFilesTest.java:202)\nat org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testASCIIFileRoundtripImplicitUnicodeExtra(UTF8ZipFilesTest.java:80)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:canEncode(Ljava/lang/String;)Z",
+            "method_body": "public boolean canEncode(String name) {\nCharsetEncoder enc = this.charset.newEncoder();\nenc.onMalformedInput(CodingErrorAction.REPORT);\nenc.onUnmappableCharacter(CodingErrorAction.REPORT);\nreturn enc.canEncode(name);\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:encode(Ljava/lang/String;)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer encode(String name) {\nCharsetEncoder enc = this.charset.newEncoder();\nenc.onMalformedInput(CodingErrorAction.REPORT);\nenc.onUnmappableCharacter(CodingErrorAction.REPORT);\nCharBuffer cb = CharBuffer.wrap(name);\nByteBuffer out = ByteBuffer.allocate(name.length()\nwhile (cb.remaining() > 0) {\nCoderResult res = enc.encode(cb, out,true);\nif (res.isUnmappable() || res.isMalformed()) {\nif (res.length() * 6 > out.remaining()) {\nfor (int i=0; i<res.length(); ++i) {\nZipEncodingHelper.appendSurrogate(out,cb.get());\n} else if (res.isOverflow()) {\nout = ZipEncodingHelper.growBuffer(out, 0);\n} else if (res.isUnderflow()) {\nenc.flush(out);\nbreak;\n}\nout.limit(out.position());\nout.rewind();\nreturn out;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:<clinit>()V",
+            "method_body": "private static final int WORD = 4;\npublic static final ZipLong CFH_SIG = new ZipLong(0X02014B50L);\npublic static final ZipLong LFH_SIG = new ZipLong(0X04034B50L);\npublic ZipLong(long value) {\nthis.value = value;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:growBuffer(Ljava/nio/ByteBuffer;I)Ljava/nio/ByteBuffer;",
+            "method_body": "static ByteBuffer growBuffer(ByteBuffer b, int newCapacity) {\nb.limit(b.position());\nb.rewind();\nint c2 = b.capacity() * 2;\nByteBuffer on = ByteBuffer.allocate(c2 < newCapacity ? newCapacity : c2);\non.put(b);\nreturn on;\n}",
+            "method_id": 83
+        }
+    ]
+}

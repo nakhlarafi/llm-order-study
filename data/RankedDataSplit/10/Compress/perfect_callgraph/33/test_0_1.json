@@ -1,0 +1,59 @@
+{
+    "bug_id": 33,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.compressors.DetectCompressorTestCase.testDetection",
+    "test_body": "91: public void testDetection() throws Exception {\n92: CompressorInputStream bzip2 = getStreamFor(\"bla.txt.bz2\"); \n93: assertNotNull(bzip2);\n94: assertTrue(bzip2 instanceof BZip2CompressorInputStream);\n95: 96: CompressorInputStream gzip = getStreamFor(\"bla.tgz\");\n97: assertNotNull(gzip);\n98: assertTrue(gzip instanceof GzipCompressorInputStream);\n99: 100: CompressorInputStream pack200 = getStreamFor(\"bla.pack\");\n101: assertNotNull(pack200);\n102: assertTrue(pack200 instanceof Pack200CompressorInputStream);\n103: 104: CompressorInputStream xz = getStreamFor(\"bla.tar.xz\");\n105: assertNotNull(xz);\n106: assertTrue(xz instanceof XZCompressorInputStream);\n107: 108: CompressorInputStream zlib = getStreamFor(\"bla.tar.deflatez\");\n109: assertNotNull(zlib);\n110: assertTrue(zlib instanceof DeflateCompressorInputStream);\n111: 112: try {\n113: factory.createCompressorInputStream(new ByteArrayInputStream(new byte[0]));\n114: fail(\"No exception thrown for an empty input stream\");\n115: } catch (CompressorException e) {\n116: // expected\n117: }\n118: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.compressors.xz.XZUtils:internalIsXZCompressionAvailable()Z",
+            "method_body": "private static boolean internalIsXZCompressionAvailable() {\nXZCompressorInputStream.matches(null, 0);\nreturn true;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.lzma.LZMAUtils:internalIsLZMACompressionAvailable()Z",
+            "method_body": "private static boolean internalIsLZMACompressionAvailable() {\nLZMACompressorInputStream.matches(null, 0);\nreturn true;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.CompressorException:<init>(Ljava/lang/String;)V",
+            "method_body": "public CompressorException(String message) {\nsuper(message);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:recvDecodingTables()V",
+            "method_body": "private void recvDecodingTables() throws IOException {\nfinal Data dataShadow = this.data;\nfinal boolean[] inUse = dataShadow.inUse;\nfinal byte[] pos = dataShadow.recvDecodingTables_pos;\nfinal byte[] selector = dataShadow.selector;\nfinal byte[] selectorMtf = dataShadow.selectorMtf;\nint inUse16 = 0;\nfor (int i = 0; i < 16; i++) {\nif (bsGetBit()) {\ninUse16 |= 1 << i;\nfor (int i = 256; --i >= 0;) {\ninUse[i] = false;\nfor (int i = 0; i < 16; i++) {\nif ((inUse16 & (1 << i)) != 0) {\nfinal int i16 = i << 4;\nfor (int j = 0; j < 16; j++) {\nif (bsGetBit()) {\ninUse[i16 + j] = true;\nmakeMaps();\nfinal int alphaSize = this.nInUse + 2;\nfinal int nGroups = bsR(3);\nfinal int nSelectors = bsR(15);\nfor (int i = 0; i < nSelectors; i++) {\nint j = 0;\nwhile (bsGetBit()) {\nselectorMtf[i] = (byte) j;\nfor (int v = nGroups; --v >= 0;) {\npos[v] = (byte) v;\nfor (int i = 0; i < nSelectors; i++) {\nint v = selectorMtf[i] & 0xff;\nfinal byte tmp = pos[v];\nwhile (v > 0) {\npos[0] = tmp;\nselector[i] = tmp;\nfinal char[][] len = dataShadow.temp_charArray2d;\nfor (int t = 0; t < nGroups; t++) {\nint curr = bsR(5);\nfinal char[] len_t = len[t];\nfor (int i = 0; i < alphaSize; i++) {\nwhile (bsGetBit()) {\ncurr += bsGetBit() ? -1 : 1;\nlen_t[i] = (char) curr;\ncreateHuffmanDecodingTables(alphaSize, nGroups);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:getAndMoveToFrontDecode0(I)I",
+            "method_body": "private int getAndMoveToFrontDecode0(final int groupNo) throws IOException {\nfinal InputStream inShadow = this.in;\nfinal Data dataShadow = this.data;\nfinal int zt = dataShadow.selector[groupNo] & 0xff;\nfinal int[] limit_zt = dataShadow.limit[zt];\nint zn = dataShadow.minLens[zt];\nint zvec = bsR(zn);\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nwhile (zvec > limit_zt[zn]) {\nzn++;\nwhile (bsLiveShadow < 1) {\nfinal int thech = inShadow.read();\nif (thech >= 0) {\nbsBuffShadow = (bsBuffShadow << 8) | thech;\nbsLiveShadow += 8;\ncontinue;\nbsLiveShadow--;\nzvec = (zvec << 1) | ((bsBuffShadow >> bsLiveShadow) & 1);\nthis.bsLive = bsLiveShadow;\nthis.bsBuff = bsBuffShadow;\nreturn dataShadow.perm[zt][zvec - dataShadow.base[zt][zn]];\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:<clinit>()V",
+            "method_body": "private static final int COPY_BUF_SIZE = 8024;\nprivate static final byte[] SKIP_BUF = new byte[SKIP_BUF_SIZE];\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:readFully(Ljava/io/InputStream;[B)I",
+            "method_body": "public static int readFully(InputStream input, byte[] b) throws IOException {\nreturn readFully(input, b, 0, b.length);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:readFully(Ljava/io/InputStream;[BII)I",
+            "method_body": "public static int readFully(InputStream input, byte[] b, int offset, int len)\nif (len < 0 || offset < 0 || len + offset > b.length) {\nint count = 0, x = 0;\nwhile (count != len) {\nx = input.read(b, offset + count, len - count);\nif (x == -1) {\ncount += x;\nreturn count;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.CRC:<clinit>()V",
+            "method_body": "private static final int crc32Table[] = {\n};",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.CRC:initialiseCRC()V",
+            "method_body": "void initialiseCRC() {\nglobalCrc = 0xffffffff;\n}",
+            "method_id": 19
+        }
+    ]
+}

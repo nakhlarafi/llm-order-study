@@ -1,0 +1,109 @@
+{
+    "bug_id": 15,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.ParserTest.handlesDataOnlyTags",
+    "test_body": "155: @Test public void handlesDataOnlyTags() {\n156: String t = \"<style>font-family: bold</style>\";\n157: List<Element> tels = Jsoup.parse(t).getElementsByTag(\"style\");\n158: assertEquals(\"font-family: bold\", tels.get(0).data());\n159: assertEquals(\"\", tels.get(0).text());\n160: 161: String s = \"<p>Hello</p><script>obj.insert('<a rel=\\\"none\\\" />');\\ni++;</script><p>There</p>\";\n162: Document doc = Jsoup.parse(s);\n163: assertEquals(\"Hello There\", doc.text());\n164: assertEquals(\"obj.insert('<a rel=\\\"none\\\" />');\\ni++;\", doc.data());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<Hello []There> but was:<Hello ['); i++; ]There>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.jsoup.parser.ParserTest.handlesDataOnlyTags(ParserTest.java:163)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:addAll(Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "public void addAll(Attributes incoming) {\nif (incoming.size() == 0)\nif (attributes == null)\nattributes = new LinkedHashMap<String, Attribute>(incoming.size());\nattributes.putAll(incoming.attributes);\n}",
+            "method_id": 120
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:text(Ljava/lang/StringBuilder;)V",
+            "method_body": "private void text(StringBuilder accum) {\nappendWhitespaceIfBr(this, accum);\nfor (Node child : childNodes) {\nif (child instanceof TextNode) {\nTextNode textNode = (TextNode) child;\nappendNormalisedText(accum, textNode);\n} else if (child instanceof Element) {\nElement element = (Element) child;\nif (accum.length() > 0 && element.isBlock() && !TextNode.lastCharIsWhitespace(accum))\naccum.append(\" \");\nelement.text(accum);\n}\n}",
+            "method_id": 121
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:normaliseWhitespace(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public static String normaliseWhitespace(String string) {\nStringBuilder sb = new StringBuilder(string.length());\nboolean lastWasWhite = false;\nboolean modified = false;\nint l = string.length();\nfor (int i = 0; i < l; i++) {\nint c = string.codePointAt(i);\nif (Character.isWhitespace(c)) {\nif (lastWasWhite) {\nif (c != ' ')\nmodified = true;\nsb.append(' ');\nlastWasWhite = true;\nsb.appendCodePoint(c);\nlastWasWhite = false;\nreturn modified ? sb.toString() : string;\n}",
+            "method_id": 122
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendNormalisedText(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/TextNode;)V",
+            "method_body": "private void appendNormalisedText(StringBuilder accum, TextNode textNode) {\nString text = textNode.getWholeText();\nif (!preserveWhitespace()) {\ntext = TextNode.normaliseWhitespace(text);\nif (TextNode.lastCharIsWhitespace(accum))\ntext = TextNode.stripLeadingWhitespace(text);\naccum.append(text);\n}",
+            "method_id": 123
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:getElementsByTag(Ljava/lang/String;)Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements getElementsByTag(String tagName) {\nValidate.notEmpty(tagName);\ntagName = tagName.toLowerCase().trim();\nreturn Collector.collect(new Evaluator.Tag(tagName), this);\n}",
+            "method_id": 124
+        },
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:traverse(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "public void traverse(Node root) {\nNode node = root;\nint depth = 0;\nwhile (node != null) {\nvisitor.head(node, depth);\nif (node.childNodes().size() > 0) {\nnode = node.childNode(0);\ndepth++;\nwhile (node.nextSibling() == null && depth > 0) {\nvisitor.tail(node, depth);\nnode = node.parent();\ndepth--;\nvisitor.tail(node, depth);\nif (node == root)\nbreak;\nnode = node.nextSibling();\n}",
+            "method_id": 125
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:put(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public void put(String key, String value) {\nAttribute attr = new Attribute(key, value);\nput(attr);\n}",
+            "method_id": 126
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:<init>(Ljava/lang/String;)V",
+            "method_body": "protected Node(String baseUri) {\nthis(baseUri, new Attributes());\n}",
+            "method_id": 127
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:put(Lorg/jsoup/nodes/Attribute;)V",
+            "method_body": "public void put(Attribute attribute) {\nValidate.notNull(attribute);\nif (attributes == null)\nattributes = new LinkedHashMap<String, Attribute>(2);\nattributes.put(attribute.getKey(), attribute);\n}",
+            "method_id": 128
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public Attribute(String key, String value) {\nValidate.notEmpty(key);\nValidate.notNull(value);\nthis.key = key.trim().toLowerCase();\nthis.value = value;\n}",
+            "method_id": 129
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector$Accumulator:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(Node node, int depth) {\nif (node instanceof Element) {\nElement el = (Element) node;\nif (eval.matches(root, el))\nelements.add(el);\n}",
+            "method_id": 130
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:<init>(Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "protected Node(String baseUri, Attributes attributes) {\nValidate.notNull(baseUri);\nValidate.notNull(attributes);\nchildNodes = new ArrayList<Node>(4);\nthis.baseUri = baseUri.trim();\nthis.attributes = attributes;\n}",
+            "method_id": 131
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:get(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String get(String key) {\nValidate.notEmpty(key);\nif (attributes == null)\nAttribute attr = attributes.get(key.toLowerCase());\nreturn attr != null ? attr.getValue() : \"\";\n}",
+            "method_id": 132
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendWhitespaceIfBr(Lorg/jsoup/nodes/Element;Ljava/lang/StringBuilder;)V",
+            "method_body": "private static void appendWhitespaceIfBr(Element element, StringBuilder accum) {\nif (element.tag.getName().equals(\"br\") && !TextNode.lastCharIsWhitespace(accum))\n}",
+            "method_id": 133
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:text()Ljava/lang/String;",
+            "method_body": "public String text() {\nStringBuilder sb = new StringBuilder();\ntext(sb);\nreturn sb.toString().trim();\n}",
+            "method_id": 134
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector$Accumulator:<init>(Lorg/jsoup/nodes/Element;Lorg/jsoup/select/Elements;Lorg/jsoup/select/Evaluator;)V",
+            "method_body": "Accumulator(Element root, Elements elements, Evaluator eval) {\nthis.root = root;\nthis.elements = elements;\nthis.eval = eval;\n}",
+            "method_id": 135
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:nextSibling()Lorg/jsoup/nodes/Node;",
+            "method_body": "public Node nextSibling() {\nif (parentNode == null)\nreturn null; // root\nList<Node> siblings = parentNode.childNodes;\nInteger index = siblingIndex();\nValidate.notNull(index);\nif (siblings.size() > index+1)\nreturn siblings.get(index+1);\nreturn null;\n}",
+            "method_id": 136
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "public Element(Tag tag, String baseUri, Attributes attributes) {\nsuper(baseUri, attributes);\nValidate.notNull(tag);\nthis.tag = tag;\n}",
+            "method_id": 137
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:addChildren([Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void addChildren(Node... children) {\nfor (Node child: children) {\nreparentChild(child);\nchildNodes.add(child);\nchild.setSiblingIndex(childNodes.size()-1);\n}",
+            "method_id": 138
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:setParentNode(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void setParentNode(Node parentNode) {\nif (this.parentNode != null)\nthis.parentNode = parentNode;\n}",
+            "method_id": 139
+        }
+    ]
+}

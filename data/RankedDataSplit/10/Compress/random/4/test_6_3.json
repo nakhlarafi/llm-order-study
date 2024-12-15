@@ -1,0 +1,59 @@
+{
+    "bug_id": 4,
+    "test_id": 6,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testASCIIFileRoundtripExplicitUnicodeExtra",
+    "test_body": "58: public void testASCIIFileRoundtripExplicitUnicodeExtra()\n59: throws IOException {\n60: testFileRoundtrip(US_ASCII, false, true);\n61: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:putArchiveEntry(Lorg/apache/commons/compress/archivers/ArchiveEntry;)V",
+            "method_body": "public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {\ncloseArchiveEntry();\nentry = ((ZipArchiveEntry) archiveEntry);\nentries.add(entry);\nif (entry.getMethod() == -1) { // not specified\nentry.setMethod(method);\nif (entry.getTime() == -1) { // not specified\nentry.setTime(System.currentTimeMillis());\nif (entry.getMethod() == STORED && raf == null) {\nif (entry.getMethod() == DEFLATED && hasCompressionLevelChanged) {\nwriteLocalFileHeader(entry);\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipUtil:toDosTime(J)[B",
+            "method_body": "public static byte[] toDosTime(long t) {\nCalendar c = Calendar.getInstance();\nc.setTimeInMillis(t);\nint year = c.get(Calendar.YEAR);\nif (year < 1980) {\nint month = c.get(Calendar.MONTH) + 1;\nlong value =  ((year - 1980) << 25)\nreturn ZipLong.getBytes(value);\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:<init>(Ljava/io/File;)V",
+            "method_body": "public ZipArchiveOutputStream(File file) throws IOException {\nOutputStream o = null;\nRandomAccessFile _raf = null;\n_raf = new RandomAccessFile(file, \"rw\");\n_raf.setLength(0);\n}\nout = o;\nraf = _raf;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:getBytes(J)[B",
+            "method_body": "public static byte[] getBytes(long value) {\nbyte[] result = new byte[WORD];\nresult[0] = (byte) ((value & BYTE_MASK));\nresult[BYTE_1] = (byte) ((value & BYTE_1_MASK) >> BYTE_1_SHIFT);\nresult[BYTE_2] = (byte) ((value & BYTE_2_MASK) >> BYTE_2_SHIFT);\nresult[BYTE_3] = (byte) ((value & BYTE_3_MASK) >> BYTE_3_SHIFT);\nreturn result;\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeOut([BII)V",
+            "method_body": "protected final void writeOut(byte[] data, int offset, int length)\nif (raf != null) {\nraf.write(data, offset, length);\nout.write(data, offset, length);\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:finish()V",
+            "method_body": "public void finish() throws IOException {\nif(entry != null) {\ncdOffset = written;\nfor (Iterator i = entries.iterator(); i.hasNext(); ) {\nwriteCentralFileHeader((ZipArchiveEntry) i.next());\ncdLength = written - cdOffset;\nwriteCentralDirectoryEnd();\noffsets.clear();\nentries.clear();\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn name == null ? super.getName() : name;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:closeArchiveEntry()V",
+            "method_body": "public void closeArchiveEntry() throws IOException {\nif (entry == null) {\nreturn;\nlong realCrc = crc.getValue();\ncrc.reset();\nif (entry.getMethod() == DEFLATED) {\ndef.finish();\nwhile (!def.finished()) {\ndeflate();\nentry.setSize(ZipUtil.adjustToLong(def.getTotalIn()));\nentry.setCompressedSize(ZipUtil.adjustToLong(def.getTotalOut()));\nentry.setCrc(realCrc);\ndef.reset();\nwritten += entry.getCompressedSize();\nif (raf != null) {\nlong save = raf.getFilePointer();\nraf.seek(localDataStart);\nwriteOut(ZipLong.getBytes(entry.getCrc()));\nwriteOut(ZipLong.getBytes(entry.getCompressedSize()));\nwriteOut(ZipLong.getBytes(entry.getSize()));\nraf.seek(save);\nwriteDataDescriptor(entry);\nentry = null;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:growBuffer(Ljava/nio/ByteBuffer;I)Ljava/nio/ByteBuffer;",
+            "method_body": "static ByteBuffer growBuffer(ByteBuffer b, int newCapacity) {\nb.limit(b.position());\nb.rewind();\nint c2 = b.capacity() * 2;\nByteBuffer on = ByteBuffer.allocate(c2 < newCapacity ? newCapacity : c2);\non.put(b);\nreturn on;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:getLocalFileDataExtra()[B",
+            "method_body": "public byte[] getLocalFileDataExtra() {\nbyte[] extra = getExtra();\nreturn extra != null ? extra : new byte[0];\n}",
+            "method_id": 39
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 39,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.nonstiff.DormandPrince853IntegratorTest.testTooLargeFirstStep",
+    "test_body": "public void testTooLargeFirstStep() {\n182: AdaptiveStepsizeIntegrator integ =\nnew DormandPrince853Integrator(0, Double.POSITIVE_INFINITY, Double.NaN, Double.NaN);\nfinal double start = 0.0;\nfinal double end   = 0.001;\nFirstOrderDifferentialEquations equations = new FirstOrderDifferentialEquations() {\n188: public int getDimension() {\nreturn 1;\n}\n192: public void computeDerivatives(double t, double[] y, double[] yDot) {\nAssert.assertTrue(t >= FastMath.nextAfter(start, Double.NEGATIVE_INFINITY));\nAssert.assertTrue(t <= FastMath.nextAfter(end,   Double.POSITIVE_INFINITY));\nyDot[0] = -100.0 * y[0];\n}\n198: };\n200: integ.setStepSizeControl(0, 1.0, 1.0e-6, 1.0e-8);\ninteg.integrate(equations, start, new double[] { 1.0 }, end, new double[1]);\n203: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math.ode.nonstiff.DormandPrince853IntegratorTest$3.computeDerivatives(DormandPrince853IntegratorTest.java:194)\nat org.apache.commons.math.ode.ExpandableStatefulODE.computeDerivatives(ExpandableStatefulODE.java:115)\nat org.apache.commons.math.ode.AbstractIntegrator.computeDerivatives(AbstractIntegrator.java:265)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:262)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math.ode.nonstiff.DormandPrince853IntegratorTest.testTooLargeFirstStep(DormandPrince853IntegratorTest.java:201)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:<init>(Lorg/apache/commons/math/ode/FirstOrderDifferentialEquations;)V",
+            "method_body": "public ExpandableStatefulODE(final FirstOrderDifferentialEquations primary) {\nfinal int n          = primary.getDimension();\nthis.primary         = primary;\nthis.primaryMapper   = new EquationsMapper(0, n);\nthis.time            = Double.NaN;\nthis.primaryState    = new double[n];\nthis.primaryStateDot = new double[n];\nthis.components      = new ArrayList<ExpandableStatefulODE.SecondaryComponent>();\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:computeDerivatives(D[D[D)V",
+            "method_body": "public void computeDerivatives(final double t, final double[] y, final double[] yDot) {\nprimaryMapper.extractEquationData(y, primaryState);\nprimary.computeDerivatives(t, primaryState, primaryStateDot);\nprimaryMapper.insertEquationData(primaryStateDot, yDot);\nfor (final SecondaryComponent component : components) {\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:resetCount()V",
+            "method_body": "public void resetCount() {\ncount = 0;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:getPrimaryMapper()Lorg/apache/commons/math/ode/EquationsMapper;",
+            "method_body": "public EquationsMapper getPrimaryMapper() {\nreturn primaryMapper;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.DormandPrince853StepInterpolator:storeTime(D)V",
+            "method_body": "public void storeTime(final double t) {\nsuper.storeTime(t);\nvectorsInitialized = false;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:getCompleteState()[D",
+            "method_body": "public double[] getCompleteState() {\ndouble[] completeState = new double[getTotalDimension()];\nprimaryMapper.insertEquationData(primaryState, completeState);\nfor (final SecondaryComponent component : components) {\nreturn completeState;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:getTime()D",
+            "method_body": "public double getTime() {\nreturn time;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:integrate(Lorg/apache/commons/math/ode/FirstOrderDifferentialEquations;D[DD[D)D",
+            "method_body": "public double integrate(final FirstOrderDifferentialEquations equations,\nif (y0.length != equations.getDimension()) {\nif (y.length != equations.getDimension()) {\nfinal ExpandableStatefulODE expandableODE = new ExpandableStatefulODE(equations);\nexpandableODE.setTime(t0);\nexpandableODE.setPrimaryState(y0);\nintegrate(expandableODE, t);\nSystem.arraycopy(expandableODE.getPrimaryState(), 0, y, 0, y.length);\nreturn expandableODE.getTime();\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:initIntegration(D[DD)V",
+            "method_body": "protected void initIntegration(final double t0, final double[] y0, final double t) {\nevaluations.resetCount();\nfor (final EventState state : eventsStates) {\nfor (StepHandler handler : stepHandlers) {\nsetStateInitialized(false);\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.EquationsMapper:insertEquationData([D[D)V",
+            "method_body": "public void insertEquationData(double[] equationData, double[] complete)\nif (equationData.length != dimension) {\nSystem.arraycopy(equationData, 0, complete, firstIndex, dimension);\n}",
+            "method_id": 49
+        }
+    ]
+}

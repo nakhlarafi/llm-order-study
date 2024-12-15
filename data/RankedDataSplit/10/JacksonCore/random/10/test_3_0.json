@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 3,
+    "test_name": "com.fasterxml.jackson.core.sym.TestSymbolTables.testShortNameCollisionsDirectNew",
+    "test_body": "public void testShortNameCollisionsDirectNew() throws IOException\n{\nfinal int COUNT = 700;\n{\nByteQuadsCanonicalizer symbols =\nByteQuadsCanonicalizer.createRoot(333).makeChild(JsonFactory.Feature.collectDefaults());\nfor (int i = 0; i < COUNT; ++i) {\nString id = String.valueOf((char) i);\nint[] quads = calcQuads(id.getBytes(\"UTF-8\"));\nsymbols.addName(id, quads, quads.length);\n}\nassertEquals(COUNT, symbols.size());\n473: assertEquals(1024, symbols.bucketCount());\n475: // Primary is good, but secondary spills cluster in nasty way...\nassertEquals(564, symbols.primaryCount());\nassertEquals(122, symbols.secondaryCount());\nassertEquals(14, symbols.tertiaryCount());\nassertEquals(0, symbols.spilloverCount());\n481: assertEquals(COUNT,\nsymbols.primaryCount() + symbols.secondaryCount() + symbols.tertiaryCount() + symbols.spilloverCount());\n}\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<1024> but was:<2048>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:234)\nat junit.framework.Assert.assertEquals(Assert.java:241)\nat junit.framework.TestCase.assertEquals(TestCase.java:409)\nat com.fasterxml.jackson.core.sym.TestSymbolTables.testShortNameCollisionsDirectNew(TestSymbolTables.java:473)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:<clinit>()V",
+            "method_body": "private final static int MAX_ENTRIES = 180;\npublic final static InternCache instance = new InternCache();\nprivate final Object lock = new Object();\nprivate InternCache() { super(MAX_ENTRIES, 0.8f, 4); }",
+            "method_id": 0
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:bucketCount()I",
+            "method_body": "public int bucketCount() { return _hashSize; }\npublic int bucketCount() { return _hashSize; }",
+            "method_id": 1
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledByDefault()Z",
+            "method_body": "public boolean enabledByDefault() { return _defaultState; }\npublic boolean enabledByDefault() { return _defaultState; }",
+            "method_id": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifyNeedForRehash()V",
+            "method_body": "private void _verifyNeedForRehash() {\nif (_count > (_hashSize >> 1)) { // over 50%\nint spillCount = (_spilloverEnd - _spilloverStart()) >> 2;\nif ((spillCount > (1 + _count >> 7))\n_needRehash = true;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifySharing()V",
+            "method_body": "private void _verifySharing()\nif (_hashShared) {\n_hashArea = Arrays.copyOf(_hashArea, _hashArea.length);\n_names = Arrays.copyOf(_names, _names.length);\n_hashShared = false;\nif (_needRehash) {\nrehash();\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(I)I",
+            "method_body": "public int calcHash(int q1)\nint hash = q1 ^ _seed;\nhash += (hash >>> 16); // to xor hi- and low- 16-bits\nhash ^= (hash >>> 12);\nreturn hash;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "protected static ByteQuadsCanonicalizer createRoot(int seed) {\nreturn new ByteQuadsCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:<init>()V",
+            "method_body": "private final static int MAX_ENTRIES = 180;\npublic final static InternCache instance = new InternCache();\nprivate final Object lock = new Object();\nprivate InternCache() { super(MAX_ENTRIES, 0.8f, 4); }",
+            "method_id": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:getMask()I",
+            "method_body": "public int getMask() { return (1 << ordinal()); }\npublic int getMask() { return (1 << ordinal()); }",
+            "method_id": 8
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:createInitial(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;",
+            "method_body": "public static TableInfo createInitial(int sz) {\nint hashAreaSize = sz << 3;\nint tertShift = _calcTertiaryShift(sz);\nreturn new TableInfo(sz, // hashSize\n}",
+            "method_id": 9
+        }
+    ]
+}

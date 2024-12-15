@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 1,
+    "test_name": "com.fasterxml.jackson.core.sym.TestSymbolTables.testSyntheticWithBytesNew",
+    "test_body": "public void testSyntheticWithBytesNew() throws IOException\n{\n// pass seed, to keep results consistent:\nfinal int SEED = 33333;\nByteQuadsCanonicalizer symbols =\nByteQuadsCanonicalizer.createRoot(SEED).makeChild(JsonFactory.Feature.collectDefaults());\n71: final int COUNT = 12000;\nfor (int i = 0; i < COUNT; ++i) {\nString id = fieldNameFor(i);\nint[] quads = calcQuads(id.getBytes(\"UTF-8\"));\nsymbols.addName(id, quads, quads.length);\n}\nassertEquals(COUNT, symbols.size());\nassertEquals(16384, symbols.bucketCount());\n80: // fragile, but essential to verify low collision counts;\n// anywhere between 70-80% primary matches\nassertEquals(8534, symbols.primaryCount());\n// secondary between 10-20%",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<8534> but was:<8524>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:234)\nat junit.framework.Assert.assertEquals(Assert.java:241)\nat junit.framework.TestCase.assertEquals(TestCase.java:409)\nat com.fasterxml.jackson.core.sym.TestSymbolTables.testSyntheticWithBytesNew(TestSymbolTables.java:82)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledByDefault()Z",
+            "method_body": "public boolean enabledByDefault() { return _defaultState; }\npublic boolean enabledByDefault() { return _defaultState; }",
+            "method_id": 0
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:<init>(IZIZ)V",
+            "method_body": "private ByteQuadsCanonicalizer(int sz, boolean intern, int seed, boolean failOnDoS) {\n_parent = null;\n_seed = seed;\n_intern = intern;\n_failOnDoS = failOnDoS;\nif (sz < MIN_HASH_SIZE) {\nif ((sz & (sz - 1)) != 0) { // only true if it's 2^N\n_tableInfo = new AtomicReference<TableInfo>(TableInfo.createInitial(sz));\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(I)I",
+            "method_body": "public int calcHash(int q1)\nint hash = q1 ^ _seed;\nhash += (hash >>> 16); // to xor hi- and low- 16-bits\nhash ^= (hash >>> 12);\nreturn hash;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "protected static ByteQuadsCanonicalizer createRoot(int seed) {\nreturn new ByteQuadsCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(III)I",
+            "method_body": "public int calcHash(int q1, int q2, int q3)\nint hash = q1 ^ _seed;\nhash += (hash >>> 9);\nhash *= MULT3;\nhash += q2;\nhash *= MULT;\nhash += (hash >>> 15);\nhash ^= q3;\nhash += (hash >>> 4);\nhash += (hash >>> 15);\nhash ^= (hash << 9);\nreturn hash;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_calcTertiaryShift(I)I",
+            "method_body": "static int _calcTertiaryShift(int primarySlots)\nint tertSlots = (primarySlots) >> 2;\nif (tertSlots < 64) {\nreturn 4;\nif (tertSlots <= 256) { // buckets of 8 slots (up to 256 == 32 x 8)\nreturn 5;\nif (tertSlots <= 1024) { // buckets of 16 slots (up to 1024 == 64 x 16)\nreturn 6;\nreturn 7;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) { _defaultState = defaultState; }\nprivate Feature(boolean defaultState) { _defaultState = defaultState; }",
+            "method_id": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_spilloverStart()I",
+            "method_body": "private final int _spilloverStart() {\nint offset = _hashSize;\nreturn (offset << 3) - offset;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:rehash()V",
+            "method_body": "private void rehash()\n_needRehash = false;\n_hashShared = false;\nfinal int[] oldHashArea = _hashArea;\nfinal String[] oldNames = _names;\nfinal int oldSize = _hashSize;\nfinal int oldCount = _count;\nfinal int newSize = oldSize + oldSize;\nfinal int oldEnd = _spilloverEnd;\nif (newSize > MAX_T_SIZE) {\n_hashArea = new int[oldHashArea.length + (oldSize<<3)];\n_hashSize = newSize;\n_secondaryStart = (newSize << 2); // 4 ints per entry\n_tertiaryStart = _secondaryStart + (_secondaryStart >> 1); // right after secondary\n_tertiaryShift = _calcTertiaryShift(newSize);\n_names = new String[oldNames.length << 1];\nnukeSymbols(false);\nint copyCount = 0;\nint[] q = new int[16];\nfor (int offset = 0, end = oldEnd; offset < end; offset += 4) {\nint len = oldHashArea[offset+3];\nif (len == 0) { // empty slot, skip\ncontinue;\n++copyCount;\nString name = oldNames[offset>>2];\nswitch (len) {\nq[0] = oldHashArea[offset];\naddName(name, q, 1);\nbreak;\nq[0] = oldHashArea[offset];\nq[1] = oldHashArea[offset+1];\naddName(name, q, 2);\nbreak;\nq[0] = oldHashArea[offset];\nq[1] = oldHashArea[offset+1];\nq[2] = oldHashArea[offset+2];\naddName(name, q, 3);\nbreak;\nif (len > q.length) {\nint qoff = oldHashArea[offset+1];\nSystem.arraycopy(oldHashArea, qoff, q, 0, len);\naddName(name, q, len);\nif (copyCount != oldCount) {\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:intern(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String intern(String input) {\nString result = get(input);\nif (result != null) { return result; }\nif (size() >= MAX_ENTRIES) {\nsynchronized (lock) {\nif (size() >= MAX_ENTRIES) {\nclear();\n}\nresult = input.intern();\nput(result, result);\nreturn result;\n}",
+            "method_id": 9
+        }
+    ]
+}

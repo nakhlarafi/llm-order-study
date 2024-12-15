@@ -1,0 +1,79 @@
+{
+    "bug_id": 38,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.survivesPaxHeaderWithNameEndingInSlash",
+    "test_body": "320: public void survivesPaxHeaderWithNameEndingInSlash() throws Exception {\n321: final TarArchiveInputStream is = getTestStream(\"/COMPRESS-356.tar\");\n322: try {\n323: final TarArchiveEntry entry = is.getNextTarEntry();\n324: assertEquals(\"package/package.json\", entry.getName());",
+    "stack_trace": "java.io.IOException: Error detected parsing the header\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.getNextTarEntry(TarArchiveInputStream.java:286)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.getNextEntry(TarArchiveInputStream.java:600)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.paxHeaders(TarArchiveInputStream.java:445)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.getNextTarEntry(TarArchiveInputStream.java:319)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.survivesPaxHeaderWithNameEndingInSlash(TarArchiveInputStreamTest.java:323)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveInputStream:read()I",
+            "method_body": "public int read() throws IOException {\nfinal int num = read(SINGLE, 0, 1);\nreturn num == -1 ? -1 : SINGLE[0] & BYTE_MASK;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:skip(J)J",
+            "method_body": "public long skip(final long n) throws IOException {\nif (n <= 0 || isDirectory()) {\nreturn 0;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseName([BII)Ljava/lang/String;",
+            "method_body": "public static String parseName(final byte[] buffer, final int offset, final int length) {\nreturn parseName(buffer, offset, length, DEFAULT_ENCODING);\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:verifyCheckSum([B)Z",
+            "method_body": "public static boolean verifyCheckSum(final byte[] header) {\nfinal long storedSum = parseOctal(header, CHKSUM_OFFSET, CHKSUMLEN);\nlong unsignedSum = 0;\nlong signedSum = 0;\nfor (int i = 0; i < header.length; i++) {\nbyte b = header[i];\nif (CHKSUM_OFFSET  <= i && i < CHKSUM_OFFSET + CHKSUMLEN) {\nb = ' ';\nunsignedSum += 0xff & b;\nsignedSum += b;\nreturn storedSum == unsignedSum || storedSum == signedSum;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseName([BIILorg/apache/commons/compress/archivers/zip/ZipEncoding;)Ljava/lang/String;",
+            "method_body": "public static String parseName(final byte[] buffer, final int offset,\nint len = length;\nfor (; len > 0; len--) {\nif (buffer[offset + len - 1] != 0) {\nbreak;\nif (len > 0) {\nfinal byte[] b = new byte[len];\nSystem.arraycopy(buffer, offset, b, 0, len);\nreturn encoding.decode(b);\nreturn \"\";\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ArchiveUtils:matchAsciiBuffer(Ljava/lang/String;[BII)Z",
+            "method_body": "public static boolean matchAsciiBuffer(\nbuffer1 = expected.getBytes(CharsetNames.US_ASCII);\n}\nreturn isEqual(buffer1, 0, buffer1.length, buffer, offset, length, false);\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ArchiveUtils:isEqual([BII[BIIZ)Z",
+            "method_body": "public static boolean isEqual(\nfinal int minLen=length1 < length2 ? length1 : length2;\nfor (int i=0; i < minLen; i++){\nif (buffer1[offset1+i] != buffer2[offset2+i]){\nreturn false;\nif (length1 == length2){\nreturn true;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctalOrBinary([BII)J",
+            "method_body": "public static long parseOctalOrBinary(final byte[] buffer, final int offset,\nif ((buffer[offset] & 0x80) == 0) {\nreturn parseOctal(buffer, offset, length);\nfinal boolean negative = buffer[offset] == (byte) 0xff;\nif (length < 9) {\nreturn parseBinaryLong(buffer, offset, length, negative);\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctal([BII)J",
+            "method_body": "public static long parseOctal(final byte[] buffer, final int offset, final int length) {\nlong    result = 0;\nint     end = offset + length;\nint     start = offset;\nif (length < 2){\nif (buffer[start] == 0) {\nwhile (start < end){\nif (buffer[start] == ' '){\nbyte trailer = buffer[end - 1];\nwhile (start < end && (trailer == 0 || trailer == ' ')) {\nend--;\ntrailer = buffer[end - 1];\nfor ( ;start < end; start++) {\nfinal byte currentByte = buffer[start];\nif (currentByte < '0' || currentByte > '7'){\nthrow new IllegalArgumentException(\nresult = (result << 3) + (currentByte - '0'); // convert from ASCII\nreturn result;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:<clinit>()V",
+            "method_body": "private static final int BYTE_MASK = 255;\nstatic final ZipEncoding DEFAULT_ENCODING =\nstatic final ZipEncoding FALLBACK_ENCODING = new ZipEncoding() {\n};",
+            "method_id": 49
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveInputStream:count(I)V",
+            "method_body": "protected void count(final int read) {\ncount((long) read);\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveInputStream:count(J)V",
+            "method_body": "protected void count(final long read) {\nif (read != -1) {\nbytesRead = bytesRead + read;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.FallbackZipEncoding:decode([B)Ljava/lang/String;",
+            "method_body": "public String decode(final byte[] data) throws IOException {\nif (this.charsetName == null) { // i.e. use default charset, see no-args constructor\nreturn new String(data,this.charsetName);\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:<clinit>()V",
+            "method_body": "private static final int COPY_BUF_SIZE = 8024;\nprivate static final byte[] SKIP_BUF = new byte[SKIP_BUF_SIZE];\n}",
+            "method_id": 53
+        }
+    ]
+}

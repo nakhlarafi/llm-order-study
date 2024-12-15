@@ -1,0 +1,59 @@
+{
+    "bug_id": 17,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug3476684_adjustOffset",
+    "test_body": "public void testBug3476684_adjustOffset() {\nfinal DateTimeZone zone = DateTimeZone.forID(\"America/Sao_Paulo\");\nDateTime base = new DateTime(2012, 2, 25, 22, 15, zone);\nDateTime baseBefore = base.plusHours(1);  // 23:15 (first)\nDateTime baseAfter = base.plusHours(2);  // 23:15 (second)\n1255: assertSame(base, base.withEarlierOffsetAtOverlap());\nassertSame(base, base.withLaterOffsetAtOverlap());\n1258: assertSame(baseBefore, baseBefore.withEarlierOffsetAtOverlap());\nassertEquals(baseAfter, baseBefore.withLaterOffsetAtOverlap());\n1261: assertSame(baseAfter, baseAfter.withLaterOffsetAtOverlap());\nassertEquals(baseBefore, baseAfter.withEarlierOffsetAtOverlap());\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2012-02-25T23:15:00.000-03:00> but was:<2012-02-25T23:15:00.000-02:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug3476684_adjustOffset(TestDateTimeZoneCutover.java:1259)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.DateTimeZone:adjustOffset(JZ)J",
+            "method_body": "public long adjustOffset(long instant, boolean earlierOrLater) {\nlong instantBefore = convertUTCToLocal(instant - 3 * DateTimeConstants.MILLIS_PER_HOUR);\nlong instantAfter = convertUTCToLocal(instant + 3 * DateTimeConstants.MILLIS_PER_HOUR);\nif (instantBefore == instantAfter) {\nlong local = convertUTCToLocal(instant);\nreturn convertLocalToUTC(local, false, earlierOrLater ? instantAfter : instantBefore);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:forID(Ljava/lang/String;)Lorg/joda/time/DateTimeZone;",
+            "method_body": "public static DateTimeZone forID(String id) {\nif (id == null) {\nif (id.equals(\"UTC\")) {\nDateTimeZone zone = cProvider.getZone(id);\nif (zone != null) {\nreturn zone;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BaseChronology:<init>()V",
+            "method_body": "protected BaseChronology() {\nsuper();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:getOffsetFromLocal(J)I",
+            "method_body": "public int getOffsetFromLocal(long instantLocal) {\nfinal int offsetLocal = getOffset(instantLocal);\nfinal long instantAdjusted = instantLocal - offsetLocal;\nfinal int offsetAdjusted = getOffset(instantAdjusted);\nif (offsetLocal != offsetAdjusted) {\n} else if (offsetLocal >= 0) {\nreturn offsetAdjusted;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:<init>(Ljava/lang/String;)V",
+            "method_body": "protected DateTimeZone(String id) {\nif (id == null) {\niID = id;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractDateTime:<init>()V",
+            "method_body": "protected AbstractDateTime() {\nsuper();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractInstant:<init>()V",
+            "method_body": "protected AbstractInstant() {\nsuper();\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:plusHours(I)Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime plusHours(int hours) {\nif (hours == 0) {\nlong instant = getChronology().hours().add(getMillis(), hours);\nreturn withMillis(instant);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:withMillis(J)Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime withMillis(long newMillis) {\nreturn (newMillis == getMillis() ? this : new DateTime(newMillis, getChronology()));\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.joda.time.DateTime:withEarlierOffsetAtOverlap()Lorg/joda/time/DateTime;",
+            "method_body": "public DateTime withEarlierOffsetAtOverlap() {\nlong newMillis = getZone().adjustOffset(getMillis(), false);\nreturn withMillis(newMillis);\n}",
+            "method_id": 9
+        }
+    ]
+}

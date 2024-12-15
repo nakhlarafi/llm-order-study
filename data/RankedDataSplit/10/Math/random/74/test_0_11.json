@@ -1,0 +1,59 @@
+{
+    "bug_id": 74,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegratorTest.polynomial",
+    "test_body": "public void polynomial() throws DerivativeException, IntegratorException {\nTestProblem6 pb = new TestProblem6();\ndouble range = Math.abs(pb.getFinalTime() - pb.getInitialTime());\n140: for (int nSteps = 1; nSteps < 7; ++nSteps) {\nAdamsMoultonIntegrator integ =\nnew AdamsMoultonIntegrator(nSteps, 1.0e-6 * range, 0.1 * range, 1.0e-9, 1.0e-9);\nTestProblemHandler handler = new TestProblemHandler(pb, integ);\ninteg.addStepHandler(handler);\ninteg.integrate(pb, pb.getInitialTime(), pb.getInitialState(),\npb.getFinalTime(), new double[pb.getDimension()]);\nif (nSteps < 4) {\nassertTrue(integ.getEvaluations() > 140);\n} else {\nassertTrue(integ.getEvaluations() < 90);\n}",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegratorTest.polynomial(AdamsMoultonIntegratorTest.java:150)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:<init>(Lorg/apache/commons/math/ode/sampling/AbstractStepInterpolator;)V",
+            "method_body": "protected AbstractStepInterpolator(final AbstractStepInterpolator interpolator) {\npreviousTime      = interpolator.previousTime;\ncurrentTime       = interpolator.currentTime;\nh                 = interpolator.h;\ninterpolatedTime  = interpolator.interpolatedTime;\nif (interpolator.currentState != null) {\ncurrentState            = null;\ninterpolatedState       = null;\ninterpolatedDerivatives = null;\nfinalized  = interpolator.finalized;\nforward    = interpolator.forward;\ndirtyState = interpolator.dirtyState;\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:clearEventHandlers()V",
+            "method_body": "public void clearEventHandlers() {\neventsHandlersManager.clearEventsHandlers();\n}",
+            "method_id": 111
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.events.CombinedEventsManager:<init>()V",
+            "method_body": "public CombinedEventsManager() {\nstates      = new ArrayList<EventState>();\nfirst       = null;\ninitialized = false;\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdaptiveStepsizeIntegrator:getCurrentStepStart()D",
+            "method_body": "public double getCurrentStepStart() {\nreturn stepStart;\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsNordsieckTransformer:getInstance(I)Lorg/apache/commons/math/ode/nonstiff/AdamsNordsieckTransformer;",
+            "method_body": "public static AdamsNordsieckTransformer getInstance(final int nSteps) {\nsynchronized(CACHE) {\nAdamsNordsieckTransformer t = CACHE.get(nSteps);\nif (t == null) {\nreturn t;\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.NordsieckStepInterpolator:reinitialize([DZ)V",
+            "method_body": "public void reinitialize(final double[] y, final boolean forward) {\nsuper.reinitialize(y, forward);\nstateVariation = new double[y.length];\n}",
+            "method_id": 115
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator$Corrector:end()D",
+            "method_body": "public double end() {\ndouble error = 0;\nfor (int i = 0; i < after.length; ++i) {\nafter[i] += previous[i] + scaled[i];\nfinal double yScale = Math.max(Math.abs(previous[i]), Math.abs(after[i]));\nfinal double tol = (vecAbsoluteTolerance == null) ?\nfinal double ratio  = (after[i] - before[i]) / tol;\nerror += ratio * ratio;\nreturn Math.sqrt(error / after.length);\n}",
+            "method_id": 116
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.events.CombinedEventsManager:evaluateStep(Lorg/apache/commons/math/ode/sampling/StepInterpolator;)Z",
+            "method_body": "public boolean evaluateStep(final StepInterpolator interpolator)\nfirst = null;\nif (states.isEmpty()) {\nif (! initialized) {\nfinal double t0 = interpolator.getPreviousTime();\ninterpolator.setInterpolatedTime(t0);\nfinal double [] y = interpolator.getInterpolatedState();\nfor (EventState state : states) {\nstate.reinitializeBegin(t0, y);\ninitialized = true;\nfor (EventState state : states) {\nif (state.evaluateStep(interpolator)) {\nif (first == null) {\nfirst = state;\nreturn first != null;\n}",
+            "method_id": 117
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.events.EventState$1:<init>(Lorg/apache/commons/math/ode/events/EventState;Lorg/apache/commons/math/ode/sampling/StepInterpolator;)V",
+            "method_body": "public boolean evaluateStep(final StepInterpolator interpolator)\nforward = interpolator.isForward();\nfinal double t1 = interpolator.getCurrentTime();\nfinal int    n  = Math.max(1, (int) Math.ceil(Math.abs(t1 - t0) / maxCheckInterval));\nfinal double h  = (t1 - t0) / n;\ndouble ta = t0;\ndouble ga = g0;\ndouble tb = t0 + (interpolator.isForward() ? convergence : -convergence);\nfor (int i = 0; i < n; ++i) {\ntb += h;\ninterpolator.setInterpolatedTime(tb);\nfinal double gb = handler.g(tb, interpolator.getInterpolatedState());\nif (g0Positive ^ (gb >= 0)) {\nif (ga * gb > 0) {\nincreasing = gb >= ga;\nfinal UnivariateRealFunction f = new UnivariateRealFunction() {\ninterpolator.setInterpolatedTime(t);\nreturn handler.g(t, interpolator.getInterpolatedState());\nfinal BrentSolver solver = new BrentSolver();\nsolver.setAbsoluteAccuracy(convergence);\nsolver.setMaximalIterationCount(maxIterationCount);\nfinal double root = (ta <= tb) ? solver.solve(f, ta, tb) : solver.solve(f, tb, ta);\nif ((Math.abs(root - ta) <= convergence) &&\n} else if (Double.isNaN(previousEventTime) ||\npendingEventTime = root;\nif (pendingEvent && (Math.abs(t1 - pendingEventTime) <= convergence)) {\nreturn false;\npendingEvent = true;\nreturn true;\nta = tb;\nga = gb;\npendingEvent     = false;\npendingEventTime = Double.NaN;\nreturn false;\n}",
+            "method_id": 118
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsIntegrator:<init>(Ljava/lang/String;IIDDDD)V",
+            "method_body": "public AdamsIntegrator(final String name, final int nSteps, final int order,\nsuper(name, nSteps, order, minStep, maxStep,\ntransformer = AdamsNordsieckTransformer.getInstance(nSteps);\n}",
+            "method_id": 119
+        }
+    ]
+}

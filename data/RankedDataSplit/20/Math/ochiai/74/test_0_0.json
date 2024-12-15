@@ -1,0 +1,109 @@
+{
+    "bug_id": 74,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegratorTest.polynomial",
+    "test_body": "public void polynomial() throws DerivativeException, IntegratorException {\nTestProblem6 pb = new TestProblem6();\ndouble range = Math.abs(pb.getFinalTime() - pb.getInitialTime());\n140: for (int nSteps = 1; nSteps < 7; ++nSteps) {\nAdamsMoultonIntegrator integ =\nnew AdamsMoultonIntegrator(nSteps, 1.0e-6 * range, 0.1 * range, 1.0e-9, 1.0e-9);\nTestProblemHandler handler = new TestProblemHandler(pb, integ);\ninteg.addStepHandler(handler);\ninteg.integrate(pb, pb.getInitialTime(), pb.getInitialState(),\npb.getFinalTime(), new double[pb.getDimension()]);\nif (nSteps < 4) {\nassertTrue(integ.getEvaluations() > 140);\n} else {\nassertTrue(integ.getEvaluations() < 90);\n}",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegratorTest.polynomial(AdamsMoultonIntegratorTest.java:150)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator$Corrector:<init>(Lorg/apache/commons/math/ode/nonstiff/AdamsMoultonIntegrator;[D[D[D)V",
+            "method_body": "public Corrector(final double[] previous, final double[] scaled, final double[] state) {\nthis.previous = previous;\nthis.scaled   = scaled;\nthis.after    = state;\nthis.before   = state.clone();\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator$Corrector:start(IIIIII)V",
+            "method_body": "public void start(int rows, int columns,\nArrays.fill(after, 0.0);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator$Corrector:visit(IID)V",
+            "method_body": "public void visit(int row, int column, double value)\nif ((row & 0x1) == 0) {\nafter[column] -= value;\nafter[column] += value;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator$Corrector:end()D",
+            "method_body": "public double end() {\ndouble error = 0;\nfor (int i = 0; i < after.length; ++i) {\nafter[i] += previous[i] + scaled[i];\nfinal double yScale = Math.max(Math.abs(previous[i]), Math.abs(after[i]));\nfinal double tol = (vecAbsoluteTolerance == null) ?\nfinal double ratio  = (after[i] - before[i]) / tol;\nerror += ratio * ratio;\nreturn Math.sqrt(error / after.length);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator:<init>(IDDDD)V",
+            "method_body": "public AdamsMoultonIntegrator(final int nSteps,\nsuper(\"Adams-Moulton\", nSteps, nSteps + 1, minStep, maxStep,\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsMoultonIntegrator:integrate(Lorg/apache/commons/math/ode/FirstOrderDifferentialEquations;D[DD[D)D",
+            "method_body": "public double integrate(final FirstOrderDifferentialEquations equations,\nfinal int n = y0.length;\nsanityChecks(equations, t0, y0, t, y);\nsetEquations(equations);\nresetEvaluations();\nfinal boolean forward = t > t0;\nif (y != y0) {\nSystem.arraycopy(y0, 0, y, 0, n);\nfinal double[] yDot = new double[y0.length];\nfinal double[] yTmp = new double[y0.length];\nfinal NordsieckStepInterpolator interpolator = new NordsieckStepInterpolator();\ninterpolator.reinitialize(y, forward);\nfinal NordsieckStepInterpolator interpolatorTmp = new NordsieckStepInterpolator();\ninterpolatorTmp.reinitialize(yTmp, forward);\nfor (StepHandler handler : stepHandlers) {\nhandler.reset();\nCombinedEventsManager manager = addEndTimeChecker(t0, t, eventsHandlersManager);\nstart(t0, y, t);\ninterpolator.reinitialize(stepStart, stepSize, scaled, nordsieck);\ninterpolator.storeTime(stepStart);\ndouble hNew = stepSize;\ninterpolator.rescale(hNew);\nboolean lastStep = false;\nwhile (!lastStep) {\ninterpolator.shift();\ndouble error = 0;\nfor (boolean loop = true; loop;) {\nstepSize = hNew;\nfinal double stepEnd = stepStart + stepSize;\ninterpolator.setInterpolatedTime(stepEnd);\nSystem.arraycopy(interpolator.getInterpolatedState(), 0, yTmp, 0, y0.length);\ncomputeDerivatives(stepEnd, yTmp, yDot);\nfinal double[] predictedScaled = new double[y0.length];\nfor (int j = 0; j < y0.length; ++j) {\npredictedScaled[j] = stepSize * yDot[j];\nfinal Array2DRowRealMatrix nordsieckTmp = updateHighOrderDerivativesPhase1(nordsieck);\nupdateHighOrderDerivativesPhase2(scaled, predictedScaled, nordsieckTmp);\nerror = nordsieckTmp.walkInOptimizedOrder(new Corrector(y, predictedScaled, yTmp));\nif (error <= 1.0) {\ncomputeDerivatives(stepEnd, yTmp, yDot);\nfinal double[] correctedScaled = new double[y0.length];\nfor (int j = 0; j < y0.length; ++j) {\ncorrectedScaled[j] = stepSize * yDot[j];\nupdateHighOrderDerivativesPhase2(predictedScaled, correctedScaled, nordsieckTmp);\ninterpolatorTmp.reinitialize(stepEnd, stepSize, correctedScaled, nordsieckTmp);\ninterpolatorTmp.storeTime(stepStart);\ninterpolatorTmp.shift();\ninterpolatorTmp.storeTime(stepEnd);\nif (manager.evaluateStep(interpolatorTmp)) {\nfinal double dt = manager.getEventTime() - stepStart;\nif (Math.abs(dt) <= Math.ulp(stepStart)) {\nhNew = dt;\ninterpolator.rescale(hNew);\n} else {\nscaled    = correctedScaled;\nnordsieck = nordsieckTmp;\ninterpolator.reinitialize(stepEnd, stepSize, scaled, nordsieck);\nloop = false;\n} else {\nfinal double factor = computeStepGrowShrinkFactor(error);\nhNew = filterStep(stepSize * factor, forward, false);\ninterpolator.rescale(hNew);\n}\nfinal double nextStep = stepStart + stepSize;\nSystem.arraycopy(yTmp, 0, y, 0, n);\ninterpolator.storeTime(nextStep);\nmanager.stepAccepted(nextStep, y);\nlastStep = manager.stop();\nfor (StepHandler handler : stepHandlers) {\ninterpolator.setInterpolatedTime(nextStep);\nhandler.handleStep(interpolator, lastStep);\nstepStart = nextStep;\nif (!lastStep && manager.reset(stepStart, y)) {\nif (! lastStep) {\nstepSize = filterStep(stepSize, forward, true);\nfinal double  factor     = computeStepGrowShrinkFactor(error);\nfinal double  scaledH    = stepSize * factor;\nfinal double  nextT      = stepStart + scaledH;\nfinal boolean nextIsLast = forward ? (nextT >= t) : (nextT <= t);\nhNew = filterStep(scaledH, forward, nextIsLast);\ninterpolator.rescale(hNew);\n}\nfinal double stopTime  = stepStart;\nstepStart = Double.NaN;\nstepSize  = Double.NaN;\nreturn stopTime;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.MultistepIntegrator:computeStepGrowShrinkFactor(D)D",
+            "method_body": "protected double computeStepGrowShrinkFactor(final double error) {\nreturn Math.min(maxGrowth, Math.max(minReduction, safety * Math.pow(error, exp)));\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsIntegrator:initializeHighOrderDerivatives([D[[D)Lorg/apache/commons/math/linear/Array2DRowRealMatrix;",
+            "method_body": "protected Array2DRowRealMatrix initializeHighOrderDerivatives(final double[] first,\nreturn transformer.initializeHighOrderDerivatives(first, multistep);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsIntegrator:updateHighOrderDerivativesPhase1(Lorg/apache/commons/math/linear/Array2DRowRealMatrix;)Lorg/apache/commons/math/linear/Array2DRowRealMatrix;",
+            "method_body": "public Array2DRowRealMatrix updateHighOrderDerivativesPhase1(final Array2DRowRealMatrix highOrder) {\nreturn transformer.updateHighOrderDerivativesPhase1(highOrder);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsIntegrator:updateHighOrderDerivativesPhase2([D[DLorg/apache/commons/math/linear/Array2DRowRealMatrix;)V",
+            "method_body": "public void updateHighOrderDerivativesPhase2(final double[] start,\ntransformer.updateHighOrderDerivativesPhase2(start, end, highOrder);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsNordsieckTransformer:initializeHighOrderDerivatives([D[[D)Lorg/apache/commons/math/linear/Array2DRowRealMatrix;",
+            "method_body": "public Array2DRowRealMatrix initializeHighOrderDerivatives(final double[] first,\nfor (int i = 0; i < multistep.length; ++i) {\nfinal double[] msI = multistep[i];\nfor (int j = 0; j < first.length; ++j) {\nmsI[j] -= first[j];\nreturn initialization.multiply(new Array2DRowRealMatrix(multistep, false));\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsNordsieckTransformer:updateHighOrderDerivativesPhase1(Lorg/apache/commons/math/linear/Array2DRowRealMatrix;)Lorg/apache/commons/math/linear/Array2DRowRealMatrix;",
+            "method_body": "public Array2DRowRealMatrix updateHighOrderDerivativesPhase1(final Array2DRowRealMatrix highOrder) {\nreturn update.multiply(highOrder);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdamsNordsieckTransformer:updateHighOrderDerivativesPhase2([D[DLorg/apache/commons/math/linear/Array2DRowRealMatrix;)V",
+            "method_body": "public void updateHighOrderDerivativesPhase2(final double[] start,\nfinal double[][] data = highOrder.getDataRef();\nfor (int i = 0; i < data.length; ++i) {\nfinal double[] dataI = data[i];\nfinal double c1I = c1[i];\nfor (int j = 0; j < dataI.length; ++j) {\ndataI[j] += c1I * (start[j] - end[j]);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.NordsieckStepInterpolator:reinitialize(DD[DLorg/apache/commons/math/linear/Array2DRowRealMatrix;)V",
+            "method_body": "public void reinitialize(final double time, final double stepSize,\nthis.referenceTime = time;\nthis.scalingH      = stepSize;\nthis.scaled        = scaledDerivative;\nthis.nordsieck     = nordsieckVector;\nsetInterpolatedTime(getInterpolatedTime());\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.NordsieckStepInterpolator:rescale(D)V",
+            "method_body": "public void rescale(final double stepSize) {\nfinal double ratio = stepSize / scalingH;\nfor (int i = 0; i < scaled.length; ++i) {\nscaled[i] *= ratio;\nfinal double[][] nData = nordsieck.getDataRef();\ndouble power = ratio;\nfor (int i = 0; i < nData.length; ++i) {\npower *= ratio;\nfinal double[] nDataI = nData[i];\nfor (int j = 0; j < nDataI.length; ++j) {\nnDataI[j] *= power;\nscalingH = stepSize;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.NordsieckStepInterpolator:computeInterpolatedStateAndDerivatives(DD)V",
+            "method_body": "protected void computeInterpolatedStateAndDerivatives(final double theta, final double oneMinusThetaH) {\nfinal double x = interpolatedTime - referenceTime;\nfinal double normalizedAbscissa = x / scalingH;\nArrays.fill(stateVariation, 0.0);\nArrays.fill(interpolatedDerivatives, 0.0);\nfinal double[][] nData = nordsieck.getDataRef();\nfor (int i = nData.length - 1; i >= 0; --i) {\nfinal int order = i + 2;\nfinal double[] nDataI = nData[i];\nfinal double power = Math.pow(normalizedAbscissa, order);\nfor (int j = 0; j < nDataI.length; ++j) {\nfinal double d = nDataI[j] * power;\nstateVariation[j]          += d;\ninterpolatedDerivatives[j] += order * d;\nfor (int j = 0; j < currentState.length; ++j) {\nstateVariation[j] += scaled[j] * normalizedAbscissa;\ninterpolatedState[j] = currentState[j] + stateVariation[j];\ninterpolatedDerivatives[j] =\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.MultistepIntegrator$NordsieckInitializer:handleStep(Lorg/apache/commons/math/ode/sampling/StepInterpolator;Z)V",
+            "method_body": "RealMatrix initializeHighOrderDerivatives(double[] first, double[][] multistep);\npublic NordsieckInitializer(final int n) {\nthis.n = n;\n}\nfinal double prev = interpolator.getPreviousTime();\nfinal double curr = interpolator.getCurrentTime();\nstepStart = prev;\nstepSize  = (curr - prev) / (nSteps + 1);\ninterpolator.setInterpolatedTime(prev);\nscaled = interpolator.getInterpolatedDerivatives().clone();\nfor (int j = 0; j < n; ++j) {\nscaled[j] *= stepSize;\nfinal double[][] multistep = new double[nSteps][];\nfor (int i = 1; i <= nSteps; ++i) {\ninterpolator.setInterpolatedTime(prev + stepSize * i);\nfinal double[] msI = interpolator.getInterpolatedDerivatives().clone();\nfor (int j = 0; j < n; ++j) {\nmsI[j] *= stepSize;\nmultistep[i - 1] = msI;\nnordsieck = initializeHighOrderDerivatives(scaled, multistep);\nthrow new InitializationCompletedMarkerException();\nreturn true;\n}\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.MultistepIntegrator$InitializationCompletedMarkerException:<init>()V",
+            "method_body": "public InitializationCompletedMarkerException() {\nsuper((Throwable) null);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:clearStepHandlers()V",
+            "method_body": "public void clearStepHandlers() {\nstepHandlers.clear();\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:getEvaluations()I",
+            "method_body": "public int getEvaluations() {\nreturn evaluations;\n}",
+            "method_id": 19
+        }
+    ]
+}

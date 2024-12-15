@@ -1,0 +1,109 @@
+{
+    "bug_id": 29,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.testEncodingInputStream",
+    "test_body": "307: public void testEncodingInputStream() throws Exception {\n308: int failed = 0;\n309: for(int i = 1; i <= TESTS.length; i++) {\n310: TestData test = TESTS[i-1];\n311: ArchiveInputStream ais = getInputStreamFor(test.type, test.testFile, test.fac);\n312: final String field = getField(ais,test.fieldName);\n313: if (!eq(test.expectedEncoding,field)) {\n314: System.out.println(\"Failed test \" + i + \". expected: \" + test.expectedEncoding + \" actual: \" + field + \" type: \" + test.type);\n315: failed++;\n316: }\n317: }\n318: if (failed > 0) {\n319: fail(\"Tests failed: \" + failed);\n320: }",
+    "stack_trace": "junit.framework.AssertionFailedError: Tests failed: 20\nat org.junit.Assert.fail(Assert.java:88)\nat org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.testEncodingInputStream(ArchiveStreamFactoryTest.java:319)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveSummary:<init>([BLorg/apache/commons/compress/archivers/zip/ZipEncoding;)V",
+            "method_body": "DumpArchiveSummary(byte[] buffer, ZipEncoding encoding) throws IOException {\ndumpDate = 1000L * DumpArchiveUtil.convert32(buffer, 4);\npreviousDumpDate = 1000L * DumpArchiveUtil.convert32(buffer, 8);\nvolume = DumpArchiveUtil.convert32(buffer, 12);\nlabel = DumpArchiveUtil.decode(encoding, buffer, 676, DumpArchiveConstants.LBLSIZE).trim();\nlevel = DumpArchiveUtil.convert32(buffer, 692);\nfilesys = DumpArchiveUtil.decode(encoding, buffer, 696, DumpArchiveConstants.NAMELEN).trim();\ndevname = DumpArchiveUtil.decode(encoding, buffer, 760, DumpArchiveConstants.NAMELEN).trim();\nhostname = DumpArchiveUtil.decode(encoding, buffer, 824, DumpArchiveConstants.NAMELEN).trim();\nflags = DumpArchiveUtil.convert32(buffer, 888);\nfirstrec = DumpArchiveUtil.convert32(buffer, 892);\nntrec = DumpArchiveUtil.convert32(buffer, 896);\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveSummary:getNTRec()I",
+            "method_body": "public int getNTRec() {\nreturn ntrec;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveSummary:isCompressed()Z",
+            "method_body": "public boolean isCompressed() {\nreturn (flags & 0x0080) == 0x0080;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:<init>()V",
+            "method_body": "public DumpArchiveEntry() {\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:getHeaderType()Lorg/apache/commons/compress/archivers/dump/DumpArchiveConstants$SEGMENT_TYPE;",
+            "method_body": "public DumpArchiveConstants.SEGMENT_TYPE getHeaderType() {\nreturn header.getType();\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:getHeaderCount()I",
+            "method_body": "public int getHeaderCount() {\nreturn header.getCount();\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:parse([B)Lorg/apache/commons/compress/archivers/dump/DumpArchiveEntry;",
+            "method_body": "static DumpArchiveEntry parse(byte[] buffer) {\nDumpArchiveEntry entry = new DumpArchiveEntry();\nTapeSegmentHeader header = entry.header;\nheader.type = DumpArchiveConstants.SEGMENT_TYPE.find(DumpArchiveUtil.convert32(\nheader.volume = DumpArchiveUtil.convert32(buffer, 12);\nentry.ino = header.ino = DumpArchiveUtil.convert32(buffer, 20);\nint m = DumpArchiveUtil.convert16(buffer, 32);\nentry.setType(TYPE.find((m >> 12) & 0x0F));\nentry.setMode(m);\nentry.nlink = DumpArchiveUtil.convert16(buffer, 34);\nentry.setSize(DumpArchiveUtil.convert64(buffer, 40));\nlong t = (1000L * DumpArchiveUtil.convert32(buffer, 48)) +\nentry.setAccessTime(new Date(t));\nt = (1000L * DumpArchiveUtil.convert32(buffer, 56)) +\nentry.setLastModifiedDate(new Date(t));\nt = (1000L * DumpArchiveUtil.convert32(buffer, 64)) +\nentry.ctime = t;\nentry.generation = DumpArchiveUtil.convert32(buffer, 140);\nentry.setUserId(DumpArchiveUtil.convert32(buffer, 144));\nentry.setGroupId(DumpArchiveUtil.convert32(buffer, 148));\nheader.count = DumpArchiveUtil.convert32(buffer, 160);\nheader.holes = 0;\nfor (int i = 0; (i < 512) && (i < header.count); i++) {\nif (buffer[164 + i] == 0) {\nheader.holes++;\nSystem.arraycopy(buffer, 164, header.cdata, 0, 512);\nentry.volume = header.getVolume();\nreturn entry;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setMode(I)V",
+            "method_body": "public void setMode(int mode) {\nthis.mode = mode & 07777;\nthis.permissions = PERMISSION.find(mode);\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setSize(J)V",
+            "method_body": "public void setSize(long size) {\nthis.size = size;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setLastModifiedDate(Ljava/util/Date;)V",
+            "method_body": "public void setLastModifiedDate(Date mtime) {\nthis.mtime = mtime.getTime();\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setAccessTime(Ljava/util/Date;)V",
+            "method_body": "public void setAccessTime(Date atime) {\nthis.atime = atime.getTime();\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setUserId(I)V",
+            "method_body": "public void setUserId(int uid) {\nthis.uid = uid;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setGroupId(I)V",
+            "method_body": "public void setGroupId(int gid) {\nthis.gid = gid;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$TYPE:find(I)Lorg/apache/commons/compress/archivers/dump/DumpArchiveEntry$TYPE;",
+            "method_body": "public static TYPE find(int code) {\nTYPE type = UNKNOWN;\nfor (TYPE t : TYPE.values()) {\nif (code == t.code) {\nreturn type;\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$TapeSegmentHeader:getType()Lorg/apache/commons/compress/archivers/dump/DumpArchiveConstants$SEGMENT_TYPE;",
+            "method_body": "public DumpArchiveConstants.SEGMENT_TYPE getType() {\nreturn type;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$TapeSegmentHeader:getVolume()I",
+            "method_body": "public int getVolume() {\nreturn volume;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$TapeSegmentHeader:getCount()I",
+            "method_body": "public int getCount() {\nreturn count;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveConstants$SEGMENT_TYPE:<init>(Ljava/lang/String;II)V",
+            "method_body": "private SEGMENT_TYPE(int code) {\nthis.code = code;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveConstants$SEGMENT_TYPE:find(I)Lorg/apache/commons/compress/archivers/dump/DumpArchiveConstants$SEGMENT_TYPE;",
+            "method_body": "public static SEGMENT_TYPE find(int code) {\nfor (SEGMENT_TYPE t : values()) {\nif (t.code == code) {\nreturn t;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$PERMISSION:<init>(Ljava/lang/String;II)V",
+            "method_body": "private PERMISSION(int code) {\nthis.code = code;\n}",
+            "method_id": 39
+        }
+    ]
+}

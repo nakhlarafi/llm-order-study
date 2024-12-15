@@ -1,0 +1,109 @@
+{
+    "bug_id": 32,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.shouldReadBigGid",
+    "test_body": "239: public void shouldReadBigGid() throws Exception {\n240: ByteArrayOutputStream bos = new ByteArrayOutputStream();\n241: TarArchiveOutputStream tos = new TarArchiveOutputStream(bos);\n242: tos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);\n243: TarArchiveEntry t = new TarArchiveEntry(\"name\");\n244: t.setGroupId(4294967294l);\n245: t.setSize(1);\n246: tos.putArchiveEntry(t);\n247: tos.write(30);\n248: tos.closeArchiveEntry();\n249: tos.close();\n250: byte[] data = bos.toByteArray();\n251: ByteArrayInputStream bis = new ByteArrayInputStream(data);\n252: TarArchiveInputStream tis =\n253: new TarArchiveInputStream(bis);\n254: t = tis.getNextTarEntry();\n255: assertEquals(4294967294l, t.getLongGroupId());",
+    "stack_trace": "java.lang.NumberFormatException: For input string: \"4294967294\"\nat java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)\nat java.lang.Integer.parseInt(Integer.java:583)\nat java.lang.Integer.parseInt(Integer.java:615)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.applyPaxHeadersToCurrentEntry(TarArchiveInputStream.java:501)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.paxHeaders(TarArchiveInputStream.java:431)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStream.getNextTarEntry(TarArchiveInputStream.java:311)\nat org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.shouldReadBigGid(TarArchiveInputStreamTest.java:254)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:normalizeFileName(Ljava/lang/String;Z)Ljava/lang/String;",
+            "method_body": "private static String normalizeFileName(String fileName,\nString osname = System.getProperty(\"os.name\").toLowerCase(Locale.ENGLISH);\nif (osname != null) {\nif (osname.startsWith(\"windows\")) {\n} else if (osname.contains(\"netware\")) {\nfileName = fileName.replace(File.separatorChar, '/');\nwhile (!preserveLeadingSlashes && fileName.startsWith(\"/\")) {\nreturn fileName;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:setGroupId(J)V",
+            "method_body": "public void setGroupId(long groupId) {\nthis.groupId = groupId;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:skipRecordPadding()V",
+            "method_body": "private void skipRecordPadding() throws IOException {\nif (this.entrySize > 0 && this.entrySize % this.recordSize != 0) {\nlong numRecords = (this.entrySize / this.recordSize) + 1;\nlong padding = (numRecords * this.recordSize) - this.entrySize;\nlong skipped = IOUtils.skip(is, padding);\ncount(skipped);\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:<init>(Ljava/lang/String;BZ)V",
+            "method_body": "public TarArchiveEntry(String name, byte linkFlag, boolean preserveLeadingSlashes) {\nthis(name, preserveLeadingSlashes);\nthis.linkFlag = linkFlag;\nif (linkFlag == LF_GNUTYPE_LONGNAME) {\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:writeEntryHeaderField(J[BIIZ)I",
+            "method_body": "private int writeEntryHeaderField(long value, byte[] outbuf, int offset,\nif (!starMode && (value < 0\nreturn TarUtils.formatLongOctalBytes(0, outbuf, offset, length);\nreturn TarUtils.formatLongOctalOrBinaryBytes(value, outbuf, offset,\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;IILjava/lang/String;)V",
+            "method_body": "public TarArchiveInputStream(InputStream is, int blockSize, int recordSize,\nString encoding) {\nthis.is = is;\nthis.hasHitEOF = false;\nthis.encoding = encoding;\nthis.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.recordSize = recordSize;\nthis.blockSize = blockSize;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatUnsignedOctalString(J[BII)V",
+            "method_body": "public static void formatUnsignedOctalString(final long value, byte[] buffer,\nint remaining = length;\nremaining--;\nif (value == 0) {\nbuffer[offset + remaining--] = (byte) '0';\nlong val = value;\nfor (; remaining >= 0 && val != 0; --remaining) {\nbuffer[offset + remaining] = (byte) ((byte) '0' + (byte) (val & 7));\nval = val >>> 3;\nif (val != 0){\nfor (; remaining >= 0; --remaining) { // leading zeros\nbuffer[offset + remaining] = (byte) '0';\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:isDirectory()Z",
+            "method_body": "public boolean isDirectory() {\nif (file != null) {\nif (linkFlag == LF_DIR) {\nif (getName().endsWith(\"/\")) {\nreturn false;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:readRecord()[B",
+            "method_body": "protected byte[] readRecord() throws IOException {\nbyte[] record = new byte[recordSize];\nint readNow = IOUtils.readFully(is, record);\ncount(readNow);\nif (readNow != recordSize) {\nreturn record;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatNameBytes(Ljava/lang/String;[BIILorg/apache/commons/compress/archivers/zip/ZipEncoding;)I",
+            "method_body": "public static int formatNameBytes(String name, byte[] buf, final int offset,\nint len = name.length();\nByteBuffer b = encoding.encode(name);\nwhile (b.limit() > length && len > 0) {\nfinal int limit = b.limit() - b.position();\nSystem.arraycopy(b.array(), b.arrayOffset(), buf, offset, limit);\nfor (int i = limit; i < length; ++i) {\nbuf[offset + i] = 0;\nreturn offset + length;\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:writeRecord([B)V",
+            "method_body": "private void writeRecord(byte[] record) throws IOException {\nif (record.length != recordSize) {\nout.write(record);\nrecordsWritten++;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:handleLongName(Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;BLjava/lang/String;)Z",
+            "method_body": "private boolean handleLongName(TarArchiveEntry entry , String name,\nfinal ByteBuffer encodedName = zipEncoding.encode(name);\nfinal int len = encodedName.limit() - encodedName.position();\nif (len >= TarConstants.NAMELEN) {\nreturn false;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:padAsNeeded()V",
+            "method_body": "private void padAsNeeded() throws IOException {\nint start = recordsWritten % recordsPerBlock;\nif (start != 0) {\nfor (int i = start; i < recordsPerBlock; i++) {\nwriteEOFRecord();\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:writeEOFRecord()V",
+            "method_body": "private void writeEOFRecord() throws IOException {\nArrays.fill(recordBuf, (byte) 0);\nwriteRecord(recordBuf);\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:getRecord()[B",
+            "method_body": "private byte[] getRecord() throws IOException {\nbyte[] headerBuf = readRecord();\nhasHitEOF = isEOFRecord(headerBuf);\nif (hasHitEOF && headerBuf != null) {\nreturn headerBuf;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:available()I",
+            "method_body": "public int available() throws IOException {\nif (entrySize - entryOffset > Integer.MAX_VALUE) {\nreturn (int) (entrySize - entryOffset);\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatCheckSumOctalBytes(J[BII)I",
+            "method_body": "public static int formatCheckSumOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-2; // for NUL and space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx++]   = 0; // Trailing null\nbuf[offset + idx]     = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:<init>(Ljava/io/File;Ljava/lang/String;)V",
+            "method_body": "private String name = \"\";\nprivate long userId = 0;\nprivate long groupId = 0;\nprivate long size = 0;\nprivate String linkName = \"\";\nprivate String magic = MAGIC_POSIX;\nprivate String version = VERSION_POSIX;\nprivate String groupName = \"\";\nprivate int devMajor = 0;\nprivate int devMinor = 0;\nprivate TarArchiveEntry() {\nString user = System.getProperty(\"user.name\", \"\");\nif (user.length() > MAX_NAMELEN) {\nthis.userName = user;\nthis.file = null;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:<init>()V",
+            "method_body": "private TarArchiveEntry() {\nString user = System.getProperty(\"user.name\", \"\");\nif (user.length() > MAX_NAMELEN) {\nthis.userName = user;\nthis.file = null;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:setSize(J)V",
+            "method_body": "public void setSize(long size) {\nif (size < 0){\nthis.size = size;\n}",
+            "method_id": 39
+        }
+    ]
+}

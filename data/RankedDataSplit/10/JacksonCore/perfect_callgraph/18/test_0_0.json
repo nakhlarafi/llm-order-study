@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal",
+    "test_body": "public void testTooBigBigDecimal() throws Exception\n{\nJsonFactory f = new JsonFactory();\nf.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);\n116: // 24-Aug-2016, tatu: Initial check limits scale to [-9999,+9999]\nBigDecimal BIG = new BigDecimal(\"1E+9999\");\nBigDecimal TOO_BIG = new BigDecimal(\"1E+10000\");\nBigDecimal SMALL = new BigDecimal(\"1E-9999\");\nBigDecimal TOO_SMALL = new BigDecimal(\"1E-10000\");\n122: for (boolean useBytes : new boolean[] { false, true } ) {\nfor (boolean asString : new boolean[] { false, true } ) {\nJsonGenerator g;\n126: if (useBytes) {\ng = f.createGenerator(new ByteArrayOutputStream());\n} else {\ng = f.createGenerator(new StringWriter());\n}\nif (asString) {\ng.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n}\n135: // first, ok cases:\ng.writeStartArray();\ng.writeNumber(BIG);\ng.writeNumber(SMALL);\ng.writeEndArray();\ng.close();\n142: // then invalid\nfor (BigDecimal input : new BigDecimal[] { TOO_BIG, TOO_SMALL }) {\nif (useBytes) {\ng = f.createGenerator(new ByteArrayOutputStream());\n} else {\ng = f.createGenerator(new StringWriter());\n}\nif (asString) {\ng.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n}\ntry {\ng.writeNumber(input);\nfail(\"Should not have written without exception: \"+input);\n} catch (JsonGenerationException e) {",
+    "stack_trace": "junit.framework.AssertionFailedError: Should not have written without exception: 1E+10000\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.TestCase.fail(TestCase.java:227)\nat com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal(TestJsonGeneratorFeatures.java:154)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.WriterBasedJsonGenerator:writeNumber(Ljava/math/BigDecimal;)V",
+            "method_body": "public void writeNumber(BigDecimal value) throws IOException\n_verifyValueWrite(WRITE_NUMBER);\nif (value == null) {\n} else  if (_cfgNumbersAsStrings) {\n} else if (isEnabled(Feature.WRITE_BIGDECIMAL_AS_PLAIN)) {\nwriteRaw(value.toPlainString());\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:<init>()V",
+            "method_body": "public JsonFactory() { this(null); }\npublic JsonFactory() { this(null); }",
+            "method_id": 1
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "public static CharsToNameCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "protected static CharsToNameCanonicalizer createRoot(int hashSeed) {\nreturn sBootstrapSymbolTable.makeOrphan(hashSeed);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:makeOrphan(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "private CharsToNameCanonicalizer makeOrphan(int seed) {\nreturn new CharsToNameCanonicalizer(null, -1, _symbols, _buckets, _size, seed, _longestCollisionList);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public static ByteQuadsCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "protected static ByteQuadsCanonicalizer createRoot(int seed) {\nreturn new ByteQuadsCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:_getBufferRecycler()Lcom/fasterxml/jackson/core/util/BufferRecycler;",
+            "method_body": "public BufferRecycler _getBufferRecycler()\nif (isEnabled(Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)) {\nSoftReference<BufferRecycler> ref = _recyclerRef.get();\nbr = (ref == null) ? null : ref.get();\nif (br == null) {\nbr = new BufferRecycler();\n_recyclerRef.set(new SoftReference<BufferRecycler>(br));\n} else {\nreturn br;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:<init>()V",
+            "method_body": "public BufferRecycler() {\nthis(4, 4);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:allocConcatBuffer()[C",
+            "method_body": "public char[] allocConcatBuffer() {\n_verifyAlloc(_concatCBuffer);\nreturn (_concatCBuffer = _bufferRecycler.allocCharBuffer(BufferRecycler.CHAR_CONCAT_BUFFER));\n}",
+            "method_id": 9
+        }
+    ]
+}

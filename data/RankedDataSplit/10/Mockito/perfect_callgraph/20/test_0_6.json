@@ -1,0 +1,59 @@
+{
+    "bug_id": 20,
+    "test_id": 0,
+    "test_name": "org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class",
+    "test_body": "public void should_spy_inner_class() throws Exception {\n126: class WithMockAndSpy {\n@Spy private InnerStrength strength;\n@Mock private List<String> list;\n130: abstract class InnerStrength {\nprivate final String name;\n133: InnerStrength() {\n// Make sure that @Mock fields are always injected before @Spy fields.\nassertNotNull(list);\n// Make sure constructor is indeed called.\nthis.name = \"inner\";\n}\n140: abstract String strength();\n142: String fullStrength() {\nreturn name + \" \" + strength();\n}\n}\n}\nWithMockAndSpy outer = new WithMockAndSpy();\nMockitoAnnotations.initMocks(outer);\nwhen(outer.strength.strength()).thenReturn(\"strength\");\nassertEquals(\"inner strength\", outer.strength.fullStrength());\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<[inner] strength> but was:<[null] strength>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class(SpyAnnotationTest.java:150)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.configuration.SpyAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> context, Object testInstance) {\nField[] fields = context.getDeclaredFields();\nfor (Field field : fields) {\nif (field.isAnnotationPresent(Spy.class) && !field.isAnnotationPresent(InjectMocks.class)) {\nassertNoIncompatibleAnnotations(Spy.class, field, Mock.class, org.mockito.MockitoAnnotations.Mock.class, Captor.class);\nfield.setAccessible(true);\ninstance = field.get(testInstance);\nassertNotInterface(instance, field.getType());\nif (new MockUtil().isMock(instance)) {\n} else if (instance != null) {\nfield.set(testInstance, Mockito.mock(instance.getClass(), withSettings()\nfield.set(testInstance, newSpyInstance(testInstance, field));\n}\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.AccessibilityChanger:enableAccess(Ljava/lang/reflect/AccessibleObject;)V",
+            "method_body": "public void enableAccess(AccessibleObject accessibleObject) {\nwasAccessible = accessibleObject.isAccessible();\naccessibleObject.setAccessible(true);\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.MockingProgressImpl:validateMostStuff()V",
+            "method_body": "private void validateMostStuff() {\nGlobalConfiguration.validate();\nif (verificationMode != null) {\ngetArgumentMatcherStorage().validateState();\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.ClassInstantiator$UsingObjenesis:instantiate(Ljava/lang/Class;)Ljava/lang/Object;",
+            "method_body": "<T> T instantiate(Class<T> type);\nreturn objenesis.newInstance(type);\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.mockito.internal.handler.MockHandlerImpl:handle(Lorg/mockito/invocation/Invocation;)Ljava/lang/Object;",
+            "method_body": "public Object handle(Invocation invocation) throws Throwable {\nif (invocationContainerImpl.hasAnswersForStubbing()) {\nVerificationMode verificationMode = mockingProgress.pullVerificationMode();\nInvocationMatcher invocationMatcher = matchersBinder.bindMatchers(\nmockingProgress.validateState();\nif (verificationMode != null) {\ninvocationContainerImpl.setInvocationForPotentialStubbing(invocationMatcher);\nOngoingStubbingImpl<T> ongoingStubbing = new OngoingStubbingImpl<T>(invocationContainerImpl);\nmockingProgress.reportOngoingStubbing(ongoingStubbing);\nStubbedInvocationMatcher stubbedInvocation = invocationContainerImpl.findAnswerFor(invocation);\nif (stubbedInvocation != null) {\nstubbedInvocation.captureArgumentsFrom(invocation);\nreturn stubbedInvocation.answer(invocation);\nObject ret = mockSettings.getDefaultAnswer().answer(invocation);\ninvocationContainerImpl.resetInvocationForPotentialStubbing(invocationMatcher);\nreturn ret;\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.mockito.internal.stubbing.StubbedInvocationMatcher:answer(Lorg/mockito/invocation/InvocationOnMock;)Ljava/lang/Object;",
+            "method_body": "public Object answer(InvocationOnMock invocation) throws Throwable {\nsynchronized(answers) {\na = answers.size() == 1 ? answers.peek() : answers.poll();\n}\nreturn a.answer(invocation);\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.CachingMockBytecodeGenerator$CachedBytecodeGenerator$MockKey:of(Ljava/lang/Class;Ljava/util/Set;)Lorg/mockito/internal/creation/bytebuddy/CachingMockBytecodeGenerator$CachedBytecodeGenerator$MockKey;",
+            "method_body": "public static <T> MockKey of(Class<T> mockedType, Set<Class> interfaces) {\nreturn new MockKey<T>(mockedType, interfaces);\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.MatchersBinder:bindMatchers(Lorg/mockito/internal/progress/ArgumentMatcherStorage;Lorg/mockito/invocation/Invocation;)Lorg/mockito/internal/invocation/InvocationMatcher;",
+            "method_body": "public InvocationMatcher bindMatchers(ArgumentMatcherStorage argumentMatcherStorage, Invocation invocation) {\nList<LocalizedMatcher> lastMatchers = argumentMatcherStorage.pullLocalizedMatchers();\nvalidateMatchers(invocation, lastMatchers);\nInvocationMatcher invocationWithMatchers = new InvocationMatcher(invocation, (List<Matcher>)(List) lastMatchers);\nreturn invocationWithMatchers;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockNameImpl:<init>(Ljava/lang/String;Ljava/lang/Class;)V",
+            "method_body": "public MockNameImpl(String mockName, Class classToMock) {\nif (mockName == null) {\nthis.mockName = toInstanceName(classToMock);\nthis.defaultName = true;\nthis.mockName = mockName;\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjectionStrategy$1:<init>()V",
+            "method_body": "public static final MockInjectionStrategy nop() {\nreturn new MockInjectionStrategy() {\n}",
+            "method_id": 69
+        }
+    ]
+}

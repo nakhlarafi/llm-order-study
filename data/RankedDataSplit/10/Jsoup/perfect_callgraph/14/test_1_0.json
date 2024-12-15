@@ -1,0 +1,59 @@
+{
+    "bug_id": 14,
+    "test_id": 1,
+    "test_name": "org.jsoup.parser.ParserTest.handlesUnclosedTitle",
+    "test_body": "554: @Test public void handlesUnclosedTitle() {\n555: Document one = Jsoup.parse(\"<title>One <b>Two <b>Three</TITLE><p>Test</p>\"); // has title, so <b> is plain text\n556: assertEquals(\"One <b>Two <b>Three\", one.title());\n557: assertEquals(\"Test\", one.select(\"p\").first().text());\n558: 559: Document two = Jsoup.parse(\"<title>One<b>Two <p>Test</p>\"); // no title, so <b> causes </title> breakout\n560: assertEquals(\"One\", two.title());\n561: assertEquals(\"<b>Two <p>Test</p></b>\", two.body().html());\n562: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$11:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matches('/')) {\nt.createTempBuffer();\nt.advanceTransition(RCDATAEndTagOpen);\nt.emit(\"<\");\nt.transition(Rcdata);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.Jsoup:parse(Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document parse(String html) {\nreturn Parser.parse(html, \"\");\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parse(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document parse(String html, String baseUri) {\nTreeBuilder treeBuilder = new TreeBuilder();\nreturn treeBuilder.parse(html, baseUri);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:<init>()V",
+            "method_body": "CharacterReader reader;\nprivate LinkedList<Element> formattingElements = new LinkedList<Element>(); // active (open) formatting elements\nprivate List<Token.Character> pendingTableCharacters = new ArrayList<Token.Character>(); // chars in table to be shifted out\nprivate boolean framesetOk = true; // if ok to go into frameset\nprivate boolean fosterInserts = false; // if next inserts should be fostered\nprivate boolean fragmentParsing = false; // if parsing a fragment of html\nprivate boolean trackErrors = false;\nprivate List<ParseError> errors = new ArrayList<ParseError>();\nTreeBuilder() {}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:parse(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "Document parse(String input, String baseUri) {\nstate = TreeBuilderState.Initial;\ninitialiseParse(input, baseUri);\nrunParser();\nreturn doc;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:initialiseParse(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "private void initialiseParse(String input, String baseUri) {\ndoc = new Document(baseUri);\nreader = new CharacterReader(input);\ntokeniser = new Tokeniser(reader);\nstack = new LinkedList<Element>();\nthis.baseUri = baseUri;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:<init>(Ljava/lang/String;)V",
+            "method_body": "private OutputSettings outputSettings = new OutputSettings();\nprivate QuirksMode quirksMode = QuirksMode.noQuirks;\nsuper(Tag.valueOf(\"#root\"), baseUri);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:<init>(Ljava/lang/String;)V",
+            "method_body": "static final char EOF = (char) -1;\nprivate int pos = 0;\nprivate int mark = 0;\nCharacterReader(String input) {\nthis.input = input;\nthis.length = input.length();\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:runParser()V",
+            "method_body": "private void runParser() {\nToken token = tokeniser.read();\nprocess(token);\nif (token.type == Token.TokenType.EOF)\nbreak;\n}\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:read()Lorg/jsoup/parser/Token;",
+            "method_body": "Token read() {\nif (!selfClosingFlagAcknowledged) {\nwhile (!isEmitPending)\nstate.read(this, reader);\nif (charBuffer.length() > 0) {\nString str = charBuffer.toString();\ncharBuffer.delete(0, charBuffer.length());\nreturn new Token.Character(str);\nisEmitPending = false;\nreturn emitPending;\n}",
+            "method_id": 9
+        }
+    ]
+}

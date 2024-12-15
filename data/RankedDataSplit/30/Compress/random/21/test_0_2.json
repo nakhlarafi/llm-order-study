@@ -1,0 +1,159 @@
+{
+    "bug_id": 21,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFileTest.testSixFilesSomeNotEmpty",
+    "test_body": "178: public void testSixFilesSomeNotEmpty() throws Exception {\n179: testCompress252(6, 2);\n180: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile$OutputStreamWrapper:flush()V",
+            "method_body": "public void flush() throws IOException {\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writePackInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writePackInfo(final DataOutput header) throws IOException {\nheader.write(NID.kPackInfo);\nwriteUint64(header, 0);\nwriteUint64(header, 0xffffFFFFL & numNonEmptyStreams);\nheader.write(NID.kSize);\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.hasStream()) {\nwriteUint64(header, entry.getCompressedSize());\n}\nheader.write(NID.kCRC);\nheader.write(1);\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.hasStream()) {\nheader.writeInt(Integer.reverseBytes((int) entry.getCompressedCrcValue()));\n}\nheader.write(NID.kEnd);\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setName(Ljava/lang/String;)V",
+            "method_body": "public void setName(String name) {\nthis.name = name;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:createArchiveEntry(Ljava/io/File;Ljava/lang/String;)Lorg/apache/commons/compress/archivers/sevenz/SevenZArchiveEntry;",
+            "method_body": "public SevenZArchiveEntry createArchiveEntry(final File inputFile,\nfinal SevenZArchiveEntry entry = new SevenZArchiveEntry();\nentry.setDirectory(inputFile.isDirectory());\nentry.setName(entryName);\nentry.setLastModifiedDate(new Date(inputFile.lastModified()));\nreturn entry;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readPackInfo(Ljava/io/DataInput;Lorg/apache/commons/compress/archivers/sevenz/Archive;)V",
+            "method_body": "private void readPackInfo(final DataInput header, final Archive archive) throws IOException {\narchive.packPos = readUint64(header);\nfinal long numPackStreams = readUint64(header);\nint nid = header.readUnsignedByte();\nif (nid == NID.kSize) {\narchive.packSizes = new long[(int)numPackStreams];\nfor (int i = 0; i < archive.packSizes.length; i++) {\narchive.packSizes[i] = readUint64(header);\nnid = header.readUnsignedByte();\nif (nid == NID.kCRC) {\narchive.packCrcsDefined = readAllOrBits(header, (int)numPackStreams);\narchive.packCrcs = new long[(int)numPackStreams];\nfor (int i = 0; i < (int)numPackStreams; i++) {\nif (archive.packCrcsDefined.get(i)) {\narchive.packCrcs[i] = 0xffffFFFFL & Integer.reverseBytes(header.readInt());\nnid = header.readUnsignedByte();\nif (nid != NID.kEnd) {\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:<init>(Ljava/io/File;[B)V",
+            "method_body": "public SevenZFile(final File filename, final byte[] password) throws IOException {\nboolean succeeded = false;\nthis.file = new RandomAccessFile(filename, \"r\");\narchive = readHeaders(password);\nif (!succeeded) {\nthis.file.close();\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readAllOrBits(Ljava/io/DataInput;I)Ljava/util/BitSet;",
+            "method_body": "private BitSet readAllOrBits(final DataInput header, final int size) throws IOException {\nfinal int areAllDefined = header.readUnsignedByte();\nif (areAllDefined != 0) {\nbits = new BitSet(size);\nfor (int i = 0; i < size; i++) {\nbits.set(i, true);\nbits = readBits(header, size);\nreturn bits;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Coders:<clinit>()V",
+            "method_body": "static CoderId[] coderTable = new CoderId[] {\n};",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:getHasLastModifiedDate()Z",
+            "method_body": "public boolean getHasLastModifiedDate() {\nreturn hasLastModifiedDate;\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readFolder(Ljava/io/DataInput;)Lorg/apache/commons/compress/archivers/sevenz/Folder;",
+            "method_body": "private Folder readFolder(final DataInput header) throws IOException {\nfinal Folder folder = new Folder();\nfinal long numCoders = readUint64(header);\nfinal Coder[] coders = new Coder[(int)numCoders];\nlong totalInStreams = 0;\nlong totalOutStreams = 0;\nfor (int i = 0; i < coders.length; i++) {\ncoders[i] = new Coder();\nint bits = header.readUnsignedByte();\nfinal int idSize = bits & 0xf;\nfinal boolean isSimple = ((bits & 0x10) == 0);\nfinal boolean hasAttributes = ((bits & 0x20) != 0);\nfinal boolean moreAlternativeMethods = ((bits & 0x80) != 0);\ncoders[i].decompressionMethodId = new byte[idSize];\nheader.readFully(coders[i].decompressionMethodId);\nif (isSimple) {\ncoders[i].numInStreams = 1;\ncoders[i].numOutStreams = 1;\ntotalInStreams += coders[i].numInStreams;\ntotalOutStreams += coders[i].numOutStreams;\nif (hasAttributes) {\nfinal long propertiesSize = readUint64(header);\ncoders[i].properties = new byte[(int)propertiesSize];\nheader.readFully(coders[i].properties);\nwhile (moreAlternativeMethods) {\nfolder.coders = coders;\nfolder.totalInputStreams = totalInStreams;\nfolder.totalOutputStreams = totalOutStreams;\nif (totalOutStreams == 0) {\nfinal long numBindPairs = totalOutStreams - 1;\nfinal BindPair[] bindPairs = new BindPair[(int)numBindPairs];\nfor (int i = 0; i < bindPairs.length; i++) {\nfolder.bindPairs = bindPairs;\nif (totalInStreams < numBindPairs) {\nfinal long numPackedStreams = totalInStreams - numBindPairs;\nfinal long packedStreams[] = new long[(int)numPackedStreams];\nif (numPackedStreams == 1) {\nfor (i = 0; i < (int)totalInStreams; i++) {\nif (folder.findBindPairForInStream(i) < 0) {\nbreak;\nif (i == (int)totalInStreams) {\npackedStreams[0] = i;\n} else {\nfolder.packedStreams = packedStreams;\nreturn folder;\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setSize(J)V",
+            "method_body": "public void setSize(long size) {\nthis.size = size;\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:write([B)V",
+            "method_body": "public void write(final byte[] b) throws IOException {\nwrite(b, 0, b.length);\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZMethod:<init>(Ljava/lang/String;I[B)V",
+            "method_body": "private SevenZMethod(byte[] id) {\nthis.id = id;\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeUnpackInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeUnpackInfo(final DataOutput header) throws IOException {\nheader.write(NID.kUnpackInfo);\nheader.write(NID.kFolder);\nwriteUint64(header, numNonEmptyStreams);\nheader.write(0);\nfor (int i = 0; i < numNonEmptyStreams; i++) {\nwriteFolder(header);\nheader.write(NID.kCodersUnpackSize);\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.hasStream()) {\nwriteUint64(header, entry.getSize());\n}\nheader.write(NID.kCRC);\nheader.write(1);\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.hasStream()) {\nheader.writeInt(Integer.reverseBytes((int) entry.getCrcValue()));\n}\nheader.write(NID.kEnd);\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:isAntiItem()Z",
+            "method_body": "public boolean isAntiItem() {\nreturn isAntiItem;\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileCTimes(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileCTimes(final DataOutput header) throws IOException {\nint numCreationDates = 0;\nfor (final SevenZArchiveEntry entry : files) {\nif (entry.getHasCreationDate()) {\n}\nif (numCreationDates > 0) {\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readBits(Ljava/io/DataInput;I)Ljava/util/BitSet;",
+            "method_body": "private BitSet readBits(final DataInput header, final int size) throws IOException {\nfinal BitSet bits = new BitSet(size);\nint mask = 0;\nint cache = 0;\nfor (int i = 0; i < size; i++) {\nif (mask == 0) {\nmask = 0x80;\ncache = header.readUnsignedByte();\nbits.set(i, (cache & mask) != 0);\nmask >>>= 1;\nreturn bits;\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:getCompressedSize()J",
+            "method_body": "long getCompressedSize() {\nreturn compressedSize;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:<init>(Ljava/util/zip/Checksum;Ljava/io/InputStream;JJ)V",
+            "method_body": "public ChecksumVerifyingInputStream(final Checksum checksum, final InputStream in,\nfinal long size, final long expectedChecksum) {\nthis.checksum = checksum;\nthis.in = in;\nthis.expectedChecksum = expectedChecksum;\nthis.bytesRemaining = size;\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFileEmptyFiles(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFileEmptyFiles(final DataOutput header) throws IOException {\nboolean hasEmptyFiles = false;\nint emptyStreamCounter = 0;\nfinal BitSet emptyFiles = new BitSet(0);\nfor (int i = 0; i < files.size(); i++) {\nif (!files.get(i).hasStream()) {\nboolean isDir = files.get(i).isDirectory();\nemptyFiles.set(emptyStreamCounter++, !isDir);\nhasEmptyFiles |= !isDir;\nif (hasEmptyFiles) {\nheader.write(NID.kEmptyFile);\nfinal ByteArrayOutputStream baos = new ByteArrayOutputStream();\nfinal DataOutputStream out = new DataOutputStream(baos);\nwriteBits(out, emptyFiles, emptyStreamCounter);\nout.flush();\nfinal byte[] contents = baos.toByteArray();\nwriteUint64(header, contents.length);\nheader.write(contents);\n}",
+            "method_id": 79
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZMethod:getId()[B",
+            "method_body": "byte[] getId() {\nbyte[] copy = new byte[id.length];\nSystem.arraycopy(id, 0, copy, 0, id.length);\nreturn copy;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readUnpackInfo(Ljava/io/DataInput;Lorg/apache/commons/compress/archivers/sevenz/Archive;)V",
+            "method_body": "private void readUnpackInfo(final DataInput header, final Archive archive) throws IOException {\nint nid = header.readUnsignedByte();\nif (nid != NID.kFolder) {\nfinal long numFolders = readUint64(header);\nfinal Folder[] folders = new Folder[(int)numFolders];\narchive.folders = folders;\nfinal int external = header.readUnsignedByte();\nif (external != 0) {\nfor (int i = 0; i < (int)numFolders; i++) {\nfolders[i] = readFolder(header);\nnid = header.readUnsignedByte();\nif (nid != NID.kCodersUnpackSize) {\nfor (final Folder folder : folders) {\nfolder.unpackSizes = new long[(int)folder.totalOutputStreams];\nfor (int i = 0; i < folder.totalOutputStreams; i++) {\nfolder.unpackSizes[i] = readUint64(header);\nnid = header.readUnsignedByte();\nif (nid == NID.kCRC) {\nfinal BitSet crcsDefined = readAllOrBits(header, (int)numFolders);\nfor (int i = 0; i < (int)numFolders; i++) {\nif (crcsDefined.get(i)) {\nfolders[i].hasCrc = true;\nfolders[i].crc = 0xffffFFFFL & Integer.reverseBytes(header.readInt());\nnid = header.readUnsignedByte();\nif (nid != NID.kEnd) {\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:getCurrentOutputStream()Ljava/io/OutputStream;",
+            "method_body": "private OutputStream getCurrentOutputStream() throws IOException {\nif (currentOutputStream == null) {\ncurrentOutputStream = setupFileOutputStream();\nreturn currentOutputStream;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:<init>(Ljava/io/RandomAccessFile;J)V",
+            "method_body": "public BoundedRandomAccessFileInputStream(final RandomAccessFile file,\nfinal long size) {\nthis.file = file;\nthis.bytesRemaining = size;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setAntiItem(Z)V",
+            "method_body": "public void setAntiItem(boolean isAntiItem) {\nthis.isAntiItem = isAntiItem;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeBits(Ljava/io/DataOutput;Ljava/util/BitSet;I)V",
+            "method_body": "private void writeBits(final DataOutput header, final BitSet bits, final int length) throws IOException {\nint cache = 0;\nint shift = 7;\nfor (int i = 0; i < length; i++) {\ncache |= ((bits.get(i) ? 1 : 0) << shift);\n--shift;\nif (shift == 0) {\nheader.write(cache);\nshift = 7;\ncache = 0;\nif (length > 0 && shift > 0) {\nheader.write(cache);\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:<clinit>()V",
+            "method_body": "static final int SIGNATURE_HEADER_SIZE = 32;\nprivate int currentEntryIndex = -1;\nprivate int currentFolderIndex = -1;\nprivate InputStream currentFolderInputStream = null;\nprivate InputStream currentEntryInputStream = null;\nstatic final byte[] sevenZSignature = {\n};",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeFolder(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeFolder(final DataOutput header) throws IOException {\nwriteUint64(header, 1);\nbyte[] id = contentCompression.getId();\nbyte[] properties = contentCompression.getProperties();\nint codecFlags = id.length;\nif (properties.length > 0) {\ncodecFlags |= 0x20;\nheader.write(codecFlags);\nheader.write(id);\nif (properties.length > 0) {\nheader.write(properties.length);\nheader.write(properties);\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Coders$CoderId:<init>(Lorg/apache/commons/compress/archivers/sevenz/SevenZMethod;Lorg/apache/commons/compress/archivers/sevenz/Coders$CoderBase;)V",
+            "method_body": "CoderId(SevenZMethod method, final CoderBase coder) {\nthis.method = method;\nthis.coder = coder;\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZOutputFile:writeSubStreamsInfo(Ljava/io/DataOutput;)V",
+            "method_body": "private void writeSubStreamsInfo(final DataOutput header) throws IOException {\nheader.write(NID.kSubStreamsInfo);\nheader.write(NID.kEnd);\n}",
+            "method_id": 89
+        }
+    ]
+}

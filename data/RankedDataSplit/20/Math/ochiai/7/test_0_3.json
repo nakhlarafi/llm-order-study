@@ -1,0 +1,109 @@
+{
+    "bug_id": 7,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling",
+    "test_body": "public void testEventsScheduling() {\n339: FirstOrderDifferentialEquations sincos = new FirstOrderDifferentialEquations() {\n341: public int getDimension() {\nreturn 2;\n}\n345: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] =  y[1];\nyDot[1] = -y[0];\n}\n350: };\n352: SchedulingChecker sinChecker = new SchedulingChecker(0); // events at 0, PI, 2PI ...\nSchedulingChecker cosChecker = new SchedulingChecker(1); // events at PI/2, 3PI/2, 5PI/2 ...\n355: FirstOrderIntegrator integ =\nnew DormandPrince853Integrator(0.001, 1.0, 1.0e-12, 0.0);\ninteg.addEventHandler(sinChecker, 0.01, 1.0e-7, 100);\ninteg.addStepHandler(sinChecker);\ninteg.addEventHandler(cosChecker, 0.01, 1.0e-7, 100);\ninteg.addStepHandler(cosChecker);\ndouble   t0 = 0.5;\ndouble[] y0 = new double[] { FastMath.sin(t0), FastMath.cos(t0) };\ndouble   t  = 10.0;\ndouble[] y  = new double[2];\ninteg.integrate(sincos, t0, y0, t, y);\n367: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest$SchedulingChecker.g(DormandPrince853IntegratorTest.java:389)\nat org.apache.commons.math3.ode.events.EventState.evaluateStep(EventState.java:224)\nat org.apache.commons.math3.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:323)\nat org.apache.commons.math3.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:303)\nat org.apache.commons.math3.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling(DormandPrince853IntegratorTest.java:365)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getTotalDimension()I",
+            "method_body": "public int getTotalDimension() {\nif (components.isEmpty()) {\nreturn primaryMapper.getDimension();\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:computeDerivatives(D[D[D)V",
+            "method_body": "public void computeDerivatives(final double t, final double[] y, final double[] yDot)\nprimaryMapper.extractEquationData(y, primaryState);\nprimary.computeDerivatives(t, primaryState, primaryStateDot);\nprimaryMapper.insertEquationData(primaryStateDot, yDot);\nfor (final SecondaryComponent component : components) {\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getSecondaryMappers()[Lorg/apache/commons/math3/ode/EquationsMapper;",
+            "method_body": "public EquationsMapper[] getSecondaryMappers() {\nfinal EquationsMapper[] mappers = new EquationsMapper[components.size()];\nfor (int i = 0; i < mappers.length; ++i) {\nreturn mappers;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getCompleteState()[D",
+            "method_body": "public double[] getCompleteState() throws DimensionMismatchException {\ndouble[] completeState = new double[getTotalDimension()];\nprimaryMapper.insertEquationData(primaryState, completeState);\nfor (final SecondaryComponent component : components) {\nreturn completeState;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:insertEquationData([D[D)V",
+            "method_body": "public void insertEquationData(double[] equationData, double[] complete)\nif (equationData.length != dimension) {\nSystem.arraycopy(equationData, 0, complete, firstIndex, dimension);\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getPrimaryMapper()Lorg/apache/commons/math3/ode/EquationsMapper;",
+            "method_body": "public EquationsMapper getPrimaryMapper() {\nreturn primaryMapper;\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:evaluateCompleteInterpolatedState()V",
+            "method_body": "protected abstract void computeInterpolatedStateAndDerivatives(double theta,\nif (dirtyState) {\nfinal double oneMinusThetaH = globalCurrentTime - interpolatedTime;\nfinal double theta = (h == 0) ? 0 : (h - oneMinusThetaH) / h;\ncomputeInterpolatedStateAndDerivatives(theta, oneMinusThetaH);\ndirtyState = false;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:getInterpolatedState()[D",
+            "method_body": "public double[] getInterpolatedState() throws MaxCountExceededException {\nevaluateCompleteInterpolatedState();\nprimaryMapper.extractEquationData(interpolatedState,\nreturn interpolatedPrimaryState;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:sanityChecks(Lorg/apache/commons/math3/ode/ExpandableStatefulODE;D)V",
+            "method_body": "protected void sanityChecks(final ExpandableStatefulODE equations, final double t)\nfinal double threshold = 1000 * FastMath.ulp(FastMath.max(FastMath.abs(equations.getTime()),\nfinal double dt = FastMath.abs(equations.getTime() - t);\nif (dt <= threshold) {\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:<init>(Lorg/apache/commons/math3/ode/FirstOrderDifferentialEquations;)V",
+            "method_body": "public ExpandableStatefulODE(final FirstOrderDifferentialEquations primary) {\nfinal int n          = primary.getDimension();\nthis.primary         = primary;\nthis.primaryMapper   = new EquationsMapper(0, n);\nthis.time            = Double.NaN;\nthis.primaryState    = new double[n];\nthis.primaryStateDot = new double[n];\nthis.components      = new ArrayList<ExpandableStatefulODE.SecondaryComponent>();\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:setTime(D)V",
+            "method_body": "public void setTime(final double time) {\nthis.time = time;\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getTime()D",
+            "method_body": "public double getTime() {\nreturn time;\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:setPrimaryState([D)V",
+            "method_body": "public void setPrimaryState(final double[] primaryState) throws DimensionMismatchException {\nif (primaryState.length != this.primaryState.length) {\nSystem.arraycopy(primaryState, 0, this.primaryState, 0, primaryState.length);\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:extractEquationData([D[D)V",
+            "method_body": "public void extractEquationData(double[] complete, double[] equationData)\nif (equationData.length != dimension) {\nSystem.arraycopy(complete, firstIndex, equationData, 0, dimension);\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:integrate(Lorg/apache/commons/math3/ode/FirstOrderDifferentialEquations;D[DD[D)D",
+            "method_body": "public double integrate(final FirstOrderDifferentialEquations equations,\nif (y0.length != equations.getDimension()) {\nif (y.length != equations.getDimension()) {\nfinal ExpandableStatefulODE expandableODE = new ExpandableStatefulODE(equations);\nexpandableODE.setTime(t0);\nexpandableODE.setPrimaryState(y0);\nintegrate(expandableODE, t);\nSystem.arraycopy(expandableODE.getPrimaryState(), 0, y, 0, y.length);\nreturn expandableODE.getTime();\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:shift()V",
+            "method_body": "public void shift() {\nglobalPreviousTime = globalCurrentTime;\nsoftPreviousTime   = globalPreviousTime;\nsoftCurrentTime    = globalCurrentTime;\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:storeTime(D)V",
+            "method_body": "public void storeTime(final double t) {\nglobalCurrentTime = t;\nsoftCurrentTime   = globalCurrentTime;\nh                 = globalCurrentTime - globalPreviousTime;\nsetInterpolatedTime(t);\nfinalized  = false;\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:setInterpolatedTime(D)V",
+            "method_body": "public void setInterpolatedTime(final double time) {\ninterpolatedTime = time;\ndirtyState       = true;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:getDimension()I",
+            "method_body": "public int getDimension() {\nreturn dimension;\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:<init>(II)V",
+            "method_body": "public EquationsMapper(final int firstIndex, final int dimension) {\nthis.firstIndex = firstIndex;\nthis.dimension  = dimension;\n}",
+            "method_id": 79
+        }
+    ]
+}

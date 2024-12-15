@@ -1,0 +1,89 @@
+{
+    "bug_id": 73,
+    "test_id": 0,
+    "test_name": "org.jsoup.helper.W3CDomTest.namespacePreservation",
+    "test_body": "public void namespacePreservation() throws IOException {\nFile in = ParseTest.getFile(\"/htmltests/namespaces.xhtml\");\norg.jsoup.nodes.Document jsoupDoc;\njsoupDoc = Jsoup.parse(in, \"UTF-8\");\n71: Document doc;\norg.jsoup.helper.W3CDom jDom = new org.jsoup.helper.W3CDom();\ndoc = jDom.fromJsoup(jsoupDoc);\n75: Node htmlEl = doc.getChildNodes().item(0);\nassertEquals(\"http://www.w3.org/1999/xhtml\", htmlEl.getNamespaceURI());\nassertEquals(\"html\", htmlEl.getLocalName());\nassertEquals(\"html\", htmlEl.getNodeName());\n80: // inherits default namespace\nNode head = htmlEl.getFirstChild();\nassertEquals(\"http://www.w3.org/1999/xhtml\", head.getNamespaceURI());\nassertEquals(\"head\", head.getLocalName());\nassertEquals(\"head\", head.getNodeName());\n86: Node epubTitle = htmlEl.getChildNodes().item(2).getChildNodes().item(3);\nassertEquals(\"Check\", epubTitle.getTextContent());\nassertEquals(\"http://www.idpf.org/2007/ops\", epubTitle.getNamespaceURI());\nassertEquals(\"title\", epubTitle.getLocalName());\nassertEquals(\"epub:title\", epubTitle.getNodeName());\n92: Node xSection = epubTitle.getNextSibling().getNextSibling();\nassertEquals(\"urn:test\", xSection.getNamespaceURI());\nassertEquals(\"section\", xSection.getLocalName());\nassertEquals(\"x:section\", xSection.getNodeName());\n97: // https://github.com/jhy/jsoup/issues/977\n// does not keep last set namespace\nNode svg = xSection.getNextSibling().getNextSibling();\nassertEquals(\"http://www.w3.org/2000/svg\", svg.getNamespaceURI());\nassertEquals(\"svg\", svg.getLocalName());\nassertEquals(\"svg\", svg.getNodeName());\n104: Node path = svg.getChildNodes().item(1);\nassertEquals(\"http://www.w3.org/2000/svg\", path.getNamespaceURI());\nassertEquals(\"path\", path.getLocalName());\nassertEquals(\"path\", path.getNodeName());\n109: Node clip = path.getChildNodes().item(1);\nassertEquals(\"http://example.com/clip\", clip.getNamespaceURI());\nassertEquals(\"clip\", clip.getLocalName());\nassertEquals(\"clip\", clip.getNodeName());\nassertEquals(\"456\", clip.getTextContent());\n115: Node picture = svg.getNextSibling().getNextSibling();\nassertEquals(\"http://www.w3.org/1999/xhtml\", picture.getNamespaceURI());\nassertEquals(\"picture\", picture.getLocalName());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<http://[www.w3.org/1999/xhtml]> but was:<http://[example.com/clip]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.jsoup.helper.W3CDomTest.namespacePreservation(W3CDomTest.java:116)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:detectCharsetFromBom(Ljava/nio/ByteBuffer;)Lorg/jsoup/helper/DataUtil$BomCharset;",
+            "method_body": "private static BomCharset detectCharsetFromBom(final ByteBuffer byteData) {\nfinal Buffer buffer = byteData; // .mark and rewind used to return Buffer, now ByteBuffer, so cast for backward compat\nbuffer.mark();\nbyte[] bom = new byte[4];\nif (byteData.remaining() >= bom.length) {\nbyteData.get(bom);\nbuffer.rewind();\nif (bom[0] == 0x00 && bom[1] == 0x00 && bom[2] == (byte) 0xFE && bom[3] == (byte) 0xFF || // BE\n} else if (bom[0] == (byte) 0xFE && bom[1] == (byte) 0xFF || // BE\n} else if (bom[0] == (byte) 0xEF && bom[1] == (byte) 0xBB && bom[2] == (byte) 0xBF) {\nreturn null;\n}",
+            "method_id": 240
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "private static final int DefaultSize = 1024 * 32;\nprivate long timeout = 0; // optional max time of request\nsuper(in, bufferSize);\nValidate.isTrue(maxSize >= 0);\nthis.maxSize = maxSize;\nremaining = maxSize;\ncapped = maxSize != 0;\nstartTime = System.nanoTime();\n}",
+            "method_id": 241
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:wrap(Ljava/io/InputStream;II)Lorg/jsoup/internal/ConstrainableInputStream;",
+            "method_body": "public static ConstrainableInputStream wrap(InputStream in, int bufferSize, int maxSize) {\nreturn in instanceof ConstrainableInputStream\n}",
+            "method_id": 242
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nif (interrupted || capped && remaining <= 0)\nif (Thread.interrupted()) {\nif (expired())\nif (capped && len > remaining)\nfinal int read = super.read(b, off, len);\nremaining -= read;\nreturn read;\n}",
+            "method_id": 243
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:readToByteBuffer(I)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer readToByteBuffer(int max) throws IOException {\nValidate.isTrue(max >= 0, \"maxSize must be 0 (unlimited) or larger\");\nfinal boolean localCapped = max > 0; // still possibly capped in total stream\nfinal int bufferSize = localCapped && max < DefaultSize ? max : DefaultSize;\nfinal byte[] readBuffer = new byte[bufferSize];\nfinal ByteArrayOutputStream outStream = new ByteArrayOutputStream(bufferSize);\nint remaining = max;\nread = read(readBuffer);\nif (read == -1) break;\nif (localCapped) { // this local byteBuffer cap may be smaller than the overall maxSize (like when reading first bytes)\nif (read >= remaining) {\nremaining -= read;\noutStream.write(readBuffer, 0, read);\nreturn ByteBuffer.wrap(outStream.toByteArray());\n}",
+            "method_id": 244
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:reset()V",
+            "method_body": "public void reset() throws IOException {\nsuper.reset();\nremaining = maxSize - markpos;\n}",
+            "method_id": 245
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:expired()Z",
+            "method_body": "private boolean expired() {\nif (timeout == 0)\nreturn false;\n}",
+            "method_id": 246
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes$1:hasNext()Z",
+            "method_body": "public Iterator<Attribute> iterator() {\nreturn new Iterator<Attribute>() {\nreturn i < size;\nfinal Attribute attr = new Attribute(keys[i], vals[i], Attributes.this);\ni++;\nreturn attr;\n}",
+            "method_id": 247
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes$1:next()Lorg/jsoup/nodes/Attribute;",
+            "method_body": "public Iterator<Attribute> iterator() {\nreturn new Iterator<Attribute>() {\nreturn i < size;\nfinal Attribute attr = new Attribute(keys[i], vals[i], Attributes.this);\ni++;\nreturn attr;\n}",
+            "method_id": 248
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom:fromJsoup(Lorg/jsoup/nodes/Document;)Lorg/w3c/dom/Document;",
+            "method_body": "public Document fromJsoup(org.jsoup.nodes.Document in) {\nValidate.notNull(in);\nfactory.setNamespaceAware(true);\nbuilder = factory.newDocumentBuilder();\nDocument out = builder.newDocument();\nconvert(in, out);\nreturn out;\n}",
+            "method_id": 249
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom:convert(Lorg/jsoup/nodes/Document;Lorg/w3c/dom/Document;)V",
+            "method_body": "public void convert(org.jsoup.nodes.Document in, Document out) {\nif (!StringUtil.isBlank(in.location()))\nout.setDocumentURI(in.location());\norg.jsoup.nodes.Element rootEl = in.child(0); // skip the #root node\nNodeTraversor.traverse(new W3CBuilder(out), rootEl);\n}",
+            "method_id": 250
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:<init>(Lorg/w3c/dom/Document;)V",
+            "method_body": "private static final String xmlnsKey = \"xmlns\";\nprivate final HashMap<String, String> namespaces = new HashMap<>();\npublic W3CBuilder(Document doc) {\nthis.doc = doc;\n}",
+            "method_id": 251
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(org.jsoup.nodes.Node source, int depth) {\nif (source instanceof org.jsoup.nodes.Element) {\norg.jsoup.nodes.Element sourceEl = (org.jsoup.nodes.Element) source;\nString prefix = updateNamespaces(sourceEl);\nString namespace = namespaces.get(prefix);\nElement el = doc.createElementNS(namespace, sourceEl.tagName());\ncopyAttributes(sourceEl, el);\nif (dest == null) { // sets up the root\ndoc.appendChild(el);\ndest.appendChild(el);\ndest = el; // descend\n} else if (source instanceof org.jsoup.nodes.TextNode) {\norg.jsoup.nodes.TextNode sourceText = (org.jsoup.nodes.TextNode) source;\nText text = doc.createTextNode(sourceText.getWholeText());\ndest.appendChild(text);\n} else if (source instanceof org.jsoup.nodes.Comment) {\n} else if (source instanceof org.jsoup.nodes.DataNode) {\norg.jsoup.nodes.DataNode sourceData = (org.jsoup.nodes.DataNode) source;\nText node = doc.createTextNode(sourceData.getWholeData());\ndest.appendChild(node);\n}",
+            "method_id": 252
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:tail(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void tail(org.jsoup.nodes.Node source, int depth) {\nif (source instanceof org.jsoup.nodes.Element && dest.getParentNode() instanceof Element) {\ndest = (Element) dest.getParentNode(); // undescend. cromulent.\n}",
+            "method_id": 253
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:copyAttributes(Lorg/jsoup/nodes/Node;Lorg/w3c/dom/Element;)V",
+            "method_body": "private void copyAttributes(org.jsoup.nodes.Node source, Element el) {\nfor (Attribute attribute : source.attributes()) {\nString key = attribute.getKey().replaceAll(\"[^-a-zA-Z0-9_:.]\", \"\");\nif (key.matches(\"[a-zA-Z_:][-a-zA-Z0-9_:.]*\"))\nel.setAttribute(key, attribute.getValue());\n}\n}",
+            "method_id": 254
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:updateNamespaces(Lorg/jsoup/nodes/Element;)Ljava/lang/String;",
+            "method_body": "private String updateNamespaces(org.jsoup.nodes.Element el) {\nAttributes attributes = el.attributes();\nfor (Attribute attr : attributes) {\nString key = attr.getKey();\nif (key.equals(xmlnsKey)) {\nprefix = \"\";\n} else if (key.startsWith(xmlnsPrefix)) {\nprefix = key.substring(xmlnsPrefix.length());\nnamespaces.put(prefix, attr.getValue());\n}\nint pos = el.tagName().indexOf(\":\");\nreturn pos > 0 ? el.tagName().substring(0, pos) : \"\";\n}",
+            "method_id": 255
+        }
+    ]
+}

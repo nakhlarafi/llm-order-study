@@ -1,0 +1,59 @@
+{
+    "bug_id": 73,
+    "test_id": 0,
+    "test_name": "org.jsoup.helper.W3CDomTest.namespacePreservation",
+    "test_body": "66: public void namespacePreservation() throws IOException {\n67: File in = ParseTest.getFile(\"/htmltests/namespaces.xhtml\");\n68: org.jsoup.nodes.Document jsoupDoc;\n69: jsoupDoc = Jsoup.parse(in, \"UTF-8\");\n70: 71: Document doc;\n72: org.jsoup.helper.W3CDom jDom = new org.jsoup.helper.W3CDom();\n73: doc = jDom.fromJsoup(jsoupDoc);\n74: 75: Node htmlEl = doc.getChildNodes().item(0);\n76: assertEquals(\"http://www.w3.org/1999/xhtml\", htmlEl.getNamespaceURI());\n77: assertEquals(\"html\", htmlEl.getLocalName());\n78: assertEquals(\"html\", htmlEl.getNodeName());\n79: 80: // inherits default namespace\n81: Node head = htmlEl.getFirstChild();\n82: assertEquals(\"http://www.w3.org/1999/xhtml\", head.getNamespaceURI());\n83: assertEquals(\"head\", head.getLocalName());\n84: assertEquals(\"head\", head.getNodeName());\n85: 86: Node epubTitle = htmlEl.getChildNodes().item(2).getChildNodes().item(3);\n87: assertEquals(\"Check\", epubTitle.getTextContent());\n88: assertEquals(\"http://www.idpf.org/2007/ops\", epubTitle.getNamespaceURI());\n89: assertEquals(\"title\", epubTitle.getLocalName());\n90: assertEquals(\"epub:title\", epubTitle.getNodeName());\n91: 92: Node xSection = epubTitle.getNextSibling().getNextSibling();\n93: assertEquals(\"urn:test\", xSection.getNamespaceURI());\n94: assertEquals(\"section\", xSection.getLocalName());\n95: assertEquals(\"x:section\", xSection.getNodeName());\n96: 97: // https://github.com/jhy/jsoup/issues/977\n98: // does not keep last set namespace\n99: Node svg = xSection.getNextSibling().getNextSibling();\n100: assertEquals(\"http://www.w3.org/2000/svg\", svg.getNamespaceURI());\n101: assertEquals(\"svg\", svg.getLocalName());\n102: assertEquals(\"svg\", svg.getNodeName());\n103: 104: Node path = svg.getChildNodes().item(1);\n105: assertEquals(\"http://www.w3.org/2000/svg\", path.getNamespaceURI());\n106: assertEquals(\"path\", path.getLocalName());\n107: assertEquals(\"path\", path.getNodeName());\n108: 109: Node clip = path.getChildNodes().item(1);\n110: assertEquals(\"http://example.com/clip\", clip.getNamespaceURI());\n111: assertEquals(\"clip\", clip.getLocalName());\n112: assertEquals(\"clip\", clip.getNodeName());\n113: assertEquals(\"456\", clip.getTextContent());\n114: 115: Node picture = svg.getNextSibling().getNextSibling();\n116: assertEquals(\"http://www.w3.org/1999/xhtml\", picture.getNamespaceURI());\n117: assertEquals(\"picture\", picture.getLocalName());\n118: assertEquals(\"picture\", picture.getNodeName());\n119: 120: Node img = picture.getFirstChild();\n121: assertEquals(\"http://www.w3.org/1999/xhtml\", img.getNamespaceURI());\n122: assertEquals(\"img\", img.getLocalName());\n123: assertEquals(\"img\", img.getNodeName());\n124: 125: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Element:childElementsList()Ljava/util/List;",
+            "method_body": "private List<Element> childElementsList() {\nif (shadowChildrenRef == null || (children = shadowChildrenRef.get()) == null) {\nfinal int size = childNodes.size();\nchildren = new ArrayList<>(size);\nfor (int i = 0; i < size; i++) {\nfinal Node node = childNodes.get(i);\nif (node instanceof Element)\nchildren.add((Element) node);\nshadowChildrenRef = new WeakReference<>(children);\nreturn children;\n}",
+            "method_id": 120
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:nodelistChanged()V",
+            "method_body": "void nodelistChanged() {\nsuper.nodelistChanged();\nshadowChildrenRef = null;\n}",
+            "method_id": 121
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendChild(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendChild(Node child) {\nValidate.notNull(child);\nreparentChild(child);\nensureChildNodes();\nchildNodes.add(child);\nchild.setSiblingIndex(childNodes.size() - 1);\nreturn this;\n}",
+            "method_id": 122
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:location()Ljava/lang/String;",
+            "method_body": "public String location() {\nreturn location;\n}",
+            "method_id": 123
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:outputSettings()Lorg/jsoup/nodes/Document$OutputSettings;",
+            "method_body": "public OutputSettings outputSettings() {\nreturn outputSettings;\n}",
+            "method_id": 124
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:<init>(Ljava/lang/String;)V",
+            "method_body": "private static final Map<String, Tag> tags = new HashMap<>(); // map of known tags\nprivate boolean isBlock = true; // block or inline\nprivate boolean formatAsBlock = true; // should be formatted as a block\nprivate boolean canContainInline = true; // only pcdata if not\nprivate boolean empty = false; // can hold nothing; e.g. img\nprivate boolean selfClosing = false; // can self close (<foo />). used for unknown tags that self close, without forcing them as empty.\nprivate boolean preserveWhitespace = false; // for pre, textarea, script etc\nprivate boolean formList = false; // a control that appears in forms: input, textarea, output etc\nprivate boolean formSubmit = false; // a control that can be submitted in a form: input etc\nprivate Tag(String tagName) {\nthis.tagName = tagName;\n}",
+            "method_id": 125
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn tagName;\n}",
+            "method_id": 126
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:valueOf(Ljava/lang/String;Lorg/jsoup/parser/ParseSettings;)Lorg/jsoup/parser/Tag;",
+            "method_body": "public static Tag valueOf(String tagName, ParseSettings settings) {\nValidate.notNull(tagName);\nTag tag = tags.get(tagName);\nif (tag == null) {\ntagName = settings.normalizeTag(tagName);\nValidate.notEmpty(tagName);\ntag = tags.get(tagName);\nif (tag == null) {\ntag = new Tag(tagName);\ntag.isBlock = false;\nreturn tag;\n}",
+            "method_id": 127
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:isEmpty()Z",
+            "method_body": "public boolean isEmpty() {\nreturn empty;\n}",
+            "method_id": 128
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:isKnownTag()Z",
+            "method_body": "public boolean isKnownTag() {\nreturn tags.containsKey(tagName);\n}",
+            "method_id": 129
+        }
+    ]
+}

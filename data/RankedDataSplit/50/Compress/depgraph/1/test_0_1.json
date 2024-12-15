@@ -1,0 +1,69 @@
+{
+    "bug_id": 1,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.CpioTestCase.testCpioUnarchive",
+    "test_body": "54: public void testCpioUnarchive() throws Exception {\n55: final File output = new File(dir, \"bla.cpio\");\n56: {\n57: final File file1 = getFile(\"test1.xml\");\n58: final File file2 = getFile(\"test2.xml\");\n59: 60: final OutputStream out = new FileOutputStream(output);\n61: final ArchiveOutputStream os = new ArchiveStreamFactory().createArchiveOutputStream(\"cpio\", out);\n62: os.putArchiveEntry(new CpioArchiveEntry(\"test1.xml\", file1.length()));\n63: IOUtils.copy(new FileInputStream(file1), os);\n64: os.closeArchiveEntry();\n65: 66: os.putArchiveEntry(new CpioArchiveEntry(\"test2.xml\", file2.length()));\n67: IOUtils.copy(new FileInputStream(file2), os);\n68: os.closeArchiveEntry();\n69: 70: os.close();\n71: out.close();\n72: }\n73: 74: // Unarchive Operation\n75: final File input = output;\n76: final InputStream is = new FileInputStream(input);\n77: final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(\"cpio\", is);\n78: 79: 80: Map result = new HashMap();\n81: ArchiveEntry entry = null;\n82: while ((entry = in.getNextEntry()) != null) {\n83: File target = new File(dir, entry.getName());",
+    "stack_trace": "java.io.EOFException\nat org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream.readFully(CpioArchiveInputStream.java:293)\nat org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream.getNextCPIOEntry(CpioArchiveInputStream.java:168)\nat org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream.getNextEntry(CpioArchiveInputStream.java:421)\nat org.apache.commons.compress.archivers.CpioTestCase.testCpioUnarchive(CpioTestCase.java:82)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream:readCString(I)Ljava/lang/String;",
+            "method_body": "private String readCString(final int length) throws IOException {\nbyte tmpBuffer[] = new byte[length];\nreadFully(tmpBuffer, 0, tmpBuffer.length);\nreturn new String(tmpBuffer, 0, tmpBuffer.length - 1);\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream:getNextEntry()Lorg/apache/commons/compress/archivers/ArchiveEntry;",
+            "method_body": "public ArchiveEntry getNextEntry() throws IOException {\nreturn getNextCPIOEntry();\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioUtil:byteArray2long([BZ)J",
+            "method_body": "static long byteArray2long(final byte[] number, final boolean swapHalfWord) {\nlong ret = 0;\nint pos = 0;\nbyte tmp_number[] = new byte[number.length];\nSystem.arraycopy(number, 0, tmp_number, 0, number.length);\nif (tmp_number.length % 2 != 0) {\nif (!swapHalfWord) {\nbyte tmp = 0;\nfor (pos = 0; pos < tmp_number.length; pos++) {\ntmp = tmp_number[pos];\ntmp_number[pos++] = tmp_number[pos];\ntmp_number[pos] = tmp;\nret = tmp_number[0] & 0xFF;\nfor (pos = 1; pos < tmp_number.length; pos++) {\nret <<= 8;\nret |= tmp_number[pos] & 0xFF;\nreturn ret;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:checkNewFormat()V",
+            "method_body": "private void checkNewFormat() {\nif ((this.fileFormat & FORMAT_NEW_MASK) == 0) {\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getChksum()J",
+            "method_body": "public long getChksum() {\ncheckNewFormat();\nreturn this.chksum;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getSize()J",
+            "method_body": "public long getSize() {\nreturn this.filesize;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getFormat()S",
+            "method_body": "public short getFormat() {\nreturn this.fileFormat;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getHeaderSize()J",
+            "method_body": "public long getHeaderSize() {\nreturn this.headerSize;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn this.name;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setSize(J)V",
+            "method_body": "public void setSize(final long size) {\nif (size < 0 || size > 0xFFFFFFFFL) {\nthis.filesize = size;\n}",
+            "method_id": 59
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setFormat(S)V",
+            "method_body": "final void setFormat(final short format) {\nswitch (format) {\nthis.fileFormat = FORMAT_NEW;\nthis.headerSize = 110;\nbreak;\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setTime(J)V",
+            "method_body": "public void setTime(final long time) {\nthis.mtime = time;\n}",
+            "method_id": 61
+        }
+    ]
+}

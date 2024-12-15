@@ -1,0 +1,59 @@
+{
+    "bug_id": 40,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolverTest.testIssue716",
+    "test_body": "public void testIssue716() {\nBracketingNthOrderBrentSolver solver =\nnew BracketingNthOrderBrentSolver(1.0e-12, 1.0e-10, 1.0e-22, 5);\nUnivariateFunction sharpTurn = new UnivariateFunction() {\npublic double value(double x) {\nreturn (2 * x + 1) / (1.0e9 * (x + 1));\n}\n};\ndouble result = solver.solve(100, sharpTurn, -0.9999999, 30, 15, AllowedSolution.RIGHT_SIDE);\nAssert.assertEquals(0, sharpTurn.value(result), solver.getFunctionValueAccuracy());",
+    "stack_trace": "org.apache.commons.math.exception.TooManyEvaluationsException: illegal state: maximal count (100) exceeded: evaluations\nat org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver.incrementEvaluationCount(BaseAbstractUnivariateRealSolver.java:296)\nat org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver.computeObjectiveValue(BaseAbstractUnivariateRealSolver.java:153)\nat org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolver.doSolve(BracketingNthOrderBrentSolver.java:283)\nat org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver.solve(BaseAbstractUnivariateRealSolver.java:190)\nat org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolver.solve(BracketingNthOrderBrentSolver.java:394)\nat org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolverTest.testIssue716(BracketingNthOrderBrentSolverTest.java:93)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BracketingNthOrderBrentSolver:doSolve()D",
+            "method_body": "protected double doSolve() {\nfinal double[] x = new double[maximalOrder + 1];\nfinal double[] y = new double[maximalOrder + 1];\nx[0] = getMin();\nx[1] = getStartValue();\nx[2] = getMax();\nverifySequence(x[0], x[1], x[2]);\ny[1] = computeObjectiveValue(x[1]);\nif (Precision.equals(y[1], 0.0, 1)) {\ny[0] = computeObjectiveValue(x[0]);\nif (Precision.equals(y[0], 0.0, 1)) {\nif (y[0] * y[1] < 0) {\nnbPoints        = 2;\nsignChangeIndex = 1;\nfinal double[] tmpX = new double[x.length];\ndouble xA    = x[signChangeIndex - 1];\ndouble yA    = y[signChangeIndex - 1];\ndouble absYA = FastMath.abs(yA);\nint agingA   = 0;\ndouble xB    = x[signChangeIndex];\ndouble yB    = y[signChangeIndex];\ndouble absYB = FastMath.abs(yB);\nint agingB   = 0;\nfinal double xTol = getAbsoluteAccuracy() +\nif (((xB - xA) <= xTol) || (FastMath.max(absYA, absYB) < getFunctionValueAccuracy())) {\nif (agingA >= MAXIMAL_AGING) {\ntargetY = -REDUCTION_FACTOR * yB;\n} else if (agingB >= MAXIMAL_AGING) {\ntargetY = 0;\nint start = 0;\nint end   = nbPoints;\nSystem.arraycopy(x, start, tmpX, start, end - start);\nnextX = guessX(targetY, tmpX, y, start, end);\nif (!((nextX > xA) && (nextX < xB))) {\nif (signChangeIndex - start >= end - signChangeIndex) {\n--end;\nnextX = Double.NaN;\n} while (Double.isNaN(nextX) && (end - start > 1));\nif (Double.isNaN(nextX)) {\nfinal double nextY = computeObjectiveValue(nextX);\nif (Precision.equals(nextY, 0.0, 1)) {\nif ((nbPoints > 2) && (end - start != nbPoints)) {\nnbPoints = end - start;\nSystem.arraycopy(x, start, x, 0, nbPoints);\nSystem.arraycopy(y, start, y, 0, nbPoints);\nsignChangeIndex -= start;\n} else  if (nbPoints == x.length) {\nSystem.arraycopy(x, signChangeIndex, x, signChangeIndex + 1, nbPoints - signChangeIndex);\nx[signChangeIndex] = nextX;\nSystem.arraycopy(y, signChangeIndex, y, signChangeIndex + 1, nbPoints - signChangeIndex);\ny[signChangeIndex] = nextY;\n++nbPoints;\nif (nextY * yA <= 0) {\nxB = nextX;\nyB = nextY;\nabsYB = FastMath.abs(yB);\n++agingA;\nagingB = 0;\n}\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.exception.MathIllegalStateException:getContext()Lorg/apache/commons/math/exception/util/ExceptionContext;",
+            "method_body": "public ExceptionContext getContext() {\nreturn context;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:resetCount()V",
+            "method_body": "public void resetCount() {\ncount = 0;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor$1:trigger(I)V",
+            "method_body": "public void trigger(int max) {\nthrow new MaxCountExceededException(max);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:solve(ILorg/apache/commons/math/analysis/UnivariateFunction;DDD)D",
+            "method_body": "public double solve(int maxEval, FUNC f, double min, double max, double startValue) {\nsetup(maxEval, f, min, max, startValue);\nreturn doSolve();\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:<init>(ILorg/apache/commons/math/util/Incrementor$MaxCountExceededCallback;)V",
+            "method_body": "public Incrementor(int max,\nMaxCountExceededCallback cb) {\nmaximalCount = max;\nmaxCountCallback = cb;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.MathUtils:checkNotNull(Ljava/lang/Object;)V",
+            "method_body": "public static void checkNotNull(Object o)\nif (o == null) {\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.Incrementor:incrementCount()V",
+            "method_body": "public void incrementCount() {\nif (++count > maximalCount) {\nmaxCountCallback.trigger(maximalCount);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:getMin()D",
+            "method_body": "public double getMin() {\nreturn searchMin;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:getRelativeAccuracy()D",
+            "method_body": "public double getRelativeAccuracy() {\nreturn relativeAccuracy;\n}",
+            "method_id": 19
+        }
+    ]
+}

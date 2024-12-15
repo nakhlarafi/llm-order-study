@@ -1,0 +1,109 @@
+{
+    "bug_id": 17,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug3476684_adjustOffset",
+    "test_body": "1249: public void testBug3476684_adjustOffset() {\n1250: final DateTimeZone zone = DateTimeZone.forID(\"America/Sao_Paulo\");\n1251: DateTime base = new DateTime(2012, 2, 25, 22, 15, zone);\n1252: DateTime baseBefore = base.plusHours(1);  // 23:15 (first)\n1253: DateTime baseAfter = base.plusHours(2);  // 23:15 (second)\n1254: 1255: assertSame(base, base.withEarlierOffsetAtOverlap());\n1256: assertSame(base, base.withLaterOffsetAtOverlap());\n1257: 1258: assertSame(baseBefore, baseBefore.withEarlierOffsetAtOverlap());\n1259: assertEquals(baseAfter, baseBefore.withLaterOffsetAtOverlap());\n1260: 1261: assertSame(baseAfter, baseAfter.withLaterOffsetAtOverlap());\n1262: assertEquals(baseBefore, baseAfter.withEarlierOffsetAtOverlap());\n1263: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2012-02-25T23:15:00.000-03:00> but was:<2012-02-25T23:15:00.000-02:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug3476684_adjustOffset(TestDateTimeZoneCutover.java:1259)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.chrono.BasicGJChronology:getDaysInYearMonth(II)I",
+            "method_body": "int getDaysInYearMonth(int year, int month) {\nif (isLeapYear(year)) {\nreturn MAX_DAYS_PER_MONTH_ARRAY[month - 1];\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYear(J)I",
+            "method_body": "int getYear(long instant) {\nlong unitMillis = getAverageMillisPerYearDividedByTwo();\nlong i2 = (instant >> 1) + getApproxMillisAtEpochDividedByTwo();\nif (i2 < 0) {\nint year = (int) (i2 / unitMillis);\nlong yearStart = getYearMillis(year);\nlong diff = instant - yearStart;\nif (diff < 0) {\n} else if (diff >= DateTimeConstants.MILLIS_PER_DAY * 365L) {\nreturn year;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicGJChronology:getTotalMillisByYearMonth(II)J",
+            "method_body": "long getTotalMillisByYearMonth(int year, int month) {\nif (isLeapYear(year)) {\nreturn MAX_TOTAL_MILLIS_BY_MONTH_ARRAY[month - 1];\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getMinYear()I",
+            "method_body": "int getMinYear() {\nreturn MIN_YEAR;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:calculateFirstDayOfYearMillis(I)J",
+            "method_body": "long calculateFirstDayOfYearMillis(int year) {\nint leapYears = year / 100;\nif (year < 0) {\nleapYears = (year >> 2) - leapYears + (leapYears >> 2);\nif (isLeapYear(year)) {\nleapYears--;\nreturn (year * 365L + (leapYears - DAYS_0000_TO_1970)) * DateTimeConstants.MILLIS_PER_DAY;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:isLeapYear(I)Z",
+            "method_body": "boolean isLeapYear(int year) {\nreturn ((year & 3) == 0) && ((year % 100) != 0 || (year % 400) == 0);\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.joda.time.base.BaseDateTime:checkInstant(JLorg/joda/time/Chronology;)J",
+            "method_body": "protected long checkInstant(long instant, Chronology chronology) {\nreturn instant;\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearMonthDayMillis(III)J",
+            "method_body": "long getYearMonthDayMillis(int year, int month, int dayOfMonth) {\nlong millis = getYearMillis(year);\nmillis += getTotalMillisByYearMonth(year, month);\nreturn millis + (dayOfMonth - 1) * (long)DateTimeConstants.MILLIS_PER_DAY;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.joda.time.base.BaseDateTime:checkChronology(Lorg/joda/time/Chronology;)Lorg/joda/time/Chronology;",
+            "method_body": "protected Chronology checkChronology(Chronology chronology) {\nreturn DateTimeUtils.getChronology(chronology);\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractDateTime:<init>()V",
+            "method_body": "protected AbstractDateTime() {\nsuper();\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearMillis(I)J",
+            "method_body": "long getYearMillis(int year) {\nreturn getYearInfo(year).iFirstDayMillis;\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearInfo(I)Lorg/joda/time/chrono/BasicChronology$YearInfo;",
+            "method_body": "abstract long getAverageMillisPerYear();\nYearInfo info = iYearInfoCache[year & CACHE_MASK];\nif (info == null || info.iYear != year) {\ninfo = new YearInfo(year, calculateFirstDayOfYearMillis(year));\niYearInfoCache[year & CACHE_MASK] = info;\nreturn info;\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology$YearInfo:<init>(IJ)V",
+            "method_body": "YearInfo(int year, long firstDayMillis) {\niYear = year;\niFirstDayMillis = firstDayMillis;\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractInstant:<init>()V",
+            "method_body": "protected AbstractInstant() {\nsuper();\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJEraDateTimeField:getDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getDurationField() {\nreturn UnsupportedDurationField.getInstance(DurationFieldType.eras());\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GJEraDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn null;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone:hashCode()I",
+            "method_body": "public int hashCode() {\nreturn iZone.hashCode();\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ISOChronology:withUTC()Lorg/joda/time/Chronology;",
+            "method_body": "public Chronology withUTC() {\nreturn INSTANCE_UTC;\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.joda.time.field.UnsupportedDurationField:getUnitMillis()J",
+            "method_body": "public long getUnitMillis() {\nreturn 0;\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology:useTimeArithmetic(Lorg/joda/time/DurationField;)Z",
+            "method_body": "static boolean useTimeArithmetic(DurationField field) {\nreturn field != null && field.getUnitMillis() < DateTimeConstants.MILLIS_PER_HOUR * 12;\n}",
+            "method_id": 99
+        }
+    ]
+}

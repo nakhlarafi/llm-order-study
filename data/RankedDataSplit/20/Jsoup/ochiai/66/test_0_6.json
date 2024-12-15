@@ -1,0 +1,109 @@
+{
+    "bug_id": 66,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.ElementTest.testNextElementSiblingAfterClone",
+    "test_body": "public void testNextElementSiblingAfterClone() {\n// via https://github.com/jhy/jsoup/issues/951\nString html = \"<!DOCTYPE html><html lang=\\\"en\\\"><head></head><body><div>Initial element</div></body></html>\";\nString expectedText = \"New element\";\nString cloneExpect = \"New element in clone\";\n1221: Document original = Jsoup.parse(html);\nDocument clone = original.clone();\n1224: Element originalElement = original.body().child(0);\noriginalElement.after(\"<div>\" + expectedText + \"</div>\");\nElement originalNextElementSibling = originalElement.nextElementSibling();\nElement originalNextSibling = (Element) originalElement.nextSibling();\nassertEquals(expectedText, originalNextElementSibling.text());\nassertEquals(expectedText, originalNextSibling.text());\n1231: Element cloneElement = clone.body().child(0);\ncloneElement.after(\"<div>\" + cloneExpect + \"</div>\");\nElement cloneNextElementSibling = cloneElement.nextElementSibling();\nElement cloneNextSibling = (Element) cloneElement.nextSibling();\nassertEquals(cloneExpect, cloneNextElementSibling.text());\nassertEquals(cloneExpect, cloneNextSibling.text());",
+    "stack_trace": "java.lang.NullPointerException\nat org.jsoup.nodes.ElementTest.testNextElementSiblingAfterClone(ElementTest.java:1235)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Element:accumulateParents(Lorg/jsoup/nodes/Element;Lorg/jsoup/select/Elements;)V",
+            "method_body": "private static void accumulateParents(Element el, Elements parents) {\nElement parent = el.parent();\nif (parent != null && !parent.tagName().equals(\"#root\")) {\nparents.add(parent);\naccumulateParents(parent, parents);\n}",
+            "method_id": 120
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:child(I)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element child(int index) {\nreturn childElementsList().get(index);\n}",
+            "method_id": 121
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:childElementsList()Ljava/util/List;",
+            "method_body": "private List<Element> childElementsList() {\nif (shadowChildrenRef == null || (children = shadowChildrenRef.get()) == null) {\nfinal int size = childNodes.size();\nchildren = new ArrayList<>(size);\nfor (int i = 0; i < size; i++) {\nfinal Node node = childNodes.get(i);\nif (node instanceof Element)\nchildren.add((Element) node);\nshadowChildrenRef = new WeakReference<>(children);\nreturn children;\n}",
+            "method_id": 122
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:nodelistChanged()V",
+            "method_body": "void nodelistChanged() {\nsuper.nodelistChanged();\nshadowChildrenRef = null;\n}",
+            "method_id": 123
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendChild(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendChild(Node child) {\nValidate.notNull(child);\nreparentChild(child);\nensureChildNodes();\nchildNodes.add(child);\nchild.setSiblingIndex(childNodes.size() - 1);\nreturn this;\n}",
+            "method_id": 124
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:after(Ljava/lang/String;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element after(String html) {\nreturn (Element) super.after(html);\n}",
+            "method_id": 125
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:nextElementSibling()Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element nextElementSibling() {\nif (parentNode == null) return null;\nList<Element> siblings = parent().childElementsList();\nInteger index = indexInList(this, siblings);\nValidate.notNull(index);\nif (siblings.size() > index+1)\nreturn siblings.get(index+1);\nreturn null;\n}",
+            "method_id": 126
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:indexInList(Lorg/jsoup/nodes/Element;Ljava/util/List;)I",
+            "method_body": "private static <E extends Element> int indexInList(Element search, List<E> elements) {\nfor (int i = 0; i < elements.size(); i++) {\nif (elements.get(i) == search)\nreturn i;\n}",
+            "method_id": 127
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:text()Ljava/lang/String;",
+            "method_body": "public String text() {\nfinal StringBuilder accum = new StringBuilder();\nNodeTraversor.traverse(new NodeVisitor() {\nif (node instanceof TextNode) {\nTextNode textNode = (TextNode) node;\nappendNormalisedText(accum, textNode);\n} else if (node instanceof Element) {\nElement element = (Element) node;\nif (accum.length() > 0 &&\n}\n}\nreturn accum.toString().trim();\n}",
+            "method_id": 128
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendNormalisedText(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/TextNode;)V",
+            "method_body": "private static void appendNormalisedText(StringBuilder accum, TextNode textNode) {\nString text = textNode.getWholeText();\nif (preserveWhitespace(textNode.parentNode))\nStringUtil.appendNormalisedWhitespace(accum, text, TextNode.lastCharIsWhitespace(accum));\n}",
+            "method_id": 129
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:preserveWhitespace(Lorg/jsoup/nodes/Node;)Z",
+            "method_body": "static boolean preserveWhitespace(Node node) {\nif (node != null && node instanceof Element) {\nElement element = (Element) node;\nreturn element.tag.preserveWhitespace() ||\n}",
+            "method_id": 130
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:clone()Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element clone() {\nreturn (Element) super.clone();\n}",
+            "method_id": 131
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:doClone(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "protected Element doClone(Node parent) {\nElement clone = (Element) super.doClone(parent);\nclone.attributes = attributes != null ? attributes.clone() : null;\nclone.baseUri = baseUri;\nclone.childNodes = new NodeList(childNodes.size());\nclone.childNodes.addAll(childNodes);\nreturn clone;\n}",
+            "method_id": 132
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:<init>(Ljava/lang/String;)V",
+            "method_body": "public Document(String baseUri) {\nsuper(Tag.valueOf(\"#root\", ParseSettings.htmlDefault), baseUri);\nthis.location = baseUri;\n}",
+            "method_id": 133
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:body()Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element body() {\nreturn findFirstElementByTagName(\"body\", this);\n}",
+            "method_id": 134
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:findFirstElementByTagName(Ljava/lang/String;Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "private Element findFirstElementByTagName(String tag, Node node) {\nif (node.nodeName().equals(tag))\nreturn (Element) node;\nint size = node.childNodeSize();\nfor (int i = 0; i < size; i++) {\nElement found = findFirstElementByTagName(tag, node.childNode(i));\nif (found != null)\nreturn found;\nreturn null;\n}",
+            "method_id": 135
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:nodeName()Ljava/lang/String;",
+            "method_body": "public String nodeName() {\nreturn \"#document\";\n}",
+            "method_id": 136
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:clone()Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document clone() {\nDocument clone = (Document) super.clone();\nclone.outputSettings = this.outputSettings.clone();\nreturn clone;\n}",
+            "method_id": 137
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:quirksMode()Lorg/jsoup/nodes/Document$QuirksMode;",
+            "method_body": "public QuirksMode quirksMode() {\nreturn quirksMode;\n}",
+            "method_id": 138
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:quirksMode(Lorg/jsoup/nodes/Document$QuirksMode;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document quirksMode(QuirksMode quirksMode) {\nthis.quirksMode = quirksMode;\nreturn this;\n}",
+            "method_id": 139
+        }
+    ]
+}

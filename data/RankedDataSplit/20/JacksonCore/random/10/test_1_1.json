@@ -1,0 +1,64 @@
+{
+    "bug_id": 10,
+    "test_id": 1,
+    "test_name": "com.fasterxml.jackson.core.sym.TestSymbolTables.testSyntheticWithBytesNew",
+    "test_body": "public void testSyntheticWithBytesNew() throws IOException\n{\n// pass seed, to keep results consistent:\nfinal int SEED = 33333;\nByteQuadsCanonicalizer symbols =\nByteQuadsCanonicalizer.createRoot(SEED).makeChild(JsonFactory.Feature.collectDefaults());\n71: final int COUNT = 12000;\nfor (int i = 0; i < COUNT; ++i) {\nString id = fieldNameFor(i);\nint[] quads = calcQuads(id.getBytes(\"UTF-8\"));\nsymbols.addName(id, quads, quads.length);\n}\nassertEquals(COUNT, symbols.size());\nassertEquals(16384, symbols.bucketCount());\n80: // fragile, but essential to verify low collision counts;\n// anywhere between 70-80% primary matches\nassertEquals(8534, symbols.primaryCount());\n// secondary between 10-20%",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<8534> but was:<8524>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:234)\nat junit.framework.Assert.assertEquals(Assert.java:241)\nat junit.framework.TestCase.assertEquals(TestCase.java:409)\nat com.fasterxml.jackson.core.sym.TestSymbolTables.testSyntheticWithBytesNew(TestSymbolTables.java:82)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:<init>(Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;ZIZLcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;)V",
+            "method_body": "private ByteQuadsCanonicalizer(ByteQuadsCanonicalizer parent, boolean intern,\n{\n_parent = parent;\n_seed = seed;\n_intern = intern;\n_failOnDoS = failOnDoS;\n_tableInfo = null; // not used by child tables\n_count = state.count;\n_hashSize = state.size;\n_secondaryStart = _hashSize << 2; // right after primary area\n_tertiaryStart = _secondaryStart + (_secondaryStart >> 1); // right after secondary\n_tertiaryShift = state.tertiaryShift;\n_hashArea = state.mainHash;\n_names = state.names;\n_spilloverEnd = state.spilloverEnd;\n_longNameOffset = state.longNameOffset;\n_needRehash = false;\n_hashShared = true;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledIn(I)Z",
+            "method_body": "public boolean enabledIn(int flags) { return (flags & getMask()) != 0; }\npublic boolean enabledIn(int flags) { return (flags & getMask()) != 0; }",
+            "method_id": 21
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:<init>()V",
+            "method_body": "private final static int MAX_ENTRIES = 180;\npublic final static InternCache instance = new InternCache();\nprivate final Object lock = new Object();\nprivate InternCache() { super(MAX_ENTRIES, 0.8f, 4); }",
+            "method_id": 22
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_calcOffset(I)I",
+            "method_body": "private final int _calcOffset(int hash)\nint ix = hash & (_hashSize-1);\nreturn (ix << 2);\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash([II)I",
+            "method_body": "public int calcHash(int[] q, int qlen)\nif (qlen < 4) {\nint hash = q[0] ^ _seed;\nhash += (hash >>> 9);\nhash += q[1];\nhash += (hash >>> 15);\nhash *= MULT;\nhash ^= q[2];\nhash += (hash >>> 4);\nfor (int i = 3; i < qlen; ++i) {\nint next = q[i];\nnext = next ^ (next >> 21);\nhash += next;\nhash *= MULT2;\nhash += (hash >>> 19);\nhash ^= (hash << 5);\nreturn hash;\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_findOffsetForAdd(I)I",
+            "method_body": "private int _findOffsetForAdd(int hash)\nint offset = _calcOffset(hash);\nfinal int[] hashArea = _hashArea;\nif (hashArea[offset+3] == 0) {\nreturn offset;\nint offset2 = _secondaryStart + ((offset >> 3) << 2);\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset2 = _tertiaryStart + ((offset >> (_tertiaryShift + 2)) << _tertiaryShift);\nfinal int bucketSize = (1 << _tertiaryShift);\nfor (int end = offset2 + bucketSize; offset2 < end; offset2 += 4) {\nif (hashArea[offset2+3] == 0) {\nreturn offset2;\noffset = _spilloverEnd;\n_spilloverEnd += 4;\nif (_spilloverEnd >= hashArea.length) {\nif (_failOnDoS) {\n_reportTooManyCollisions();\n_needRehash = true;\nreturn offset;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:bucketCount()I",
+            "method_body": "public int bucketCount() { return _hashSize; }\npublic int bucketCount() { return _hashSize; }",
+            "method_id": 26
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:calcHash(II)I",
+            "method_body": "public int calcHash(int q1, int q2)\nint hash = q1;\nhash += (hash >>> 15); // try mixing first and second byte pairs first\nhash ^= (hash >>> 9); // as well as lowest 2 bytes\nhash += (q2 * MULT); // then add second quad\nhash ^= _seed;\nhash += (hash >>> 16); // and shuffle some more\nhash ^= (hash >>> 4);\nhash += (hash << 3);\nreturn hash;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifyNeedForRehash()V",
+            "method_body": "private void _verifyNeedForRehash() {\nif (_count > (_hashSize >> 1)) { // over 50%\nint spillCount = (_spilloverEnd - _spilloverStart()) >> 2;\nif ((spillCount > (1 + _count >> 7))\n_needRehash = true;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:primaryCount()I",
+            "method_body": "public int primaryCount()\nint count = 0;\nfor (int offset = 3, end = _secondaryStart; offset < end; offset += 4) {\nif (_hashArea[offset] != 0) {\n++count;\nreturn count;\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:nukeSymbols(Z)V",
+            "method_body": "private void nukeSymbols(boolean fill) {\n_count = 0;\n_spilloverEnd = _spilloverStart();\n_longNameOffset = _hashSize << 3;\nif (fill) {\n}",
+            "method_id": 30
+        }
+    ]
+}

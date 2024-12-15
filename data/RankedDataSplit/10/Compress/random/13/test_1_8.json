@@ -1,0 +1,59 @@
+{
+    "bug_id": 13,
+    "test_id": 1,
+    "test_name": "org.apache.commons.compress.archivers.zip.ZipFileTest.testWinzipBackSlashWorkaround",
+    "test_body": "145: public void testWinzipBackSlashWorkaround() throws Exception {\n146: URL zip = getClass().getResource(\"/test-winzip.zip\");\n147: File archive = new File(new URI(zip.toString()));\n148: zf = new ZipFile(archive);\n149: assertNull(zf.getEntry(\"\\u00e4\\\\\\u00fc.txt\"));\n150: assertNotNull(zf.getEntry(\"\\u00e4/\\u00fc.txt\"));\n151: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:<init>(Ljava/io/File;Ljava/lang/String;Z)V",
+            "method_body": "public ZipFile(File f, String encoding, boolean useUnicodeExtraFields)\nthrows IOException {\nthis.archiveName = f.getAbsolutePath();\nthis.encoding = encoding;\nthis.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.useUnicodeExtraFields = useUnicodeExtraFields;\narchive = new RandomAccessFile(f, \"r\");\nboolean success = false;\nMap<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag =\nresolveLocalFileHeaderData(entriesWithoutUTF8Flag);\nsuccess = true;\nif (!success) {\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setExtraFields([Lorg/apache/commons/compress/archivers/zip/ZipExtraField;)V",
+            "method_body": "public void setExtraFields(ZipExtraField[] fields) {\nextraFields = new LinkedHashMap<ZipShort, ZipExtraField>();\nfor (int i = 0; i < fields.length; i++) {\nif (fields[i] instanceof UnparseableExtraFieldData) {\nextraFields.put(fields[i].getHeaderId(), fields[i]);\nsetExtra();\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.JarMarker:<clinit>()V",
+            "method_body": "private static final ZipShort ID = new ZipShort(0xCAFE);\nprivate static final ZipShort NULL = new ZipShort(0);\nprivate static final byte[] NO_BYTES = new byte[0];\nprivate static final JarMarker DEFAULT = new JarMarker();\npublic JarMarker() {\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:readCentralDirectoryEntry(Ljava/util/Map;)V",
+            "method_body": "private void\nbyte[] cfh = new byte[CFH_LEN];\narchive.readFully(cfh);\nint off = 0;\nZipArchiveEntry ze = new ZipArchiveEntry();\nint versionMadeBy = ZipShort.getValue(cfh, off);\noff += SHORT;\nze.setPlatform((versionMadeBy >> BYTE_SHIFT) & NIBLET_MASK);\noff += SHORT; // skip version info\nfinal GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(cfh, off);\nfinal boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();\nfinal ZipEncoding entryEncoding =\nze.setGeneralPurposeBit(gpFlag);\noff += SHORT;\nze.setMethod(ZipShort.getValue(cfh, off));\noff += SHORT;\nlong time = ZipUtil.dosToJavaTime(ZipLong.getValue(cfh, off));\nze.setTime(time);\noff += WORD;\nze.setCrc(ZipLong.getValue(cfh, off));\noff += WORD;\nze.setCompressedSize(ZipLong.getValue(cfh, off));\noff += WORD;\nze.setSize(ZipLong.getValue(cfh, off));\noff += WORD;\nint fileNameLen = ZipShort.getValue(cfh, off);\noff += SHORT;\nint extraLen = ZipShort.getValue(cfh, off);\noff += SHORT;\nint commentLen = ZipShort.getValue(cfh, off);\noff += SHORT;\nint diskStart = ZipShort.getValue(cfh, off);\noff += SHORT;\nze.setInternalAttributes(ZipShort.getValue(cfh, off));\noff += SHORT;\nze.setExternalAttributes(ZipLong.getValue(cfh, off));\noff += WORD;\nbyte[] fileName = new byte[fileNameLen];\narchive.readFully(fileName);\nze.setName(entryEncoding.decode(fileName), fileName);\nOffsetEntry offset = new OffsetEntry();\noffset.headerOffset = ZipLong.getValue(cfh, off);\nentries.put(ze, offset);\nnameMap.put(ze.getName(), ze);\nbyte[] cdExtraData = new byte[extraLen];\narchive.readFully(cdExtraData);\nze.setCentralDirectoryExtra(cdExtraData);\nsetSizesAndOffsetFromZip64Extra(ze, offset, diskStart);\nbyte[] comment = new byte[commentLen];\narchive.readFully(comment);\nze.setComment(entryEncoding.decode(comment));\nif (!hasUTF8Flag && useUnicodeExtraFields) {\nnoUTF8Flag.put(ze, new NameAndComment(fileName, comment));\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipShort:<init>(I)V",
+            "method_body": "public ZipShort (int value) {\nthis.value = value;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:<clinit>()V",
+            "method_body": "private static final Map<String, SimpleEncodingHolder> simpleEncodings;\nsimpleEncodings = new HashMap<String, SimpleEncodingHolder>();\nchar[] cp437_high_chars =\nSimpleEncodingHolder cp437 = new SimpleEncodingHolder(cp437_high_chars);\nsimpleEncodings.put(\"CP437\",cp437);\nsimpleEncodings.put(\"Cp437\",cp437);\nsimpleEncodings.put(\"cp437\",cp437);\nsimpleEncodings.put(\"IBM437\",cp437);\nsimpleEncodings.put(\"ibm437\",cp437);\nchar[] cp850_high_chars =\nSimpleEncodingHolder cp850 = new SimpleEncodingHolder(cp850_high_chars);\nsimpleEncodings.put(\"CP850\",cp850);\nsimpleEncodings.put(\"Cp850\",cp850);\nsimpleEncodings.put(\"cp850\",cp850);\nsimpleEncodings.put(\"IBM850\",cp850);\nsimpleEncodings.put(\"ibm850\",cp850);\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Zip64ExtendedInformationExtraField:<clinit>()V",
+            "method_body": "static final ZipShort HEADER_ID = new ZipShort(0x0001);\n* parseFromCentralDirectoryData} so it can be reused when ZipFile",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.UnrecognizedExtraField:getHeaderId()Lorg/apache/commons/compress/archivers/zip/ZipShort;",
+            "method_body": "public ZipShort getHeaderId() {\nreturn headerId;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:setName(Ljava/lang/String;[B)V",
+            "method_body": "protected void setName(String name, byte[] rawName) {\nsetName(name);\nthis.rawName = rawName;\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.AbstractUnicodeExtraField:getLocalFileDataLength()Lorg/apache/commons/compress/archivers/zip/ZipShort;",
+            "method_body": "public ZipShort getLocalFileDataLength() {\nreturn getCentralDirectoryLength();\n}",
+            "method_id": 89
+        }
+    ]
+}

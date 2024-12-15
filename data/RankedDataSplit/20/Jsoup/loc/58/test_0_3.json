@@ -1,0 +1,129 @@
+{
+    "bug_id": 58,
+    "test_id": 0,
+    "test_name": "org.jsoup.safety.CleanerTest.testIsValidBodyHtml",
+    "test_body": "145: @Test public void testIsValidBodyHtml() {\n146: String ok = \"<p>Test <b><a href='http://example.com/' rel='nofollow'>OK</a></b></p>\";\n147: String ok1 = \"<p>Test <b><a href='http://example.com/'>OK</a></b></p>\"; // missing enforced is OK because still needs run thru cleaner\n148: String nok1 = \"<p><script></script>Not <b>OK</b></p>\";\n149: String nok2 = \"<p align=right>Test Not <b>OK</b></p>\";\n150: String nok3 = \"<!-- comment --><p>Not OK</p>\"; // comments and the like will be cleaned\n151: String nok4 = \"<html><head>Foo</head><body><b>OK</b></body></html>\"; // not body html\n152: String nok5 = \"<p>Test <b><a href='http://example.com/' rel='nofollowme'>OK</a></b></p>\";\n153: String nok6 = \"<p>Test <b><a href='http://example.com/'>OK</b></p>\"; // missing close tag\n154: String nok7 = \"</div>What\";\n155: assertTrue(Jsoup.isValid(ok, Whitelist.basic()));\n156: assertTrue(Jsoup.isValid(ok1, Whitelist.basic()));\n157: assertFalse(Jsoup.isValid(nok1, Whitelist.basic()));\n158: assertFalse(Jsoup.isValid(nok2, Whitelist.basic()));\n159: assertFalse(Jsoup.isValid(nok3, Whitelist.basic()));\n160: assertFalse(Jsoup.isValid(nok4, Whitelist.basic()));\n161: assertFalse(Jsoup.isValid(nok5, Whitelist.basic()));\n162: assertFalse(Jsoup.isValid(nok6, Whitelist.basic()));\n163: assertFalse(Jsoup.isValid(ok, Whitelist.none()));\n164: assertFalse(Jsoup.isValid(nok7, Whitelist.basic()));\n165: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insert(Lorg/jsoup/parser/Token$Character;)V",
+            "method_body": "void insert(Token.Character characterToken) {\nString tagName = currentElement().tagName();\nif (tagName.equals(\"script\") || tagName.equals(\"style\"))\nnode = new DataNode(characterToken.getData(), baseUri);\nnode = new TextNode(characterToken.getData(), baseUri);\ncurrentElement().appendChild(node); // doesn't use insertNode, because we don't foster these; and will always have a stack.\n}",
+            "method_id": 60,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insertNode(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "private void insertNode(Node node) {\nif (stack.size() == 0)\ndoc.appendChild(node);\nelse if (isFosterInserts())\ncurrentElement().appendChild(node);\nif (node instanceof Element && ((Element) node).tag().isFormListed()) {\n}",
+            "method_id": 61,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:popStackToClose(Ljava/lang/String;)V",
+            "method_body": "void popStackToClose(String elName) {\nfor (int pos = stack.size() -1; pos >= 0; pos--) {\nElement next = stack.get(pos);\nstack.remove(pos);\nif (next.nodeName().equals(elName))\nbreak;\n}",
+            "method_id": 62,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:removeFromActiveFormattingElements(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "void removeFromActiveFormattingElements(Element el) {\nfor (int pos = formattingElements.size() -1; pos >= 0; pos--) {\nElement next = formattingElements.get(pos);\nif (next == el) {\nformattingElements.remove(pos);\nbreak;\n}",
+            "method_id": 63,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:getIgnoreCase(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String getIgnoreCase(String key) {\nValidate.notEmpty(key);\nif (attributes == null)\nfor (String attrKey : attributes.keySet()) {\nif (attrKey.equalsIgnoreCase(key))\nreturn attributes.get(attrKey).getValue();\n}",
+            "method_id": 64,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.ParseSettings:normalizeAttributes(Lorg/jsoup/nodes/Attributes;)Lorg/jsoup/nodes/Attributes;",
+            "method_body": "Attributes normalizeAttributes(Attributes attributes) {\nif (!preserveAttributeCase) {\nfor (Attribute attr : attributes) {\nattr.setKey(attr.getKey().toLowerCase());\n}\nreturn attributes;\n}",
+            "method_id": 65,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:<init>(Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "protected Node(String baseUri, Attributes attributes) {\nValidate.notNull(baseUri);\nValidate.notNull(attributes);\nchildNodes = EMPTY_NODES;\nthis.baseUri = baseUri.trim();\nthis.attributes = attributes;\n}",
+            "method_id": 66,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:removeChild(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void removeChild(Node out) {\nValidate.isTrue(out.parentNode == this);\nfinal int index = out.siblingIndex;\nchildNodes.remove(index);\nreindexChildren(index);\nout.parentNode = null;\n}",
+            "method_id": 67,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeTo(C)Ljava/lang/String;",
+            "method_body": "public String consumeTo(char c) {\nint offset = nextIndexOf(c);\nif (offset != -1) {\nString consumed = cacheString(pos, offset);\npos += offset;\nreturn consumed;\n}",
+            "method_id": 68,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matches(Ljava/lang/String;)Z",
+            "method_body": "boolean matches(String seq) {\nint scanLength = seq.length();\nif (scanLength > length - pos)\nfor (int offset = 0; offset < scanLength; offset++)\nif (seq.charAt(offset) != input[pos+offset])\nreturn true;\n}",
+            "method_id": 69,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$34:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.tagPending.newAttribute();\nr.unconsume();\nt.transition(AttributeName);\n}",
+            "method_id": 70,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$47:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.current();\nswitch (c) {\nt.advanceTransition(CommentEndDash);\nbreak;\nt.commentPending.data.append(r.consumeToAny('-', nullChar));\n}",
+            "method_id": 71,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$49:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.emitCommentPending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 72,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.jsoup.safety.Cleaner:isValid(Lorg/jsoup/nodes/Document;)Z",
+            "method_body": "public boolean isValid(Document dirtyDocument) {\nValidate.notNull(dirtyDocument);\nDocument clean = Document.createShell(dirtyDocument.baseUri());\nint numDiscarded = copySafeNodes(dirtyDocument.body(), clean.body());\nreturn numDiscarded == 0;\n}",
+            "method_id": 73,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:<init>(Ljava/lang/String;)V",
+            "method_body": "private OutputSettings outputSettings = new OutputSettings();\nprivate QuirksMode quirksMode = QuirksMode.noQuirks;\nprivate boolean updateMetaCharset = false;\nsuper(Tag.valueOf(\"#root\", ParseSettings.htmlDefault), baseUri);\nthis.location = baseUri;\n}",
+            "method_id": 74,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:insert(Lorg/jsoup/parser/Token$StartTag;)Lorg/jsoup/nodes/Element;",
+            "method_body": "Element insert(Token.StartTag startTag) {\nif (startTag.isSelfClosing()) {\nElement el = new Element(Tag.valueOf(startTag.name(), settings), baseUri, settings.normalizeAttributes(startTag.attributes));\ninsert(el);\nreturn el;\n}",
+            "method_id": 75,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:isElementInQueue(Ljava/util/ArrayList;Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "private boolean isElementInQueue(ArrayList<Element> queue, Element element) {\nfor (int pos = queue.size() -1; pos >= 0; pos--) {\nElement next = queue.get(pos);\nif (next == element) {\nreturn true;\n}",
+            "method_id": 76,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:put(Lorg/jsoup/nodes/Attribute;)V",
+            "method_body": "public void put(Attribute attribute) {\nValidate.notNull(attribute);\nif (attributes == null)\nattributes = new LinkedHashMap<String, Attribute>(2);\nattributes.put(attribute.getKey(), attribute);\n}",
+            "method_id": 77,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:hasKeyIgnoreCase(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasKeyIgnoreCase(String key) {\nif (attributes == null)\nfor (String attrKey : attributes.keySet()) {\nif (attrKey.equalsIgnoreCase(key))\nreturn true;\n}",
+            "method_id": 78,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:addAll(Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "public void addAll(Attributes incoming) {\nif (incoming.size() == 0)\nreturn;\nif (attributes == null)\nattributes.putAll(incoming.attributes);\n}",
+            "method_id": 79,
+            "loc": 6
+        }
+    ]
+}

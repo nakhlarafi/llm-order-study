@@ -1,0 +1,109 @@
+{
+    "bug_id": 66,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.ElementTest.testNextElementSiblingAfterClone",
+    "test_body": "public void testNextElementSiblingAfterClone() {\n// via https://github.com/jhy/jsoup/issues/951\nString html = \"<!DOCTYPE html><html lang=\\\"en\\\"><head></head><body><div>Initial element</div></body></html>\";\nString expectedText = \"New element\";\nString cloneExpect = \"New element in clone\";\n1221: Document original = Jsoup.parse(html);\nDocument clone = original.clone();\n1224: Element originalElement = original.body().child(0);\noriginalElement.after(\"<div>\" + expectedText + \"</div>\");\nElement originalNextElementSibling = originalElement.nextElementSibling();\nElement originalNextSibling = (Element) originalElement.nextSibling();\nassertEquals(expectedText, originalNextElementSibling.text());\nassertEquals(expectedText, originalNextSibling.text());\n1231: Element cloneElement = clone.body().child(0);\ncloneElement.after(\"<div>\" + cloneExpect + \"</div>\");\nElement cloneNextElementSibling = cloneElement.nextElementSibling();\nElement cloneNextSibling = (Element) cloneElement.nextSibling();\nassertEquals(cloneExpect, cloneNextElementSibling.text());\nassertEquals(cloneExpect, cloneNextSibling.text());",
+    "stack_trace": "java.lang.NullPointerException\nat org.jsoup.nodes.ElementTest.testNextElementSiblingAfterClone(ElementTest.java:1235)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(Ljava/lang/String;)V",
+            "method_body": "void emit(final String str) {\nif (charsString == null) {\ncharsString = str;\n}",
+            "method_id": 180
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:transition(Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "void transition(TokeniserState state) {\nthis.state = state;\n}",
+            "method_id": 181
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:advanceTransition(Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "void advanceTransition(TokeniserState state) {\nreader.advance();\nthis.state = state;\n}",
+            "method_id": 182
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createTagPending(Z)Lorg/jsoup/parser/Token$Tag;",
+            "method_body": "Token.Tag createTagPending(boolean start) {\ntagPending = start ? startPending.reset() : endPending.reset();\nreturn tagPending;\n}",
+            "method_id": 183
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emitTagPending()V",
+            "method_body": "void emitTagPending() {\ntagPending.finaliseTag();\nemit(tagPending);\n}",
+            "method_id": 184
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:createDoctypePending()V",
+            "method_body": "void createDoctypePending() {\ndoctypePending.reset();\n}",
+            "method_id": 185
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emitDoctypePending()V",
+            "method_body": "void emitDoctypePending() {\nemit(doctypePending);\n}",
+            "method_id": 186
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$1:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(TagOpen);\nbreak;\nt.emit(new Token.EOF());\nbreak;\nString data = r.consumeData();\nt.emit(data);\n}",
+            "method_id": 187
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$8:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(MarkupDeclarationOpen);\nbreak;\nt.advanceTransition(EndTagOpen);\nbreak;\nif (r.matchesLetter()) {\nt.createTagPending(true);\nt.transition(TagName);\n}",
+            "method_id": 188
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$9:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.isEmpty()) {\n} else if (r.matchesLetter()) {\nt.createTagPending(false);\nt.transition(TagName);\n}",
+            "method_id": 189
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$10:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString tagName = r.consumeTagName();\nt.tagPending.appendTagName(tagName);\nswitch (r.consume()) {\nt.transition(BeforeAttributeName);\nbreak;\nt.emitTagPending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 190
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$34:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.tagPending.newAttribute();\nr.unconsume();\nt.transition(AttributeName);\n}",
+            "method_id": 191
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$35:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString name = r.consumeToAnySorted(attributeNameCharsSorted);\nt.tagPending.appendAttributeName(name);\nchar c = r.consume();\nswitch (c) {\nt.transition(BeforeAttributeValue);\nbreak;\n}",
+            "method_id": 192
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$37:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.transition(AttributeValue_doubleQuoted);\nbreak;\n}",
+            "method_id": 193
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$38:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nString value = r.consumeToAny(attributeDoubleValueCharsSorted);\nif (value.length() > 0)\nt.tagPending.appendAttributeValue(value);\nchar c = r.consume();\nswitch (c) {\nt.transition(AfterAttributeValue_quoted);\nbreak;\n}",
+            "method_id": 194
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$41:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.emitTagPending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 195
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$44:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchConsume(\"--\")) {\n} else if (r.matchConsumeIgnoreCase(\"DOCTYPE\")) {\nt.transition(Doctype);\n}",
+            "method_id": 196
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$51:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nchar c = r.consume();\nswitch (c) {\nt.transition(BeforeDoctypeName);\nbreak;\n}",
+            "method_id": 197
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$52:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nt.createDoctypePending();\nt.transition(DoctypeName);\nreturn;\n}",
+            "method_id": 198
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$53:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.doctypePending.name.append(name);\nreturn;\nchar c = r.consume();\nswitch (c) {\nt.emitDoctypePending();\nt.transition(Data);\nbreak;\n}",
+            "method_id": 199
+        }
+    ]
+}

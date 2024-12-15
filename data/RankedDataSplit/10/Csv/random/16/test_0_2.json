@@ -1,0 +1,59 @@
+{
+    "bug_id": 16,
+    "test_id": 0,
+    "test_name": "org.apache.commons.csv.CSVParserTest.testIteratorSequenceBreaking",
+    "test_body": "public void testIteratorSequenceBreaking() throws IOException {\nfinal String fiveRows = \"1\\n2\\n3\\n4\\n5\\n\";\n1005: // Iterator hasNext() shouldn't break sequence\nCSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(fiveRows));\nint recordNumber = 0;\nIterator<CSVRecord> iter = parser.iterator();\nrecordNumber = 0;\nwhile (iter.hasNext()) {\nCSVRecord record = iter.next();\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\nif (recordNumber >= 2) {\nbreak;\n}\n}\niter.hasNext();\nwhile (iter.hasNext()) {\nCSVRecord record = iter.next();\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\n}\n1025: // Consecutive enhanced for loops shouldn't break sequence\nparser = CSVFormat.DEFAULT.parse(new StringReader(fiveRows));\nrecordNumber = 0;\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\nif (recordNumber >= 2) {\nbreak;\n}\n}\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\n}\n1040: // Consecutive enhanced for loops with hasNext() peeking shouldn't break sequence\nparser = CSVFormat.DEFAULT.parse(new StringReader(fiveRows));\nrecordNumber = 0;\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\nif (recordNumber >= 2) {\nbreak;\n}\n}\nparser.iterator().hasNext();\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\n}",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<[3]> but was:<[4]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.apache.commons.csv.CSVParserTest.testIteratorSequenceBreaking(CSVParserTest.java:1053)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.csv.CSVFormat:isLineBreak(Ljava/lang/Character;)Z",
+            "method_body": "private static boolean isLineBreak(final Character c) {\nreturn c != null && isLineBreak(c.charValue());\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVParser:iterator()Ljava/util/Iterator;",
+            "method_body": "public Iterator<CSVRecord> iterator() {\nreturn new Iterator<CSVRecord>() {\nreturn CSVParser.this.nextRecord();\nif (CSVParser.this.isClosed()) {\nif (this.current == null) {\nthis.current = this.getNextRecord();\nreturn this.current != null;\nif (CSVParser.this.isClosed()) {\nCSVRecord next = this.current;\nthis.current = null;\nif (next == null) {\nreturn next;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVFormat:getTrim()Z",
+            "method_body": "public boolean getTrim() {\nreturn trim;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVFormat:withAllowMissingColumnNames(Z)Lorg/apache/commons/csv/CSVFormat;",
+            "method_body": "public CSVFormat withAllowMissingColumnNames(final boolean allowMissingColumnNames) {\nreturn new CSVFormat(delimiter, quoteCharacter, quoteMode, commentMarker, escapeCharacter,\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Assertions:notNull(Ljava/lang/Object;Ljava/lang/String;)V",
+            "method_body": "public static void notNull(final Object parameter, final String parameterName) {\nif (parameter == null) {\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVFormat:getHeader()[Ljava/lang/String;",
+            "method_body": "public String[] getHeader() {\nreturn header != null ? header.clone() : null;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:nextToken(Lorg/apache/commons/csv/Token;)Lorg/apache/commons/csv/Token;",
+            "method_body": "Token nextToken(final Token token) throws IOException {\nint lastChar = reader.getLastChar();\nint c = reader.read();\nboolean eol = readEndOfLine(c);\nif (ignoreEmptyLines) {\nwhile (eol && isStartOfLine(lastChar)) {\nif (isEndOfFile(lastChar) || !isDelimiter(lastChar) && isEndOfFile(c)) {\ntoken.type = EOF;\nreturn token;\nif (isStartOfLine(lastChar) && isCommentStart(c)) {\nwhile (token.type == INVALID) {\nif (ignoreSurroundingSpaces) {\nif (isDelimiter(c)) {\n} else if (eol) {\n} else if (isQuoteChar(c)) {\n} else if (isEndOfFile(c)) {\nparseSimpleToken(token, c);\nreturn token;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVFormat:withNullString(Ljava/lang/String;)Lorg/apache/commons/csv/CSVFormat;",
+            "method_body": "public CSVFormat withNullString(final String nullString) {\nreturn new CSVFormat(delimiter, quoteCharacter, quoteMode, commentMarker, escapeCharacter,\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVFormat:<clinit>()V",
+            "method_body": "public static final CSVFormat MYSQL = DEFAULT\n* characters are escaped with {@code '\"'}. The default NULL string is {@code \"\"}. Values are trimmed.",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:isEndOfFile(I)Z",
+            "method_body": "boolean isEndOfFile(final int ch) {\nreturn ch == END_OF_STREAM;\n}",
+            "method_id": 29
+        }
+    ]
+}

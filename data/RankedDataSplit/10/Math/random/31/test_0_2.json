@@ -1,0 +1,34 @@
+{
+    "bug_id": 31,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.distribution.BinomialDistributionTest.testMath718",
+    "test_body": "public void testMath718() {\n// for large trials the evaluation of ContinuedFraction was inaccurate\n// do a sweep over several large trials to test if the current implementation is\n// numerically stable.\n138: for (int trials = 500000; trials < 20000000; trials += 100000) {\nBinomialDistribution dist = new BinomialDistribution(trials, 0.5);\nint p = dist.inverseCumulativeProbability(0.5);\nAssert.assertEquals(trials / 2, p);",
+    "stack_trace": "org.apache.commons.math3.exception.ConvergenceException: illegal state: Continued fraction diverged to NaN for value 0.5\nat org.apache.commons.math3.util.ContinuedFraction.evaluate(ContinuedFraction.java:177)\nat org.apache.commons.math3.special.Beta.regularizedBeta(Beta.java:154)\nat org.apache.commons.math3.special.Beta.regularizedBeta(Beta.java:129)\nat org.apache.commons.math3.special.Beta.regularizedBeta(Beta.java:50)\nat org.apache.commons.math3.distribution.BinomialDistribution.cumulativeProbability(BinomialDistribution.java:101)\nat org.apache.commons.math3.distribution.AbstractIntegerDistribution.checkedCumulativeProbability(AbstractIntegerDistribution.java:201)\nat org.apache.commons.math3.distribution.AbstractIntegerDistribution.solveInverseCumulativeProbability(AbstractIntegerDistribution.java:143)\nat org.apache.commons.math3.distribution.AbstractIntegerDistribution.inverseCumulativeProbability(AbstractIntegerDistribution.java:116)\nat org.apache.commons.math3.distribution.BinomialDistributionTest.testMath718(BinomialDistributionTest.java:140)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.distribution.BinomialDistribution:<init>(ID)V",
+            "method_body": "public BinomialDistribution(int trials, double p) {\nif (trials < 0) {\nif (p < 0 || p > 1) {\nprobabilityOfSuccess = p;\nnumberOfTrials = trials;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:log(D[D)D",
+            "method_body": "private static double log(final double x, final double[] hiPrec) {\nif (x==0) { // Handle special case of +0/-0\nlong bits = Double.doubleToLongBits(x);\nif ((bits & 0x8000000000000000L) != 0 || x != x) {\nif (x == Double.POSITIVE_INFINITY) {\nint exp = (int)(bits >> 52)-1023;\nif ((bits & 0x7ff0000000000000L) == 0) {\nif (exp == -1 || exp == 0) {\nif (x < 1.01 && x > 0.99 && hiPrec == null) {\ndouble lnm[] = lnMant.LN_MANT[(int)((bits & 0x000ffc0000000000L) >> 42)];\ndouble epsilon = (bits & 0x3ffffffffffL) / (TWO_POWER_52 + (bits & 0x000ffc0000000000L));\ndouble lnza = 0.0;\ndouble lnzb = 0.0;\nif (hiPrec != null) {\nlnza = -0.16624882440418567;\nlnza = lnza * epsilon + 0.19999954120254515;\nlnza = lnza * epsilon + -0.2499999997677497;\nlnza = lnza * epsilon + 0.3333333333332802;\nlnza = lnza * epsilon + -0.5;\nlnza = lnza * epsilon + 1.0;\nlnza = lnza * epsilon;\ndouble a = LN_2_A*exp;\ndouble b = 0.0;\ndouble c = a+lnm[0];\ndouble d = -(c-a-lnm[0]);\na = c;\nb = b + d;\nc = a + lnza;\nd = -(c - a - lnza);\na = c;\nb = b + d;\nc = a + LN_2_B*exp;\nd = -(c - a - LN_2_B*exp);\na = c;\nb = b + d;\nc = a + lnm[1];\nd = -(c - a - lnm[1]);\na = c;\nb = b + d;\nc = a + lnzb;\nd = -(c - a - lnzb);\na = c;\nb = b + d;\nif (hiPrec != null) {\nreturn a + b;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.math3.distribution.BinomialDistribution:getSupportLowerBound()I",
+            "method_body": "public int getSupportLowerBound() {\nreturn probabilityOfSuccess < 1.0 ? 0 : numberOfTrials;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.math3.distribution.BinomialDistribution:getNumericalVariance()D",
+            "method_body": "public double getNumericalVariance() {\nfinal double p = probabilityOfSuccess;\nreturn numberOfTrials * p * (1 - p);\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.math3.distribution.AbstractIntegerDistribution:checkedCumulativeProbability(I)D",
+            "method_body": "private double checkedCumulativeProbability(int argument)\ndouble result = Double.NaN;\nresult = cumulativeProbability(argument);\nif (Double.isNaN(result)) {\nreturn result;\n}",
+            "method_id": 24
+        }
+    ]
+}

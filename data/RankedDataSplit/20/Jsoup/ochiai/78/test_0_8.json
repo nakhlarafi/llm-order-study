@@ -1,0 +1,109 @@
+{
+    "bug_id": 78,
+    "test_id": 0,
+    "test_name": "org.jsoup.integration.ConnectTest.handlesEmptyStreamDuringParseRead",
+    "test_body": "public void handlesEmptyStreamDuringParseRead() throws IOException {\n// this handles situations where the remote server sets a content length greater than it actually writes\n394: Connection.Response res = Jsoup.connect(InterruptedServlet.Url)\n.timeout(200)\n.execute();\n398: boolean threw = false;\ntry {\nDocument document = res.parse();\nassertEquals(\"Something\", document.title());",
+    "stack_trace": "org.jsoup.UncheckedIOException: java.io.IOException: Underlying input stream returned zero bytes\nat org.jsoup.parser.CharacterReader.bufferUp(CharacterReader.java:63)\nat org.jsoup.parser.CharacterReader.current(CharacterReader.java:93)\nat org.jsoup.parser.TokeniserState$1.read(TokeniserState.java:12)\nat org.jsoup.parser.Tokeniser.read(Tokeniser.java:45)\nat org.jsoup.parser.TreeBuilder.runParser(TreeBuilder.java:51)\nat org.jsoup.parser.TreeBuilder.parse(TreeBuilder.java:45)\nat org.jsoup.parser.Parser.parseInput(Parser.java:39)\nat org.jsoup.helper.DataUtil.parseInputStream(DataUtil.java:151)\nat org.jsoup.helper.HttpConnection$Response.parse(HttpConnection.java:837)\nat org.jsoup.integration.ConnectTest.handlesEmptyStreamDuringParseRead(ConnectTest.java:400)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:readToByteBuffer(I)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer readToByteBuffer(int max) throws IOException {\nValidate.isTrue(max >= 0, \"maxSize must be 0 (unlimited) or larger\");\nfinal boolean localCapped = max > 0; // still possibly capped in total stream\nfinal int bufferSize = localCapped && max < DefaultSize ? max : DefaultSize;\nfinal byte[] readBuffer = new byte[bufferSize];\nfinal ByteArrayOutputStream outStream = new ByteArrayOutputStream(bufferSize);\nint remaining = max;\nread = read(readBuffer);\nif (read == -1) break;\nif (localCapped) { // this local byteBuffer cap may be smaller than the overall maxSize (like when reading first bytes)\nif (read >= remaining) {\noutStream.write(readBuffer, 0, remaining);\nbreak;\nreturn ByteBuffer.wrap(outStream.toByteArray());\n}",
+            "method_id": 160
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:reset()V",
+            "method_body": "public void reset() throws IOException {\nsuper.reset();\nremaining = maxSize - markpos;\n}",
+            "method_id": 161
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:timeout(JJ)Lorg/jsoup/internal/ConstrainableInputStream;",
+            "method_body": "public ConstrainableInputStream timeout(long startTimeNanos, long timeoutMillis) {\nthis.startTime = startTimeNanos;\nthis.timeout = timeoutMillis * 1000000;\nreturn this;\n}",
+            "method_id": 162
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:expired()Z",
+            "method_body": "private boolean expired() {\nif (timeout == 0)\nfinal long now = System.nanoTime();\nfinal long dur = now - startTime;\nreturn (dur > timeout);\n}",
+            "method_id": 163
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:<init>()V",
+            "method_body": "private HttpConnection() {\nreq = new Request();\nres = new Response();\n}",
+            "method_id": 164
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:connect(Ljava/lang/String;)Lorg/jsoup/Connection;",
+            "method_body": "public static Connection connect(String url) {\nConnection con = new HttpConnection();\ncon.url(url);\nreturn con;\n}",
+            "method_id": 165
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:encodeUrl(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "private static String encodeUrl(String url) {\nURL u = new URL(url);\nreturn encodeUrl(u).toExternalForm();\n}",
+            "method_id": 166
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:encodeUrl(Ljava/net/URL;)Ljava/net/URL;",
+            "method_body": "static URL encodeUrl(URL u) {\nString urlS = u.toExternalForm(); // URL external form may have spaces which is illegal in new URL() (odd asymmetry)\nurlS = urlS.replaceAll(\" \", \"%20\");\nfinal URI uri = new URI(urlS);\nreturn new URL(uri.toASCIIString());\n}",
+            "method_id": 167
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:url(Ljava/lang/String;)Lorg/jsoup/Connection;",
+            "method_body": "public Connection url(String url) {\nValidate.notEmpty(url, \"Must supply a valid URL\");\nreq.url(new URL(encodeUrl(url)));\n}\nreturn this;\n}",
+            "method_id": 168
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:timeout(I)Lorg/jsoup/Connection;",
+            "method_body": "public Connection timeout(int millis) {\nreq.timeout(millis);\nreturn this;\n}",
+            "method_id": 169
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:execute()Lorg/jsoup/Connection$Response;",
+            "method_body": "public Connection.Response execute() throws IOException {\nres = Response.execute(req);\nreturn res;\n}",
+            "method_id": 170
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:<init>()V",
+            "method_body": "private Base() {\nheaders = new LinkedHashMap<>();\ncookies = new LinkedHashMap<>();\n}",
+            "method_id": 171
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:url()Ljava/net/URL;",
+            "method_body": "public URL url() {\nreturn url;\n}",
+            "method_id": 172
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:url(Ljava/net/URL;)Lorg/jsoup/Connection$Base;",
+            "method_body": "public T url(URL url) {\nValidate.notNull(url, \"URL must not be null\");\nthis.url = url;\nreturn (T) this;\n}",
+            "method_id": 173
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:method()Lorg/jsoup/Connection$Method;",
+            "method_body": "public Method method() {\nreturn method;\n}",
+            "method_id": 174
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:addHeader(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/Connection$Base;",
+            "method_body": "public T addHeader(String name, String value) {\nValidate.notEmpty(name);\nvalue = value == null ? \"\" : value;\nList<String> values = headers(name);\nif (values.isEmpty()) {\nvalues = new ArrayList<>();\nheaders.put(name, values);\nvalues.add(fixHeaderEncoding(value));\nreturn (T) this;\n}",
+            "method_id": 175
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:headers(Ljava/lang/String;)Ljava/util/List;",
+            "method_body": "public List<String> headers(String name) {\nValidate.notEmpty(name);\nreturn getHeadersCaseInsensitive(name);\n}",
+            "method_id": 176
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:fixHeaderEncoding(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "private static String fixHeaderEncoding(String val) {\nbyte[] bytes = val.getBytes(\"ISO-8859-1\");\nif (!looksLikeUtf8(bytes))\nreturn new String(bytes, \"UTF-8\");\n}",
+            "method_id": 177
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:looksLikeUtf8([B)Z",
+            "method_body": "private static boolean looksLikeUtf8(byte[] input) {\nint i = 0;\nif (input.length >= 3 && (input[0] & 0xFF) == 0xEF\nfor (int j = input.length; i < j; ++i) {\nint o = input[i];\nif ((o & 0x80) == 0) {\ncontinue; // ASCII\nreturn true;\n}",
+            "method_id": 178
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Base:hasHeader(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasHeader(String name) {\nValidate.notEmpty(name, \"Header name must not be empty\");\nreturn getHeadersCaseInsensitive(name).size() != 0;\n}",
+            "method_id": 179
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 6,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.GaussNewtonOptimizerTest.testGetIterations",
+    "test_body": null,
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.vector.jacobian.AbstractLeastSquaresOptimizerAbstractTest.testGetIterations(AbstractLeastSquaresOptimizerAbstractTest.java:131)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optim.SimpleVectorValueChecker:converged(ILorg/apache/commons/math3/optim/PointVectorValuePair;Lorg/apache/commons/math3/optim/PointVectorValuePair;)Z",
+            "method_body": "public boolean converged(final int iteration,\nif (maxIterationCount != ITERATION_CHECK_DISABLED) {\nfinal double[] p = previous.getValueRef();\nfinal double[] c = current.getValueRef();\nfor (int i = 0; i < p.length; ++i) {\nfinal double pi         = p[i];\nfinal double ci         = c[i];\nfinal double difference = FastMath.abs(pi - ci);\nfinal double size       = FastMath.max(FastMath.abs(pi), FastMath.abs(ci));\nif (difference > size * getRelativeThreshold() &&\nreturn false;\nreturn true;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.GaussNewtonOptimizer:doOptimize()Lorg/apache/commons/math3/optim/PointVectorValuePair;",
+            "method_body": "public PointVectorValuePair doOptimize() {\ncheckParameters();\nfinal ConvergenceChecker<PointVectorValuePair> checker\nif (checker == null) {\nfinal double[] targetValues = getTarget();\nfinal int nR = targetValues.length; // Number of observed data.\nfinal RealMatrix weightMatrix = getWeight();\nfinal double[] residualsWeights = new double[nR];\nfor (int i = 0; i < nR; i++) {\nresidualsWeights[i] = weightMatrix.getEntry(i, i);\nfinal double[] currentPoint = getStartPoint();\nfinal int nC = currentPoint.length;\nPointVectorValuePair current = null;\nint iter = 0;\nfor (boolean converged = false; !converged;) {\n++iter;\nPointVectorValuePair previous = current;\nfinal double[] currentObjective = computeObjectiveValue(currentPoint);\nfinal double[] currentResiduals = computeResiduals(currentObjective);\nfinal RealMatrix weightedJacobian = computeWeightedJacobian(currentPoint);\ncurrent = new PointVectorValuePair(currentPoint, currentObjective);\nfinal double[]   b = new double[nC];\nfinal double[][] a = new double[nC][nC];\nfor (int i = 0; i < nR; ++i) {\nfinal double[] grad   = weightedJacobian.getRow(i);\nfinal double weight   = residualsWeights[i];\nfinal double residual = currentResiduals[i];\nfinal double wr = weight * residual;\nfor (int j = 0; j < nC; ++j) {\nb[j] += wr * grad[j];\nfor (int k = 0; k < nC; ++k) {\ndouble[] ak = a[k];\ndouble wgk = weight * grad[k];\nfor (int l = 0; l < nC; ++l) {\nak[l] += wgk * grad[l];\nRealMatrix mA = new BlockRealMatrix(a);\nDecompositionSolver solver = useLU ?\nfinal double[] dX = solver.solve(new ArrayRealVector(b, false)).toArray();\nfor (int i = 0; i < nC; ++i) {\ncurrentPoint[i] += dX[i];\n}\nif (previous != null) {\nconverged = checker.converged(iter, previous, current);\nif (converged) {\nsetCost(computeCost(currentResiduals));\nreturn current;\n}\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.GaussNewtonOptimizer:checkParameters()V",
+            "method_body": "private void checkParameters() {\nif (getLowerBound() != null ||\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.SimpleVectorValueChecker:<init>(DD)V",
+            "method_body": "public SimpleVectorValueChecker(final double relativeThreshold,\nsuper(relativeThreshold, absoluteThreshold);\nmaxIterationCount = ITERATION_CHECK_DISABLED;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.GaussNewtonOptimizer:<init>(ZLorg/apache/commons/math3/optim/ConvergenceChecker;)V",
+            "method_body": "public GaussNewtonOptimizer(final boolean useLU,\nsuper(checker);\nthis.useLU = useLU;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:getDataRef()[D",
+            "method_body": "public double[] getDataRef() {\nreturn data;\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:operate([D)[D",
+            "method_body": "public double[] operate(final double[] v)\nreturn multiply(new DiagonalMatrix(v, false)).getDataRef();\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:multiply(Lorg/apache/commons/math3/linear/DiagonalMatrix;)Lorg/apache/commons/math3/linear/DiagonalMatrix;",
+            "method_body": "public DiagonalMatrix multiply(final DiagonalMatrix m)\nMatrixUtils.checkMultiplicationCompatible(this, m);\nfinal int dim = getRowDimension();\nfinal double[] outData = new double[dim];\nfor (int i = 0; i < dim; i++) {\noutData[i] = data[i] * m.data[i];\nreturn new DiagonalMatrix(outData, false);\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:<init>([[D)V",
+            "method_body": "public BlockRealMatrix(final double[][] rawData)\nthis(rawData.length, rawData[0].length, toBlocksLayout(rawData), false);\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:toBlocksLayout([[D)[[D",
+            "method_body": "public static double[][] toBlocksLayout(final double[][] rawData)\nfinal int rows = rawData.length;\nfinal int columns = rawData[0].length;\nfinal int blockRows = (rows    + BLOCK_SIZE - 1) / BLOCK_SIZE;\nfinal int blockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nfor (int i = 0; i < rawData.length; ++i) {\nfinal int length = rawData[i].length;\nif (length != columns) {\nfinal double[][] blocks = new double[blockRows * blockColumns][];\nint blockIndex = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int pStart = iBlock * BLOCK_SIZE;\nfinal int pEnd = FastMath.min(pStart + BLOCK_SIZE, rows);\nfinal int iHeight = pEnd - pStart;\nfor (int jBlock = 0; jBlock < blockColumns; ++jBlock) {\nfinal int qStart = jBlock * BLOCK_SIZE;\nfinal int qEnd = FastMath.min(qStart + BLOCK_SIZE, columns);\nfinal int jWidth = qEnd - qStart;\nfinal double[] block = new double[iHeight * jWidth];\nblocks[blockIndex] = block;\nint index = 0;\nfor (int p = pStart; p < pEnd; ++p) {\nSystem.arraycopy(rawData[p], qStart, block, index, jWidth);\nindex += jWidth;\n++blockIndex;\nreturn blocks;\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:multiply(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix multiply(final RealMatrix m)\nif (m instanceof DiagonalMatrix) {\nMatrixUtils.checkMultiplicationCompatible(this, m);\nfinal int nRows = m.getRowDimension();\nfinal int nCols = m.getColumnDimension();\nfinal double[][] product = new double[nRows][nCols];\nfor (int r = 0; r < nRows; r++) {\nfor (int c = 0; c < nCols; c++) {\nproduct[r][c] = data[r] * m.getEntry(r, c);\nreturn new Array2DRowRealMatrix(product, false);\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:copy()Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix copy() {\nreturn new DiagonalMatrix(data);\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:setEntry(IID)V",
+            "method_body": "public void setEntry(final int row, final int column, final double value)\nif (row == column) {\nMatrixUtils.checkRowIndex(this, row);\ndata[row] = value;\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:<init>(I)V",
+            "method_body": "public DiagonalMatrix(final int dimension)\nsuper(dimension, dimension);\ndata = new double[dimension];\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:<init>([D)V",
+            "method_body": "public DiagonalMatrix(final double[] d) {\nthis(d, true);\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:getEntry(II)D",
+            "method_body": "public double getEntry(final int row, final int column)\nMatrixUtils.checkMatrixIndex(this, row, column);\nreturn row == column ? data[row] : 0;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:<init>([DZ)V",
+            "method_body": "public DiagonalMatrix(final double[] d, final boolean copyArray)\nthrows NullArgumentException {\nMathUtils.checkNotNull(d);\ndata = copyArray ? d.clone() : d;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.BlockRealMatrix:<init>(II[[DZ)V",
+            "method_body": "public BlockRealMatrix(final int rows, final int columns,\nsuper(rows, columns);\nthis.rows = rows;\nthis.columns = columns;\nblockRows = (rows + BLOCK_SIZE - 1) / BLOCK_SIZE;\nblockColumns = (columns + BLOCK_SIZE - 1) / BLOCK_SIZE;\nif (copyArray) {\nblocks = blockData;\nint index = 0;\nfor (int iBlock = 0; iBlock < blockRows; ++iBlock) {\nfinal int iHeight = blockHeight(iBlock);\nfor (int jBlock = 0; jBlock < blockColumns; ++jBlock, ++index) {\nif (blockData[index].length != iHeight * blockWidth(jBlock)) {\nif (copyArray) {\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:getColumnDimension()I",
+            "method_body": "public int getColumnDimension() {\nreturn data.length;\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DiagonalMatrix:getRowDimension()I",
+            "method_body": "public int getRowDimension() {\nreturn data.length;\n}",
+            "method_id": 99
+        }
+    ]
+}

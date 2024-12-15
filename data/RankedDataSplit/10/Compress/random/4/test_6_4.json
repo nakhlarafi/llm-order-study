@@ -1,0 +1,59 @@
+{
+    "bug_id": 4,
+    "test_id": 6,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testASCIIFileRoundtripExplicitUnicodeExtra",
+    "test_body": "58: public void testASCIIFileRoundtripExplicitUnicodeExtra()\n59: throws IOException {\n60: testFileRoundtrip(US_ASCII, false, true);\n61: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipShort:getBytes()[B",
+            "method_body": "public byte[] getBytes() {\nbyte[] result = new byte[2];\nresult[0] = (byte) (value & BYTE_MASK);\nresult[1] = (byte) ((value & BYTE_1_MASK) >> BYTE_1_SHIFT);\nreturn result;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeVersionNeededToExtractAndGeneralPurposeBits(IZ)V",
+            "method_body": "private void writeVersionNeededToExtractAndGeneralPurposeBits(final int\nint versionNeededToExtract = 10;\nint generalPurposeFlag = (useEFS || utfFallback) ? EFS_FLAG : 0;\nif (zipMethod == DEFLATED && raf == null) {\nversionNeededToExtract =  20;\ngeneralPurposeFlag |= 8;\nwriteOut(ZipShort.getBytes(versionNeededToExtract));\nwriteOut(ZipShort.getBytes(generalPurposeFlag));\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.AbstractUnicodeExtraField:<init>()V",
+            "method_body": "protected AbstractUnicodeExtraField() {\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:startsWithLocalFileHeader()Z",
+            "method_body": "private boolean startsWithLocalFileHeader() throws IOException {\narchive.seek(0);\nfinal byte[] start = new byte[WORD];\narchive.readFully(start);\nfor (int i = 0; i < start.length; i++) {\nif (start[i] != ZipArchiveOutputStream.LFH_SIG[i]) {\nreturn true;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:write([BII)V",
+            "method_body": "public void write(byte[] b, int offset, int length) throws IOException {\nif (entry.getMethod() == DEFLATED) {\nif (length > 0) {\nif (!def.finished()) {\nif (length <= DEFLATER_BLOCK_SIZE) {\ndef.setInput(b, offset, length);\ndeflateUntilInputIsNeeded();\ncrc.update(b, offset, length);\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeLocalFileHeader(Lorg/apache/commons/compress/archivers/zip/ZipArchiveEntry;)V",
+            "method_body": "protected void writeLocalFileHeader(ZipArchiveEntry ze) throws IOException {\nboolean encodable = zipEncoding.canEncode(ze.getName());\nif (!encodable && fallbackToUTF8) {\nentryEncoding = zipEncoding;\nByteBuffer name = entryEncoding.encode(ze.getName());\nif (createUnicodeExtraFields != UnicodeExtraFieldPolicy.NEVER) {\nif (createUnicodeExtraFields == UnicodeExtraFieldPolicy.ALWAYS\nze.addExtraField(new UnicodePathExtraField(ze.getName(),\nString comm = ze.getComment();\nif (comm != null && !\"\".equals(comm)) {\noffsets.put(ze, ZipLong.getBytes(written));\nwriteOut(LFH_SIG);\nwritten += WORD;\nfinal int zipMethod = ze.getMethod();\nwriteVersionNeededToExtractAndGeneralPurposeBits(zipMethod,\nwritten += WORD;\nwriteOut(ZipShort.getBytes(zipMethod));\nwritten += SHORT;\nwriteOut(ZipUtil.toDosTime(ze.getTime()));\nwritten += WORD;\nlocalDataStart = written;\nif (zipMethod == DEFLATED || raf != null) {\nwriteOut(LZERO);\nwriteOut(LZERO);\nwriteOut(LZERO);\nwritten += 12;\nwriteOut(ZipShort.getBytes(name.limit()));\nwritten += SHORT;\nbyte[] extra = ze.getLocalFileDataExtra();\nwriteOut(ZipShort.getBytes(extra.length));\nwritten += SHORT;\nwriteOut(name.array(), name.arrayOffset(), name.limit());\nwritten += name.limit();\nwriteOut(extra);\nwritten += extra.length;\ndataStart = written;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.UnicodePathExtraField:<clinit>()V",
+            "method_body": "public static final ZipShort UPATH_ID = new ZipShort(0x7075);\npublic UnicodePathExtraField () {\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:<init>(Ljava/io/File;Ljava/lang/String;Z)V",
+            "method_body": "public ZipFile(File f, String encoding, boolean useUnicodeExtraFields)\nthrows IOException {\nthis.encoding = encoding;\nthis.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.useUnicodeExtraFields = useUnicodeExtraFields;\narchive = new RandomAccessFile(f, \"r\");\nboolean success = false;\nMap entriesWithoutEFS = populateFromCentralDirectory();\nif (!success) {\narchive.close();\n}\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipUtil:adjustToLong(I)J",
+            "method_body": "public static long adjustToLong(int i) {\nif (i < 0) {\nreturn i;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeCentralFileHeader(Lorg/apache/commons/compress/archivers/zip/ZipArchiveEntry;)V",
+            "method_body": "protected void writeCentralFileHeader(ZipArchiveEntry ze) throws IOException {\nwriteOut(CFH_SIG);\nwritten += WORD;\nwriteOut(ZipShort.getBytes((ze.getPlatform() << 8) | 20));\nwritten += SHORT;\nfinal int zipMethod = ze.getMethod();\nfinal boolean encodable = zipEncoding.canEncode(ze.getName());\nwriteVersionNeededToExtractAndGeneralPurposeBits(zipMethod,\nwritten += WORD;\nwriteOut(ZipShort.getBytes(zipMethod));\nwritten += SHORT;\nwriteOut(ZipUtil.toDosTime(ze.getTime()));\nwritten += WORD;\nwriteOut(ZipLong.getBytes(ze.getCrc()));\nwriteOut(ZipLong.getBytes(ze.getCompressedSize()));\nwriteOut(ZipLong.getBytes(ze.getSize()));\nwritten += 12;\nif (!encodable && fallbackToUTF8) {\nentryEncoding = zipEncoding;\nByteBuffer name = entryEncoding.encode(ze.getName());\nwriteOut(ZipShort.getBytes(name.limit()));\nwritten += SHORT;\nbyte[] extra = ze.getCentralDirectoryExtra();\nwriteOut(ZipShort.getBytes(extra.length));\nwritten += SHORT;\nString comm = ze.getComment();\nif (comm == null) {\ncomm = \"\";\nByteBuffer commentB = entryEncoding.encode(comm);\nwriteOut(ZipShort.getBytes(commentB.limit()));\nwritten += SHORT;\nwriteOut(ZERO);\nwritten += SHORT;\nwriteOut(ZipShort.getBytes(ze.getInternalAttributes()));\nwritten += SHORT;\nwriteOut(ZipLong.getBytes(ze.getExternalAttributes()));\nwritten += WORD;\nwriteOut((byte[]) offsets.get(ze));\nwritten += WORD;\nwriteOut(name.array(), name.arrayOffset(), name.limit());\nwritten += name.limit();\nwriteOut(extra);\nwritten += extra.length;\nwriteOut(commentB.array(), commentB.arrayOffset(), commentB.limit());\nwritten += commentB.limit();\n}",
+            "method_id": 49
+        }
+    ]
+}

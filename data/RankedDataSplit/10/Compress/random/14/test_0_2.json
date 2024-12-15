@@ -1,0 +1,34 @@
+{
+    "bug_id": 14,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.workaroundForBrokenTimeHeader",
+    "test_body": "51: public void workaroundForBrokenTimeHeader() throws Exception {\n52: URL tar = getClass().getResource(\"/simple-aix-native-tar.tar\");\n53: TarArchiveInputStream in = null;\n54: try {\n55: in = new TarArchiveInputStream(new FileInputStream(new File(new URI(tar.toString()))));\n56: TarArchiveEntry tae = in.getNextTarEntry();\n57: tae = in.getNextTarEntry();\n58: assertEquals(\"sample/link-to-txt-file.lnk\", tae.getName());\n59: assertEquals(new Date(0), tae.getLastModifiedDate());\n60: assertTrue(tae.isSymbolicLink());\n61: } finally {\n62: if (in != null) {\n63: in.close();\n64: }\n65: }\n66: }        \n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:isPaxHeader()Z",
+            "method_body": "public boolean isPaxHeader(){\nreturn linkFlag == LF_PAX_EXTENDED_HEADER_LC\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:exceptionMessage([BIIIB)Ljava/lang/String;",
+            "method_body": "private static String exceptionMessage(byte[] buffer, final int offset,\nString string = new String(buffer, offset, length);\nstring=string.replaceAll(\"\\0\", \"{NUL}\"); // Replace NULs to allow string to be printed\nfinal String s = \"Invalid byte \"+currentByte+\" at offset \"+(current-offset)+\" in '\"+string+\"' len=\"+length;\nreturn s;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:<init>([B)V",
+            "method_body": "public TarArchiveEntry(byte[] headerBuf) {\nthis();\nparseTarHeader(headerBuf);\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctal([BII)J",
+            "method_body": "public static long parseOctal(final byte[] buffer, final int offset, final int length) {\nlong    result = 0;\nint     end = offset + length;\nint     start = offset;\nif (length < 2){\nboolean allNUL = true;\nfor (int i = start; i < end; i++){\nif (buffer[i] != 0){\nallNUL = false;\nbreak;\nif (allNUL) {\nwhile (start < end){\nif (buffer[start] == ' '){\ntrailer = buffer[end-1];\nif (trailer == 0 || trailer == ' '){\nend--;\ntrailer = buffer[end-1];\nif (trailer == 0 || trailer == ' '){\nend--;\nfor ( ;start < end; start++) {\nfinal byte currentByte = buffer[start];\nif (currentByte < '0' || currentByte > '7'){\nthrow new IllegalArgumentException(\nresult = (result << 3) + (currentByte - '0'); // convert from ASCII\nreturn result;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctalOrBinary([BII)J",
+            "method_body": "public static long parseOctalOrBinary(final byte[] buffer, final int offset,\nif ((buffer[offset] & 0x80) == 0) {\nreturn parseOctal(buffer, offset, length);\n}",
+            "method_id": 24
+        }
+    ]
+}

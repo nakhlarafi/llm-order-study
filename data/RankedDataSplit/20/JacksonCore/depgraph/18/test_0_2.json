@@ -1,0 +1,109 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal",
+    "test_body": "111: public void testTooBigBigDecimal() throws Exception\n112: {\n113: JsonFactory f = new JsonFactory();\n114: f.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);\n115: 116: // 24-Aug-2016, tatu: Initial check limits scale to [-9999,+9999]\n117: BigDecimal BIG = new BigDecimal(\"1E+9999\");\n118: BigDecimal TOO_BIG = new BigDecimal(\"1E+10000\");\n119: BigDecimal SMALL = new BigDecimal(\"1E-9999\");\n120: BigDecimal TOO_SMALL = new BigDecimal(\"1E-10000\");\n121: 122: for (boolean useBytes : new boolean[] { false, true } ) {\n123: for (boolean asString : new boolean[] { false, true } ) {\n124: JsonGenerator g;\n125: 126: if (useBytes) {\n127: g = f.createGenerator(new ByteArrayOutputStream());\n128: } else {\n129: g = f.createGenerator(new StringWriter());\n130: }\n131: if (asString) {\n132: g.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n133: }\n134: 135: // first, ok cases:\n136: g.writeStartArray();\n137: g.writeNumber(BIG);\n138: g.writeNumber(SMALL);\n139: g.writeEndArray();\n140: g.close();\n141: 142: // then invalid\n143: for (BigDecimal input : new BigDecimal[] { TOO_BIG, TOO_SMALL }) {\n144: if (useBytes) {\n145: g = f.createGenerator(new ByteArrayOutputStream());\n146: } else {\n147: g = f.createGenerator(new StringWriter());\n148: }\n149: if (asString) {\n150: g.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);\n151: }\n152: try {\n153: g.writeNumber(input);\n154: fail(\"Should not have written without exception: \"+input);\n155: } catch (JsonGenerationException e) {",
+    "stack_trace": "junit.framework.AssertionFailedError: Should not have written without exception: 1E+10000\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.TestCase.fail(TestCase.java:227)\nat com.fasterxml.jackson.core.json.TestJsonGeneratorFeatures.testTooBigBigDecimal(TestJsonGeneratorFeatures.java:154)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) {\n_defaultState = defaultState;\n_mask = (1 << ordinal());\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:collectDefaults()I",
+            "method_body": "public static int collectDefaults()\nint flags = 0;\nfor (Feature f : values()) {\nif (f.enabledByDefault()) {\nflags |= f.getMask();\nreturn flags;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:enabledByDefault()Z",
+            "method_body": "public boolean enabledByDefault() { return _defaultState; }\npublic boolean enabledByDefault() { return _defaultState; }",
+            "method_id": 42
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonGenerator$Feature:enabledIn(I)Z",
+            "method_body": "public boolean enabledIn(int flags) { return (flags & _mask) != 0; }\npublic boolean enabledIn(int flags) { return (flags & _mask) != 0; }",
+            "method_id": 43
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.DefaultPrettyPrinter:<clinit>()V",
+            "method_body": "private static final long serialVersionUID = 1;\npublic final static SerializedString DEFAULT_ROOT_VALUE_SEPARATOR = new SerializedString(\" \");\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.SerializedString:<init>(Ljava/lang/String;)V",
+            "method_body": "public SerializedString(String v) {\nif (v == null) {\n_value = v;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:<init>()V",
+            "method_body": "private CharsToNameCanonicalizer() {\n_canonicalize = true;\n_flags = -1;\n_dirty = true;\n_hashSeed = 0;\n_longestCollisionList = 0;\ninitTables(DEFAULT_T_SIZE);\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:<init>(Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;I[Ljava/lang/String;[Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer$Bucket;III)V",
+            "method_body": "private CharsToNameCanonicalizer(CharsToNameCanonicalizer parent, int flags,\nString[] symbols, Bucket[] buckets, int size, int hashSeed, int longestColl) {\n_parent = parent;\n_flags = flags;\n_canonicalize = JsonFactory.Feature.CANONICALIZE_FIELD_NAMES.enabledIn(flags);\n_symbols = symbols;\n_buckets = buckets;\n_size = size;\n_hashSeed = hashSeed;\nint arrayLen = (symbols.length);\n_sizeThreshold = _thresholdSize(arrayLen);\n_indexMask =  (arrayLen - 1);\n_longestCollisionList = longestColl;\n_dirty = false;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:<clinit>()V",
+            "method_body": "public final static int HASH_MULT = 33;\nfinal static CharsToNameCanonicalizer sBootstrapSymbolTable = new CharsToNameCanonicalizer();\n* Method called to create root canonicalizer for a {@link com.fasterxml.jackson.core.JsonFactory}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "public static CharsToNameCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "protected static CharsToNameCanonicalizer createRoot(int hashSeed) {\nreturn sBootstrapSymbolTable.makeOrphan(hashSeed);\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:initTables(I)V",
+            "method_body": "private void initTables(int initialSize)\n_symbols = new String[initialSize];\n_buckets = new Bucket[initialSize >> 1];\n_indexMask = initialSize - 1;\n_size = 0;\n_longestCollisionList = 0;\n_sizeThreshold = _thresholdSize(initialSize);\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:_thresholdSize(I)I",
+            "method_body": "private static int _thresholdSize(int hashAreaSize) { return hashAreaSize - (hashAreaSize >> 2); }\nprivate static int _thresholdSize(int hashAreaSize) { return hashAreaSize - (hashAreaSize >> 2); }",
+            "method_id": 52
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:makeOrphan(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "private CharsToNameCanonicalizer makeOrphan(int seed) {\nreturn new CharsToNameCanonicalizer(null, -1, _symbols, _buckets, _size, seed, _longestCollisionList);\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:<init>(IZIZ)V",
+            "method_body": "private ByteQuadsCanonicalizer(int sz, boolean intern, int seed, boolean failOnDoS) {\n_parent = null;\n_seed = seed;\n_intern = intern;\n_failOnDoS = failOnDoS;\nif (sz < MIN_HASH_SIZE) {\nif ((sz & (sz - 1)) != 0) { // only true if it's 2^N\n_tableInfo = new AtomicReference<TableInfo>(TableInfo.createInitial(sz));\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public static ByteQuadsCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:createRoot(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "protected static ByteQuadsCanonicalizer createRoot(int seed) {\nreturn new ByteQuadsCanonicalizer(DEFAULT_T_SIZE, true, seed, true);\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_calcTertiaryShift(I)I",
+            "method_body": "static int _calcTertiaryShift(int primarySlots)\nint tertSlots = (primarySlots) >> 2;\nif (tertSlots < 64) {\nreturn 4;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:<init>(III[I[Ljava/lang/String;II)V",
+            "method_body": "public TableInfo(int size, int count, int tertiaryShift,\n{\nthis.size = size;\nthis.count = count;\nthis.tertiaryShift = tertiaryShift;\nthis.mainHash = mainHash;\nthis.names = names;\nthis.spilloverEnd = spilloverEnd;\nthis.longNameOffset = longNameOffset;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer$TableInfo:createInitial(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;",
+            "method_body": "public static TableInfo createInitial(int sz) {\nint hashAreaSize = sz << 3;\nint tertShift = _calcTertiaryShift(sz);\nreturn new TableInfo(sz, // hashSize\n}",
+            "method_id": 59
+        }
+    ]
+}

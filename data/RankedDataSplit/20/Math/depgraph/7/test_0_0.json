@@ -1,0 +1,109 @@
+{
+    "bug_id": 7,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling",
+    "test_body": "337: public void testEventsScheduling() {\n338: 339: FirstOrderDifferentialEquations sincos = new FirstOrderDifferentialEquations() {\n340: 341: public int getDimension() {\n342: return 2;\n343: }\n344: 345: public void computeDerivatives(double t, double[] y, double[] yDot) {\n346: yDot[0] =  y[1];\n347: yDot[1] = -y[0];\n348: }\n349: 350: };\n351: 352: SchedulingChecker sinChecker = new SchedulingChecker(0); // events at 0, PI, 2PI ...\n353: SchedulingChecker cosChecker = new SchedulingChecker(1); // events at PI/2, 3PI/2, 5PI/2 ...\n354: 355: FirstOrderIntegrator integ =\n356: new DormandPrince853Integrator(0.001, 1.0, 1.0e-12, 0.0);\n357: integ.addEventHandler(sinChecker, 0.01, 1.0e-7, 100);\n358: integ.addStepHandler(sinChecker);\n359: integ.addEventHandler(cosChecker, 0.01, 1.0e-7, 100);\n360: integ.addStepHandler(cosChecker);\n361: double   t0 = 0.5;\n362: double[] y0 = new double[] { FastMath.sin(t0), FastMath.cos(t0) };\n363: double   t  = 10.0;\n364: double[] y  = new double[2];\n365: integ.integrate(sincos, t0, y0, t, y);\n366: 367: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest$SchedulingChecker.g(DormandPrince853IntegratorTest.java:389)\nat org.apache.commons.math3.ode.events.EventState.evaluateStep(EventState.java:224)\nat org.apache.commons.math3.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:323)\nat org.apache.commons.math3.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:303)\nat org.apache.commons.math3.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling(DormandPrince853IntegratorTest.java:365)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:acceptStep(Lorg/apache/commons/math3/ode/sampling/AbstractStepInterpolator;[D[DD)D",
+            "method_body": "protected double acceptStep(final AbstractStepInterpolator interpolator,\ndouble previousT = interpolator.getGlobalPreviousTime();\nfinal double currentT = interpolator.getGlobalCurrentTime();\nif (! statesInitialized) {\nfor (EventState state : eventsStates) {\nstate.reinitializeBegin(interpolator);\nstatesInitialized = true;\nfinal int orderingSign = interpolator.isForward() ? +1 : -1;\nSortedSet<EventState> occuringEvents = new TreeSet<EventState>(new Comparator<EventState>() {\nfor (final EventState state : eventsStates) {\nif (state.evaluateStep(interpolator)) {\noccuringEvents.add(state);\nwhile (!occuringEvents.isEmpty()) {\nfinal Iterator<EventState> iterator = occuringEvents.iterator();\nfinal EventState currentEvent = iterator.next();\niterator.remove();\nfinal double eventT = currentEvent.getEventTime();\ninterpolator.setSoftPreviousTime(previousT);\ninterpolator.setSoftCurrentTime(eventT);\ninterpolator.setInterpolatedTime(eventT);\nfinal double[] eventY = interpolator.getInterpolatedState().clone();\ncurrentEvent.stepAccepted(eventT, eventY);\nisLastStep = currentEvent.stop();\nfor (final StepHandler handler : stepHandlers) {\nhandler.handleStep(interpolator, isLastStep);\nif (isLastStep) {\nboolean needReset = currentEvent.reset(eventT, eventY);\nif (needReset) {\nSystem.arraycopy(eventY, 0, y, 0, y.length);\ncomputeDerivatives(eventT, y, yDot);\nresetOccurred = true;\nfor (final EventState remaining : occuringEvents) {\nreturn eventT;\ninterpolator.setInterpolatedTime(currentT);\nfinal double[] currentY = interpolator.getInterpolatedState();\nfor (final EventState state : eventsStates) {\nstate.stepAccepted(currentT, currentY);\nisLastStep = isLastStep || state.stop();\nisLastStep = isLastStep || Precision.equals(currentT, tEnd, 1);\nfor (StepHandler handler : stepHandlers) {\nhandler.handleStep(interpolator, isLastStep);\nreturn currentT;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:sinQ(DD)D",
+            "method_body": "private static double sinQ(double xa, double xb) {\nint idx = (int) ((xa * 8.0) + 0.5);\nfinal double epsilon = xa - EIGHTHS[idx]; //idx*0.125;\nfinal double sintA = SINE_TABLE_A[idx];\nfinal double sintB = SINE_TABLE_B[idx];\nfinal double costA = COSINE_TABLE_A[idx];\nfinal double costB = COSINE_TABLE_B[idx];\ndouble sinEpsA = epsilon;\ndouble sinEpsB = polySine(epsilon);\nfinal double cosEpsA = 1.0;\nfinal double cosEpsB = polyCosine(epsilon);\nfinal double temp = sinEpsA * HEX_40000000;\ndouble temp2 = (sinEpsA + temp) - temp;\nsinEpsB +=  sinEpsA - temp2;\nsinEpsA = temp2;\ndouble a = 0;\ndouble b = 0;\ndouble t = sintA;\ndouble c = a + t;\ndouble d = -(c - a - t);\na = c;\nb = b + d;\nt = costA * sinEpsA;\nc = a + t;\nd = -(c - a - t);\na = c;\nb = b + d;\nb = b + sintA * cosEpsB + costA * sinEpsB;\nb = b + sintB + costB * sinEpsA + sintB * cosEpsB + costB * sinEpsB;\nif (xb != 0.0) {\nt = ((costA + costB) * (cosEpsA + cosEpsB) -\nc = a + t;\nd = -(c - a - t);\na = c;\nb = b + d;\nresult = a + b;\nreturn result;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:sin(D)D",
+            "method_body": "public static double sin(double x) {\nboolean negative = false;\nint quadrant = 0;\ndouble xb = 0.0;\nxa = x;\nif (x < 0) {\nif (xa == 0.0) {\nif (xa != xa || xa == Double.POSITIVE_INFINITY) {\nif (xa > 3294198.0) {\n} else if (xa > 1.5707963267948966) {\nif (negative) {\nswitch (quadrant) {\nreturn sinQ(xa, xb);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:cos(D)D",
+            "method_body": "public static double cos(double x) {\nint quadrant = 0;\ndouble xa = x;\nif (x < 0) {\nif (xa != xa || xa == Double.POSITIVE_INFINITY) {\ndouble xb = 0;\nif (xa > 3294198.0) {\n} else if (xa > 1.5707963267948966) {\nswitch (quadrant) {\nreturn cosQ(xa, xb);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:cosQ(DD)D",
+            "method_body": "private static double cosQ(double xa, double xb) {\nfinal double pi2a = 1.5707963267948966;\nfinal double pi2b = 6.123233995736766E-17;\nfinal double a = pi2a - xa;\ndouble b = -(a - pi2a + xa);\nb += pi2b - xb;\nreturn sinQ(a, b);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:polySine(D)D",
+            "method_body": "private static double polySine(final double x)\ndouble x2 = x*x;\ndouble p = 2.7553817452272217E-6;\np = p * x2 + -1.9841269659586505E-4;\np = p * x2 + 0.008333333333329196;\np = p * x2 + -0.16666666666666666;\np = p * x2 * x;\nreturn p;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:polyCosine(D)D",
+            "method_body": "private static double polyCosine(double x) {\ndouble x2 = x*x;\ndouble p = 2.479773539153719E-5;\np = p * x2 + -0.0013888888689039883;\np = p * x2 + 0.041666666666621166;\np = p * x2 + -0.49999999999999994;\np *= x2;\nreturn p;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:integrate(Lorg/apache/commons/math3/ode/FirstOrderDifferentialEquations;D[DD[D)D",
+            "method_body": "public double integrate(final FirstOrderDifferentialEquations equations,\nif (y0.length != equations.getDimension()) {\nif (y.length != equations.getDimension()) {\nfinal ExpandableStatefulODE expandableODE = new ExpandableStatefulODE(equations);\nexpandableODE.setTime(t0);\nexpandableODE.setPrimaryState(y0);\nintegrate(expandableODE, t);\nSystem.arraycopy(expandableODE.getPrimaryState(), 0, y, 0, y.length);\nreturn expandableODE.getTime();\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:sanityChecks(Lorg/apache/commons/math3/ode/ExpandableStatefulODE;D)V",
+            "method_body": "protected void sanityChecks(final ExpandableStatefulODE equations, final double t)\nfinal double threshold = 1000 * FastMath.ulp(FastMath.max(FastMath.abs(equations.getTime()),\nfinal double dt = FastMath.abs(equations.getTime() - t);\nif (dt <= threshold) {\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:<init>(Ljava/lang/String;)V",
+            "method_body": "public AbstractIntegrator(final String name) {\nthis.name = name;\nstepHandlers = new ArrayList<StepHandler>();\nstepStart = Double.NaN;\nstepSize  = Double.NaN;\neventsStates = new ArrayList<EventState>();\nstatesInitialized = false;\nevaluations = new Incrementor();\nsetMaxEvaluations(-1);\nevaluations.resetCount();\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:computeDerivatives(D[D[D)V",
+            "method_body": "public abstract void integrate(ExpandableStatefulODE equations, double t)\nevaluations.incrementCount();\nexpandable.computeDerivatives(t, y, yDot);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:setMaxEvaluations(I)V",
+            "method_body": "public void setMaxEvaluations(int maxEvaluations) {\nevaluations.setMaximalCount((maxEvaluations < 0) ? Integer.MAX_VALUE : maxEvaluations);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:setEquations(Lorg/apache/commons/math3/ode/ExpandableStatefulODE;)V",
+            "method_body": "protected void setEquations(final ExpandableStatefulODE equations) {\nthis.expandable = equations;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:setStateInitialized(Z)V",
+            "method_body": "protected void setStateInitialized(final boolean stateInitialized) {\nthis.statesInitialized = stateInitialized;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:addStepHandler(Lorg/apache/commons/math3/ode/sampling/StepHandler;)V",
+            "method_body": "public void addStepHandler(final StepHandler handler) {\nstepHandlers.add(handler);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:initIntegration(D[DD)V",
+            "method_body": "protected void initIntegration(final double t0, final double[] y0, final double t) {\nevaluations.resetCount();\nfor (final EventState state : eventsStates) {\nstate.getEventHandler().init(t0, y0, t);\nfor (StepHandler handler : stepHandlers) {\nhandler.init(t0, y0, t);\nsetStateInitialized(false);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:addEventHandler(Lorg/apache/commons/math3/ode/events/EventHandler;DDILorg/apache/commons/math3/analysis/solvers/UnivariateSolver;)V",
+            "method_body": "public void addEventHandler(final EventHandler handler,\neventsStates.add(new EventState(handler, maxCheckInterval, convergence,\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator:<init>(DDDD)V",
+            "method_body": "public DormandPrince853Integrator(final double minStep, final double maxStep,\nsuper(METHOD_NAME, true, STATIC_C, STATIC_A, STATIC_B,\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:addEventHandler(Lorg/apache/commons/math3/ode/events/EventHandler;DDI)V",
+            "method_body": "public void addEventHandler(final EventHandler handler,\naddEventHandler(handler, maxCheckInterval, convergence,\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.events.EventState:reset(D[D)Z",
+            "method_body": "public boolean reset(final double t, final double[] y) {\nif (!(pendingEvent && (FastMath.abs(pendingEventTime - t) <= convergence))) {\nif (nextAction == EventHandler.Action.RESET_STATE) {\nhandler.resetState(t, y);\npendingEvent      = false;\npendingEventTime  = Double.NaN;\nreturn (nextAction == EventHandler.Action.RESET_STATE) ||\n}",
+            "method_id": 19
+        }
+    ]
+}

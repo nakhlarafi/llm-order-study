@@ -1,0 +1,59 @@
+{
+    "bug_id": 73,
+    "test_id": 0,
+    "test_name": "org.jsoup.helper.W3CDomTest.namespacePreservation",
+    "test_body": "66: public void namespacePreservation() throws IOException {\n67: File in = ParseTest.getFile(\"/htmltests/namespaces.xhtml\");\n68: org.jsoup.nodes.Document jsoupDoc;\n69: jsoupDoc = Jsoup.parse(in, \"UTF-8\");\n70: 71: Document doc;\n72: org.jsoup.helper.W3CDom jDom = new org.jsoup.helper.W3CDom();\n73: doc = jDom.fromJsoup(jsoupDoc);\n74: 75: Node htmlEl = doc.getChildNodes().item(0);\n76: assertEquals(\"http://www.w3.org/1999/xhtml\", htmlEl.getNamespaceURI());\n77: assertEquals(\"html\", htmlEl.getLocalName());\n78: assertEquals(\"html\", htmlEl.getNodeName());\n79: 80: // inherits default namespace\n81: Node head = htmlEl.getFirstChild();\n82: assertEquals(\"http://www.w3.org/1999/xhtml\", head.getNamespaceURI());\n83: assertEquals(\"head\", head.getLocalName());\n84: assertEquals(\"head\", head.getNodeName());\n85: 86: Node epubTitle = htmlEl.getChildNodes().item(2).getChildNodes().item(3);\n87: assertEquals(\"Check\", epubTitle.getTextContent());\n88: assertEquals(\"http://www.idpf.org/2007/ops\", epubTitle.getNamespaceURI());\n89: assertEquals(\"title\", epubTitle.getLocalName());\n90: assertEquals(\"epub:title\", epubTitle.getNodeName());\n91: 92: Node xSection = epubTitle.getNextSibling().getNextSibling();\n93: assertEquals(\"urn:test\", xSection.getNamespaceURI());\n94: assertEquals(\"section\", xSection.getLocalName());\n95: assertEquals(\"x:section\", xSection.getNodeName());\n96: 97: // https://github.com/jhy/jsoup/issues/977\n98: // does not keep last set namespace\n99: Node svg = xSection.getNextSibling().getNextSibling();\n100: assertEquals(\"http://www.w3.org/2000/svg\", svg.getNamespaceURI());\n101: assertEquals(\"svg\", svg.getLocalName());\n102: assertEquals(\"svg\", svg.getNodeName());\n103: 104: Node path = svg.getChildNodes().item(1);\n105: assertEquals(\"http://www.w3.org/2000/svg\", path.getNamespaceURI());\n106: assertEquals(\"path\", path.getLocalName());\n107: assertEquals(\"path\", path.getNodeName());\n108: 109: Node clip = path.getChildNodes().item(1);\n110: assertEquals(\"http://example.com/clip\", clip.getNamespaceURI());\n111: assertEquals(\"clip\", clip.getLocalName());\n112: assertEquals(\"clip\", clip.getNodeName());\n113: assertEquals(\"456\", clip.getTextContent());\n114: 115: Node picture = svg.getNextSibling().getNextSibling();\n116: assertEquals(\"http://www.w3.org/1999/xhtml\", picture.getNamespaceURI());\n117: assertEquals(\"picture\", picture.getLocalName());\n118: assertEquals(\"picture\", picture.getNodeName());\n119: 120: Node img = picture.getFirstChild();\n121: assertEquals(\"http://www.w3.org/1999/xhtml\", img.getNamespaceURI());\n122: assertEquals(\"img\", img.getLocalName());\n123: assertEquals(\"img\", img.getNodeName());\n124: 125: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nif (interrupted || capped && remaining <= 0)\nif (Thread.interrupted()) {\nif (expired())\nif (capped && len > remaining)\nfinal int read = super.read(b, off, len);\nremaining -= read;\nreturn read;\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilder:getStack()Ljava/util/ArrayList;",
+            "method_body": "ArrayList<Element> getStack() {\nreturn stack;\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.jsoup.nodes.DataNode:nodeName()Ljava/lang/String;",
+            "method_body": "public String nodeName() {\nreturn \"#data\";\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$3:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nreturn true;\n} else if (t.isComment()) {\n} else if (t.isDoctype()) {\n} else if (t.isStartTag() && t.asStartTag().normalName().equals(\"html\")) {\n} else if (t.isStartTag() && t.asStartTag().normalName().equals(\"head\")) {\nElement head = tb.insert(t.asStartTag());\ntb.setHeadElement(head);\ntb.transition(InHead);\n} else if (t.isEndTag() && (StringUtil.in(t.asEndTag().normalName(), \"head\", \"body\", \"html\", \"br\"))) {\nreturn true;\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState:readData(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;Lorg/jsoup/parser/TokeniserState;Lorg/jsoup/parser/TokeniserState;)V",
+            "method_body": "private static void readData(Tokeniser t, CharacterReader r, TokeniserState current, TokeniserState advance) {\nswitch (r.current()) {\nt.advanceTransition(advance);\nbreak;\nString data = r.consumeToAny('<', nullChar); // todo - why hunt for null here? Just consumeTo'<'?\nt.emit(data);\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token:isStartTag()Z",
+            "method_body": "final boolean isStartTag() {\nreturn type == TokenType.StartTag;\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:tail(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void tail(org.jsoup.nodes.Node source, int depth) {\nif (source instanceof org.jsoup.nodes.Element && dest.getParentNode() instanceof Element) {\ndest = (Element) dest.getParentNode(); // undescend. cromulent.\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:read()Lorg/jsoup/parser/Token;",
+            "method_body": "Token read() {\nwhile (!isEmitPending)\nstate.read(this, reader);\nif (charsBuilder.length() > 0) {\n} else if (charsString != null) {\nToken token = charPending.data(charsString);\ncharsString = null;\nreturn token;\nisEmitPending = false;\nreturn emitPending;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:copyAttributes(Lorg/jsoup/nodes/Node;Lorg/w3c/dom/Element;)V",
+            "method_body": "private void copyAttributes(org.jsoup.nodes.Node source, Element el) {\nfor (Attribute attribute : source.attributes()) {\nString key = attribute.getKey().replaceAll(\"[^-a-zA-Z0-9_:.]\", \"\");\nif (key.matches(\"[a-zA-Z_:][-a-zA-Z0-9_:.]*\"))\nel.setAttribute(key, attribute.getValue());\n}\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.jsoup.helper.W3CDom$W3CBuilder:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(org.jsoup.nodes.Node source, int depth) {\nif (source instanceof org.jsoup.nodes.Element) {\norg.jsoup.nodes.Element sourceEl = (org.jsoup.nodes.Element) source;\nString prefix = updateNamespaces(sourceEl);\nString namespace = namespaces.get(prefix);\nElement el = doc.createElementNS(namespace, sourceEl.tagName());\ncopyAttributes(sourceEl, el);\nif (dest == null) { // sets up the root\ndoc.appendChild(el);\ndest.appendChild(el);\ndest = el; // descend\n} else if (source instanceof org.jsoup.nodes.TextNode) {\norg.jsoup.nodes.TextNode sourceText = (org.jsoup.nodes.TextNode) source;\nText text = doc.createTextNode(sourceText.getWholeText());\ndest.appendChild(text);\n} else if (source instanceof org.jsoup.nodes.Comment) {\n} else if (source instanceof org.jsoup.nodes.DataNode) {\norg.jsoup.nodes.DataNode sourceData = (org.jsoup.nodes.DataNode) source;\nText node = doc.createTextNode(sourceData.getWholeData());\ndest.appendChild(node);\n}",
+            "method_id": 79
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 15,
+    "test_id": 0,
+    "test_name": "org.mockitousage.bugs.InjectMocksShouldTryPropertySettersFirstBeforeFieldAccessTest.shouldInjectUsingPropertySetterIfAvailable",
+    "test_body": "public void shouldInjectUsingPropertySetterIfAvailable() {\nassertTrue(awaitingInjection.propertySetterUsed);\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.mockitousage.bugs.InjectMocksShouldTryPropertySettersFirstBeforeFieldAccessTest.shouldInjectUsingPropertySetterIfAvailable(InjectMocksShouldTryPropertySettersFirstBeforeFieldAccessTest.java:25)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter$2:thenInject()Z",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:injectMocks(Ljava/lang/Object;)V",
+            "method_body": "public void injectMocks(Object testClass) {\nClass<?> clazz = testClass.getClass();\nSet<Field> mockDependents = new HashSet<Field>();\nSet<Object> mocks = new HashSet<Object>();\nwhile (clazz != Object.class) {\nmockDependents.addAll(scanForInjection(testClass, clazz));\nmocks.addAll(scanMocks(testClass, clazz));\nclazz = clazz.getSuperclass();\nnew DefaultInjectionEngine().injectMocksOnFields(mockDependents, mocks, testClass);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:scanForInjection(Ljava/lang/Object;Ljava/lang/Class;)Ljava/util/Set;",
+            "method_body": "private static Set<Field> scanForInjection(Object testClass, Class<?> clazz) {\nSet<Field> testedFields = new HashSet<Field>();\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nif (null != field.getAnnotation(InjectMocks.class)) {\ntestedFields.add(field);\nreturn testedFields;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:scanMocks(Ljava/lang/Object;Ljava/lang/Class;)Ljava/util/Set;",
+            "method_body": "private static Set<Object> scanMocks(Object testClass, Class<?> clazz) {\nSet<Object> mocks = new HashSet<Object>();\nfor (Field field : clazz.getDeclaredFields()) {\nif (null != field.getAnnotation(Spy.class) || null != field.getAnnotation(org.mockito.Mock.class)\nObject fieldInstance = null;\nboolean wasAccessible = field.isAccessible();\nfield.setAccessible(true);\nfieldInstance = field.get(testClass);\nfield.setAccessible(wasAccessible);\n}\nif (fieldInstance != null) {\nmocks.add(fieldInstance);\nreturn mocks;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultInjectionEngine:injectMocksOnFields(Ljava/util/Set;Ljava/util/Set;Ljava/lang/Object;)V",
+            "method_body": "public void injectMocksOnFields(Set<Field> testClassFields, Set<Object> mocks, Object testClass) {\nfor (Field field : testClassFields) {\nObject fieldInstance = null;\nfieldInstance = new FieldInitializer(testClass, field).initialize();\n}\nClass<?> fieldClass = fieldInstance.getClass();\nwhile (fieldClass != Object.class) {\ninjectMockCandidate(fieldClass, mocks, fieldInstance);\nfieldClass = fieldClass.getSuperclass();\n}\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultInjectionEngine:injectMockCandidate(Ljava/lang/Class;Ljava/util/Set;Ljava/lang/Object;)V",
+            "method_body": "private void injectMockCandidate(Class<?> awaitingInjectionClazz, Set<Object> mocks, Object fieldInstance) {\nfor(Field field : awaitingInjectionClazz.getDeclaredFields()) {\nmockCandidateFilter.filterCandidate(mocks, field, fieldInstance).thenInject();\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.TypeBasedCandidateFilter:<init>(Lorg/mockito/internal/configuration/injection/MockCandidateFilter;)V",
+            "method_body": "public TypeBasedCandidateFilter(MockCandidateFilter next) {\nthis.next = next;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.TypeBasedCandidateFilter:filterCandidate(Ljava/util/Collection;Ljava/lang/reflect/Field;Ljava/lang/Object;)Lorg/mockito/internal/configuration/injection/OngoingInjecter;",
+            "method_body": "public OngoingInjecter filterCandidate(Collection<Object> mocks, Field field, Object fieldInstance) {\nList<Object> mockTypeMatches = new ArrayList<Object>();\nfor (Object mock : mocks) {\nif (field.getType().isAssignableFrom(mock.getClass())) {\nmockTypeMatches.add(mock);\n}\nreturn next.filterCandidate(mockTypeMatches, field, fieldInstance);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.NameBasedCandidateFilter:<init>(Lorg/mockito/internal/configuration/injection/MockCandidateFilter;)V",
+            "method_body": "public NameBasedCandidateFilter(MockCandidateFilter next) {\nthis.next = next;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.NameBasedCandidateFilter:filterCandidate(Ljava/util/Collection;Ljava/lang/reflect/Field;Ljava/lang/Object;)Lorg/mockito/internal/configuration/injection/OngoingInjecter;",
+            "method_body": "public OngoingInjecter filterCandidate(Collection<Object> mocks, Field field, Object fieldInstance) {\nList<Object> mockNameMatches = new ArrayList<Object>();\nif(mocks.size() > 1) {\nfor (Object mock : mocks) {\nif (field.getName().equals(mockUtil.getMockName(mock).toString())) {\nmockNameMatches.add(mock);\n}\nreturn next.filterCandidate(mockNameMatches, field, fieldInstance);\nreturn next.filterCandidate(mocks, field, fieldInstance);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter:filterCandidate(Ljava/util/Collection;Ljava/lang/reflect/Field;Ljava/lang/Object;)Lorg/mockito/internal/configuration/injection/OngoingInjecter;",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.FinalMockCandidateFilter$1:thenInject()Z",
+            "method_body": "public OngoingInjecter filterCandidate(final Collection<Object> mocks, final Field field, final Object fieldInstance) {\nif(mocks.size() == 1) {\nfinal Object matchingMock = mocks.iterator().next();\nreturn new OngoingInjecter() {\nnew FieldSetter(fieldInstance, field).set(matchingMock);\n}\nreturn true;\nreturn new OngoingInjecter() {\nreturn false;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:assertNoAnnotations(Ljava/lang/reflect/Field;[Ljava/lang/Class;)V",
+            "method_body": "void assertNoAnnotations(Field field, Class ... annotations) {\nfor (Class annotation : annotations) {\nif (field.isAnnotationPresent(annotation)) {\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.runners.JUnit45AndHigherRunnerImpl:filter(Lorg/junit/runner/manipulation/Filter;)V",
+            "method_body": "public void filter(Filter filter) throws NoTestsRemainException {\nrunner.filter(filter);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.mockito.runners.MockitoJUnitRunner:filter(Lorg/junit/runner/manipulation/Filter;)V",
+            "method_body": "public void filter(Filter filter) throws NoTestsRemainException {\nrunner.filter(filter);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.runners.util.FrameworkUsageValidator:testFinished(Lorg/junit/runner/Description;)V",
+            "method_body": "public void testFinished(Description description) throws Exception {\nsuper.testFinished(description);\nMockito.validateMockitoUsage();\n}\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.FieldInitializer:initializeField(Ljava/lang/Object;Ljava/lang/reflect/Field;)V",
+            "method_body": "private void initializeField(Object testClass, Field field) {\nfinal AccessibilityChanger changer = new AccessibilityChanger();\nConstructor<?> constructor = null;\nconstructor = field.getType().getDeclaredConstructor();\nchanger.enableAccess(constructor);\nfinal Object[] noArg = new Object[0];\nObject newFieldInstance = constructor.newInstance(noArg);\nnew FieldSetter(testClass, field).set(newFieldInstance);\nif(constructor != null) {\nchanger.safelyDisableAccess(constructor);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.mockito.runners.MockitoJUnitRunner:<init>(Ljava/lang/Class;)V",
+            "method_body": "public MockitoJUnitRunner(Class<?> klass) throws InvocationTargetException {\nrunner = new RunnerFactory().create(klass);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.mockito.runners.MockitoJUnitRunner:run(Lorg/junit/runner/notification/RunNotifier;)V",
+            "method_body": "public void run(final RunNotifier notifier) {\nrunner.run(notifier);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:validateMockitoUsage()V",
+            "method_body": "public void validateMockitoUsage() {\nmockingProgress.validateState();\n}",
+            "method_id": 19
+        }
+    ]
+}

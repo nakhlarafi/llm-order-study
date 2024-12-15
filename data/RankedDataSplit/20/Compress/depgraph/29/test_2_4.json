@@ -1,0 +1,109 @@
+{
+    "bug_id": 29,
+    "test_id": 2,
+    "test_name": "org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.testEncodingInputStreamAutodetect",
+    "test_body": "290: public void testEncodingInputStreamAutodetect() throws Exception {\n291: int failed = 0;\n292: for(int i = 1; i <= TESTS.length; i++) {\n293: TestData test = TESTS[i-1];\n294: ArchiveInputStream ais = getInputStreamFor(test.testFile, test.fac);\n295: final String field = getField(ais,test.fieldName);\n296: if (!eq(test.expectedEncoding,field)) {\n297: System.out.println(\"Failed test \" + i + \". expected: \" + test.expectedEncoding + \" actual: \" + field + \" type: \" + test.type);\n298: failed++;\n299: }\n300: }\n301: if (failed > 0) {\n302: fail(\"Tests failed: \" + failed);\n303: }",
+    "stack_trace": "junit.framework.AssertionFailedError: Tests failed: 24\nat org.junit.Assert.fail(Assert.java:88)\nat org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.testEncodingInputStreamAutodetect(ArchiveStreamFactoryTest.java:302)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry:setType(Lorg/apache/commons/compress/archivers/dump/DumpArchiveEntry$TYPE;)V",
+            "method_body": "public void setType(TYPE type) {\nthis.type = type;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.TapeInputStream:<init>(Ljava/io/InputStream;)V",
+            "method_body": "private byte[] blockBuffer = new byte[DumpArchiveConstants.TP_SIZE];\nprivate int currBlkIdx = -1;\nprivate int blockSize = DumpArchiveConstants.TP_SIZE;\nprivate int readOffset = DumpArchiveConstants.TP_SIZE;\nprivate boolean isCompressed = false;\nprivate long bytesRead = 0;\nsuper(in);\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.TapeInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nif ((len % recordSize) != 0) {\nint bytes = 0;\nwhile (bytes < len) {\nif ((readOffset == blockSize) && !readBlock(true)) {\nint n = 0;\nif ((readOffset + (len - bytes)) <= blockSize) {\nn = len - bytes;\nSystem.arraycopy(blockBuffer, readOffset, b, off, n);\nreadOffset += n;\nbytes += n;\noff += n;\n}\nreturn bytes;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.TapeInputStream:readRecord()[B",
+            "method_body": "public byte[] readRecord() throws IOException {\nbyte[] result = new byte[recordSize];\nif (-1 == read(result, 0, result.length)) {\nreturn result;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.TapeInputStream:readBlock(Z)Z",
+            "method_body": "private boolean readBlock(boolean decompress) throws IOException {\nboolean success = true;\nif (in == null) {\nif (!isCompressed || (currBlkIdx == -1)) {\nsuccess = readFully(blockBuffer, 0, blockSize);\nbytesRead += blockSize;\ncurrBlkIdx++;\nreadOffset = 0;\nreturn success;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.TapeInputStream:readFully([BII)Z",
+            "method_body": "private boolean readFully(byte[] b, int off, int len)\nint count = IOUtils.readFully(in, b, off, len);\nif (count < len) {\nreturn true;\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$TYPE:<init>(Ljava/lang/String;II)V",
+            "method_body": "private TYPE(int code) {\nthis.code = code;\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveEntry$TapeSegmentHeader:<init>()V",
+            "method_body": "private DumpArchiveConstants.SEGMENT_TYPE type;\nprivate final byte[] cdata = new byte[512]; // map of any 'holes'\nreturn type;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveInputStream:pushedBackBytes(J)V",
+            "method_body": "protected void pushedBackBytes(long pushedBack) {\nbytesRead -= pushedBack;\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:decode([B)Ljava/lang/String;",
+            "method_body": "public String decode(byte[] data) throws IOException {\nreturn this.charset.newDecoder()\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.FallbackZipEncoding:decode([B)Ljava/lang/String;",
+            "method_body": "public String decode(byte[] data) throws IOException {\nif (this.charsetName == null) { // i.e. use default charset, see no-args constructor\nreturn new String(data,this.charsetName);\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveInputStream:count(I)V",
+            "method_body": "protected void count(int read) {\ncount((long) read);\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveInputStream:count(J)V",
+            "method_body": "protected void count(long read) {\nif (read != -1) {\nbytesRead = bytesRead + read;\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:<init>(J)V",
+            "method_body": "public ZipLong(long value) {\nthis.value = value;\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:<clinit>()V",
+            "method_body": "private static final long serialVersionUID = 1L;\npublic static final ZipLong CFH_SIG = new ZipLong(0X02014B50L);\npublic static final ZipLong LFH_SIG = new ZipLong(0X04034B50L);\npublic static final ZipLong DD_SIG = new ZipLong(0X08074B50L);\nstatic final ZipLong ZIP64_MAGIC = new ZipLong(ZipConstants.ZIP64_MAGIC);\npublic static final ZipLong SINGLE_SEGMENT_SPLIT_MARKER =\npublic static final ZipLong AED_SIG = new ZipLong(0X08064B50L);\npublic ZipLong(long value) {\nthis.value = value;\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper:<clinit>()V",
+            "method_body": "private static final Map<String, SimpleEncodingHolder> simpleEncodings;\nMap<String, SimpleEncodingHolder> se =\nchar[] cp437_high_chars =\nSimpleEncodingHolder cp437 = new SimpleEncodingHolder(cp437_high_chars);\nse.put(\"CP437\", cp437);\nse.put(\"Cp437\", cp437);\nse.put(\"cp437\", cp437);\nse.put(\"IBM437\", cp437);\nse.put(\"ibm437\", cp437);\nchar[] cp850_high_chars =\nSimpleEncodingHolder cp850 = new SimpleEncodingHolder(cp850_high_chars);\nse.put(\"CP850\", cp850);\nse.put(\"Cp850\", cp850);\nse.put(\"cp850\", cp850);\nse.put(\"IBM850\", cp850);\nse.put(\"ibm850\", cp850);\nsimpleEncodings = Collections.unmodifiableMap(se);\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper$SimpleEncodingHolder:<init>([C)V",
+            "method_body": "SimpleEncodingHolder(char [] highChars) {\nthis.highChars = highChars;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.Charsets:<clinit>()V",
+            "method_body": "public static final Charset ISO_8859_1 = Charset.forName(CharsetNames.ISO_8859_1);\npublic static final Charset US_ASCII = Charset.forName(CharsetNames.US_ASCII);\npublic static final Charset UTF_16 = Charset.forName(CharsetNames.UTF_16);\npublic static final Charset UTF_16BE = Charset.forName(CharsetNames.UTF_16BE);\npublic static final Charset UTF_16LE = Charset.forName(CharsetNames.UTF_16LE);\npublic static final Charset UTF_8 = Charset.forName(CharsetNames.UTF_8);\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:<clinit>()V",
+            "method_body": "static final byte[] LFH_SIG = ZipLong.LFH_SIG.getBytes();\nstatic final byte[] DD_SIG = ZipLong.DD_SIG.getBytes();\nstatic final byte[] CFH_SIG = ZipLong.CFH_SIG.getBytes();\nstatic final byte[] EOCD_SIG = ZipLong.getBytes(0X06054B50L);\nstatic final byte[] ZIP64_EOCD_SIG = ZipLong.getBytes(0X06064B50L);\nstatic final byte[] ZIP64_EOCD_LOC_SIG = ZipLong.getBytes(0X07064B50L);\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:<clinit>()V",
+            "method_body": "private static final int COPY_BUF_SIZE = 8024;\nprivate static final byte[] SKIP_BUF = new byte[SKIP_BUF_SIZE];\n}",
+            "method_id": 99
+        }
+    ]
+}

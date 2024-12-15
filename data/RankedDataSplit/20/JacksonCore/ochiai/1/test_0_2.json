@@ -1,0 +1,109 @@
+{
+    "bug_id": 1,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.json.TestParserNonStandard.testAllowNaN",
+    "test_body": "public void testAllowNaN() throws Exception {\n_testAllowNaN(false);\n_testAllowNaN(true);\n}\n private void _testAllowNaN(boolean useStream) throws Exception{final String JSON = \"[ NaN]\";JsonFactory f = new JsonFactory();assertFalse(f.isEnabled(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS));JsonParser jp = useStream ? createParserUsingStream(f, JSON, \"UTF-8\"): createParserUsingReader(f, JSON);assertToken(JsonToken.START_ARRAY, jp.nextToken());try {jp.nextToken();fail(\"Expected exception\");} catch (Exception e) {verifyException(e, \"non-standard\");} finally {jp.close();}f.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);jp = useStream ? createParserUsingStream(f, JSON, \"UTF-8\"): createParserUsingReader(f, JSON);assertToken(JsonToken.START_ARRAY, jp.nextToken());assertToken(JsonToken.VALUE_NUMBER_FLOAT, jp.nextToken());double d = jp.getDoubleValue();assertTrue(Double.isNaN(d));assertEquals(\"NaN\", jp.getText());try {/*BigDecimal dec =*/ jp.getDecimalValue();fail(\"Should fail when trying to access NaN as BigDecimal\");} catch (NumberFormatException e) {e.printStackTrace();verifyException(e, \"can not be represented as BigDecimal\");}",
+    "stack_trace": "junit.framework.AssertionFailedError: Expected an exception with one of substrings ([can not be represented as BigDecimal]): got one with message \"null\"\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.TestCase.fail(TestCase.java:227)\nat com.fasterxml.jackson.test.BaseTest.verifyException(BaseTest.java:355)\nat com.fasterxml.jackson.core.json.TestParserNonStandard._testAllowNaN(TestParserNonStandard.java:394)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:releaseTokenBuffer([C)V",
+            "method_body": "public void releaseTokenBuffer(char[] buf)\nif (buf != null) {\n_verifyRelease(buf, _tokenCBuffer);\n_tokenCBuffer = null;\n_bufferRecycler.releaseCharBuffer(BufferRecycler.CharBufferType.TOKEN_BUFFER, buf);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:hashSeed()I",
+            "method_body": "public int hashSeed() { return _hashSeed; }\npublic int hashSeed() { return _hashSeed; }",
+            "method_id": 41
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.ReaderBasedJsonParser:<init>(Lcom/fasterxml/jackson/core/io/IOContext;ILjava/io/Reader;Lcom/fasterxml/jackson/core/ObjectCodec;Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;)V",
+            "method_body": "public ReaderBasedJsonParser(IOContext ctxt, int features, Reader r,\nsuper(ctxt, features);\n_reader = r;\n_inputBuffer = ctxt.allocTokenBuffer();\n_objectCodec = codec;\n_symbols = st;\n_hashSeed = st.hashSeed();\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.ReaderBasedJsonParser:_closeInput()V",
+            "method_body": "protected void _closeInput() throws IOException\nif (_reader != null) {\nif (_ioContext.isResourceManaged() || isEnabled(Feature.AUTO_CLOSE_SOURCE)) {\n_reader.close();\n_reader = null;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:allocTokenBuffer()[C",
+            "method_body": "public char[] allocTokenBuffer()\n_verifyAlloc(_tokenCBuffer);\nreturn (_tokenCBuffer = _bufferRecycler.allocCharBuffer(BufferRecycler.CharBufferType.TOKEN_BUFFER));\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonParser:isEnabled(Lcom/fasterxml/jackson/core/JsonParser$Feature;)Z",
+            "method_body": "public boolean isEnabled(Feature f) {\nreturn (_features & f.getMask()) != 0;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:expectComma()Z",
+            "method_body": "public boolean expectComma()\nint ix = ++_index; // starts from -1\nreturn (_type != TYPE_ROOT && ix > 0);\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonToken:<init>(Ljava/lang/String;ILjava/lang/String;)V",
+            "method_body": "JsonToken(String token)\n{\nif (token == null) {\n_serialized = null;\n_serializedChars = null;\n_serializedBytes = null;\n_serialized = token;\n_serializedChars = token.toCharArray();\nint len = _serializedChars.length;\n_serializedBytes = new byte[len];\nfor (int i = 0; i < len; ++i) {\n_serializedBytes[i] = (byte) _serializedChars[i];\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.base.ParserBase:close()V",
+            "method_body": "public void close() throws IOException\nif (!_closed) {\n_closed = true;\n_closeInput();\n_releaseBuffers();\n}\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.base.ParserBase:_releaseBuffers()V",
+            "method_body": "protected void _releaseBuffers() throws IOException\n_textBuffer.releaseBuffers();\nchar[] buf = _nameCopyBuffer;\nif (buf != null) {\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.TextBuffer:releaseBuffers()V",
+            "method_body": "public void releaseBuffers()\nif (_allocator == null) {\nif (_currentSegment != null) {\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:constructTextBuffer()Lcom/fasterxml/jackson/core/util/TextBuffer;",
+            "method_body": "public TextBuffer constructTextBuffer() {\nreturn new TextBuffer(_bufferRecycler);\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonParser:<init>()V",
+            "method_body": "protected JsonParser() { }\nprotected JsonParser() { }",
+            "method_id": 52
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.base.ParserMinimalBase:<init>()V",
+            "method_body": "protected ParserMinimalBase() { }\nprotected ParserMinimalBase() { }",
+            "method_id": 53
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.base.ParserBase:<init>(Lcom/fasterxml/jackson/core/io/IOContext;I)V",
+            "method_body": "protected char[] _nameCopyBuffer = null;\nprotected boolean _nameCopied = false;\nprotected ByteArrayBuilder _byteArrayBuilder = null;\n* {@link #getBinaryValue} will not need to decode data more",
+            "method_id": 54
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.base.ParserBase:<clinit>()V",
+            "method_body": "protected byte[] _binaryValue;\nfinal static BigInteger BI_MIN_INT = BigInteger.valueOf(Integer.MIN_VALUE);\nfinal static BigInteger BI_MAX_INT = BigInteger.valueOf(Integer.MAX_VALUE);\nfinal static BigInteger BI_MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);\nfinal static BigInteger BI_MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);\nfinal static BigDecimal BD_MIN_LONG = new BigDecimal(BI_MIN_LONG);\nfinal static BigDecimal BD_MAX_LONG = new BigDecimal(BI_MAX_LONG);\nfinal static BigDecimal BD_MIN_INT = new BigDecimal(BI_MIN_INT);\nfinal static BigDecimal BD_MAX_INT = new BigDecimal(BI_MAX_INT);\nprotected int _numTypesValid = NR_UNKNOWN;\nsuper();\n_features = features;\n_ioContext = ctxt;\n_textBuffer = ctxt.constructTextBuffer();\n_parsingContext = JsonReadContext.createRootContext();\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:<init>(Lcom/fasterxml/jackson/core/json/JsonReadContext;III)V",
+            "method_body": "public JsonReadContext(JsonReadContext parent, int type, int lineNr, int colNr)\nsuper();\n_type = type;\n_parent = parent;\n_lineNr = lineNr;\n_columnNr = colNr;\n_index = -1;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:createRootContext()Lcom/fasterxml/jackson/core/json/JsonReadContext;",
+            "method_body": "public static JsonReadContext createRootContext()\nreturn new JsonReadContext(null, TYPE_ROOT, 1, 0);\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:isEnabled(Lcom/fasterxml/jackson/core/JsonFactory$Feature;)Z",
+            "method_body": "public final boolean isEnabled(JsonFactory.Feature f) {\nreturn (_factoryFeatures & f.getMask()) != 0;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:allocCharBuffer(Lcom/fasterxml/jackson/core/util/BufferRecycler$CharBufferType;)[C",
+            "method_body": "public final char[] allocCharBuffer(CharBufferType type)\nreturn allocCharBuffer(type, 0);\n}",
+            "method_id": 59
+        }
+    ]
+}

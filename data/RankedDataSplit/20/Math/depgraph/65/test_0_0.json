@@ -1,0 +1,109 @@
+{
+    "bug_id": 65,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizerTest.testCircleFitting",
+    "test_body": "398: public void testCircleFitting() throws FunctionEvaluationException, OptimizationException {\n399: Circle circle = new Circle();\n400: circle.addPoint( 30.0,  68.0);\n401: circle.addPoint( 50.0,  -6.0);\n402: circle.addPoint(110.0, -20.0);\n403: circle.addPoint( 35.0,  15.0);\n404: circle.addPoint( 45.0,  97.0);\n405: LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();\n406: VectorialPointValuePair optimum =\n407: optimizer.optimize(circle, new double[] { 0, 0, 0, 0, 0 }, new double[] { 1, 1, 1, 1, 1 },\n408: new double[] { 98.680, 47.345 });\n409: assertTrue(optimizer.getEvaluations() < 10);\n410: assertTrue(optimizer.getJacobianEvaluations() < 10);\n411: double rms = optimizer.getRMS();\n412: assertEquals(1.768262623567235,  Math.sqrt(circle.getN()) * rms,  1.0e-10);\n413: Point2D.Double center = new Point2D.Double(optimum.getPointRef()[0], optimum.getPointRef()[1]);\n414: assertEquals(69.96016176931406, circle.getRadius(center), 1.0e-10);\n415: assertEquals(96.07590211815305, center.x,      1.0e-10);\n416: assertEquals(48.13516790438953, center.y,      1.0e-10);\n417: double[][] cov = optimizer.getCovariances();\n418: assertEquals(1.839, cov[0][0], 0.001);\n419: assertEquals(0.731, cov[0][1], 0.001);\n420: assertEquals(cov[0][1], cov[1][0], 1.0e-14);\n421: assertEquals(0.786, cov[1][1], 0.001);\n422: double[] errors = optimizer.guessParametersErrors();\n423: assertEquals(1.384, errors[0], 0.001);\n424: assertEquals(0.905, errors[1], 0.001);\n425: 426: // add perfect measurements and check errors are reduced\n427: double  r = circle.getRadius(center);\n428: for (double d= 0; d < 2 * Math.PI; d += 0.01) {\n429: circle.addPoint(center.x + r * Math.cos(d), center.y + r * Math.sin(d));\n430: }\n431: double[] target = new double[circle.getN()];\n432: Arrays.fill(target, 0.0);\n433: double[] weights = new double[circle.getN()];\n434: Arrays.fill(weights, 2.0);\n435: optimizer.optimize(circle, target, weights, new double[] { 98.680, 47.345 });\n436: cov = optimizer.getCovariances();\n437: assertEquals(0.0016, cov[0][0], 0.001);\n438: assertEquals(3.2e-7, cov[0][1], 1.0e-9);\n439: assertEquals(cov[0][1], cov[1][0], 1.0e-14);\n440: assertEquals(0.0016, cov[1][1], 0.001);\n441: errors = optimizer.guessParametersErrors();\n442: assertEquals(0.004, errors[0], 0.001);\n443: assertEquals(0.004, errors[1], 0.001);",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.004> but was:<0.0019737107108948474>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:120)\nat junit.framework.Assert.assertEquals(Assert.java:129)\nat junit.framework.TestCase.assertEquals(TestCase.java:288)\nat org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizerTest.testCircleFitting(LevenbergMarquardtOptimizerTest.java:442)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:guessParametersErrors()[D",
+            "method_body": "public double[] guessParametersErrors()\nif (rows <= cols) {\ndouble[] errors = new double[cols];\nfinal double c = Math.sqrt(getChiSquare() / (rows - cols));\ndouble[][] covar = getCovariances();\nfor (int i = 0; i < errors.length; ++i) {\nerrors[i] = Math.sqrt(covar[i][i]) * c;\nreturn errors;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:getChiSquare()D",
+            "method_body": "public double getChiSquare() {\ndouble chiSquare = 0;\nfor (int i = 0; i < rows; ++i) {\nfinal double residual = residuals[i];\nchiSquare += residual * residual / residualsWeights[i];\nreturn chiSquare;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:getCovariances()[[D",
+            "method_body": "public double[][] getCovariances()\nupdateJacobian();\ndouble[][] jTj = new double[cols][cols];\nfor (int i = 0; i < cols; ++i) {\nfor (int j = i; j < cols; ++j) {\ndouble sum = 0;\nfor (int k = 0; k < rows; ++k) {\nsum += jacobian[k][i] * jacobian[k][j];\njTj[i][j] = sum;\njTj[j][i] = sum;\nRealMatrix inverse =\nreturn inverse.getData();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:getEvaluations()I",
+            "method_body": "public int getEvaluations() {\nreturn objectiveEvaluations;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:getJacobianEvaluations()I",
+            "method_body": "public int getJacobianEvaluations() {\nreturn jacobianEvaluations;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:getRMS()D",
+            "method_body": "public double getRMS() {\ndouble criterion = 0;\nfor (int i = 0; i < rows; ++i) {\nfinal double residual = residuals[i];\ncriterion += residual * residual * residualsWeights[i];\nreturn Math.sqrt(criterion / rows);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:optimize(Lorg/apache/commons/math/analysis/DifferentiableMultivariateVectorialFunction;[D[D[D)Lorg/apache/commons/math/optimization/VectorialPointValuePair;",
+            "method_body": "public VectorialPointValuePair optimize(final DifferentiableMultivariateVectorialFunction f,\nif (target.length != weights.length) {\niterations           = 0;\nobjectiveEvaluations = 0;\njacobianEvaluations  = 0;\nfunction         = f;\njF               = f.jacobian();\ntargetValues     = target.clone();\nresidualsWeights = weights.clone();\nthis.point       = startPoint.clone();\nthis.residuals   = new double[target.length];\nrows      = target.length;\ncols      = point.length;\njacobian  = new double[rows][cols];\ncost = Double.POSITIVE_INFINITY;\nreturn doOptimize();\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:updateResidualsAndCost()V",
+            "method_body": "protected void updateResidualsAndCost()\nif (++objectiveEvaluations > maxEvaluations) {\nobjective = function.value(point);\nif (objective.length != rows) {\ncost = 0;\nint index = 0;\nfor (int i = 0; i < rows; i++) {\nfinal double residual = targetValues[i] - objective[i];\nresiduals[i] = residual;\ncost += residualsWeights[i] * residual * residual;\nindex += cols;\ncost = Math.sqrt(cost);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:updateJacobian()V",
+            "method_body": "protected void updateJacobian() throws FunctionEvaluationException {\n++jacobianEvaluations;\njacobian = jF.value(point);\nif (jacobian.length != rows) {\nfor (int i = 0; i < rows; i++) {\nfinal double[] ji = jacobian[i];\nfinal double factor = -Math.sqrt(residualsWeights[i]);\nfor (int j = 0; j < cols; ++j) {\nji[j] *= factor;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer:<init>()V",
+            "method_body": "public LevenbergMarquardtOptimizer() {\nsetMaxIterations(1000);\nsetConvergenceChecker(null);\nsetInitialStepBoundFactor(100.0);\nsetCostRelativeTolerance(1.0e-10);\nsetParRelativeTolerance(1.0e-10);\nsetOrthoTolerance(1.0e-10);\nsetQRRankingThreshold(MathUtils.SAFE_MIN);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.VectorialPointValuePair:getPointRef()[D",
+            "method_body": "public double[] getPointRef() {\nreturn point;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:<init>()V",
+            "method_body": "protected AbstractLeastSquaresOptimizer() {\nsetConvergenceChecker(new SimpleVectorialValueChecker());\nsetMaxIterations(DEFAULT_MAX_ITERATIONS);\nsetMaxEvaluations(Integer.MAX_VALUE);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:incrementIterationsCounter()V",
+            "method_body": "protected void incrementIterationsCounter()\nif (++iterations > maxIterations) {\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:setMaxEvaluations(I)V",
+            "method_body": "public void setMaxEvaluations(int maxEvaluations) {\nthis.maxEvaluations = maxEvaluations;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:setConvergenceChecker(Lorg/apache/commons/math/optimization/VectorialConvergenceChecker;)V",
+            "method_body": "public void setConvergenceChecker(VectorialConvergenceChecker convergenceChecker) {\nthis.checker = convergenceChecker;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.AbstractLeastSquaresOptimizer:setMaxIterations(I)V",
+            "method_body": "public void setMaxIterations(int maxIterations) {\nthis.maxIterations = maxIterations;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.LUDecompositionImpl$Solver:getInverse()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getInverse() throws InvalidMatrixException {\nreturn solve(MatrixUtils.createRealIdentityMatrix(pivot.length));\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.LUDecompositionImpl$Solver:solve(Lorg/apache/commons/math/linear/RealMatrix;)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix solve(RealMatrix b)\nfinal int m = pivot.length;\nif (b.getRowDimension() != m) {\nif (singular) {\nfinal int nColB = b.getColumnDimension();\nfinal double[][] bp = new double[m][nColB];\nfor (int row = 0; row < m; row++) {\nfinal double[] bpRow = bp[row];\nfinal int pRow = pivot[row];\nfor (int col = 0; col < nColB; col++) {\nbpRow[col] = b.getEntry(pRow, col);\nfor (int col = 0; col < m; col++) {\nfinal double[] bpCol = bp[col];\nfor (int i = col + 1; i < m; i++) {\nfinal double[] bpI = bp[i];\nfinal double luICol = lu[i][col];\nfor (int j = 0; j < nColB; j++) {\nbpI[j] -= bpCol[j] * luICol;\nfor (int col = m - 1; col >= 0; col--) {\nfinal double[] bpCol = bp[col];\nfinal double luDiag = lu[col][col];\nfor (int j = 0; j < nColB; j++) {\nbpCol[j] /= luDiag;\nfor (int i = 0; i < col; i++) {\nfinal double[] bpI = bp[i];\nfinal double luICol = lu[i][col];\nfor (int j = 0; j < nColB; j++) {\nbpI[j] -= bpCol[j] * luICol;\nreturn new Array2DRowRealMatrix(bp, false);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.MatrixUtils:createRealIdentityMatrix(I)Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealIdentityMatrix(int dimension) {\nfinal RealMatrix m = createRealMatrix(dimension, dimension);\nfor (int i = 0; i < dimension; ++i) {\nm.setEntry(i, i, 1.0);\nreturn m;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer:determineLMParameter([DD[D[D[D[D)V",
+            "method_body": "private void determineLMParameter(double[] qy, double delta, double[] diag,\nfor (int j = 0; j < rank; ++j) {\nlmDir[permutation[j]] = qy[j];\nfor (int j = rank; j < cols; ++j) {\nfor (int k = rank - 1; k >= 0; --k) {\nint pk = permutation[k];\ndouble ypk = lmDir[pk] / diagR[pk];\nfor (int i = 0; i < k; ++i) {\nlmDir[permutation[i]] -= ypk * jacobian[i][pk];\nlmDir[pk] = ypk;\ndouble dxNorm = 0;\nfor (int j = 0; j < solvedCols; ++j) {\nint pj = permutation[j];\ndouble s = diag[pj] * lmDir[pj];\nwork1[pj] = s;\ndxNorm += s * s;\ndxNorm = Math.sqrt(dxNorm);\ndouble fp = dxNorm - delta;\nif (fp <= 0.1 * delta) {\nlmPar = 0;\nreturn;\n}",
+            "method_id": 19
+        }
+    ]
+}

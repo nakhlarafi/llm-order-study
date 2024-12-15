@@ -1,0 +1,59 @@
+{
+    "bug_id": 22,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.compressors.bzip2.PythonTruncatedBzip2Test.testPartialReadTruncatedData",
+    "test_body": "85: public void testPartialReadTruncatedData() throws IOException {\n86: //with BZ2File(self.filename) as f:\n87: //    self.assertEqual(f.read(len(self.TEXT)), self.TEXT)\n88: //    self.assertRaises(EOFError, f.read, 1)\n89: 90: final int length = TEXT.length();\n91: ByteBuffer buffer = ByteBuffer.allocate(length);\n92: bz2Channel.read(buffer);\n93: 94: assertArrayEquals(Arrays.copyOfRange(TEXT.getBytes(), 0, length),\n95: buffer.array());\n96: 97: // subsequent read should throw\n98: buffer = ByteBuffer.allocate(1);\n99: try {\n100: bz2Channel.read(buffer);\n101: Assert.fail(\"The read should have thrown.\");\n102: } catch (IOException e) {\n103: // pass\n104: }\n105: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:createHuffmanDecodingTables(II)V",
+            "method_body": "private void createHuffmanDecodingTables(final int alphaSize,\nfinal Data dataShadow = this.data;\nfinal char[][] len = dataShadow.temp_charArray2d;\nfinal int[] minLens = dataShadow.minLens;\nfinal int[][] limit = dataShadow.limit;\nfinal int[][] base = dataShadow.base;\nfinal int[][] perm = dataShadow.perm;\nfor (int t = 0; t < nGroups; t++) {\nint minLen = 32;\nint maxLen = 0;\nfinal char[] len_t = len[t];\nfor (int i = alphaSize; --i >= 0;) {\nfinal char lent = len_t[i];\nif (lent > maxLen) {\nmaxLen = lent;\nif (lent < minLen) {\nminLen = lent;\n}\nhbCreateDecodeTables(limit[t], base[t], perm[t], len[t], minLen,\nminLens[t] = minLen;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:getAndMoveToFrontDecode()V",
+            "method_body": "private void getAndMoveToFrontDecode() throws IOException {\nthis.origPtr = bsR(24);\nrecvDecodingTables();\nfinal InputStream inShadow = this.in;\nfinal Data dataShadow = this.data;\nfinal byte[] ll8 = dataShadow.ll8;\nfinal int[] unzftab = dataShadow.unzftab;\nfinal byte[] selector = dataShadow.selector;\nfinal byte[] seqToUnseq = dataShadow.seqToUnseq;\nfinal char[] yy = dataShadow.getAndMoveToFrontDecode_yy;\nfinal int[] minLens = dataShadow.minLens;\nfinal int[][] limit = dataShadow.limit;\nfinal int[][] base = dataShadow.base;\nfinal int[][] perm = dataShadow.perm;\nfinal int limitLast = this.blockSize100k * 100000;\nfor (int i = 256; --i >= 0;) {\nyy[i] = (char) i;\nunzftab[i] = 0;\nint groupNo = 0;\nint groupPos = G_SIZE - 1;\nfinal int eob = this.nInUse + 1;\nint nextSym = getAndMoveToFrontDecode0(0);\nint bsBuffShadow = this.bsBuff;\nint bsLiveShadow = this.bsLive;\nint lastShadow = -1;\nint zt = selector[groupNo] & 0xff;\nint[] base_zt = base[zt];\nint[] limit_zt = limit[zt];\nint[] perm_zt = perm[zt];\nint minLens_zt = minLens[zt];\nwhile (nextSym != eob) {\nif ((nextSym == RUNA) || (nextSym == RUNB)) {\nint s = -1;\nfor (int n = 1; true; n <<= 1) {\nif (nextSym == RUNA) {\ns += n;\n} else if (nextSym == RUNB) {\ns += n << 1;\nif (groupPos == 0) {\ngroupPos = G_SIZE - 1;\nzt = selector[++groupNo] & 0xff;\nbase_zt = base[zt];\nlimit_zt = limit[zt];\nperm_zt = perm[zt];\nminLens_zt = minLens[zt];\ngroupPos--;\nint zn = minLens_zt;\nwhile (bsLiveShadow < zn) {\nfinal int thech = inShadow.read();\nif (thech >= 0) {\nbsBuffShadow = (bsBuffShadow << 8) | thech;\nbsLiveShadow += 8;\ncontinue;\nint zvec = (bsBuffShadow >> (bsLiveShadow - zn))\nbsLiveShadow -= zn;\nwhile (zvec > limit_zt[zn]) {\nzn++;\nwhile (bsLiveShadow < 1) {\nfinal int thech = inShadow.read();\nif (thech >= 0) {\nbsBuffShadow = (bsBuffShadow << 8) | thech;\nbsLiveShadow += 8;\ncontinue;\nbsLiveShadow--;\nzvec = (zvec << 1)\nnextSym = perm_zt[zvec - base_zt[zn]];\nfinal byte ch = seqToUnseq[yy[0]];\nunzftab[ch & 0xff] += s + 1;\nwhile (s-- >= 0) {\nll8[++lastShadow] = ch;\nif (lastShadow >= limitLast) {\n} else {\nif (++lastShadow >= limitLast) {\nfinal char tmp = yy[nextSym - 1];\nunzftab[seqToUnseq[tmp] & 0xff]++;\nll8[lastShadow] = seqToUnseq[tmp];\nif (nextSym <= 16) {\nfor (int j = nextSym - 1; j > 0;) {\nyy[j] = yy[--j];\nSystem.arraycopy(yy, 0, yy, 1, nextSym - 1);\nyy[0] = tmp;\nif (groupPos == 0) {\ngroupPos = G_SIZE - 1;\nzt = selector[++groupNo] & 0xff;\nbase_zt = base[zt];\nlimit_zt = limit[zt];\nperm_zt = perm[zt];\nminLens_zt = minLens[zt];\ngroupPos--;\nint zn = minLens_zt;\nwhile (bsLiveShadow < zn) {\nfinal int thech = inShadow.read();\nif (thech >= 0) {\nbsBuffShadow = (bsBuffShadow << 8) | thech;\nbsLiveShadow += 8;\ncontinue;\nint zvec = (bsBuffShadow >> (bsLiveShadow - zn))\nbsLiveShadow -= zn;\nwhile (zvec > limit_zt[zn]) {\nzn++;\nwhile (bsLiveShadow < 1) {\nfinal int thech = inShadow.read();\nif (thech >= 0) {\nbsBuffShadow = (bsBuffShadow << 8) | thech;\nbsLiveShadow += 8;\ncontinue;\nbsLiveShadow--;\nzvec = (zvec << 1) | ((bsBuffShadow >> bsLiveShadow) & 1);\nnextSym = perm_zt[zvec - base_zt[zn]];\n}\nthis.last = lastShadow;\nthis.bsLive = bsLiveShadow;\nthis.bsBuff = bsBuffShadow;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:moveToFrontCodeAndSend()V",
+            "method_body": "private void moveToFrontCodeAndSend() throws IOException {\nbsW(24, this.data.origPtr);\ngenerateMTFValues();\nsendMTFValues();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:sendMTFValues6(II)V",
+            "method_body": "private void sendMTFValues6(final int nGroups, final int alphaSize)\nfinal byte[][] len = this.data.sendMTFValues_len;\nfinal OutputStream outShadow = this.out;\nint bsLiveShadow = this.bsLive;\nint bsBuffShadow = this.bsBuff;\nfor (int t = 0; t < nGroups; t++) {\nbyte[] len_t = len[t];\nint curr = len_t[0] & 0xff;\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= curr << (32 - bsLiveShadow - 5);\nbsLiveShadow += 5;\nfor (int i = 0; i < alphaSize; i++) {\nint lti = len_t[i] & 0xff;\nwhile (curr < lti) {\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= 2 << (32 - bsLiveShadow - 2);\nbsLiveShadow += 2;\ncurr++; /* 10 */\nwhile (curr > lti) {\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsBuffShadow |= 3 << (32 - bsLiveShadow - 2);\nbsLiveShadow += 2;\ncurr--; /* 11 */\nwhile (bsLiveShadow >= 8) {\noutShadow.write(bsBuffShadow >> 24); // write 8-bit\nbsBuffShadow <<= 8;\nbsLiveShadow -= 8;\nbsLiveShadow++;\nthis.bsBuff = bsBuffShadow;\nthis.bsLive = bsLiveShadow;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:setupNoRandPartA()I",
+            "method_body": "private int setupNoRandPartA() throws IOException {\nif (this.su_i2 <= this.last) {\nthis.su_chPrev = this.su_ch2;\nint su_ch2Shadow = this.data.ll8[this.su_tPos] & 0xff;\nthis.su_ch2 = su_ch2Shadow;\nthis.su_tPos = this.data.tt[this.su_tPos];\nthis.su_i2++;\nthis.currentChar = su_ch2Shadow;\nthis.currentState = NO_RAND_PART_B_STATE;\nthis.crc.updateCRC(su_ch2Shadow);\nreturn su_ch2Shadow;\nthis.currentState = NO_RAND_PART_A_STATE;\nendBlock();\ninitBlock();\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:bsFinishedWithStream()V",
+            "method_body": "private void bsFinishedWithStream() throws IOException {\nwhile (this.bsLive > 0) {\nint ch = this.bsBuff >> 24;\nthis.out.write(ch); // write 8-bit\nthis.bsBuff <<= 8;\nthis.bsLive -= 8;\n}\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream:bsPutUByte(I)V",
+            "method_body": "private void bsPutUByte(final int c) throws IOException {\nbsW(8, c);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BlockSort:<init>(Lorg/apache/commons/compress/compressors/bzip2/BZip2CompressorOutputStream$Data;)V",
+            "method_body": "BlockSort(final BZip2CompressorOutputStream.Data data) {\nthis.quadrant = data.sfmap;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream:hbCreateDecodeTables([I[I[I[CIII)V",
+            "method_body": "private static void hbCreateDecodeTables(final int[] limit,\nfor (int i = minLen, pp = 0; i <= maxLen; i++) {\nfor (int j = 0; j < alphaSize; j++) {\nif (length[j] == i) {\nperm[pp++] = j;\nfor (int i = MAX_CODE_LEN; --i > 0;) {\nbase[i] = 0;\nlimit[i] = 0;\nfor (int i = 0; i < alphaSize; i++) {\nbase[length[i] + 1]++;\nfor (int i = 1, b = base[0]; i < MAX_CODE_LEN; i++) {\nb += base[i];\nbase[i] = b;\nfor (int i = minLen, vec = 0, b = base[i]; i <= maxLen; i++) {\nfinal int nb = base[i + 1];\nvec += nb - b;\nb = nb;\nlimit[i] = vec - 1;\nvec <<= 1;\nfor (int i = minLen + 1; i <= maxLen; i++) {\nbase[i] = ((limit[i - 1] + 1) << 1) - base[i];\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.compressors.bzip2.CRC:<clinit>()V",
+            "method_body": "private static final int crc32Table[] = {\n};",
+            "method_id": 9
+        }
+    ]
+}

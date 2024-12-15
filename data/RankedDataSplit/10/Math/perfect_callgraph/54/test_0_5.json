@@ -1,0 +1,39 @@
+{
+    "bug_id": 54,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.dfp.DfpTest.testIssue567",
+    "test_body": "public void testIssue567() {\nDfpField field = new DfpField(100);\nAssert.assertEquals(0.0, field.getZero().toDouble(), MathUtils.SAFE_MIN);\nAssert.assertEquals(0.0, field.newDfp(0.0).toDouble(), MathUtils.SAFE_MIN);",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<-Infinity>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.dfp.DfpTest.testIssue567(DfpTest.java:1512)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpField:computeExp(Lorg/apache/commons/math/dfp/Dfp;Lorg/apache/commons/math/dfp/Dfp;)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public static Dfp computeExp(final Dfp a, final Dfp one) {\nDfp y  = new Dfp(one);\nDfp py = new Dfp(one);\nDfp f  = new Dfp(one);\nDfp fi = new Dfp(one);\nDfp x  = new Dfp(one);\nfor (int i = 0; i < 10000; i++) {\nx = x.multiply(a);\ny = y.add(x.divide(f));\nfi = fi.add(one);\nf = f.multiply(fi);\nif (y.equals(py)) {\nbreak;\npy = new Dfp(y);\nreturn y;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:isInfinite()Z",
+            "method_body": "public boolean isInfinite() {\nreturn nans == INFINITE;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:lessThan(Lorg/apache/commons/math/dfp/Dfp;)Z",
+            "method_body": "public boolean lessThan(final Dfp x) {\nif (field.getRadixDigits() != x.field.getRadixDigits()) {\nif (isNaN() || x.isNaN()) {\nreturn compare(this, x) < 0;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:greaterThan(Lorg/apache/commons/math/dfp/Dfp;)Z",
+            "method_body": "public boolean greaterThan(final Dfp x) {\nif (field.getRadixDigits() != x.field.getRadixDigits()) {\nif (isNaN() || x.isNaN()) {\nreturn compare(this, x) > 0;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:add(Lorg/apache/commons/math/dfp/Dfp;)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp add(final Dfp x) {\nif (field.getRadixDigits() != x.field.getRadixDigits()) {\nif (nans != FINITE || x.nans != FINITE) {\nDfp a = newInstance(this);\nDfp b = newInstance(x);\nDfp result = newInstance(getZero());\nfinal byte asign = a.sign;\nfinal byte bsign = b.sign;\na.sign = 1;\nb.sign = 1;\nbyte rsign = bsign;\nif (compare(a, b) > 0) {\nrsign = asign;\nif (b.mant[mant.length-1] == 0) {\nb.exp = a.exp;\nif (a.mant[mant.length-1] == 0) {\na.exp = b.exp;\nint aextradigit = 0;\nint bextradigit = 0;\nif (a.exp < b.exp) {\naextradigit = a.align(b.exp);\nbextradigit = b.align(a.exp);\nif (asign != bsign) {\nif (asign == rsign) {\nbextradigit = b.complement(bextradigit);\naextradigit = a.complement(aextradigit);\nint rh = 0; /* acts as a carry */\nfor (int i = 0; i < mant.length; i++) {\nfinal int r = a.mant[i]+b.mant[i]+rh;\nrh = r / RADIX;\nresult.mant[i] = r - rh * RADIX;\nresult.exp = a.exp;\nresult.sign = rsign;\nif (rh != 0 && (asign == bsign)) {\nfinal int lostdigit = result.mant[0];\nresult.shiftRight();\nresult.mant[mant.length-1] = rh;\nfinal int excp = result.round(lostdigit);\nif (excp != 0) {\nresult = dotrap(excp, ADD_TRAP, x, result);\nfor (int i = 0; i < mant.length; i++) {\nif (result.mant[mant.length-1] != 0) {\nbreak;\nresult.shiftLeft();\nif (i == 0) {\nresult.mant[0] = aextradigit+bextradigit;\naextradigit = 0;\nbextradigit = 0;\nif (result.mant[mant.length-1] == 0) {\nresult.exp = 0;\nif (asign != bsign) {\nresult.sign = 1;  // Per IEEE 854-1987 Section 6.3\nfinal int excp = result.round(aextradigit + bextradigit);\nif (excp != 0) {\nresult = dotrap(excp, ADD_TRAP, x, result);\nreturn result;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:complement(I)I",
+            "method_body": "protected int complement(int extra) {\nextra = RADIX-extra;\nfor (int i = 0; i < mant.length; i++) {\nmant[i] = RADIX-mant[i]-1;\nint rh = extra / RADIX;\nextra = extra - rh * RADIX;\nfor (int i = 0; i < mant.length; i++) {\nfinal int r = mant[i] + rh;\nrh = r / RADIX;\nmant[i] = r - rh * RADIX;\nreturn extra;\n}",
+            "method_id": 55
+        }
+    ]
+}

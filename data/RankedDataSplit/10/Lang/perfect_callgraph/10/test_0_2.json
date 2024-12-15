@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "org.apache.commons.lang3.time.FastDateFormat_ParserTest.testLANG_831",
+    "test_body": null,
+    "stack_trace": "junit.framework.AssertionFailedError: Parsed dates should be equal expected:<null> but was:<Mon Mar 02 21:00:00 PST 1970>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:118)\nat org.apache.commons.lang3.time.FastDateParserTest.testSdfAndFdp(FastDateParserTest.java:388)\nat org.apache.commons.lang3.time.FastDateParserTest.testLANG_831(FastDateParserTest.java:348)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.lang3.time.FormatCache:getInstance(Ljava/lang/String;Ljava/util/TimeZone;Ljava/util/Locale;)Ljava/text/Format;",
+            "method_body": "public F getInstance(String pattern, TimeZone timeZone, Locale locale) {\nif (pattern == null) {\nif (timeZone == null) {\nif (locale == null) {\nMultipartKey key = new MultipartKey(pattern, timeZone, locale);\nF format = cInstanceCache.get(key);\nif (format == null) {\nformat = createInstance(pattern, timeZone, locale);\nF previousValue= cInstanceCache.putIfAbsent(key, format);\nif (previousValue != null) {\nreturn format;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateFormat:parse(Ljava/lang/String;)Ljava/util/Date;",
+            "method_body": "public Date parse(String source) throws ParseException {\nreturn parser.parse(source);\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateParser:getDisplayNames(I)[Lorg/apache/commons/lang3/time/FastDateParser$KeyValue;",
+            "method_body": "KeyValue[] getDisplayNames(int field) {\nInteger fieldInt = Integer.valueOf(field);\nKeyValue[] fieldKeyValues= nameValues.get(fieldInt);\nif(fieldKeyValues==null) {\nDateFormatSymbols symbols= DateFormatSymbols.getInstance(locale);\nswitch(field) {\nfieldKeyValues= createKeyValues(symbols.getWeekdays(), symbols.getShortWeekdays());\nbreak;\nKeyValue[] prior = nameValues.putIfAbsent(fieldInt, fieldKeyValues);\nif(prior!=null) {\nreturn fieldKeyValues;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateParser:parse(Ljava/lang/String;Ljava/text/ParsePosition;)Ljava/util/Date;",
+            "method_body": "public Date parse(String source, ParsePosition pos) {\nint offset= pos.getIndex();\nMatcher matcher= parsePattern.matcher(source.substring(offset));\nif(!matcher.lookingAt()) {\nCalendar cal= Calendar.getInstance(timeZone, locale);\ncal.clear();\nfor(int i=0; i<strategies.length;) {\nStrategy strategy= strategies[i++];\nstrategy.setCalendar(this, cal, matcher.group(i));\n}\npos.setIndex(offset+matcher.end());\nreturn cal.getTime();\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateParser$CopyQuotedStrategy:addRegex(Lorg/apache/commons/lang3/time/FastDateParser;Ljava/lang/StringBuilder;)Z",
+            "method_body": "public boolean addRegex(FastDateParser parser, StringBuilder regex) {\nescapeRegex(regex, formatField, true);\nreturn false;\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateParser:isNextNumber()Z",
+            "method_body": "boolean isNextNumber() {\nreturn nextStrategy!=null && nextStrategy.isNumber();\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateParser:init()V",
+            "method_body": "private void init() {\nthisYear= Calendar.getInstance(timeZone, locale).get(Calendar.YEAR);\nnameValues= new ConcurrentHashMap<Integer, KeyValue[]>();\nStringBuilder regex= new StringBuilder();\nList<Strategy> collector = new ArrayList<Strategy>();\nMatcher patternMatcher= formatPattern.matcher(pattern);\nif(!patternMatcher.lookingAt()) {\ncurrentFormatField= patternMatcher.group();\nStrategy currentStrategy= getStrategy(currentFormatField);\npatternMatcher.region(patternMatcher.end(), patternMatcher.regionEnd());\nif(!patternMatcher.lookingAt()) {\nnextStrategy = null;\nbreak;\nString nextFormatField= patternMatcher.group();\nnextStrategy = getStrategy(nextFormatField);\nif(currentStrategy.addRegex(this, regex)) {\ncollector.add(currentStrategy);\ncurrentFormatField= nextFormatField;\ncurrentStrategy= nextStrategy;\n}\nif(currentStrategy.addRegex(this, regex)) {\ncollector.add(currentStrategy);\ncurrentFormatField= null;\nstrategies= collector.toArray(new Strategy[collector.size()]);\nparsePattern= Pattern.compile(regex.toString());\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDateParser$1:compare(Lorg/apache/commons/lang3/time/FastDateParser$KeyValue;Lorg/apache/commons/lang3/time/FastDateParser$KeyValue;)I",
+            "method_body": "public int compare(KeyValue left, KeyValue right) {\nreturn left.key.compareToIgnoreCase(right.key);\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDatePrinter:parseToken(Ljava/lang/String;[I)Ljava/lang/String;",
+            "method_body": "protected String parseToken(String pattern, int[] indexRef) {\nStringBuilder buf = new StringBuilder();\nint i = indexRef[0];\nint length = pattern.length();\nchar c = pattern.charAt(i);\nif (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z') {\nbuf.append(c);\nwhile (i + 1 < length) {\nchar peek = pattern.charAt(i + 1);\nif (peek == c) {\nbuf.append('\\'');\nboolean inLiteral = false;\nfor (; i < length; i++) {\nc = pattern.charAt(i);\nif (c == '\\'') {\n} else if (!inLiteral &&\ni--;\nbreak;\nbuf.append(c);\nindexRef[0] = i;\nreturn buf.toString();\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.lang3.time.FastDatePrinter$TextField:<init>(I[Ljava/lang/String;)V",
+            "method_body": "TextField(int field, String[] values) {\nmField = field;\nmValues = values;\n}",
+            "method_id": 29
+        }
+    ]
+}

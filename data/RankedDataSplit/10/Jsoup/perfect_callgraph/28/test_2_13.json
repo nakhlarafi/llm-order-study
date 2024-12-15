@@ -1,0 +1,59 @@
+{
+    "bug_id": 28,
+    "test_id": 2,
+    "test_name": "org.jsoup.parser.HtmlParserTest.relaxedBaseEntityMatchAndStrictExtendedMatch",
+    "test_body": "732: @Test public void relaxedBaseEntityMatchAndStrictExtendedMatch() {\n733: // extended entities need a ; at the end to match, base does not\n734: String html = \"&amp &quot &reg &icy &hopf &icy; &hopf;\";\n735: Document doc = Jsoup.parse(html);\n736: doc.outputSettings().escapeMode(Entities.EscapeMode.extended); // modifies output only to clarify test\n737: assertEquals(StringUtil.normaliseWhitespace(\"&amp; &quot; &reg; &amp;icy &amp;hopf &icy; &hopf;\"), doc.body().html());\n738: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/String;Lorg/jsoup/nodes/Document$OutputSettings;)Ljava/lang/String;",
+            "method_body": "static String escape(String string, Document.OutputSettings out) {\nreturn escape(string, out.encoder(), out.escapeMode());\n}",
+            "method_id": 130
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/String;Ljava/nio/charset/CharsetEncoder;Lorg/jsoup/nodes/Entities$EscapeMode;)Ljava/lang/String;",
+            "method_body": "static String escape(String string, CharsetEncoder encoder, EscapeMode escapeMode) {\nStringBuilder accum = new StringBuilder(string.length() * 2);\nMap<Character, String> map = escapeMode.getMap();\nfor (int pos = 0; pos < string.length(); pos++) {\nCharacter c = string.charAt(pos);\nif (map.containsKey(c))\naccum.append('&').append(map.get(c)).append(';');\nelse if (encoder.canEncode(c))\naccum.append(c.charValue());\nreturn accum.toString();\n}",
+            "method_id": 131
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(C)V",
+            "method_body": "void emit(char c) {\ncharBuffer.append(c);\n}",
+            "method_id": 132
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$2:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nCharacter c = t.consumeCharacterReference(null, false);\nif (c == null)\nt.emit(c);\nt.transition(Data);\n}",
+            "method_id": 133
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:padding(I)Ljava/lang/String;",
+            "method_body": "public static String padding(int width) {\nif (width < 0)\nif (width < padding.length)\nreturn padding[width];\n}",
+            "method_id": 134
+        },
+        {
+            "method_signature": "org.jsoup.helper.StringUtil:isBlank(Ljava/lang/String;)Z",
+            "method_body": "public static boolean isBlank(String string) {\nif (string == null || string.length() == 0)\nint l = string.length();\nfor (int i = 0; i < l; i++) {\nif (!StringUtil.isWhitespace(string.codePointAt(i)))\nreturn false;\n}",
+            "method_id": 135
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:nodeName()Ljava/lang/String;",
+            "method_body": "public String nodeName() {\nreturn \"#text\";\n}",
+            "method_id": 136
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:getWholeText()Ljava/lang/String;",
+            "method_body": "public String getWholeText() {\nreturn attributes == null ? text : attributes.get(TEXT_KEY);\n}",
+            "method_id": 137
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:isBlank()Z",
+            "method_body": "public boolean isBlank() {\nreturn StringUtil.isBlank(getWholeText());\n}",
+            "method_id": 138
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:outerHtmlHead(Ljava/lang/StringBuilder;ILorg/jsoup/nodes/Document$OutputSettings;)V",
+            "method_body": "void outerHtmlHead(StringBuilder accum, int depth, Document.OutputSettings out) {\nString html = Entities.escape(getWholeText(), out);\nif (out.prettyPrint() && parent() instanceof Element && !((Element) parent()).preserveWhitespace()) {\nhtml = normaliseWhitespace(html);\nif (out.prettyPrint() && siblingIndex() == 0 && parentNode instanceof Element && ((Element) parentNode).tag().formatAsBlock() && !isBlank())\nindent(accum, depth, out);\naccum.append(html);\n}",
+            "method_id": 139
+        }
+    ]
+}

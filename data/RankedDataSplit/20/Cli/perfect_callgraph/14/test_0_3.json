@@ -1,0 +1,109 @@
+{
+    "bug_id": 14,
+    "test_id": 0,
+    "test_name": "org.apache.commons.cli2.bug.BugCLI144Test.testFileValidator",
+    "test_body": "public void testFileValidator() {\nfinal DefaultOptionBuilder obuilder = new DefaultOptionBuilder();\nfinal ArgumentBuilder abuilder = new ArgumentBuilder();\nfinal GroupBuilder gbuilder = new GroupBuilder();\nDefaultOption fileNameOption = obuilder.withShortName(\"f\")\n.withLongName(\"file-name\").withRequired(true).withDescription(\n\"name of an existing file\").withArgument(\nabuilder.withName(\"file-name\").withValidator(\nFileValidator.getExistingFileInstance())\n.create()).create();\nGroup options = gbuilder.withName(\"options\").withOption(fileNameOption)\n.create();\nParser parser = new Parser();\nparser.setHelpTrigger(\"--help\");\nparser.setGroup(options);\n60: final String fileName = \"src/test/org/apache/commons/cli2/bug/BugCLI144Test.java\";\nCommandLine cl = parser\n.parseAndHelp(new String[] { \"--file-name\", fileName });",
+    "stack_trace": "java.lang.ClassCastException: java.io.File cannot be cast to java.lang.String\nat org.apache.commons.cli2.validation.FileValidator.validate(FileValidator.java:123)\nat org.apache.commons.cli2.option.ArgumentImpl.validate(ArgumentImpl.java:251)\nat org.apache.commons.cli2.option.ParentImpl.validate(ParentImpl.java:124)\nat org.apache.commons.cli2.option.DefaultOption.validate(DefaultOption.java:176)\nat org.apache.commons.cli2.option.GroupImpl.validate(GroupImpl.java:262)\nat org.apache.commons.cli2.commandline.Parser.parse(Parser.java:104)\nat org.apache.commons.cli2.commandline.Parser.parseAndHelp(Parser.java:124)\nat org.apache.commons.cli2.bug.BugCLI144Test.testFileValidator(BugCLI144Test.java:61)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli2.option.ArgumentImpl:validate(Lorg/apache/commons/cli2/WriteableCommandLine;Lorg/apache/commons/cli2/Option;)V",
+            "method_body": "public void validate(final WriteableCommandLine commandLine,\nfinal List values = commandLine.getValues(option);\nif (values.size() < minimum) {\nif (values.size() > maximum) {\nif (validator != null) {\nvalidator.validate(values);\n}\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ArgumentImpl:stripBoundaryQuotes(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String stripBoundaryQuotes(String token) {\nif (!token.startsWith(\"\\\"\") || !token.endsWith(\"\\\"\")) {\nreturn token;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.ArgumentImpl:defaultValues(Lorg/apache/commons/cli2/WriteableCommandLine;Lorg/apache/commons/cli2/Option;)V",
+            "method_body": "public void defaultValues(final WriteableCommandLine commandLine,\ncommandLine.setDefaultValues(option, defaultValues);\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.builder.GroupBuilder:withName(Ljava/lang/String;)Lorg/apache/commons/cli2/builder/GroupBuilder;",
+            "method_body": "public GroupBuilder withName(final String newName) {\nthis.name = newName;\nreturn this;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.builder.GroupBuilder:withOption(Lorg/apache/commons/cli2/Option;)Lorg/apache/commons/cli2/builder/GroupBuilder;",
+            "method_body": "public GroupBuilder withOption(final Option option) {\nthis.options.add(option);\nreturn this;\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:<init>(Ljava/util/List;Ljava/lang/String;Ljava/lang/String;II)V",
+            "method_body": "public GroupImpl(final List options,\nsuper(0, false);\nthis.name = name;\nthis.description = description;\nthis.minimum = minimum;\nthis.maximum = maximum;\nthis.options = Collections.unmodifiableList(options);\nfinal List newAnonymous = new ArrayList();\nfinal SortedMap newOptionMap = new TreeMap(ReverseStringComparator.getInstance());\nfinal Set newPrefixes = new HashSet();\nfor (final Iterator i = options.iterator(); i.hasNext();) {\nfinal Option option = (Option) i.next();\nif (option instanceof Argument) {\nfinal Set triggers = option.getTriggers();\nfor (Iterator j = triggers.iterator(); j.hasNext();) {\nnewOptionMap.put(j.next(), option);\nnewPrefixes.addAll(option.getPrefixes());\n}\nthis.anonymous = Collections.unmodifiableList(newAnonymous);\nthis.optionMap = Collections.unmodifiableSortedMap(newOptionMap);\nthis.prefixes = Collections.unmodifiableSet(newPrefixes);\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:canProcess(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/lang/String;)Z",
+            "method_body": "public boolean canProcess(final WriteableCommandLine commandLine,\nif (arg == null) {\nif (optionMap.containsKey(arg)) {\nreturn true;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:getPrefixes()Ljava/util/Set;",
+            "method_body": "public Set getPrefixes() {\nreturn prefixes;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:process(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/util/ListIterator;)V",
+            "method_body": "public void process(final WriteableCommandLine commandLine,\nString previous = null;\nwhile (arguments.hasNext()) {\nfinal String arg = (String) arguments.next();\nif (arg == previous) {\nprevious = arg;\nfinal Option opt = (Option) optionMap.get(arg);\nif (opt != null) {\narguments.previous();\nopt.process(commandLine, arguments);\n} // [END process each command line token\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:defaults(Lorg/apache/commons/cli2/WriteableCommandLine;)V",
+            "method_body": "public void defaults(final WriteableCommandLine commandLine) {\nsuper.defaults(commandLine);\nfor (final Iterator i = options.iterator(); i.hasNext();) {\nfinal Option option = (Option) i.next();\noption.defaults(commandLine);\n}\nfor (final Iterator i = anonymous.iterator(); i.hasNext();) {\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.Parser:setGroup(Lorg/apache/commons/cli2/Group;)V",
+            "method_body": "public void setGroup(final Group group) {\nthis.group = group;\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.Parser:setHelpTrigger(Ljava/lang/String;)V",
+            "method_body": "public void setHelpTrigger(final String helpTrigger) {\nthis.helpTrigger = helpTrigger;\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.CommandLineImpl:hasOption(Ljava/lang/String;)Z",
+            "method_body": "public final boolean hasOption(final String trigger) {\nreturn hasOption(getOption(trigger));\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.CommandLineImpl:getValues(Lorg/apache/commons/cli2/Option;)Ljava/util/List;",
+            "method_body": "public final List getValues(final Option option) {\nreturn getValues(option, Collections.EMPTY_LIST);\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.WriteableCommandLineImpl:<init>(Lorg/apache/commons/cli2/Option;Ljava/util/List;)V",
+            "method_body": "private final Map optionToProperties = new HashMap();\nprivate final List options = new ArrayList();\nprivate final Map nameToOption = new HashMap();\nprivate final Map values = new HashMap();\nprivate final Map switches = new HashMap();\nprivate final Map defaultValues = new HashMap();\nprivate final Map defaultSwitches = new HashMap();\nfinal List arguments) {\nthis.prefixes = rootOption.getPrefixes();\nthis.normalised = arguments;\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.WriteableCommandLineImpl:addOption(Lorg/apache/commons/cli2/Option;)V",
+            "method_body": "public void addOption(Option option) {\noptions.add(option);\nnameToOption.put(option.getPreferredName(), option);\nfor (Iterator i = option.getTriggers().iterator(); i.hasNext();) {\nnameToOption.put(i.next(), option);\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.WriteableCommandLineImpl:addValue(Lorg/apache/commons/cli2/Option;Ljava/lang/Object;)V",
+            "method_body": "public void addValue(final Option option,\nif (option instanceof Argument) {\nList valueList = (List) values.get(option);\nif (valueList == null) {\nvalueList = new ArrayList();\nvalues.put(option, valueList);\nvalueList.add(value);\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.WriteableCommandLineImpl:hasOption(Lorg/apache/commons/cli2/Option;)Z",
+            "method_body": "public boolean hasOption(final Option option) {\nfinal boolean present = options.contains(option);\nreturn present;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.WriteableCommandLineImpl:getOption(Ljava/lang/String;)Lorg/apache/commons/cli2/Option;",
+            "method_body": "public Option getOption(final String trigger) {\nreturn (Option) nameToOption.get(trigger);\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.WriteableCommandLineImpl:getValues(Lorg/apache/commons/cli2/Option;Ljava/util/List;)Ljava/util/List;",
+            "method_body": "public List getValues(final Option option,\nList valueList = (List) values.get(option);\nif ((valueList == null) || valueList.isEmpty()) {\nif ((valueList == null) || valueList.isEmpty()) {\nif (valueList == null) {\nreturn valueList;\n}",
+            "method_id": 79
+        }
+    ]
+}

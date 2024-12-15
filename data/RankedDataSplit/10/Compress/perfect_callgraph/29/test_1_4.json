@@ -1,0 +1,59 @@
+{
+    "bug_id": 29,
+    "test_id": 1,
+    "test_name": "org.apache.commons.compress.archivers.ArchiveStreamFactoryTest.testEncodingOutputStream",
+    "test_body": "324: public void testEncodingOutputStream() throws Exception {\n325: int failed = 0;\n326: for(int i = 1; i <= TESTS.length; i++) {\n327: TestData test = TESTS[i-1];\n328: if (test.hasOutputStream) {\n329: ArchiveOutputStream ais = getOutputStreamFor(test.type, test.fac);\n330: final String field = getField(ais, test.fieldName);\n331: if (!eq(test.expectedEncoding, field)) {\n332: System.out.println(\"Failed test \" + i + \". expected: \" + test.expectedEncoding + \" actual: \" + field + \" type: \" + test.type);\n333: failed++;\n334: }\n335: }\n336: }\n337: if (failed > 0) {\n338: fail(\"Tests failed: \" + failed);\n339: }\n340: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:read32(Ljava/io/DataInputStream;)I",
+            "method_body": "private int read32(final DataInputStream dataIn) throws IOException {\nfinal int value = dataIn.readInt();\ncount(4);\nreturn Integer.reverseBytes(value);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:readString(Ljava/io/DataInputStream;)Ljava/lang/String;",
+            "method_body": "private String readString(final DataInputStream dataIn) throws IOException {\nfinal ByteArrayOutputStream buffer = new ByteArrayOutputStream();\nwhile ((nextByte = dataIn.readUnsignedByte()) != 0) {\nbuffer.write(nextByte);\nif (charsetName != null) {\nreturn new String(buffer.toByteArray(), charsetName);\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:readFully(Ljava/io/DataInputStream;[B)V",
+            "method_body": "private void readFully(final DataInputStream dataIn, byte[] b)\ndataIn.readFully(b);\ncount(b.length);\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:readHeader()[B",
+            "method_body": "private byte[] readHeader() throws IOException {\nboolean found = false;\nbyte[] basicHeaderBytes = null;\nint first = 0;\nint second = read8(in);\nfirst = second;\nsecond = read8(in);\n} while (first != ARJ_MAGIC_1 && second != ARJ_MAGIC_2);\nfinal int basicHeaderSize = read16(in);\nif (basicHeaderSize == 0) {\nif (basicHeaderSize <= 2600) {\nbasicHeaderBytes = new byte[basicHeaderSize];\nreadFully(in, basicHeaderBytes);\nfinal long basicHeaderCrc32 = read32(in) & 0xFFFFFFFFL;\nfinal CRC32 crc32 = new CRC32();\ncrc32.update(basicHeaderBytes);\nif (basicHeaderCrc32 == crc32.getValue()) {\nfound = true;\n} while (!found);\nreturn basicHeaderBytes;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.arj.ArjArchiveInputStream:readMainHeader()Lorg/apache/commons/compress/archivers/arj/MainHeader;",
+            "method_body": "private MainHeader readMainHeader() throws IOException {\nfinal byte[] basicHeaderBytes = readHeader();\nif (basicHeaderBytes == null) {\nfinal DataInputStream basicHeader = new DataInputStream(\nfinal int firstHeaderSize = basicHeader.readUnsignedByte();\nfinal byte[] firstHeaderBytes = new byte[firstHeaderSize - 1];\nbasicHeader.readFully(firstHeaderBytes);\nfinal DataInputStream firstHeader = new DataInputStream(\nfinal MainHeader hdr = new MainHeader();\nhdr.archiverVersionNumber = firstHeader.readUnsignedByte();\nhdr.minVersionToExtract = firstHeader.readUnsignedByte();\nhdr.hostOS = firstHeader.readUnsignedByte();\nhdr.arjFlags = firstHeader.readUnsignedByte();\nhdr.securityVersion = firstHeader.readUnsignedByte();\nhdr.fileType = firstHeader.readUnsignedByte();\nhdr.reserved = firstHeader.readUnsignedByte();\nhdr.dateTimeCreated = read32(firstHeader);\nhdr.dateTimeModified = read32(firstHeader);\nhdr.archiveSize = 0xffffFFFFL & read32(firstHeader);\nhdr.securityEnvelopeFilePosition = read32(firstHeader);\nhdr.fileSpecPosition = read16(firstHeader);\nhdr.securityEnvelopeLength = read16(firstHeader);\npushedBackBytes(20); // count has already counted them via readFully\nhdr.encryptionVersion = firstHeader.readUnsignedByte();\nhdr.lastChapter = firstHeader.readUnsignedByte();\nif (firstHeaderSize >= 33) {\nhdr.arjProtectionFactor = firstHeader.readUnsignedByte();\nhdr.arjFlags2 = firstHeader.readUnsignedByte();\nfirstHeader.readUnsignedByte();\nfirstHeader.readUnsignedByte();\nhdr.name = readString(basicHeader);\nhdr.comment = readString(basicHeader);\nfinal  int extendedHeaderSize = read16(in);\nif (extendedHeaderSize > 0) {\nreturn hdr;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveInputStream:<init>(Ljava/io/InputStream;)V",
+            "method_body": "public DumpArchiveInputStream(InputStream is) throws ArchiveException {\nthis(is, null);\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveInputStream:readCLRI()V",
+            "method_body": "private void readCLRI() throws IOException {\nbyte[] buffer = raw.readRecord();\nif (!DumpArchiveUtil.verify(buffer)) {\nactive = DumpArchiveEntry.parse(buffer);\nif (DumpArchiveConstants.SEGMENT_TYPE.CLRI != active.getHeaderType()) {\nif (raw.skip(DumpArchiveConstants.TP_SIZE * active.getHeaderCount())\nreadIdx = active.getHeaderCount();\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveInputStream:readBITS()V",
+            "method_body": "private void readBITS() throws IOException {\nbyte[] buffer = raw.readRecord();\nif (!DumpArchiveUtil.verify(buffer)) {\nactive = DumpArchiveEntry.parse(buffer);\nif (DumpArchiveConstants.SEGMENT_TYPE.BITS != active.getHeaderType()) {\nif (raw.skip(DumpArchiveConstants.TP_SIZE * active.getHeaderCount())\nreadIdx = active.getHeaderCount();\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveUtil:calculateChecksum([B)I",
+            "method_body": "public static int calculateChecksum(byte[] buffer) {\nint calc = 0;\nfor (int i = 0; i < 256; i++) {\ncalc += DumpArchiveUtil.convert32(buffer, 4 * i);\nreturn DumpArchiveConstants.CHECKSUM -\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.dump.DumpArchiveUtil:verify([B)Z",
+            "method_body": "public static final boolean verify(byte[] buffer) {\nint magic = convert32(buffer, 24);\nif (magic != DumpArchiveConstants.NFS_MAGIC) {\nint checksum = convert32(buffer, 28);\nif (checksum != calculateChecksum(buffer)) {\nreturn true;\n}",
+            "method_id": 49
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "bug_id": 65,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.testTemplateInsideTable",
+    "test_body": "@Test public void testTemplateInsideTable() throws IOException {\nFile in = ParseTest.getFile(\"/htmltests/table-polymer-template.html\");\nDocument doc = Jsoup.parse(in, \"UTF-8\");\ndoc.outputSettings().prettyPrint(true);\n1043: Elements templates = doc.body().getElementsByTag(\"template\");\nfor (Element template : templates) {\nassertTrue(template.childNodes().size() > 1);\n}",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.jsoup.parser.HtmlParserTest.testTemplateInsideTable(HtmlParserTest.java:1045)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:load(Ljava/io/File;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document load(File in, String charsetName, String baseUri) throws IOException {\nreturn parseInputStream(new FileInputStream(in), charsetName, baseUri, Parser.htmlParser());\n}",
+            "method_id": 240
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:parseInputStream(Ljava/io/InputStream;Ljava/lang/String;Ljava/lang/String;Lorg/jsoup/parser/Parser;)Lorg/jsoup/nodes/Document;",
+            "method_body": "static Document parseInputStream(InputStream input, String charsetName, String baseUri, Parser parser) throws IOException  {\nif (input == null) // empty body\nif (!(input instanceof ConstrainableInputStream))\ninput = new ConstrainableInputStream(input, bufferSize, 0);\nDocument doc = null;\nboolean fullyRead = false;\ninput.mark(firstReadBufferSize);\nByteBuffer firstBytes = readToByteBuffer(input, firstReadBufferSize - 1); // -1 because we read one more to see if completed\nfullyRead = input.read() == -1;\ninput.reset();\nBomCharset bomCharset = detectCharsetFromBom(firstBytes, charsetName);\nif (bomCharset != null) {\nif (charsetName == null) { // determine from meta. safe first parse as UTF-8\nValidate.notEmpty(charsetName, \"Must set charset arg to character set of file to parse. Set to null to attempt to detect from HTML\");\nif (doc == null) {\nif (charsetName == null)\nBufferedReader reader = new BufferedReader(new InputStreamReader(input, charsetName), bufferSize);\ndoc = parser.parseInput(reader, baseUri);\ndoc.outputSettings().charset(charsetName);\ninput.close();\nreturn doc;\n}",
+            "method_id": 241
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:readToByteBuffer(Ljava/io/InputStream;I)Ljava/nio/ByteBuffer;",
+            "method_body": "public static ByteBuffer readToByteBuffer(InputStream inStream, int maxSize) throws IOException {\nValidate.isTrue(maxSize >= 0, \"maxSize must be 0 (unlimited) or larger\");\nfinal boolean capped = maxSize > 0;\nfinal byte[] buffer = new byte[capped && maxSize < bufferSize ? maxSize : bufferSize];\nfinal ByteArrayOutputStream outStream = new ByteArrayOutputStream(capped ? maxSize : bufferSize);\nint remaining = maxSize;\nread = inStream.read(buffer);\nif (read == -1) break;\nif (capped) { // todo - why not using ConstrainedInputStream?\nif (read >= remaining) {\nremaining -= read;\noutStream.write(buffer, 0, read);\nreturn ByteBuffer.wrap(outStream.toByteArray());\n}",
+            "method_id": 242
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:detectCharsetFromBom(Ljava/nio/ByteBuffer;Ljava/lang/String;)Lorg/jsoup/helper/DataUtil$BomCharset;",
+            "method_body": "private static BomCharset detectCharsetFromBom(final ByteBuffer byteData, final String charsetName) {\nbyteData.mark();\nbyte[] bom = new byte[4];\nif (byteData.remaining() >= bom.length) {\nbyteData.get(bom);\nbyteData.rewind();\nif (bom[0] == 0x00 && bom[1] == 0x00 && bom[2] == (byte) 0xFE && bom[3] == (byte) 0xFF || // BE\n} else if (bom[0] == (byte) 0xFE && bom[1] == (byte) 0xFF || // BE\n} else if (bom[0] == (byte) 0xEF && bom[1] == (byte) 0xBB && bom[2] == (byte) 0xBF) {\nreturn null;\n}",
+            "method_id": 243
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "public ConstrainableInputStream(InputStream in, int bufferSize, int maxSize) {\nsuper(in, bufferSize);\nValidate.isTrue(maxSize >= 0);\nremaining = maxSize;\ncapped = maxSize != 0;\n}",
+            "method_id": 244
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nif (Thread.interrupted() || remaining < 0)\nfinal int read = super.read(b, off, len);\nif (capped) {\nreturn read;\n}",
+            "method_id": 245
+        }
+    ]
+}

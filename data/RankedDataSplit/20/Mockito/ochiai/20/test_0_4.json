@@ -1,0 +1,109 @@
+{
+    "bug_id": 20,
+    "test_id": 0,
+    "test_name": "org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class",
+    "test_body": "public void should_spy_inner_class() throws Exception {\n126: class WithMockAndSpy {\n@Spy private InnerStrength strength;\n@Mock private List<String> list;\n130: abstract class InnerStrength {\nprivate final String name;\n133: InnerStrength() {\n// Make sure that @Mock fields are always injected before @Spy fields.\nassertNotNull(list);\n// Make sure constructor is indeed called.\nthis.name = \"inner\";\n}\n140: abstract String strength();\n142: String fullStrength() {\nreturn name + \" \" + strength();\n}\n}\n}\nWithMockAndSpy outer = new WithMockAndSpy();\nMockitoAnnotations.initMocks(outer);\nwhen(outer.strength.strength()).thenReturn(\"strength\");\nassertEquals(\"inner strength\", outer.strength.fullStrength());\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<[inner] strength> but was:<[null] strength>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class(SpyAnnotationTest.java:150)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.InjectMocksScanner:addTo(Ljava/util/Set;)V",
+            "method_body": "public void addTo(Set<Field> mockDependentFields) {\nmockDependentFields.addAll(scan());\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.InjectMocksScanner:scan()Ljava/util/Set;",
+            "method_body": "private Set<Field> scan() {\nSet<Field> mockDependentFields = new HashSet<Field>();\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nif (null != field.getAnnotation(InjectMocks.class)) {\nreturn mockDependentFields;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.MockScanner:<init>(Ljava/lang/Object;Ljava/lang/Class;)V",
+            "method_body": "public MockScanner(Object instance, Class<?> clazz) {\nthis.instance = instance;\nthis.clazz = clazz;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.MockScanner:addPreparedMocks(Ljava/util/Set;)V",
+            "method_body": "public void addPreparedMocks(Set<Object> mocks) {\nmocks.addAll(scan());\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.MockScanner:scan()Ljava/util/Set;",
+            "method_body": "private Set<Object> scan() {\nSet<Object> mocks = newMockSafeHashSet();\nfor (Field field : clazz.getDeclaredFields()) {\nFieldReader fieldReader = new FieldReader(instance, field);\nObject mockInstance = preparedMock(fieldReader.read(), field);\nif (mockInstance != null) {\nmocks.add(mockInstance);\nreturn mocks;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultInjectionEngine:injectMocksOnFields(Ljava/util/Set;Ljava/util/Set;Ljava/lang/Object;)V",
+            "method_body": "public void injectMocksOnFields(Set<Field> needingInjection, Set<Object> mocks, Object testClassInstance) {\nMockInjection.onFields(needingInjection, testClassInstance)\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjection$OngoingMockInjection:handleSpyAnnotation()Lorg/mockito/internal/configuration/injection/MockInjection$OngoingMockInjection;",
+            "method_body": "public OngoingMockInjection handleSpyAnnotation() {\npostInjectionStrategies.thenTry(new SpyOnInjectedFieldsHandler());\nreturn this;\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.mockito.MockitoAnnotations:initMocks(Ljava/lang/Object;)V",
+            "method_body": "public static void initMocks(Object testClass) {\nif (testClass == null) {\nAnnotationEngine annotationEngine = new GlobalConfiguration().getAnnotationEngine();\nClass<?> clazz = testClass.getClass();\nif (annotationEngine.getClass() != new DefaultMockitoConfiguration().getAnnotationEngine().getClass()) {\nwhile (clazz != Object.class) {\nscanDeprecatedWay(annotationEngine, testClass, clazz);\nclazz = clazz.getSuperclass();\nannotationEngine.process(testClass.getClass(), testClass);\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.mockito.MockitoAnnotations:scanDeprecatedWay(Lorg/mockito/configuration/AnnotationEngine;Ljava/lang/Object;Ljava/lang/Class;)V",
+            "method_body": "static void scanDeprecatedWay(AnnotationEngine annotationEngine, Object testClass, Class<?> clazz) {\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nprocessAnnotationDeprecatedWay(annotationEngine, testClass, field);\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.GlobalConfiguration:getAnnotationEngine()Lorg/mockito/configuration/AnnotationEngine;",
+            "method_body": "public AnnotationEngine getAnnotationEngine() {\nreturn GLOBAL_CONFIGURATION.get().getAnnotationEngine();\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.mockito.configuration.DefaultMockitoConfiguration:getAnnotationEngine()Lorg/mockito/configuration/AnnotationEngine;",
+            "method_body": "public AnnotationEngine getAnnotationEngine() {\nreturn new InjectingAnnotationEngine();\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:<init>()V",
+            "method_body": "public DefaultAnnotationEngine() {\nregisterAnnotationProcessor(Mock.class, new MockAnnotationProcessor());\nregisterAnnotationProcessor(MockitoAnnotations.Mock.class, new MockitoAnnotationsMockAnnotationProcessor());\nregisterAnnotationProcessor(Captor.class, new CaptorAnnotationProcessor());\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:registerAnnotationProcessor(Ljava/lang/Class;Lorg/mockito/internal/configuration/FieldAnnotationProcessor;)V",
+            "method_body": "private <A extends Annotation> void registerAnnotationProcessor(Class<A> annotationClass, FieldAnnotationProcessor<A> fieldAnnotationProcessor) {\nannotationProcessorMap.put(annotationClass, fieldAnnotationProcessor);\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjection:onFields(Ljava/util/Set;Ljava/lang/Object;)Lorg/mockito/internal/configuration/injection/MockInjection$OngoingMockInjection;",
+            "method_body": "public static OngoingMockInjection onFields(Set<Field> fields, Object ofInstance) {\nreturn new OngoingMockInjection(fields, ofInstance);\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjection$OngoingMockInjection:tryConstructorInjection()Lorg/mockito/internal/configuration/injection/MockInjection$OngoingMockInjection;",
+            "method_body": "public OngoingMockInjection tryConstructorInjection() {\ninjectionStrategies.thenTry(new ConstructorInjection());\nreturn this;\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjection$OngoingMockInjection:tryPropertyOrFieldInjection()Lorg/mockito/internal/configuration/injection/MockInjection$OngoingMockInjection;",
+            "method_body": "public OngoingMockInjection tryPropertyOrFieldInjection() {\ninjectionStrategies.thenTry(new PropertyAndSetterInjection());\nreturn this;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.filter.TypeBasedCandidateFilter:<init>(Lorg/mockito/internal/configuration/injection/filter/MockCandidateFilter;)V",
+            "method_body": "public TypeBasedCandidateFilter(MockCandidateFilter next) {\nthis.next = next;\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.filter.NameBasedCandidateFilter:<init>(Lorg/mockito/internal/configuration/injection/filter/MockCandidateFilter;)V",
+            "method_body": "public NameBasedCandidateFilter(MockCandidateFilter next) {\nthis.next = next;\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjection$OngoingMockInjection:apply()V",
+            "method_body": "public void apply() {\nfor (Field field : fields) {\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.MockInjectionStrategy:thenTry(Lorg/mockito/internal/configuration/injection/MockInjectionStrategy;)Lorg/mockito/internal/configuration/injection/MockInjectionStrategy;",
+            "method_body": "public MockInjectionStrategy thenTry(MockInjectionStrategy strategy) {\nif(nextStrategy != null) {\nnextStrategy.thenTry(strategy);\nnextStrategy = strategy;\nreturn strategy;\n}",
+            "method_id": 99
+        }
+    ]
+}

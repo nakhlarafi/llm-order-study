@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207",
+    "test_body": "public void testIssue207() throws Exception\n{\nByteQuadsCanonicalizer nc = ByteQuadsCanonicalizer.createRoot(-523743345);\nField byteSymbolCanonicalizerField = JsonFactory.class.getDeclaredField(\"_byteSymbolCanonicalizer\");\nbyteSymbolCanonicalizerField.setAccessible(true);\nJsonFactory jsonF = new JsonFactory();\nbyteSymbolCanonicalizerField.set(jsonF, nc);\n110: StringBuilder stringBuilder = new StringBuilder();\nstringBuilder.append(\"{\\n\");\nstringBuilder.append(\"    \\\"expectedGCperPosition\\\": null\");\nfor (int i = 0; i < 60; ++i) {\nstringBuilder.append(\",\\n    \\\"\").append(i + 1).append(\"\\\": null\");\n}\nstringBuilder.append(\"\\n}\");\n118: JsonParser p = jsonF.createParser(stringBuilder.toString().getBytes(\"UTF-8\"));\nwhile (p.nextToken() != null) { }\np.close();",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 256\nat com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer.addName(ByteQuadsCanonicalizer.java:853)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.addName(UTF8StreamJsonParser.java:2340)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.parseEscapedName(UTF8StreamJsonParser.java:1980)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.slowParseName(UTF8StreamJsonParser.java:1867)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._parseName(UTF8StreamJsonParser.java:1651)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:740)\nat com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207(TestByteBasedSymbols.java:119)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledIn(I)Z",
+            "method_body": "public boolean enabledIn(int flags) { return (flags & getMask()) != 0; }\npublic boolean enabledIn(int flags) { return (flags & getMask()) != 0; }",
+            "method_id": 20
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:makeChild(I)Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;",
+            "method_body": "public ByteQuadsCanonicalizer makeChild(int flags) {\nreturn new ByteQuadsCanonicalizer(this,\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:<init>(Ljava/lang/String;IZ)V",
+            "method_body": "private Feature(boolean defaultState) { _defaultState = defaultState; }\nprivate Feature(boolean defaultState) { _defaultState = defaultState; }",
+            "method_id": 22
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:collectDefaults()I",
+            "method_body": "public static int collectDefaults() {\nint flags = 0;\nfor (Feature f : values()) {\nif (f.enabledByDefault()) { flags |= f.getMask(); }\nreturn flags;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:enabledByDefault()Z",
+            "method_body": "public boolean enabledByDefault() { return _defaultState; }\npublic boolean enabledByDefault() { return _defaultState; }",
+            "method_id": 24
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:<init>(IZIZ)V",
+            "method_body": "private ByteQuadsCanonicalizer(int sz, boolean intern, int seed, boolean failOnDoS) {\n_parent = null;\n_seed = seed;\n_intern = intern;\n_failOnDoS = failOnDoS;\nif (sz < MIN_HASH_SIZE) {\nif ((sz & (sz - 1)) != 0) { // only true if it's 2^N\n_tableInfo = new AtomicReference<TableInfo>(TableInfo.createInitial(sz));\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:<init>(Lcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer;ZIZLcom/fasterxml/jackson/core/sym/ByteQuadsCanonicalizer$TableInfo;)V",
+            "method_body": "private ByteQuadsCanonicalizer(ByteQuadsCanonicalizer parent, boolean intern,\n{\n_parent = parent;\n_seed = seed;\n_intern = intern;\n_failOnDoS = failOnDoS;\n_tableInfo = null; // not used by child tables\n_count = state.count;\n_hashSize = state.size;\n_secondaryStart = _hashSize << 2; // right after primary area\n_tertiaryStart = _secondaryStart + (_secondaryStart >> 1); // right after secondary\n_tertiaryShift = state.tertiaryShift;\n_hashArea = state.mainHash;\n_names = state.names;\n_spilloverEnd = state.spilloverEnd;\n_longNameOffset = state.longNameOffset;\n_needRehash = false;\n_hashShared = true;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_calcOffset(I)I",
+            "method_body": "private final int _calcOffset(int hash)\nint ix = hash & (_hashSize-1);\nreturn (ix << 2);\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:addName(Ljava/lang/String;[II)Ljava/lang/String;",
+            "method_body": "public String addName(String name, int[] q, int qlen)\n_verifySharing();\nif (_intern) {\nname = InternCache.instance.intern(name);\nswitch (qlen) {\noffset = _findOffsetForAdd(calcHash(q[0]));\n_hashArea[offset] = q[0];\n_hashArea[offset+3] = 1;\nbreak;\noffset = _findOffsetForAdd(calcHash(q[0], q[1]));\n_hashArea[offset] = q[0];\n_hashArea[offset+1] = q[1];\n_hashArea[offset+3] = 2;\nbreak;\noffset = _findOffsetForAdd(calcHash(q[0], q[1], q[2]));\n_hashArea[offset] = q[0];\n_hashArea[offset+1] = q[1];\n_hashArea[offset+2] = q[2];\n_hashArea[offset+3] = 3;\nbreak;\nfinal int hash = calcHash(q, qlen);\noffset = _findOffsetForAdd(hash);\n_hashArea[offset] = hash;\nint longStart = _appendLongName(q, qlen);\n_hashArea[offset+1] = longStart;\n_hashArea[offset+3] = qlen;\n_names[offset >> 2] = name;\n++_count;\n_verifyNeedForRehash();\nreturn name;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:_verifyNeedForRehash()V",
+            "method_body": "private void _verifyNeedForRehash() {\nif (_count > (_hashSize >> 1)) { // over 50%\nint spillCount = (_spilloverEnd - _spilloverStart()) >> 2;\nif ((spillCount > (1 + _count >> 7))\n_needRehash = true;\n}",
+            "method_id": 29
+        }
+    ]
+}

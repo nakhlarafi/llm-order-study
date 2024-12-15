@@ -1,0 +1,159 @@
+{
+    "bug_id": 22,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestPeriod_Constructors.testConstructor_long_fixedZone",
+    "test_body": "public void testConstructor_long_fixedZone() throws Throwable {\nDateTimeZone zone = DateTimeZone.getDefault();\ntry {\nDateTimeZone.setDefault(DateTimeZone.forOffsetHours(2));\nlong length =\n(4L + (3L * 7L) + (2L * 30L) + 365L) * DateTimeConstants.MILLIS_PER_DAY +\n5L * DateTimeConstants.MILLIS_PER_HOUR +\n6L * DateTimeConstants.MILLIS_PER_MINUTE +\n7L * DateTimeConstants.MILLIS_PER_SECOND + 8L;\nPeriod test = new Period(length);\nassertEquals(PeriodType.standard(), test.getPeriodType());\n// only time fields are precise in AllType\nassertEquals(0, test.getYears());  // (4 + (3 * 7) + (2 * 30) + 365) == 450\nassertEquals(0, test.getMonths());\nassertEquals(0, test.getWeeks());\nassertEquals(0, test.getDays());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0> but was:<64>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:234)\nat junit.framework.Assert.assertEquals(Assert.java:241)\nat junit.framework.TestCase.assertEquals(TestCase.java:409)\nat org.joda.time.TestPeriod_Constructors.testConstructor_long_fixedZone(TestPeriod_Constructors.java:188)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.chrono.BaseChronology:get(Lorg/joda/time/ReadablePeriod;J)[I",
+            "method_body": "public int[] get(ReadablePeriod period, long duration) {\nint size = period.size();\nint[] values = new int[size];\nif (duration != 0) {\nlong current = 0;\nfor (int i = 0; i < size; i++) {\nDurationField field = period.getFieldType(i).getField(this);\nif (field.isPrecise()) {\nint value = field.getDifference(duration, current);\ncurrent = field.add(current, value);\nvalues[i] = value;\nreturn values;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.joda.time.format.FormatUtils:appendPaddedInteger(Ljava/lang/StringBuffer;II)V",
+            "method_body": "public static void appendPaddedInteger(StringBuffer buf, int value, int size) {\nif (value < 0) {\nif (value < 10) {\nfor (; size > 1; size--) {\nbuf.append('0');\nbuf.append((char)(value + '0'));\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationField:isPrecise()Z",
+            "method_body": "public final boolean isPrecise() {\nreturn true;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:getZone()Lorg/joda/time/DateTimeZone;",
+            "method_body": "public DateTimeZone getZone() {\nif ((base = iBase) != null) {\nreturn base.getZone();\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDurationField:add(JI)J",
+            "method_body": "public long add(long instant, int value) {\nint offset = getOffsetToAdd(instant);\ninstant = iField.add(instant + offset, value);\nreturn instant - (iTimeField ? offset : getOffsetFromLocalToSubtract(instant));\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationField:add(JI)J",
+            "method_body": "public long add(long instant, int value) {\nlong addition = value * iUnitMillis;  // safe\nreturn FieldUtils.safeAdd(instant, addition);\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.joda.time.field.MillisDurationField:getDifference(JJ)I",
+            "method_body": "public int getDifference(long minuendInstant, long subtrahendInstant) {\nreturn FieldUtils.safeToInt(FieldUtils.safeSubtract(minuendInstant, subtrahendInstant));\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDurationField:getOffsetToAdd(J)I",
+            "method_body": "private int getOffsetToAdd(long instant) {\nint offset = this.iZone.getOffset(instant);\nlong sum = instant + offset;\nif ((instant ^ sum) < 0 && (instant ^ offset) >= 0) {\nreturn offset;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDurationField:isPrecise()Z",
+            "method_body": "public boolean isPrecise() {\nreturn iTimeField ? iField.isPrecise() : iField.isPrecise() && this.iZone.isFixed();\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology$ZonedDurationField:getOffsetFromLocalToSubtract(J)I",
+            "method_body": "private int getOffsetFromLocalToSubtract(long instant) {\nint offset = this.iZone.getOffsetFromLocal(instant);\nlong diff = instant - offset;\nif ((instant ^ diff) < 0 && (instant ^ offset) < 0) {\nreturn offset;\n}",
+            "method_id": 39
+        },
+        {
+            "method_signature": "org.joda.time.tz.FixedDateTimeZone:getOffset(J)I",
+            "method_body": "public int getOffset(long instant) {\nreturn iWallOffset;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:getPeriodType(Lorg/joda/time/PeriodType;)Lorg/joda/time/PeriodType;",
+            "method_body": "public static final PeriodType getPeriodType(PeriodType type) {\nif (type == null) {\nreturn PeriodType.standard();\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology:getZone()Lorg/joda/time/DateTimeZone;",
+            "method_body": "public DateTimeZone getZone() {\nreturn (DateTimeZone)getParam();\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:checkPermission()V",
+            "method_body": "private static void checkPermission() throws SecurityException {\nSecurityManager sm = System.getSecurityManager();\nif (sm != null) {\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:years()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField years() {\nreturn iYears;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:seconds()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField seconds() {\nreturn iSeconds;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:setDefault(Lorg/joda/time/DateTimeZone;)V",
+            "method_body": "public static void setDefault(DateTimeZone zone) throws SecurityException {\nSecurityManager sm = System.getSecurityManager();\nif (sm != null) {\nif (zone == null) {\nsynchronized(DateTimeZone.class) {\ncDefault = zone;\n}\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.joda.time.field.ImpreciseDateTimeField$LinkedDurationField:isPrecise()Z",
+            "method_body": "public boolean isPrecise() {\nreturn false;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:setCurrentMillisSystem()V",
+            "method_body": "public static final void setCurrentMillisSystem() throws SecurityException {\ncheckPermission();\ncMillisProvider = SYSTEM_MILLIS_PROVIDER;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.joda.time.tz.FixedDateTimeZone:isFixed()Z",
+            "method_body": "public boolean isFixed() {\nreturn true;\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "org.joda.time.field.FieldUtils:safeSubtract(JJ)J",
+            "method_body": "public static long safeSubtract(long val1, long val2) {\nlong diff = val1 - val2;\nif ((val1 ^ diff) < 0 && (val1 ^ val2) < 0) {\nreturn diff;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.joda.time.field.MillisDurationField:isPrecise()Z",
+            "method_body": "public final boolean isPrecise() {\nreturn true;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:days()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField days() {\nreturn iDays;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:weeks()Lorg/joda/time/DurationField;",
+            "method_body": "public final DurationField weeks() {\nreturn iWeeks;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.joda.time.field.FieldUtils:safeToInt(J)I",
+            "method_body": "public static int safeToInt(long value) {\nif (Integer.MIN_VALUE <= value && value <= Integer.MAX_VALUE) {\nreturn (int) value;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:getChronology(Lorg/joda/time/Chronology;)Lorg/joda/time/Chronology;",
+            "method_body": "public static final Chronology getChronology(Chronology chrono) {\nif (chrono == null) {\nreturn ISOChronology.getInstance();\nreturn chrono;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.joda.time.PeriodType:equals(Ljava/lang/Object;)Z",
+            "method_body": "public boolean equals(Object obj) {\nif (this == obj) {\nreturn true;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:setCurrentMillisFixed(J)V",
+            "method_body": "public static final void setCurrentMillisFixed(long fixedMillis) throws SecurityException {\ncheckPermission();\ncMillisProvider = new FixedMillisProvider(fixedMillis);\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.joda.time.PeriodType:getIndexedField(Lorg/joda/time/ReadablePeriod;I)I",
+            "method_body": "int getIndexedField(ReadablePeriod period, int index) {\nint realIndex = iIndices[index];\nreturn (realIndex == -1 ? 0 : period.getValue(realIndex));\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationField:getDifferenceAsLong(JJ)J",
+            "method_body": "public long getDifferenceAsLong(long minuendInstant, long subtrahendInstant) {\nlong difference = FieldUtils.safeSubtract(minuendInstant, subtrahendInstant);\nreturn difference / iUnitMillis;\n}",
+            "method_id": 59
+        }
+    ]
+}

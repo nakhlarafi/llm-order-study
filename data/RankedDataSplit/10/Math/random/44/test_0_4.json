@@ -1,0 +1,59 @@
+{
+    "bug_id": 44,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.events.EventStateTest.testIssue695",
+    "test_body": "public void testIssue695() {\n82: FirstOrderDifferentialEquations equation = new FirstOrderDifferentialEquations() {\n84: public int getDimension() {\nreturn 1;\n}\n88: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] = 1.0;\n}\n};\n93: DormandPrince853Integrator integrator = new DormandPrince853Integrator(0.001, 1000, 1.0e-14, 1.0e-14);\nintegrator.addEventHandler(new ResettingEvent(10.99), 0.1, 1.0e-9, 1000);\nintegrator.addEventHandler(new ResettingEvent(11.01), 0.1, 1.0e-9, 1000);\nintegrator.setInitialStepSize(3.0);\n98: double target = 30.0;\ndouble[] y = new double[1];\ndouble tEnd = integrator.integrate(equation, 0.0, y, target, y);\nAssert.assertEquals(target, tEnd, 1.0e-10);",
+    "stack_trace": "junit.framework.AssertionFailedError: going backard in time! (7.796578226186635 < 10.99)\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.apache.commons.math.ode.events.EventStateTest$ResettingEvent.g(EventStateTest.java:120)\nat org.apache.commons.math.ode.events.EventState.evaluateStep(EventState.java:214)\nat org.apache.commons.math.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:302)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:296)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:213)\nat org.apache.commons.math.ode.events.EventStateTest.testIssue695(EventStateTest.java:100)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getPreviousTime()D",
+            "method_body": "public double getPreviousTime() {\nreturn softPreviousTime;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.MathUtils:checkNotNull(Ljava/lang/Object;)V",
+            "method_body": "public static void checkNotNull(Object o)\nif (o == null) {\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:getCompleteState()[D",
+            "method_body": "public double[] getCompleteState() {\ndouble[] completeState = new double[getTotalDimension()];\nprimaryMapper.insertEquationData(primaryState, completeState);\nfor (final SecondaryComponent component : components) {\nreturn completeState;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:<init>(D)V",
+            "method_body": "protected BaseAbstractUnivariateRealSolver(final double absoluteAccuracy) {\nthis(DEFAULT_RELATIVE_ACCURACY,\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator:integrate(Lorg/apache/commons/math/ode/ExpandableStatefulODE;D)V",
+            "method_body": "public void integrate(final ExpandableStatefulODE equations, final double t)\nsanityChecks(equations, t);\nsetEquations(equations);\nresetEvaluations();\nfinal boolean forward = t > equations.getTime();\nfinal double[] y0  = equations.getCompleteState();\nfinal double[] y = y0.clone();\nfinal int stages = c.length + 1;\nfinal double[][] yDotK = new double[stages][y.length];\nfinal double[] yTmp    = new double[y.length];\nfinal double[] yDotTmp = new double[y.length];\nfinal RungeKuttaStepInterpolator interpolator = (RungeKuttaStepInterpolator) prototype.copy();\ninterpolator.reinitialize(this, yTmp, yDotK, forward,\ninterpolator.storeTime(equations.getTime());\nstepStart         = equations.getTime();\ndouble  hNew      = 0;\nboolean firstTime = true;\nfor (StepHandler handler : stepHandlers) {\nsetStateInitialized(false);\nisLastStep = false;\ninterpolator.shift();\ndouble error = 10;\nwhile (error >= 1.0) {\nif (firstTime || !fsal) {\ncomputeDerivatives(stepStart, y, yDotK[0]);\nif (firstTime) {\nfinal double[] scale = new double[mainSetDimension];\nif (vecAbsoluteTolerance == null) {\nfor (int i = 0; i < scale.length; ++i) {\nscale[i] = scalAbsoluteTolerance + scalRelativeTolerance * FastMath.abs(y[i]);\nhNew = initializeStep(forward, getOrder(), scale,\nfirstTime = false;\nstepSize = hNew;\nfor (int k = 1; k < stages; ++k) {\nfor (int j = 0; j < y0.length; ++j) {\ndouble sum = a[k-1][0] * yDotK[0][j];\nfor (int l = 1; l < k; ++l) {\nsum += a[k-1][l] * yDotK[l][j];\nyTmp[j] = y[j] + stepSize * sum;\ncomputeDerivatives(stepStart + c[k-1] * stepSize, yTmp, yDotK[k]);\nfor (int j = 0; j < y0.length; ++j) {\ndouble sum    = b[0] * yDotK[0][j];\nfor (int l = 1; l < stages; ++l) {\nsum    += b[l] * yDotK[l][j];\nyTmp[j] = y[j] + stepSize * sum;\nerror = estimateError(yDotK, y, yTmp, stepSize);\nif (error >= 1.0) {\ninterpolator.storeTime(stepStart + stepSize);\nSystem.arraycopy(yTmp, 0, y, 0, y0.length);\nSystem.arraycopy(yDotK[stages - 1], 0, yDotTmp, 0, y0.length);\nstepStart = acceptStep(interpolator, y, yDotTmp, t);\nif (!isLastStep) {\ninterpolator.storeTime(stepStart);\nif (fsal) {\nSystem.arraycopy(yDotTmp, 0, yDotK[0], 0, y0.length);\nfinal double factor =\nfinal double  scaledH    = stepSize * factor;\nfinal double  nextT      = stepStart + scaledH;\nfinal boolean nextIsLast = forward ? (nextT >= t) : (nextT <= t);\nhNew = filterStep(scaledH, forward, nextIsLast);\nfinal double  filteredNextT      = stepStart + hNew;\nfinal boolean filteredNextIsLast = forward ? (filteredNextT >= t) : (filteredNextT <= t);\nif (filteredNextIsLast) {\n} while (!isLastStep);\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:getMin()D",
+            "method_body": "public double getMin() {\nreturn searchMin;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.RungeKuttaStepInterpolator:reinitialize(Lorg/apache/commons/math/ode/AbstractIntegrator;[D[[DZLorg/apache/commons/math/ode/EquationsMapper;[Lorg/apache/commons/math/ode/EquationsMapper;)V",
+            "method_body": "public void reinitialize(final AbstractIntegrator rkIntegrator,\nreinitialize(y, forward, primaryMapper, secondaryMappers);\nthis.yDotK = yDotArray;\nthis.integrator = rkIntegrator;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:getFunctionValueAccuracy()D",
+            "method_body": "public double getFunctionValueAccuracy() {\nreturn functionValueAccuracy;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:setEquations(Lorg/apache/commons/math/ode/ExpandableStatefulODE;)V",
+            "method_body": "protected void setEquations(final ExpandableStatefulODE equations) {\nthis.expandable = equations;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.AbstractUnivariateRealSolver:<init>(D)V",
+            "method_body": "protected AbstractUnivariateRealSolver(final double absoluteAccuracy) {\nsuper(absoluteAccuracy);\n}",
+            "method_id": 49
+        }
+    ]
+}

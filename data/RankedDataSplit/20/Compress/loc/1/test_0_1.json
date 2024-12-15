@@ -1,0 +1,129 @@
+{
+    "bug_id": 1,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.CpioTestCase.testCpioUnarchive",
+    "test_body": "54: public void testCpioUnarchive() throws Exception {\n55: final File output = new File(dir, \"bla.cpio\");\n56: {\n57: final File file1 = getFile(\"test1.xml\");\n58: final File file2 = getFile(\"test2.xml\");\n59: 60: final OutputStream out = new FileOutputStream(output);\n61: final ArchiveOutputStream os = new ArchiveStreamFactory().createArchiveOutputStream(\"cpio\", out);\n62: os.putArchiveEntry(new CpioArchiveEntry(\"test1.xml\", file1.length()));\n63: IOUtils.copy(new FileInputStream(file1), os);\n64: os.closeArchiveEntry();\n65: 66: os.putArchiveEntry(new CpioArchiveEntry(\"test2.xml\", file2.length()));\n67: IOUtils.copy(new FileInputStream(file2), os);\n68: os.closeArchiveEntry();\n69: 70: os.close();\n71: out.close();\n72: }\n73: 74: // Unarchive Operation\n75: final File input = output;\n76: final InputStream is = new FileInputStream(input);\n77: final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(\"cpio\", is);\n78: 79: 80: Map result = new HashMap();\n81: ArchiveEntry entry = null;\n82: while ((entry = in.getNextEntry()) != null) {\n83: File target = new File(dir, entry.getName());\n84: final OutputStream out = new FileOutputStream(target);\n85: IOUtils.copy(in, out);\n86: out.close();\n87: result.put(entry.getName(), target);\n88: }\n89: in.close();\n90: 91: int lineSepLength = System.getProperty(\"line.separator\").length();\n92: 93: File t = (File)result.get(\"test1.xml\");\n94: assertTrue(\"Expected \" + t.getAbsolutePath() + \" to exist\", t.exists());\n95: assertEquals(\"length of \" + t.getAbsolutePath(),\n96: 72 + 4 * lineSepLength, t.length());\n97: 98: t = (File)result.get(\"test2.xml\");\n99: assertTrue(\"Expected \" + t.getAbsolutePath() + \" to exist\", t.exists());\n100: assertEquals(\"length of \" + t.getAbsolutePath(),\n101: 73 + 5 * lineSepLength, t.length());\n102: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:<init>(Ljava/lang/String;J)V",
+            "method_body": "public CpioArchiveEntry(final String name, final long size) {\nthis(FORMAT_NEW);\nthis.name = name;\nthis.setSize(size);\n}",
+            "method_id": 20,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setMode(J)V",
+            "method_body": "public void setMode(final long mode) {\nswitch ((int) (mode & S_IFMT)) {\nnew IllegalArgumentException(\"Unknown mode (full mode: \" + mode\nthis.mode = mode;\n}",
+            "method_id": 21,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream:closeEntry()V",
+            "method_body": "public void closeEntry() throws IOException {\nensureOpen();\nwhile (read(this.tmpbuf, 0, this.tmpbuf.length) != -1) {\nthis.entryEOF = true;\n}",
+            "method_id": 22,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream:readAsciiLong(II)J",
+            "method_body": "private long readAsciiLong(final int length, final int radix)\nbyte tmpBuffer[] = new byte[length];\nreadFully(tmpBuffer, 0, tmpBuffer.length);\nreturn Long.parseLong(new String(tmpBuffer), radix);\n}",
+            "method_id": 23,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream:readCString(I)Ljava/lang/String;",
+            "method_body": "private String readCString(final int length) throws IOException {\nbyte tmpBuffer[] = new byte[length];\nreadFully(tmpBuffer, 0, tmpBuffer.length);\nreturn new String(tmpBuffer, 0, tmpBuffer.length - 1);\n}",
+            "method_id": 24,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setSize(J)V",
+            "method_body": "public void setSize(final long size) {\nif (size < 0 || size > 0xFFFFFFFFL) {\nthis.filesize = size;\n}",
+            "method_id": 25,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream:writeCString(Ljava/lang/String;)V",
+            "method_body": "private void writeCString(final String str) throws IOException {\nout.write(str.getBytes());\nout.write('\\0');\n}",
+            "method_id": 26,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getChksum()J",
+            "method_body": "public long getChksum() {\ncheckNewFormat();\nreturn this.chksum;\n}",
+            "method_id": 27,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getDeviceMaj()J",
+            "method_body": "public long getDeviceMaj() {\ncheckNewFormat();\nreturn this.maj;\n}",
+            "method_id": 28,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getDeviceMin()J",
+            "method_body": "public long getDeviceMin() {\ncheckNewFormat();\nreturn this.min;\n}",
+            "method_id": 29,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getRemoteDeviceMaj()J",
+            "method_body": "public long getRemoteDeviceMaj() {\ncheckNewFormat();\nreturn this.rmaj;\n}",
+            "method_id": 30,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getRemoteDeviceMin()J",
+            "method_body": "public long getRemoteDeviceMin() {\ncheckNewFormat();\nreturn this.rmin;\n}",
+            "method_id": 31,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setChksum(J)V",
+            "method_body": "public void setChksum(final long chksum) {\ncheckNewFormat();\nthis.chksum = chksum;\n}",
+            "method_id": 32,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setDeviceMaj(J)V",
+            "method_body": "public void setDeviceMaj(final long maj) {\ncheckNewFormat();\nthis.maj = maj;\n}",
+            "method_id": 33,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setDeviceMin(J)V",
+            "method_body": "public void setDeviceMin(final long min) {\ncheckNewFormat();\nthis.min = min;\n}",
+            "method_id": 34,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setRemoteDeviceMaj(J)V",
+            "method_body": "public void setRemoteDeviceMaj(final long rmaj) {\ncheckNewFormat();\nthis.rmaj = rmaj;\n}",
+            "method_id": 35,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:setRemoteDeviceMin(J)V",
+            "method_body": "public void setRemoteDeviceMin(final long rmin) {\ncheckNewFormat();\nthis.rmin = rmin;\n}",
+            "method_id": 36,
+            "loc": 4
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:<init>(S)V",
+            "method_body": "public CpioArchiveEntry(final short format) {\nsetFormat(format);\n}",
+            "method_id": 37,
+            "loc": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream:<init>(Ljava/io/OutputStream;)V",
+            "method_body": "public CpioArchiveOutputStream(final OutputStream out) {\nthis(out, FORMAT_NEW);\n}",
+            "method_id": 38,
+            "loc": 3
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream:ensureOpen()V",
+            "method_body": "private void ensureOpen() throws IOException {\nif (this.closed) {\n}",
+            "method_id": 39,
+            "loc": 3
+        }
+    ]
+}

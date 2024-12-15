@@ -1,0 +1,59 @@
+{
+    "bug_id": 26,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral",
+    "test_body": "public void testBug2182444_usCentral() {\nChronology chronUSCentral = GregorianChronology.getInstance(DateTimeZone.forID(\"US/Central\"));\nChronology chronUTC = GregorianChronology.getInstance(DateTimeZone.UTC);\nDateTime usCentralStandardInUTC = new DateTime(2008, 11, 2, 7, 0, 0, 0, chronUTC);\nDateTime usCentralDaylightInUTC = new DateTime(2008, 11, 2, 6, 0, 0, 0, chronUTC);\nassertTrue(\"Should be standard time\", chronUSCentral.getZone().isStandardOffset(usCentralStandardInUTC.getMillis()));\nassertFalse(\"Should be daylight time\", chronUSCentral.getZone().isStandardOffset(usCentralDaylightInUTC.getMillis()));\n1161: DateTime usCentralStandardInUSCentral = usCentralStandardInUTC.toDateTime(chronUSCentral);\nDateTime usCentralDaylightInUSCentral = usCentralDaylightInUTC.toDateTime(chronUSCentral);\nassertEquals(1, usCentralStandardInUSCentral.getHourOfDay());\nassertEquals(usCentralStandardInUSCentral.getHourOfDay(), usCentralDaylightInUSCentral.getHourOfDay());\nassertTrue(usCentralStandardInUSCentral.getMillis() != usCentralDaylightInUSCentral.getMillis());\nassertEquals(usCentralStandardInUSCentral, usCentralStandardInUSCentral.withHourOfDay(1));\nassertEquals(usCentralStandardInUSCentral.getMillis() + 3, usCentralStandardInUSCentral.withMillisOfSecond(3).getMillis());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2008-11-02T01:00:00.000-06:00> but was:<2008-11-02T01:00:00.000-05:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral(TestDateTimeZoneCutover.java:1166)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:readFrom(Ljava/io/DataInput;Ljava/lang/String;)Lorg/joda/time/tz/DateTimeZoneBuilder$PrecalculatedZone;",
+            "method_body": "static PrecalculatedZone readFrom(DataInput in, String id) throws IOException {\nint poolSize = in.readUnsignedShort();\nString[] pool = new String[poolSize];\nfor (int i=0; i<poolSize; i++) {\npool[i] = in.readUTF();\nint size = in.readInt();\nlong[] transitions = new long[size];\nint[] wallOffsets = new int[size];\nint[] standardOffsets = new int[size];\nString[] nameKeys = new String[size];\nfor (int i=0; i<size; i++) {\ntransitions[i] = readMillis(in);\nwallOffsets[i] = (int)readMillis(in);\nstandardOffsets[i] = (int)readMillis(in);\nif (poolSize < 256) {\nindex = in.readUnsignedByte();\nnameKeys[i] = pool[index];\n}\nDSTZone tailZone = null;\nif (in.readBoolean()) {\ntailZone = DSTZone.readFrom(in, id);\nreturn new PrecalculatedZone\n}",
+            "method_id": 200
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicYearDateTimeField:getRangeDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getRangeDurationField() {\nreturn null;\n}",
+            "method_id": 201
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationDateTimeField:getUnitMillis()J",
+            "method_body": "public final long getUnitMillis() {\nreturn iUnitMillis;\n}",
+            "method_id": 202
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYearMonthDayMillis(III)J",
+            "method_body": "long getYearMonthDayMillis(int year, int month, int dayOfMonth) {\nlong millis = getYearMillis(year);\nmillis += getTotalMillisByYearMonth(year, month);\nreturn millis + (dayOfMonth - 1) * (long)DateTimeConstants.MILLIS_PER_DAY;\n}",
+            "method_id": 203
+        },
+        {
+            "method_signature": "org.joda.time.tz.ZoneInfoProvider:openResource(Ljava/lang/String;)Ljava/io/InputStream;",
+            "method_body": "private InputStream openResource(String name) throws IOException {\nif (iFileDir != null) {\nString path = iResourcePath.concat(name);\nif (iLoader != null) {\nin = iLoader.getResourceAsStream(path);\nif (in == null) {\nreturn in;\n}",
+            "method_id": 204
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicDayOfMonthDateTimeField:getMaximumValueForSet(JI)I",
+            "method_body": "protected int getMaximumValueForSet(long instant, int value) {\nreturn iChronology.getDaysInMonthMaxForSet(instant, value);\n}",
+            "method_id": 205
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDateTimeField:set(JI)J",
+            "method_body": "public long set(long instant, int value) {\nFieldUtils.verifyValueBounds(this, value, getMinimumValue(), getMaximumValue());\nreturn instant + (value - get(instant)) * iUnitMillis;\n}",
+            "method_id": 206
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeZone:convertUTCToLocal(J)J",
+            "method_body": "public long convertUTCToLocal(long instantUTC) {\nint offset = getOffset(instantUTC);\nlong instantLocal = instantUTC + offset;\nif ((instantUTC ^ instantLocal) < 0 && (instantUTC ^ offset) >= 0) {\nreturn instantLocal;\n}",
+            "method_id": 207
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:<init>(Ljava/lang/String;[J[I[I[Ljava/lang/String;Lorg/joda/time/tz/DateTimeZoneBuilder$DSTZone;)V",
+            "method_body": "private PrecalculatedZone(String id, long[] transitions, int[] wallOffsets,\nsuper(id);\niTransitions = transitions;\niWallOffsets = wallOffsets;\niStandardOffsets = standardOffsets;\niNameKeys = nameKeys;\niTailZone = tailZone;\n}",
+            "method_id": 208
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeFieldType:minuteOfHour()Lorg/joda/time/DateTimeFieldType;",
+            "method_body": "public static DateTimeFieldType minuteOfHour() {\nreturn MINUTE_OF_HOUR_TYPE;\n}",
+            "method_id": 209
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 12,
+    "test_id": 0,
+    "test_name": "org.jsoup.select.SelectorTest.testByAttributeRegexCombined",
+    "test_body": "127: @Test public void testByAttributeRegexCombined() {\n128: Document doc = Jsoup.parse(\"<div><table class=x><td>Hello</td></table></div>\");\n129: Elements els = doc.select(\"div table[class~=x|y]\");\n130: assertEquals(1, els.size());",
+    "stack_trace": "org.jsoup.select.Selector$SelectorParseException: Could not parse query '=x|y]': unexpected token at '=x|y]'\nat org.jsoup.select.Selector.findElements(Selector.java:187)\nat org.jsoup.select.Selector.select(Selector.java:113)\nat org.jsoup.select.Selector.select(Selector.java:84)\nat org.jsoup.select.Selector.combinator(Selector.java:149)\nat org.jsoup.select.Selector.select(Selector.java:126)\nat org.jsoup.select.Selector.select(Selector.java:84)\nat org.jsoup.nodes.Element.select(Element.java:199)\nat org.jsoup.select.SelectorTest.testByAttributeRegexCombined(SelectorTest.java:129)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.select.Selector:combinator(C)V",
+            "method_body": "private void combinator(char combinator) {\ntq.consumeWhitespace();\nString subQuery = tq.consumeToAny(combinators);\nif (combinator == '>')\nelse if (combinator == ' ')\noutput = filterForDescendants(elements, select(subQuery, elements));\nelse if (combinator == '+')\nelse if (combinator == '~')\noutput = filterForGeneralSiblings(elements, select(subQuery, root));\nelements.clear(); elements.addAll(output);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:findElements()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements findElements() {\nif (tq.matchChomp(\"#\")) {\n} else if (tq.matchChomp(\".\")) {\n} else if (tq.matchesWord()) {\nreturn byTag();\n} else if (tq.matches(\"[\")) {\nreturn byAttribute();\n} else if (tq.matchChomp(\"*\")) {\n} else if (tq.matchChomp(\":lt(\")) {\n} else if (tq.matchChomp(\":gt(\")) {\n} else if (tq.matchChomp(\":eq(\")) {\n} else if (tq.matches(\":has(\")) {\n} else if (tq.matches(\":contains(\")) {\n} else if (tq.matches(\":containsOwn(\")) {\n} else if (tq.matches(\":matches(\")) {\n} else if (tq.matches(\":matchesOwn(\")) {\n} else if (tq.matches(\":not(\")) {\nthrow new SelectorParseException(\"Could not parse query '%s': unexpected token at '%s'\", query, tq.remainder());\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector$SelectorParseException:<init>(Ljava/lang/String;[Ljava/lang/Object;)V",
+            "method_body": "public SelectorParseException(String msg, Object... params) {\nsuper(String.format(msg, params));\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:byAttribute()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements byAttribute() {\nTokenQueue cq = new TokenQueue(tq.chompBalanced('[', ']')); // content queue\nString key = cq.consumeToAny(\"=\", \"!=\", \"^=\", \"$=\", \"*=\", \"~=\"); // eq, not, start, end, contain, match, (no val)\nValidate.notEmpty(key);\ncq.consumeWhitespace();\nif (cq.isEmpty()) {\nreturn key.startsWith(\"^\") ? root.getElementsByAttributeStarting(key.substring(1)) : root.getElementsByAttribute(key);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements select() {\ntq.consumeWhitespace();\nif (tq.matchesAny(combinators)) { // if starts with a combinator, use root as elements\n} else if (tq.matches(\":has(\")) {\naddElements(findElements()); // chomp first element matcher off queue\nwhile (!tq.isEmpty()) {\nboolean seenWhite = tq.consumeWhitespace();\nif (tq.matchChomp(\",\")) { // group or\n} else if (tq.matchesAny(combinators)) {\ncombinator(tq.consume());\n} else if (seenWhite) {\ncombinator(' ');\nElements candidates = findElements(); // take next el, #. etc off queue\nintersectElements(filterForSelf(elements, candidates));\n}\nreturn new Elements(elements);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:getElementsByAttribute(Ljava/lang/String;)Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements getElementsByAttribute(String key) {\nValidate.notEmpty(key);\nkey = key.trim().toLowerCase();\nreturn Collector.collect(new Evaluator.Attribute(key), this);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select(Ljava/lang/String;Ljava/lang/Iterable;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements select(String query, Iterable<Element> roots) {\nValidate.notEmpty(query);\nValidate.notNull(roots);\nLinkedHashSet<Element> elements = new LinkedHashSet<Element>();\nfor (Element root : roots) {\nelements.addAll(select(query, root));\n}\nreturn new Elements(elements);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:filterForDescendants(Ljava/util/Collection;Ljava/util/Collection;)Lorg/jsoup/select/Elements;",
+            "method_body": "private static Elements filterForDescendants(Collection<Element> parents, Collection<Element> candidates) {\nElements children = new Elements();\nCHILD: for (Element c : candidates) {\nfor (Element p : parents) {\nif (c.equals(p)) {\n}\nchildren.add(c);\n}\nreturn children;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:<init>(Ljava/lang/String;Lorg/jsoup/nodes/Element;)V",
+            "method_body": "private Selector(String query, Element root) {\nValidate.notNull(query);\nquery = query.trim();\nValidate.notEmpty(query);\nValidate.notNull(root);\nthis.elements = new LinkedHashSet<Element>();\nthis.query = query;\nthis.root = root;\nthis.tq = new TokenQueue(query);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:byTag()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements byTag() {\nString tagName = tq.consumeElementSelector();\nValidate.notEmpty(tagName);\nif (tagName.contains(\"|\"))\nreturn root.getElementsByTag(tagName);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseAttribute(Lorg/jsoup/parser/Tag;)Lorg/jsoup/nodes/Attribute;",
+            "method_body": "private Attribute parseAttribute(Tag tag) {\ntq.consumeWhitespace();\nString key = tq.consumeAttributeKey();\nString value = \"\";\ntq.consumeWhitespace();\nif (tq.matchChomp(\"=\")) {\ntq.consumeWhitespace();\nif (tq.matchChomp(SQ)) {\n} else if (tq.matchChomp(DQ)) {\nStringBuilder valueAccum = new StringBuilder();\nwhile (!(tq.matchesAny(\"<\", \">\") || (tag.isEmpty() && tq.matches(\"/>\")))  && !tq.matchesWhitespace() && !tq.isEmpty()) {\nvalueAccum.append(tq.consume());\nvalue = valueAccum.toString();\ntq.consumeWhitespace();\nif (key.length() != 0)\nreturn Attribute.createFromEncoded(key, value);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public Attribute(String key, String value) {\nValidate.notEmpty(key);\nValidate.notNull(value);\nthis.key = key.trim().toLowerCase();\nthis.value = value;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:intersectElements(Ljava/util/Collection;)V",
+            "method_body": "private void intersectElements(Collection<Element> intersect) {\nelements.retainAll(intersect);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Evaluator$Attribute:<init>(Ljava/lang/String;)V",
+            "method_body": "public Attribute (String key) {\nthis.key = key;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:hashCode()I",
+            "method_body": "public int hashCode() {\nint result = key != null ? key.hashCode() : 0;\nresult = 31 * result + (value != null ? value.hashCode() : 0);\nreturn result;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:filterForSelf(Ljava/util/Collection;Ljava/util/Collection;)Lorg/jsoup/select/Elements;",
+            "method_body": "private static Elements filterForSelf(Collection<Element> parents, Collection<Element> candidates) {\nElements children = new Elements();\nCHILD: for (Element c : candidates) {\nfor (Element p : parents) {\nif (c.equals(p)) {\nchildren.add(c);\ncontinue CHILD;\nreturn children;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:<clinit>()V",
+            "method_body": "private final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};\nprivate final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:addElements(Ljava/util/Collection;)V",
+            "method_body": "private void addElements(Collection<Element> add) {\nelements.addAll(add);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select(Ljava/lang/String;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements select(String query, Element root) {\nreturn new Selector(query, root).select();\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:getKey()Ljava/lang/String;",
+            "method_body": "public String getKey() {\nreturn key;\n}",
+            "method_id": 19
+        }
+    ]
+}

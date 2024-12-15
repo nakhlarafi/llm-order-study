@@ -1,0 +1,109 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.google.gson.functional.CollectionTest.testIssue1107",
+    "test_body": "401: public void testIssue1107() {\n402: String json = \"{\\n\" +\n403: \"  \\\"inBig\\\": {\\n\" +\n404: \"    \\\"key\\\": [\\n\" +\n405: \"      { \\\"inSmall\\\": \\\"hello\\\" }\\n\" +\n406: \"    ]\\n\" +\n407: \"  }\\n\" +\n408: \"}\";\n409: BigClass bigClass = new Gson().fromJson(json, BigClass.class);\n410: SmallClass small = bigClass.inBig.get(\"key\").get(0);\n411: assertNotNull(small);",
+    "stack_trace": "java.lang.ClassCastException: com.google.gson.internal.LinkedTreeMap cannot be cast to com.google.gson.functional.CollectionTest$SmallClass\nat com.google.gson.functional.CollectionTest.testIssue1107(CollectionTest.java:410)",
+    "covered_methods": [
+        {
+            "method_signature": "com.google.gson.stream.JsonReader$1:promoteNameToValue(Lcom/google/gson/stream/JsonReader;)V",
+            "method_body": "@Override public void promoteNameToValue(JsonReader reader) throws IOException {\nif (reader instanceof JsonTreeReader) {\nint p = reader.peeked;\nif (p == PEEKED_NONE) {\nif (p == PEEKED_DOUBLE_QUOTED_NAME) {\nreader.peeked = PEEKED_DOUBLE_QUOTED;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor$8:construct()Ljava/lang/Object;",
+            "method_body": "private <T> ObjectConstructor<T> newDefaultImplementationConstructor(\nif (Collection.class.isAssignableFrom(rawType)) {\nif (SortedSet.class.isAssignableFrom(rawType)) {\n} else if (EnumSet.class.isAssignableFrom(rawType)) {\n} else if (Set.class.isAssignableFrom(rawType)) {\n} else if (Queue.class.isAssignableFrom(rawType)) {\nreturn new ObjectConstructor<T>() {\nreturn (T) new ArrayList<Object>();\nif (Map.class.isAssignableFrom(rawType)) {\nif (ConcurrentNavigableMap.class.isAssignableFrom(rawType)) {\n} else if (ConcurrentMap.class.isAssignableFrom(rawType)) {\n} else if (SortedMap.class.isAssignableFrom(rawType)) {\n} else if (type instanceof ParameterizedType && !(String.class.isAssignableFrom(\nreturn new ObjectConstructor<T>() {\nreturn (T) new LinkedTreeMap<String, Object>();\nreturn null;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor$14:construct()Ljava/lang/Object;",
+            "method_body": "private <T> ObjectConstructor<T> newUnsafeAllocator(\nreturn new ObjectConstructor<T>() {\nObject newInstance = unsafeAllocator.newInstance(rawType);\nreturn (T) newInstance;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter:read(Lcom/google/gson/stream/JsonReader;)Ljava/util/Map;",
+            "method_body": "@Override public Map<K, V> read(JsonReader in) throws IOException {\nJsonToken peek = in.peek();\nif (peek == JsonToken.NULL) {\nMap<K, V> map = constructor.construct();\nif (peek == JsonToken.BEGIN_ARRAY) {\nin.beginObject();\nwhile (in.hasNext()) {\nJsonReaderInternalAccess.INSTANCE.promoteNameToValue(in);\nK key = keyTypeAdapter.read(in);\nV value = valueTypeAdapter.read(in);\nV replaced = map.put(key, value);\nif (replaced != null) {\n}\nin.endObject();\nreturn map;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator:assertInstantiable(Ljava/lang/Class;)V",
+            "method_body": "static void assertInstantiable(Class<?> c) {\nint modifiers = c.getModifiers();\nif (Modifier.isInterface(modifiers)) {\nif (Modifier.isAbstract(modifiers)) {\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator$1:newInstance(Ljava/lang/Class;)Ljava/lang/Object;",
+            "method_body": "public abstract <T> T newInstance(Class<T> c) throws Exception;\nClass<?> unsafeClass = Class.forName(\"sun.misc.Unsafe\");\nField f = unsafeClass.getDeclaredField(\"theUnsafe\");\nf.setAccessible(true);\nfinal Object unsafe = f.get(null);\nfinal Method allocateInstance = unsafeClass.getMethod(\"allocateInstance\", Class.class);\nreturn new UnsafeAllocator() {\nassertInstantiable(c);\nreturn (T) allocateInstance.invoke(unsafe, c);\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "com.google.gson.internal.LinkedTreeMap:get(Ljava/lang/Object;)Ljava/lang/Object;",
+            "method_body": "@Override public V get(Object key) {\nNode<K, V> node = findByObject(key);\nreturn node != null ? node.value : null;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.CollectionTypeAdapterFactory$Adapter:read(Lcom/google/gson/stream/JsonReader;)Ljava/util/Collection;",
+            "method_body": "@Override public Collection<E> read(JsonReader in) throws IOException {\nif (in.peek() == JsonToken.NULL) {\nCollection<E> collection = constructor.construct();\nin.beginArray();\nwhile (in.hasNext()) {\nE instance = elementTypeAdapter.read(in);\ncollection.add(instance);\n}\nin.endArray();\nreturn collection;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "com.google.gson.internal.LinkedTreeMap:findByObject(Ljava/lang/Object;)Lcom/google/gson/internal/LinkedTreeMap$Node;",
+            "method_body": "Node<K, V> findByObject(Object key) {\nreturn key != null ? find((K) key, false) : null;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ObjectTypeAdapter:<init>(Lcom/google/gson/Gson;)V",
+            "method_body": "ObjectTypeAdapter(Gson gson) {\nthis.gson = gson;\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.MapTypeAdapterFactory:getKeyAdapter(Lcom/google/gson/Gson;Ljava/lang/reflect/Type;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "private TypeAdapter<?> getKeyAdapter(Gson context, Type keyType) {\nreturn (keyType == boolean.class || keyType == Boolean.class)\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter:<init>(Lcom/google/gson/internal/bind/MapTypeAdapterFactory;Lcom/google/gson/Gson;Ljava/lang/reflect/Type;Lcom/google/gson/TypeAdapter;Ljava/lang/reflect/Type;Lcom/google/gson/TypeAdapter;Lcom/google/gson/internal/ObjectConstructor;)V",
+            "method_body": "public Adapter(Gson context, Type keyType, TypeAdapter<K> keyTypeAdapter,\nObjectConstructor<? extends Map<K, V>> constructor) {\nthis.keyTypeAdapter =\nthis.valueTypeAdapter =\nthis.constructor = constructor;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "com.google.gson.internal.LinkedTreeMap$Node:<init>(Lcom/google/gson/internal/LinkedTreeMap$Node;Ljava/lang/Object;Lcom/google/gson/internal/LinkedTreeMap$Node;Lcom/google/gson/internal/LinkedTreeMap$Node;)V",
+            "method_body": "Node(Node<K, V> parent, K key, Node<K, V> next, Node<K, V> prev) {\nthis.parent = parent;\nthis.key = key;\nthis.height = 1;\nthis.next = next;\nthis.prev = prev;\nprev.next = this;\nnext.prev = this;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper:read(Lcom/google/gson/stream/JsonReader;)Ljava/lang/Object;",
+            "method_body": "public T read(JsonReader in) throws IOException {\nreturn delegate.read(in);\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "com.google.gson.internal.LinkedTreeMap:find(Ljava/lang/Object;Z)Lcom/google/gson/internal/LinkedTreeMap$Node;",
+            "method_body": "Node<K, V> find(K key, boolean create) {\nComparator<? super K> comparator = this.comparator;\nNode<K, V> nearest = root;\nint comparison = 0;\nif (nearest != null) {\nComparable<Object> comparableKey = (comparator == NATURAL_ORDER)\ncomparison = (comparableKey != null)\nif (comparison == 0) {\nreturn nearest;\nif (!create) {\nNode<K, V> header = this.header;\nif (nearest == null) {\nif (comparator == NATURAL_ORDER && !(key instanceof Comparable)) {\ncreated = new Node<K, V>(nearest, key, header, header.prev);\nroot = created;\nsize++;\nmodCount++;\nreturn created;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "com.google.gson.internal.ConstructorConstructor:newUnsafeAllocator(Ljava/lang/reflect/Type;Ljava/lang/Class;)Lcom/google/gson/internal/ObjectConstructor;",
+            "method_body": "private <T> ObjectConstructor<T> newUnsafeAllocator(\nreturn new ObjectConstructor<T>() {\nObject newInstance = unsafeAllocator.newInstance(rawType);\nreturn (T) newInstance;\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "com.google.gson.internal.LinkedTreeMap:put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+            "method_body": "@Override public V put(K key, V value) {\nif (key == null) {\nNode<K, V> created = find(key, true);\nV result = created.value;\ncreated.value = value;\nreturn result;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator:create()Lcom/google/gson/internal/UnsafeAllocator;",
+            "method_body": "public abstract <T> T newInstance(Class<T> c) throws Exception;\nClass<?> unsafeClass = Class.forName(\"sun.misc.Unsafe\");\nField f = unsafeClass.getDeclaredField(\"theUnsafe\");\nf.setAccessible(true);\nfinal Object unsafe = f.get(null);\nfinal Method allocateInstance = unsafeClass.getMethod(\"allocateInstance\", Class.class);\nreturn new UnsafeAllocator() {\nassertInstantiable(c);\nreturn (T) allocateInstance.invoke(unsafe, c);\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.CollectionTypeAdapterFactory$Adapter:<init>(Lcom/google/gson/Gson;Ljava/lang/reflect/Type;Lcom/google/gson/TypeAdapter;Lcom/google/gson/internal/ObjectConstructor;)V",
+            "method_body": "public Adapter(Gson context, Type elementType,\nObjectConstructor<? extends Collection<E>> constructor) {\nthis.elementTypeAdapter =\nthis.constructor = constructor;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "com.google.gson.internal.LinkedTreeMap:<init>()V",
+            "method_body": "public LinkedTreeMap() {\nthis((Comparator<? super K>) NATURAL_ORDER);\n}",
+            "method_id": 59
+        }
+    ]
+}

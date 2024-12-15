@@ -1,0 +1,59 @@
+{
+    "bug_id": 100,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.estimation.GaussNewtonEstimatorTest.testBoundParameters",
+    "test_body": "public void testBoundParameters() throws EstimationException {\nEstimatedParameter[] p = {\nnew EstimatedParameter(\"unbound0\", 2, false),\nnew EstimatedParameter(\"unbound1\", 2, false),\nnew EstimatedParameter(\"bound\",    2, true)\n};\nLinearProblem problem = new LinearProblem(new LinearMeasurement[] {\nnew LinearMeasurement(new double[] { 1.0, 1.0, 1.0 },\nnew EstimatedParameter[] { p[0], p[1], p[2] },\n3.0),\nnew LinearMeasurement(new double[] { 1.0, -1.0, 1.0 },\nnew EstimatedParameter[] { p[0], p[1], p[2] },\n1.0),\nnew LinearMeasurement(new double[] { 1.0, 3.0, 2.0 },\nnew EstimatedParameter[] { p[0], p[1], p[2] },\n7.0)\n});\n469: GaussNewtonEstimator estimator = new GaussNewtonEstimator(100, 1.0e-6, 1.0e-6);\nestimator.estimate(problem);\nassertTrue(estimator.getRMS(problem) < 1.0e-10);\ndouble[][] covariances = estimator.getCovariances(problem);\nint i0 = 0, i1 = 1;",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 6\nat org.apache.commons.math.estimation.AbstractEstimator.getCovariances(AbstractEstimator.java:173)\nat org.apache.commons.math.estimation.GaussNewtonEstimatorTest.testBoundParameters(GaussNewtonEstimatorTest.java:472)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:<init>(II)V",
+            "method_body": "public RealMatrixImpl(int rowDimension, int columnDimension) {\nif (rowDimension <= 0 || columnDimension <= 0) {\ndata = new double[rowDimension][columnDimension];\nlu = null;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:getEntry(II)D",
+            "method_body": "public double getEntry(int row, int column)\nif (!isValidCoordinate(row,column)) {\nreturn data[row][column];\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.GaussNewtonEstimator:estimate(Lorg/apache/commons/math/estimation/EstimationProblem;)V",
+            "method_body": "public void estimate(EstimationProblem problem)\ninitializeEstimate(problem);\ndouble[] grad             = new double[parameters.length];\nRealMatrixImpl bDecrement = new RealMatrixImpl(parameters.length, 1);\ndouble[][] bDecrementData = bDecrement.getDataRef();\nRealMatrixImpl wGradGradT = new RealMatrixImpl(parameters.length, parameters.length);\ndouble[][] wggData        = wGradGradT.getDataRef();\ndouble previous = Double.POSITIVE_INFINITY;\nincrementJacobianEvaluationsCounter();\nRealMatrix b = new RealMatrixImpl(parameters.length, 1);\nRealMatrix a = new RealMatrixImpl(parameters.length, parameters.length);\nfor (int i = 0; i < measurements.length; ++i) {\nif (! measurements [i].isIgnored()) {\ndouble weight   = measurements[i].getWeight();\ndouble residual = measurements[i].getResidual();\nfor (int j = 0; j < parameters.length; ++j) {\ngrad[j] = measurements[i].getPartial(parameters[j]);\nbDecrementData[j][0] = weight * residual * grad[j];\nfor (int k = 0; k < parameters.length; ++k) {\ndouble[] wggRow = wggData[k];\ndouble gk = grad[k];\nfor (int l = 0; l < parameters.length; ++l) {\nwggRow[l] =  weight * gk * grad[l];\na = a.add(wGradGradT);\nb = b.add(bDecrement);\nRealMatrix dX = a.solve(b);\nfor (int i = 0; i < parameters.length; ++i) {\nparameters[i].setEstimate(parameters[i].getEstimate() + dX.getEntry(i, 0));\n}\nprevious = cost;\nupdateResidualsAndCost();\n} while ((getCostEvaluations() < 2) ||\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:isSquare()Z",
+            "method_body": "public boolean isSquare() {\nreturn (this.getColumnDimension() == this.getRowDimension());\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.WeightedMeasurement:getWeight()D",
+            "method_body": "public double getWeight() {\nreturn weight;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:copyIn([[D)V",
+            "method_body": "private void copyIn(double[][] in) {\nsetSubMatrix(in,0,0);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:<init>([[D)V",
+            "method_body": "public RealMatrixImpl(double[][] d) {\nthis.copyIn(d);\nlu = null;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.RealMatrixImpl:isSingular()Z",
+            "method_body": "public boolean isSingular() {\nif (lu == null) {\nluDecompose();\nreturn false;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.SimpleEstimationProblem:getAllParameters()[Lorg/apache/commons/math/estimation/EstimatedParameter;",
+            "method_body": "public EstimatedParameter[] getAllParameters() {\nreturn (EstimatedParameter[]) parameters.toArray(new EstimatedParameter[parameters.size()]);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.estimation.EstimatedParameter:setEstimate(D)V",
+            "method_body": "public void setEstimate(double estimate) {\nthis.estimate = estimate;\n}",
+            "method_id": 9
+        }
+    ]
+}

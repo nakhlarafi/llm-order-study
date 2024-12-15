@@ -1,0 +1,59 @@
+{
+    "bug_id": 4,
+    "test_id": 5,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testASCIIFileRoundtripImplicitUnicodeExtra",
+    "test_body": "78: public void testASCIIFileRoundtripImplicitUnicodeExtra()\n79: throws IOException {\n80: testFileRoundtrip(US_ASCII, false, false);\n81: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeOut([BII)V",
+            "method_body": "protected final void writeOut(byte[] data, int offset, int length)\nif (raf != null) {\nraf.write(data, offset, length);\nout.write(data, offset, length);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipUtil:toDosTime(J)[B",
+            "method_body": "public static byte[] toDosTime(long t) {\nCalendar c = Calendar.getInstance();\nc.setTimeInMillis(t);\nint year = c.get(Calendar.YEAR);\nif (year < 1980) {\nint month = c.get(Calendar.MONTH) + 1;\nlong value =  ((year - 1980) << 25)\nreturn ZipLong.getBytes(value);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:getLocalFileDataExtra()[B",
+            "method_body": "public byte[] getLocalFileDataExtra() {\nbyte[] extra = getExtra();\nreturn extra != null ? extra : new byte[0];\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:finish()V",
+            "method_body": "public void finish() throws IOException {\nif(entry != null) {\ncdOffset = written;\nfor (Iterator i = entries.iterator(); i.hasNext(); ) {\nwriteCentralFileHeader((ZipArchiveEntry) i.next());\ncdLength = written - cdOffset;\nwriteCentralDirectoryEnd();\noffsets.clear();\nentries.clear();\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:getCentralDirectoryExtra()[B",
+            "method_body": "public byte[] getCentralDirectoryExtra() {\nreturn ExtraFieldUtils.mergeCentralDirectoryData(getExtraFields());\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeCentralDirectoryEnd()V",
+            "method_body": "protected void writeCentralDirectoryEnd() throws IOException {\nwriteOut(EOCD_SIG);\nwriteOut(ZERO);\nwriteOut(ZERO);\nbyte[] num = ZipShort.getBytes(entries.size());\nwriteOut(num);\nwriteOut(num);\nwriteOut(ZipLong.getBytes(cdLength));\nwriteOut(ZipLong.getBytes(cdOffset));\nByteBuffer data = this.zipEncoding.encode(comment);\nwriteOut(ZipShort.getBytes(data.limit()));\nwriteOut(data.array(), data.arrayOffset(), data.limit());\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:populateFromCentralDirectory()Ljava/util/Map;",
+            "method_body": "private Map populateFromCentralDirectory()\nHashMap noEFS = new HashMap();\npositionAtCentralDirectory();\nbyte[] cfh = new byte[CFH_LEN];\nbyte[] signatureBytes = new byte[WORD];\narchive.readFully(signatureBytes);\nlong sig = ZipLong.getValue(signatureBytes);\nfinal long cfhSig = ZipLong.getValue(ZipArchiveOutputStream.CFH_SIG);\nif (sig != cfhSig && startsWithLocalFileHeader()) {\nthrow new IOException(\"central directory is empty, can't expand\"\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:positionAtCentralDirectory()V",
+            "method_body": "private void positionAtCentralDirectory()\nboolean found = false;\nlong off = archive.length() - MIN_EOCD_SIZE;\nlong stopSearching = Math.max(0L, archive.length() - MAX_EOCD_SIZE);\nif (off >= 0) {\narchive.seek(off);\nbyte[] sig = ZipArchiveOutputStream.EOCD_SIG;\nint curr = archive.read();\nwhile (off >= stopSearching && curr != -1) {\nif (curr == sig[POS_0]) {\ncurr = archive.read();\nif (curr == sig[POS_1]) {\ncurr = archive.read();\nif (curr == sig[POS_2]) {\ncurr = archive.read();\nif (curr == sig[POS_3]) {\nfound = true;\nbreak;\nif (!found) {\narchive.seek(off + CFD_LOCATOR_OFFSET);\nbyte[] cfdOffset = new byte[WORD];\narchive.readFully(cfdOffset);\narchive.seek(ZipLong.getValue(cfdOffset));\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipLong:getValue([B)J",
+            "method_body": "public static long getValue(byte[] bytes) {\nreturn getValue(bytes, 0);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:startsWithLocalFileHeader()Z",
+            "method_body": "private boolean startsWithLocalFileHeader() throws IOException {\narchive.seek(0);\nfinal byte[] start = new byte[WORD];\narchive.readFully(start);\nfor (int i = 0; i < start.length; i++) {\nif (start[i] != ZipArchiveOutputStream.LFH_SIG[i]) {\nreturn true;\n}",
+            "method_id": 19
+        }
+    ]
+}

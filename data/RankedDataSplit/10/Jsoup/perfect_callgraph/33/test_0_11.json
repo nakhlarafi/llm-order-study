@@ -1,0 +1,59 @@
+{
+    "bug_id": 33,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.handlesKnownEmptyBlocks",
+    "test_body": "327: @Test public void handlesKnownEmptyBlocks() {\n328: // if a known tag, allow self closing outside of spec, but force an end tag. unknown tags can be self closing.\n329: String h = \"<div id='1' /><script src='/foo' /><div id=2><img /><img></div><a id=3 /><i /><foo /><foo>One</foo> <hr /> hr text <hr> hr text two\";\n330: Document doc = Jsoup.parse(h);\n331: assertEquals(\"<div id=\\\"1\\\"></div><script src=\\\"/foo\\\"></script><div id=\\\"2\\\"><img /><img /></div><a id=\\\"3\\\"></a><i></i><foo /><foo>One</foo> <hr /> hr text <hr /> hr text two\", TextUtil.stripNewlines(doc.body().html()));\n332: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/String;Ljava/nio/charset/CharsetEncoder;Lorg/jsoup/nodes/Entities$EscapeMode;)Ljava/lang/String;",
+            "method_body": "static String escape(String string, CharsetEncoder encoder, EscapeMode escapeMode) {\nStringBuilder accum = new StringBuilder(string.length() * 2);\nMap<Character, String> map = escapeMode.getMap();\nfinal int length = string.length();\nfor (int offset = 0; offset < length; ) {\nfinal int codePoint = string.codePointAt(offset);\nif (codePoint < Character.MIN_SUPPLEMENTARY_CODE_POINT) {\nfinal char c = (char) codePoint;\nif (map.containsKey(c))\naccum.append('&').append(map.get(c)).append(';');\nelse if (encoder.canEncode(c))\naccum.append(c);\n} else {\noffset += Character.charCount(codePoint);\n}\nreturn accum.toString();\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:loadEntities(Ljava/lang/String;)Ljava/util/Map;",
+            "method_body": "private static Map<String, Character> loadEntities(String filename) {\nProperties properties = new Properties();\nMap<String, Character> entities = new HashMap<String, Character>();\nInputStream in = Entities.class.getResourceAsStream(filename);\nproperties.load(in);\nin.close();\n}\nfor (Map.Entry entry: properties.entrySet()) {\nCharacter val = Character.valueOf((char) Integer.parseInt((String) entry.getValue(), 16));\nString name = (String) entry.getKey();\nentities.put(name, val);\n}\nreturn entities;\n}",
+            "method_id": 111
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:toCharacterKey(Ljava/util/Map;)Ljava/util/Map;",
+            "method_body": "private static Map<Character, String> toCharacterKey(Map<String, Character> inMap) {\nMap<Character, String> outMap = new HashMap<Character, String>();\nfor (Map.Entry<String, Character> entry: inMap.entrySet()) {\nCharacter character = entry.getValue();\nString name = entry.getKey();\nif (outMap.containsKey(character)) {\nif (name.toLowerCase().equals(name))\noutMap.put(character, name);\noutMap.put(character, name);\n}\nreturn outMap;\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:isEmpty()Z",
+            "method_body": "boolean isEmpty() {\nreturn pos >= length;\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:current()C",
+            "method_body": "char current() {\nreturn isEmpty() ? EOF : input[pos];\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consume()C",
+            "method_body": "char consume() {\nchar val = isEmpty() ? EOF : input[pos];\npos++;\nreturn val;\n}",
+            "method_id": 115
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:unconsume()V",
+            "method_body": "void unconsume() {\npos--;\n}",
+            "method_id": 116
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:advance()V",
+            "method_body": "void advance() {\npos++;\n}",
+            "method_id": 117
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeToAny([C)Ljava/lang/String;",
+            "method_body": "String consumeToAny(final char... chars) {\nint start = pos;\nOUTER: while (pos < length) {\nfor (int i = 0; i < chars.length; i++) {\nif (input[pos] == chars[i])\nbreak OUTER;\npos++;\nreturn pos > start ? new String(input, start, pos-start) : \"\";\n}",
+            "method_id": 118
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeLetterSequence()Ljava/lang/String;",
+            "method_body": "String consumeLetterSequence() {\nint start = pos;\nwhile (pos < length) {\nchar c = input[pos];\nif ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))\npos++;\n}\nreturn new String(input, start, pos - start);\n}",
+            "method_id": 119
+        }
+    ]
+}

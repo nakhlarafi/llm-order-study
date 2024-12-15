@@ -1,0 +1,59 @@
+{
+    "bug_id": 16,
+    "test_id": 0,
+    "test_name": "org.apache.commons.csv.CSVParserTest.testIteratorSequenceBreaking",
+    "test_body": "public void testIteratorSequenceBreaking() throws IOException {\nfinal String fiveRows = \"1\\n2\\n3\\n4\\n5\\n\";\n1005: // Iterator hasNext() shouldn't break sequence\nCSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(fiveRows));\nint recordNumber = 0;\nIterator<CSVRecord> iter = parser.iterator();\nrecordNumber = 0;\nwhile (iter.hasNext()) {\nCSVRecord record = iter.next();\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\nif (recordNumber >= 2) {\nbreak;\n}\n}\niter.hasNext();\nwhile (iter.hasNext()) {\nCSVRecord record = iter.next();\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\n}\n1025: // Consecutive enhanced for loops shouldn't break sequence\nparser = CSVFormat.DEFAULT.parse(new StringReader(fiveRows));\nrecordNumber = 0;\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\nif (recordNumber >= 2) {\nbreak;\n}\n}\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\n}\n1040: // Consecutive enhanced for loops with hasNext() peeking shouldn't break sequence\nparser = CSVFormat.DEFAULT.parse(new StringReader(fiveRows));\nrecordNumber = 0;\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\nif (recordNumber >= 2) {\nbreak;\n}\n}\nparser.iterator().hasNext();\nfor (CSVRecord record : parser) {\nrecordNumber++;\nassertEquals(String.valueOf(recordNumber), record.get(0));\n}",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<[3]> but was:<[4]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.apache.commons.csv.CSVParserTest.testIteratorSequenceBreaking(CSVParserTest.java:1053)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.csv.CSVParser:addRecordValue(Z)V",
+            "method_body": "private void addRecordValue(final boolean lastRecord) {\nfinal String input = this.reusableToken.content.toString();\nfinal String inputClean = this.format.getTrim() ? input.trim() : input;\nif (lastRecord && inputClean.isEmpty() && this.format.getTrailingDelimiter()) {\nfinal String nullString = this.format.getNullString();\nthis.recordList.add(inputClean.equals(nullString) ? null : inputClean);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.csv.CSVParser:isClosed()Z",
+            "method_body": "public boolean isClosed() {\nreturn this.lexer.isClosed();\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Token:reset()V",
+            "method_body": "void reset() {\ncontent.setLength(0);\ntype = INVALID;\nisReady = false;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Token$Type:<clinit>()V",
+            "method_body": "private static final int INITIAL_TOKEN_LENGTH = 50;\nenum Type {\nINVALID,\nTOKEN,\nEOF,\nEORECORD,\nCOMMENT\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:<init>(Lorg/apache/commons/csv/CSVFormat;Lorg/apache/commons/csv/ExtendedBufferedReader;)V",
+            "method_body": "Lexer(final CSVFormat format, final ExtendedBufferedReader reader) {\nthis.reader = reader;\nthis.delimiter = format.getDelimiter();\nthis.escape = mapNullToDisabled(format.getEscapeCharacter());\nthis.quoteChar = mapNullToDisabled(format.getQuoteCharacter());\nthis.commentStart = mapNullToDisabled(format.getCommentMarker());\nthis.ignoreSurroundingSpaces = format.getIgnoreSurroundingSpaces();\nthis.ignoreEmptyLines = format.getIgnoreEmptyLines();\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:<clinit>()V",
+            "method_body": "private static final String CR_STRING = Character.toString(Constants.CR);\nprivate static final String LF_STRING = Character.toString(Constants.LF);\n* won't be confused with an EOF signal (-1), and because the Unicode value {@code FFFE} would be encoded as two",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:nextToken(Lorg/apache/commons/csv/Token;)Lorg/apache/commons/csv/Token;",
+            "method_body": "Token nextToken(final Token token) throws IOException {\nint lastChar = reader.getLastChar();\nint c = reader.read();\nboolean eol = readEndOfLine(c);\nif (ignoreEmptyLines) {\nwhile (eol && isStartOfLine(lastChar)) {\nif (isEndOfFile(lastChar) || !isDelimiter(lastChar) && isEndOfFile(c)) {\ntoken.type = EOF;\nreturn token;\nif (isStartOfLine(lastChar) && isCommentStart(c)) {\nwhile (token.type == INVALID) {\nif (ignoreSurroundingSpaces) {\nif (isDelimiter(c)) {\n} else if (eol) {\n} else if (isQuoteChar(c)) {\n} else if (isEndOfFile(c)) {\nparseSimpleToken(token, c);\nreturn token;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:parseSimpleToken(Lorg/apache/commons/csv/Token;I)Lorg/apache/commons/csv/Token;",
+            "method_body": "private Token parseSimpleToken(final Token token, int ch) throws IOException {\nif (readEndOfLine(ch)) {\ntoken.type = EORECORD;\nbreak;\n} else if (isEndOfFile(ch)) {\n} else if (isDelimiter(ch)) {\n} else if (isEscape(ch)) {\ntoken.content.append((char) ch);\nch = reader.read(); // continue\nif (ignoreSurroundingSpaces) {\nreturn token;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:mapNullToDisabled(Ljava/lang/Character;)C",
+            "method_body": "private char mapNullToDisabled(final Character c) {\nreturn c == null ? DISABLED : c.charValue();\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.csv.Lexer:getCharacterPosition()J",
+            "method_body": "long getCharacterPosition() {\nreturn reader.getPosition();\n}",
+            "method_id": 49
+        }
+    ]
+}

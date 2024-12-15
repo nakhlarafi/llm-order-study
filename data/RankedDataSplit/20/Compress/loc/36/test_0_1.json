@@ -1,0 +1,129 @@
+{
+    "bug_id": 36,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.sevenz.SevenZFileTest.readEntriesOfSize0",
+    "test_body": "267: public void readEntriesOfSize0() throws IOException {\n268: final SevenZFile sevenZFile = new SevenZFile(getFile(\"COMPRESS-348.7z\"));\n269: try {\n270: int entries = 0;\n271: SevenZArchiveEntry entry = sevenZFile.getNextEntry();\n272: while (entry != null) {\n273: entries++;\n274: int b = sevenZFile.read();\n275: if (\"2.txt\".equals(entry.getName()) || \"5.txt\".equals(entry.getName())) {\n276: assertEquals(-1, b);\n277: } else {\n278: assertNotEquals(-1, b);\n279: }\n280: entry = sevenZFile.getNextEntry();\n281: }\n282: assertEquals(5, entries);\n283: } finally {\n284: sevenZFile.close();\n285: }\n286: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:read([BII)I",
+            "method_body": "public int read(final byte[] b, final int off, final int len) throws IOException {\nif (bytesRemaining == 0) {\nint bytesToRead = len;\nif (bytesToRead > bytesRemaining) {\nbytesToRead = (int) bytesRemaining;\nfinal int bytesRead = file.read(b, off, bytesToRead);\nif (bytesRead >= 0) {\nbytesRemaining -= bytesRead;\nreturn bytesRead;\n}",
+            "method_id": 20,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.IOUtils:readFully(Ljava/io/InputStream;[BII)I",
+            "method_body": "public static int readFully(final InputStream input, final byte[] b, final int offset, final int len)\nif (len < 0 || offset < 0 || len + offset > b.length) {\nint count = 0, x = 0;\nwhile (count != len) {\nx = input.read(b, offset + count, len - count);\nif (x == -1) {\nbreak;\nreturn count;\n}",
+            "method_id": 21,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry:setContentMethods(Ljava/lang/Iterable;)V",
+            "method_body": "public void setContentMethods(final Iterable<? extends SevenZMethodConfiguration> methods) {\nif (methods != null) {\nfinal LinkedList<SevenZMethodConfiguration> l = new LinkedList<SevenZMethodConfiguration>();\nfor (final SevenZMethodConfiguration m : methods) {\nl.addLast(m);\n}\ncontentMethods = Collections.unmodifiableList(l);\n} else {\n}",
+            "method_id": 22,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:close()V",
+            "method_body": "public void close() throws IOException {\nif (file != null) {\nfile.close();\nfile = null;\nif (password != null) {\npassword = null;\n}\n}",
+            "method_id": 23,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Coders$LZMADecoder:decode(Ljava/lang/String;Ljava/io/InputStream;JLorg/apache/commons/compress/archivers/sevenz/Coder;[B)Ljava/io/InputStream;",
+            "method_body": "InputStream decode(final String archiveName, final InputStream in, final long uncompressedLength,\nfinal byte propsByte = coder.properties[0];\nlong dictSize = coder.properties[1];\nfor (int i = 1; i < 4; i++) {\ndictSize |= (coder.properties[i + 1] & 0xffl) << (8 * i);\nif (dictSize > LZMAInputStream.DICT_SIZE_MAX) {\nreturn new LZMAInputStream(in, uncompressedLength, propsByte, (int) dictSize);\n}",
+            "method_id": 24,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:readAllOrBits(Ljava/io/DataInput;I)Ljava/util/BitSet;",
+            "method_body": "private BitSet readAllOrBits(final DataInput header, final int size) throws IOException {\nfinal int areAllDefined = header.readUnsignedByte();\nif (areAllDefined != 0) {\nbits = new BitSet(size);\nfor (int i = 0; i < size; i++) {\nbits.set(i, true);\nreturn bits;\n}",
+            "method_id": 25,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:read([BII)I",
+            "method_body": "public int read(final byte[] b, final int off, final int len) throws IOException {\nfinal int ret = in.read(b, off, len);\nif (ret >= 0) {\nchecksum.update(b, off, ret);\nbytesRemaining -= ret;\nif (bytesRemaining <= 0 && expectedChecksum != checksum.getValue()) {\nreturn ret;\n}",
+            "method_id": 26,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:getNextEntry()Lorg/apache/commons/compress/archivers/sevenz/SevenZArchiveEntry;",
+            "method_body": "public SevenZArchiveEntry getNextEntry() throws IOException {\nif (currentEntryIndex >= archive.files.length - 1) {\n++currentEntryIndex;\nfinal SevenZArchiveEntry entry = archive.files[currentEntryIndex];\nbuildDecodingStream();\nreturn entry;\n}",
+            "method_id": 27,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZFile:<clinit>()V",
+            "method_body": "static final int SIGNATURE_HEADER_SIZE = 32;\nprivate int currentEntryIndex = -1;\nprivate int currentFolderIndex = -1;\nprivate InputStream currentFolderInputStream = null;\nprivate final ArrayList<InputStream> deferredBlockStreams = new ArrayList<InputStream>();\nstatic final byte[] sevenZSignature = {\n};",
+            "method_id": 28,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:<init>(Ljava/util/zip/Checksum;Ljava/io/InputStream;JJ)V",
+            "method_body": "public ChecksumVerifyingInputStream(final Checksum checksum, final InputStream in,\nfinal long size, final long expectedChecksum) {\nthis.checksum = checksum;\nthis.in = in;\nthis.expectedChecksum = expectedChecksum;\nthis.bytesRemaining = size;\n}",
+            "method_id": 29,
+            "loc": 7
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Folder:getUnpackSize()J",
+            "method_body": "long getUnpackSize() {\nif (totalOutputStreams == 0) {\nfor (int i = ((int)totalOutputStreams) - 1; i >= 0; i--) {\nif (findBindPairForOutStream(i) < 0) {\nreturn unpackSizes[i];\n}",
+            "method_id": 30,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Folder:getUnpackSizeForCoder(Lorg/apache/commons/compress/archivers/sevenz/Coder;)J",
+            "method_body": "long getUnpackSizeForCoder(final Coder coder) {\nif (coders != null) {\nfor (int i = 0; i < coders.length; i++) {\nif (coders[i] == coder) {\nreturn unpackSizes[i];\n}",
+            "method_id": 31,
+            "loc": 6
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZMethod:byId([B)Lorg/apache/commons/compress/archivers/sevenz/SevenZMethod;",
+            "method_body": "static SevenZMethod byId(final byte[] id) {\nfor (final SevenZMethod m : SevenZMethod.class.getEnumConstants()) {\nif (Arrays.equals(m.id, id)) {\nreturn m;\n}",
+            "method_id": 32,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveStreamFactory:<init>(Ljava/lang/String;)V",
+            "method_body": "public ArchiveStreamFactory(final String encoding) {\nsuper();\nthis.encoding = encoding;\nthis.entryEncoding = encoding;\n}",
+            "method_id": 33,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.SevenZMethodConfiguration:<init>(Lorg/apache/commons/compress/archivers/sevenz/SevenZMethod;Ljava/lang/Object;)V",
+            "method_body": "public SevenZMethodConfiguration(final SevenZMethod method, final Object options) {\nthis.method = method;\nthis.options = options;\nif (options != null && !Coders.findByMethod(method).canAcceptOptions(options)) {\n}",
+            "method_id": 34,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.Coders:addDecoder(Ljava/lang/String;Ljava/io/InputStream;JLorg/apache/commons/compress/archivers/sevenz/Coder;[B)Ljava/io/InputStream;",
+            "method_body": "static InputStream addDecoder(final String archiveName, final InputStream is, final long uncompressedLength,\nfinal CoderBase cb = findByMethod(SevenZMethod.byId(coder.decompressionMethodId));\nif (cb == null) {\nreturn cb.decode(archiveName, is, uncompressedLength, coder, password);\n}",
+            "method_id": 35,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.CoderBase:<clinit>()V",
+            "method_body": "private final Class<?>[] acceptableOptions;\nprivate static final byte[] NONE = new byte[0];\nprotected CoderBase(final Class<?>... acceptableOptions) {\nthis.acceptableOptions = acceptableOptions;\n}",
+            "method_id": 36,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.ChecksumVerifyingInputStream:skip(J)J",
+            "method_body": "public long skip(final long n) throws IOException {\nif (read() >= 0) {\nreturn 1;\nreturn 0;\n}",
+            "method_id": 37,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:<init>(Ljava/io/RandomAccessFile;J)V",
+            "method_body": "public BoundedRandomAccessFileInputStream(final RandomAccessFile file,\nfinal long size) {\nthis.file = file;\nthis.bytesRemaining = size;\n}",
+            "method_id": 38,
+            "loc": 5
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.sevenz.BoundedRandomAccessFileInputStream:read()I",
+            "method_body": "public int read() throws IOException {\nif (bytesRemaining > 0) {\n--bytesRemaining;\nreturn file.read();\n}",
+            "method_id": 39,
+            "loc": 5
+        }
+    ]
+}

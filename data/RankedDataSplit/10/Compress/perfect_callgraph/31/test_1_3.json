@@ -1,0 +1,59 @@
+{
+    "bug_id": 31,
+    "test_id": 1,
+    "test_name": "org.apache.commons.compress.archivers.TarTestCase.testCOMPRESS178",
+    "test_body": "319: public void testCOMPRESS178() throws Exception {\n320: final File input = getFile(\"COMPRESS-178.tar\");\n321: final InputStream is = new FileInputStream(input);\n322: final ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(\"tar\", is);\n323: try {\n324: in.getNextEntry();\n325: fail(\"Expected IOException\");\n326: } catch (IOException e) {\n327: Throwable t = e.getCause();\n328: assertTrue(\"Expected cause = IllegalArgumentException\", t instanceof IllegalArgumentException);\n329: }\n330: in.close();\n331: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:evaluateType([B)I",
+            "method_body": "private int evaluateType(byte[] header) {\nif (ArchiveUtils.matchAsciiBuffer(MAGIC_GNU, header, MAGIC_OFFSET, MAGICLEN)) {\nreturn FORMAT_OLDGNU;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctalOrBinary([BII)J",
+            "method_body": "public static long parseOctalOrBinary(final byte[] buffer, final int offset,\nif ((buffer[offset] & 0x80) == 0) {\nreturn parseOctal(buffer, offset, length);\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseBoolean([BI)Z",
+            "method_body": "public static boolean parseBoolean(final byte[] buffer, final int offset) {\nreturn buffer[offset] == 1;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseName([BII)Ljava/lang/String;",
+            "method_body": "public static String parseName(byte[] buffer, final int offset, final int length) {\nreturn parseName(buffer, offset, length, DEFAULT_ENCODING);\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseName([BIILorg/apache/commons/compress/archivers/zip/ZipEncoding;)Ljava/lang/String;",
+            "method_body": "public static String parseName(byte[] buffer, final int offset,\nint len = length;\nfor (; len > 0; len--) {\nif (buffer[offset + len - 1] != 0) {\nbreak;\nif (len > 0) {\nbyte[] b = new byte[len];\nSystem.arraycopy(buffer, offset, b, 0, len);\nreturn encoding.decode(b);\nreturn \"\";\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:verifyCheckSum([B)Z",
+            "method_body": "public static boolean verifyCheckSum(byte[] header) {\nlong storedSum = 0;\nlong unsignedSum = 0;\nlong signedSum = 0;\nint digits = 0;\nfor (int i = 0; i < header.length; i++) {\nbyte b = header[i];\nif (CHKSUM_OFFSET  <= i && i < CHKSUM_OFFSET + CHKSUMLEN) {\nif ('0' <= b && b <= '7' && digits++ < 6) {\nstoredSum = storedSum * 8 + b - '0';\n} else if (digits > 0) {\ndigits = 6; // only look at the first octal digit sequence\nb = ' ';\nunsignedSum += 0xff & b;\nsignedSum += b;\nreturn storedSum == unsignedSum || storedSum == signedSum\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;)V",
+            "method_body": "public TarArchiveInputStream(InputStream is) {\nthis(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE);\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "public TarArchiveInputStream(InputStream is, int blockSize, int recordSize) {\nthis(is, blockSize, recordSize, null);\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;IILjava/lang/String;)V",
+            "method_body": "public TarArchiveInputStream(InputStream is, int blockSize, int recordSize,\nString encoding) {\nthis.is = is;\nthis.hasHitEOF = false;\nthis.encoding = encoding;\nthis.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.recordSize = recordSize;\nthis.blockSize = blockSize;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:getNextTarEntry()Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;",
+            "method_body": "public TarArchiveEntry getNextTarEntry() throws IOException {\nif (hasHitEOF) {\nif (currEntry != null) {\nbyte[] headerBuf = getRecord();\nif (headerBuf == null) {\ncurrEntry = new TarArchiveEntry(headerBuf, zipEncoding);\n}\nentryOffset = 0;\nentrySize = currEntry.getSize();\nif (currEntry.isGNULongLinkEntry()) {\nif (currEntry.isGNULongNameEntry()) {\nif (currEntry.isPaxHeader()){ // Process Pax headers\nif (currEntry.isGNUSparse()){ // Process sparse files\nentrySize = currEntry.getSize();\nreturn currEntry;\n}",
+            "method_id": 39
+        }
+    ]
+}

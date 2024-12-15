@@ -1,0 +1,59 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.NodeTest.absHandlesRelativeQuery",
+    "test_body": "45: @Test public void absHandlesRelativeQuery() {\n46: Document doc = Jsoup.parse(\"<a href='?foo'>One</a> <a href='bar.html?foo'>Two</a>\", \"http://jsoup.org/path/file?bar\");\n47: 48: Element a1 = doc.select(\"a\").first();\n49: assertEquals(\"http://jsoup.org/path/file?foo\", a1.absUrl(\"href\"));\n50: 51: Element a2 = doc.select(\"a\").get(1);\n52: assertEquals(\"http://jsoup.org/path/bar.html?foo\", a2.absUrl(\"href\"));\n53: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.Parser:popStackToClose(Lorg/jsoup/parser/Tag;)Lorg/jsoup/nodes/Element;",
+            "method_body": "private Element popStackToClose(Tag tag) {\nint counter = 0;\nElement elToClose = null;\nfor (int i = stack.size() -1; i > 0; i--) {\ncounter++;\nElement el = stack.get(i);\nTag elTag = el.tag();\nif (elTag.equals(bodyTag) || elTag.equals(htmlTag)) { // once in body, don't close past body\n} else if (elTag.equals(tag)) {\nelToClose = el;\nbreak;\nif (elToClose != null) {\nfor (int i = 0; i < counter; i++) {\nstack.removeLast();\nreturn elToClose;\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:valueOf(Ljava/lang/String;)Lorg/jsoup/parser/Tag;",
+            "method_body": "public static Tag valueOf(String tagName) {\nValidate.notNull(tagName);\ntagName = tagName.trim().toLowerCase();\nValidate.notEmpty(tagName);\nsynchronized (tags) {\nTag tag = tags.get(tagName);\nif (tag == null) {\ntag = new Tag(tagName);\ntag.setAncestor(defaultAncestor.tagName);\ntag.setExcludes();\ntag.isBlock = false;\ntag.canContainBlock = true;\nreturn tag;\n}",
+            "method_id": 111
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:tagName()Ljava/lang/String;",
+            "method_body": "public String tagName() {\nreturn tag.getName();\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseTextNode()V",
+            "method_body": "private void parseTextNode() {\nif (tq.peek().equals('<')) {\nString text = tq.consumeTo(\"<\");\ntextNode = TextNode.createFromEncoded(text, baseUri);\nlast().appendChild(textNode);\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "org.jsoup.select.Collector$Accumulator:head(Lorg/jsoup/nodes/Node;I)V",
+            "method_body": "public void head(Node node, int depth) {\nif (node instanceof Element) {\nElement el = (Element) node;\nif (eval.matches(el))\nelements.add(el);\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "org.jsoup.select.Elements:<init>(Ljava/util/Collection;)V",
+            "method_body": "public Elements(Collection<Element> elements) {\ncontents = new ArrayList<Element>(elements);\n}",
+            "method_id": 115
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseEndTag()V",
+            "method_body": "private void parseEndTag() {\ntq.consume(\"</\");\nString tagName = tq.consumeTagName();\ntq.chompTo(\">\");\nif (tagName.length() != 0) {\nTag tag = Tag.valueOf(tagName);\nif (!last().tag().isIgnorableEndTag(tag)) // skips </tr> if in <table>\npopStackToClose(tag);\n}",
+            "method_id": 116
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:createFromEncoded(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Attribute;",
+            "method_body": "public static Attribute createFromEncoded(String unencodedKey, String encodedValue) {\nString value = Entities.unescape(encodedValue);\nreturn new Attribute(unencodedKey, value);\n}",
+            "method_id": 117
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseAttribute()Lorg/jsoup/nodes/Attribute;",
+            "method_body": "private Attribute parseAttribute() {\ntq.consumeWhitespace();\nString key = tq.consumeAttributeKey();\nString value = \"\";\ntq.consumeWhitespace();\nif (tq.matchChomp(\"=\")) {\ntq.consumeWhitespace();\nif (tq.matchChomp(SQ)) {\nvalue = tq.chompTo(SQ);\ntq.consumeWhitespace();\nif (key.length() != 0)\nreturn Attribute.createFromEncoded(key, value);\n}",
+            "method_id": 118
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:<init>(Ljava/lang/String;Ljava/lang/String;Z)V",
+            "method_body": "private Parser(String html, String baseUri, boolean isBodyFragment) {\nValidate.notNull(html);\nValidate.notNull(baseUri);\nstack = new LinkedList<Element>();\ntq = new TokenQueue(html);\nthis.baseUri = baseUri;\nif (isBodyFragment) {\ndoc = new Document(baseUri);\nstack.add(doc);\n}",
+            "method_id": 119
+        }
+    ]
+}

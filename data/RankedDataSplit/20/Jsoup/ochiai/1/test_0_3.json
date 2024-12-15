@@ -1,0 +1,109 @@
+{
+    "bug_id": 1,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.ParserTest.createsStructureFromBodySnippet",
+    "test_body": "@Test public void createsStructureFromBodySnippet() {\n// the bar baz stuff naturally goes into the body, but the 'foo' goes into root, and the normalisation routine\n// needs to move into the start of the body\nString html = \"foo <b>bar</b> baz\";\nDocument doc = Jsoup.parse(html);\nassertEquals (\"foo bar baz\", doc.text());\n112: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<[foo bar baz]> but was:<[bar baz foo]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.jsoup.parser.ParserTest.createsStructureFromBodySnippet(ParserTest.java:110)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Element:select(Ljava/lang/String;)Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements select(String query) {\nreturn Selector.select(query, this);\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendChild(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element appendChild(Node child) {\nValidate.notNull(child);\nchild.setParentNode(this);\nchildNodes.add(child);\nreturn this;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:getElementsByTag(Ljava/lang/String;)Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements getElementsByTag(String tagName) {\nValidate.notEmpty(tagName);\ntagName = tagName.toLowerCase().trim();\nreturn Collector.collect(new Evaluator.Tag(tagName), this);\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:hashCode()I",
+            "method_body": "public int hashCode() {\nint result = super.hashCode();\nresult = 31 * result + (tag != null ? tag.hashCode() : 0);\nreturn result;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:<init>(Ljava/lang/String;)V",
+            "method_body": "public Document(String baseUri) {\nsuper(Tag.valueOf(\"#root\"), baseUri);\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:head()Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element head() {\nreturn getElementsByTag(\"head\").first();\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:body()Lorg/jsoup/nodes/Element;",
+            "method_body": "public Element body() {\nreturn getElementsByTag(\"body\").first();\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:normalise()Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document normalise() {\nif (select(\"html\").isEmpty())\nif (head() == null)\nif (body() == null)\nnormalise(head());\nnormalise(select(\"html\").first());\nnormalise(this);\nreturn this;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:normalise(Lorg/jsoup/nodes/Element;)V",
+            "method_body": "private void normalise(Element element) {\nList<Node> toMove = new ArrayList<Node>();\nfor (Node node: element.childNodes) {\nif (node instanceof TextNode) {\nTextNode tn = (TextNode) node;\nif (!tn.isBlank())\ntoMove.add(tn);\n}\nfor (Node node: toMove) {\nelement.removeChild(node);\nbody().appendChild(new TextNode(\" \", \"\"));\nbody().appendChild(node);\n}\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:hashCode()I",
+            "method_body": "public int hashCode() {\nreturn attributes != null ? attributes.hashCode() : 0;\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:<init>(Ljava/lang/String;Lorg/jsoup/nodes/Element;)V",
+            "method_body": "private Selector(String query, Element root) {\nValidate.notNull(query);\nquery = query.trim();\nValidate.notEmpty(query);\nValidate.notNull(root);\nthis.elements = new LinkedHashSet<Element>();\nthis.query = query;\nthis.root = root;\nthis.tq = new TokenQueue(query);\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:<clinit>()V",
+            "method_body": "private final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};\nprivate final static String[] combinators = {\",\", \">\", \"+\", \"~\", \" \"};",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select(Ljava/lang/String;Lorg/jsoup/nodes/Element;)Lorg/jsoup/select/Elements;",
+            "method_body": "public static Elements select(String query, Element root) {\nreturn new Selector(query, root).select();\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:select()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements select() {\ntq.consumeWhitespace();\nif (tq.matchesAny(combinators)) { // if starts with a combinator, use root as elements\naddElements(findElements()); // chomp first element matcher off queue\nwhile (!tq.isEmpty()) {\nreturn new Elements(elements);\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:findElements()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements findElements() {\nif (tq.matchChomp(\"#\")) {\n} else if (tq.matchChomp(\".\")) {\n} else if (tq.matchesWord()) {\nreturn byTag();\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:addElements(Ljava/util/Collection;)V",
+            "method_body": "private void addElements(Collection<Element> add) {\nelements.addAll(add);\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.jsoup.select.Selector:byTag()Lorg/jsoup/select/Elements;",
+            "method_body": "private Elements byTag() {\nString tagName = tq.consumeWord();\nValidate.notEmpty(tagName);\nreturn root.getElementsByTag(tagName);\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Evaluator:<init>()V",
+            "method_body": "private Evaluator() {}\nprivate Evaluator() {}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Evaluator$Tag:<init>(Ljava/lang/String;)V",
+            "method_body": "public abstract boolean matches(Element element);\nTag (String tagName) {\nthis.tagName = tagName;\n}\nreturn (element.tagName().equals(tagName));\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Evaluator$Tag:matches(Lorg/jsoup/nodes/Element;)Z",
+            "method_body": "public abstract boolean matches(Element element);\nTag (String tagName) {\nthis.tagName = tagName;\n}\nreturn (element.tagName().equals(tagName));\n}",
+            "method_id": 79
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.google.gson.functional.CollectionTest.testIssue1107",
+    "test_body": "public void testIssue1107() {\nString json = \"{\\n\" +\n\"  \\\"inBig\\\": {\\n\" +\n\"    \\\"key\\\": [\\n\" +\n\"      { \\\"inSmall\\\": \\\"hello\\\" }\\n\" +\n\"    ]\\n\" +\n\"  }\\n\" +\n\"}\";\nBigClass bigClass = new Gson().fromJson(json, BigClass.class);\nSmallClass small = bigClass.inBig.get(\"key\").get(0);\nassertNotNull(small);",
+    "stack_trace": "java.lang.ClassCastException: com.google.gson.internal.LinkedTreeMap cannot be cast to com.google.gson.functional.CollectionTest$SmallClass\nat com.google.gson.functional.CollectionTest.testIssue1107(CollectionTest.java:410)",
+    "covered_methods": [
+        {
+            "method_signature": "com.google.gson.internal.bind.ReflectiveTypeAdapterFactory:excludeField(Ljava/lang/reflect/Field;Z)Z",
+            "method_body": "public boolean excludeField(Field f, boolean serialize) {\nreturn excludeField(f, serialize, excluder);\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ReflectiveTypeAdapterFactory:excludeField(Ljava/lang/reflect/Field;ZLcom/google/gson/internal/Excluder;)Z",
+            "method_body": "static boolean excludeField(Field f, boolean serialize, Excluder excluder) {\nreturn !excluder.excludeClass(f.getType(), serialize) && !excluder.excludeField(f, serialize);\n}",
+            "method_id": 111
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ReflectiveTypeAdapterFactory:getFieldNames(Ljava/lang/reflect/Field;)Ljava/util/List;",
+            "method_body": "private List<String> getFieldNames(Field f) {\nSerializedName annotation = f.getAnnotation(SerializedName.class);\nif (annotation == null) {\nString name = fieldNamingPolicy.translateName(f);\nreturn Collections.singletonList(name);\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ReflectiveTypeAdapterFactory:create(Lcom/google/gson/Gson;Lcom/google/gson/reflect/TypeToken;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "@Override public <T> TypeAdapter<T> create(Gson gson, final TypeToken<T> type) {\nClass<? super T> raw = type.getRawType();\nif (!Object.class.isAssignableFrom(raw)) {\nObjectConstructor<T> constructor = constructorConstructor.get(type);\nreturn new Adapter<T>(constructor, getBoundFields(gson, type, raw));\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ReflectiveTypeAdapterFactory:createBoundField(Lcom/google/gson/Gson;Ljava/lang/reflect/Field;Ljava/lang/String;Lcom/google/gson/reflect/TypeToken;ZZ)Lcom/google/gson/internal/bind/ReflectiveTypeAdapterFactory$BoundField;",
+            "method_body": "private ReflectiveTypeAdapterFactory.BoundField createBoundField(\nfinal boolean isPrimitive = Primitives.isPrimitive(fieldType.getRawType());\nJsonAdapter annotation = field.getAnnotation(JsonAdapter.class);\nTypeAdapter<?> mapped = null;\nif (annotation != null) {\nfinal boolean jsonAdapterPresent = mapped != null;\nif (mapped == null) mapped = context.getAdapter(fieldType);\nfinal TypeAdapter<?> typeAdapter = mapped;\nreturn new ReflectiveTypeAdapterFactory.BoundField(name, serialize, deserialize) {\nObject fieldValue = typeAdapter.read(reader);\nif (fieldValue != null || !isPrimitive) {\nfield.set(value, fieldValue);\n}\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "com.google.gson.internal.bind.ReflectiveTypeAdapterFactory:getBoundFields(Lcom/google/gson/Gson;Lcom/google/gson/reflect/TypeToken;Ljava/lang/Class;)Ljava/util/Map;",
+            "method_body": "private Map<String, BoundField> getBoundFields(Gson context, TypeToken<?> type, Class<?> raw) {\nMap<String, BoundField> result = new LinkedHashMap<String, BoundField>();\nif (raw.isInterface()) {\nType declaredType = type.getType();\nwhile (raw != Object.class) {\nField[] fields = raw.getDeclaredFields();\nfor (Field field : fields) {\nboolean serialize = excludeField(field, true);\nboolean deserialize = excludeField(field, false);\nif (!serialize && !deserialize) {\ncontinue;\nfield.setAccessible(true);\nType fieldType = $Gson$Types.resolve(type.getType(), raw, field.getGenericType());\nList<String> fieldNames = getFieldNames(field);\nBoundField previous = null;\nfor (int i = 0, size = fieldNames.size(); i < size; ++i) {\nString name = fieldNames.get(i);\nif (i != 0) serialize = false; // only serialize the default name\nBoundField boundField = createBoundField(context, field, name,\nBoundField replaced = result.put(name, boundField);\nif (previous == null) previous = replaced;\nif (previous != null) {\ntype = TypeToken.get($Gson$Types.resolve(type.getType(), raw, raw.getGenericSuperclass()));\nraw = type.getRawType();\n}\nreturn result;\n}",
+            "method_id": 115
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator:create()Lcom/google/gson/internal/UnsafeAllocator;",
+            "method_body": "public abstract <T> T newInstance(Class<T> c) throws Exception;\nClass<?> unsafeClass = Class.forName(\"sun.misc.Unsafe\");\nField f = unsafeClass.getDeclaredField(\"theUnsafe\");\nf.setAccessible(true);\nfinal Object unsafe = f.get(null);\nfinal Method allocateInstance = unsafeClass.getMethod(\"allocateInstance\", Class.class);\nreturn new UnsafeAllocator() {\nassertInstantiable(c);\nreturn (T) allocateInstance.invoke(unsafe, c);\n}",
+            "method_id": 116
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator:assertInstantiable(Ljava/lang/Class;)V",
+            "method_body": "static void assertInstantiable(Class<?> c) {\nint modifiers = c.getModifiers();\nif (Modifier.isInterface(modifiers)) {\nif (Modifier.isAbstract(modifiers)) {\n}",
+            "method_id": 117
+        },
+        {
+            "method_signature": "com.google.gson.internal.UnsafeAllocator$1:newInstance(Ljava/lang/Class;)Ljava/lang/Object;",
+            "method_body": "public abstract <T> T newInstance(Class<T> c) throws Exception;\nClass<?> unsafeClass = Class.forName(\"sun.misc.Unsafe\");\nField f = unsafeClass.getDeclaredField(\"theUnsafe\");\nf.setAccessible(true);\nfinal Object unsafe = f.get(null);\nfinal Method allocateInstance = unsafeClass.getMethod(\"allocateInstance\", Class.class);\nreturn new UnsafeAllocator() {\nassertInstantiable(c);\nreturn (T) allocateInstance.invoke(unsafe, c);\n}",
+            "method_id": 118
+        },
+        {
+            "method_signature": "com.google.gson.Gson$FutureTypeAdapter:setDelegate(Lcom/google/gson/TypeAdapter;)V",
+            "method_body": "public void setDelegate(TypeAdapter<T> typeAdapter) {\nif (delegate != null) {\ndelegate = typeAdapter;\n}",
+            "method_id": 119
+        }
+    ]
+}

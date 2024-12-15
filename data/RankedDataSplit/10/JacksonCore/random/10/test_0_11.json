@@ -1,0 +1,39 @@
+{
+    "bug_id": 10,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207",
+    "test_body": "public void testIssue207() throws Exception\n{\nByteQuadsCanonicalizer nc = ByteQuadsCanonicalizer.createRoot(-523743345);\nField byteSymbolCanonicalizerField = JsonFactory.class.getDeclaredField(\"_byteSymbolCanonicalizer\");\nbyteSymbolCanonicalizerField.setAccessible(true);\nJsonFactory jsonF = new JsonFactory();\nbyteSymbolCanonicalizerField.set(jsonF, nc);\n110: StringBuilder stringBuilder = new StringBuilder();\nstringBuilder.append(\"{\\n\");\nstringBuilder.append(\"    \\\"expectedGCperPosition\\\": null\");\nfor (int i = 0; i < 60; ++i) {\nstringBuilder.append(\",\\n    \\\"\").append(i + 1).append(\"\\\": null\");\n}\nstringBuilder.append(\"\\n}\");\n118: JsonParser p = jsonF.createParser(stringBuilder.toString().getBytes(\"UTF-8\"));\nwhile (p.nextToken() != null) { }\np.close();",
+    "stack_trace": "java.lang.ArrayIndexOutOfBoundsException: 256\nat com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer.addName(ByteQuadsCanonicalizer.java:853)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.addName(UTF8StreamJsonParser.java:2340)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.parseEscapedName(UTF8StreamJsonParser.java:1980)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.slowParseName(UTF8StreamJsonParser.java:1867)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._parseName(UTF8StreamJsonParser.java:1651)\nat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:740)\nat com.fasterxml.jackson.core.sym.TestByteBasedSymbols.testIssue207(TestByteBasedSymbols.java:119)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.json.JsonReadContext:createRootContext(Lcom/fasterxml/jackson/core/json/DupDetector;)Lcom/fasterxml/jackson/core/json/JsonReadContext;",
+            "method_body": "public static JsonReadContext createRootContext(DupDetector dups) {\nreturn new JsonReadContext(null, dups, TYPE_ROOT, 1, 0);\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.InternCache:<clinit>()V",
+            "method_body": "private final static int MAX_ENTRIES = 180;\npublic final static InternCache instance = new InternCache();\nprivate final Object lock = new Object();\nprivate InternCache() { super(MAX_ENTRIES, 0.8f, 4); }",
+            "method_id": 111
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:constructTextBuffer()Lcom/fasterxml/jackson/core/util/TextBuffer;",
+            "method_body": "public TextBuffer constructTextBuffer() {\nreturn new TextBuffer(_bufferRecycler);\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:createRoot()Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "public static CharsToNameCanonicalizer createRoot() {\nlong now = System.currentTimeMillis();\nint seed = (((int) now) + ((int) (now >>> 32))) | 1;\nreturn createRoot(seed);\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.TextBuffer:buf(I)[C",
+            "method_body": "private char[] buf(int needed)\nif (_allocator != null) {\nreturn _allocator.allocCharBuffer(BufferRecycler.CHAR_TEXT_BUFFER, needed);\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.ByteQuadsCanonicalizer:rehash()V",
+            "method_body": "private void rehash()\n_needRehash = false;\n_hashShared = false;\nfinal int[] oldHashArea = _hashArea;\nfinal String[] oldNames = _names;\nfinal int oldSize = _hashSize;\nfinal int oldCount = _count;\nfinal int newSize = oldSize + oldSize;\nfinal int oldEnd = _spilloverEnd;\nif (newSize > MAX_T_SIZE) {\n_hashArea = new int[oldHashArea.length + (oldSize<<3)];\n_hashSize = newSize;\n_secondaryStart = (newSize << 2); // 4 ints per entry\n_tertiaryStart = _secondaryStart + (_secondaryStart >> 1); // right after secondary\n_tertiaryShift = _calcTertiaryShift(newSize);\n_names = new String[oldNames.length << 1];\nnukeSymbols(false);\nint copyCount = 0;\nint[] q = new int[16];\nfor (int offset = 0, end = oldEnd; offset < end; offset += 4) {\nint len = oldHashArea[offset+3];\nif (len == 0) { // empty slot, skip\ncontinue;\n++copyCount;\nString name = oldNames[offset>>2];\nswitch (len) {\nq[0] = oldHashArea[offset];\naddName(name, q, 1);\nbreak;\nq[0] = oldHashArea[offset];\nq[1] = oldHashArea[offset+1];\naddName(name, q, 2);\nbreak;\nq[0] = oldHashArea[offset];\nq[1] = oldHashArea[offset+1];\nq[2] = oldHashArea[offset+2];\naddName(name, q, 3);\nbreak;\nif (len > q.length) {\nint qoff = oldHashArea[offset+1];\nSystem.arraycopy(oldHashArea, qoff, q, 0, len);\naddName(name, q, len);\nif (copyCount != oldCount) {\n}",
+            "method_id": 115
+        }
+    ]
+}

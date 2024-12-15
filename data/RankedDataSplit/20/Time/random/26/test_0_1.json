@@ -1,0 +1,109 @@
+{
+    "bug_id": 26,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral",
+    "test_body": "public void testBug2182444_usCentral() {\nChronology chronUSCentral = GregorianChronology.getInstance(DateTimeZone.forID(\"US/Central\"));\nChronology chronUTC = GregorianChronology.getInstance(DateTimeZone.UTC);\nDateTime usCentralStandardInUTC = new DateTime(2008, 11, 2, 7, 0, 0, 0, chronUTC);\nDateTime usCentralDaylightInUTC = new DateTime(2008, 11, 2, 6, 0, 0, 0, chronUTC);\nassertTrue(\"Should be standard time\", chronUSCentral.getZone().isStandardOffset(usCentralStandardInUTC.getMillis()));\nassertFalse(\"Should be daylight time\", chronUSCentral.getZone().isStandardOffset(usCentralDaylightInUTC.getMillis()));\n1161: DateTime usCentralStandardInUSCentral = usCentralStandardInUTC.toDateTime(chronUSCentral);\nDateTime usCentralDaylightInUSCentral = usCentralDaylightInUTC.toDateTime(chronUSCentral);\nassertEquals(1, usCentralStandardInUSCentral.getHourOfDay());\nassertEquals(usCentralStandardInUSCentral.getHourOfDay(), usCentralDaylightInUSCentral.getHourOfDay());\nassertTrue(usCentralStandardInUSCentral.getMillis() != usCentralDaylightInUSCentral.getMillis());\nassertEquals(usCentralStandardInUSCentral, usCentralStandardInUSCentral.withHourOfDay(1));\nassertEquals(usCentralStandardInUSCentral.getMillis() + 3, usCentralStandardInUSCentral.withMillisOfSecond(3).getMillis());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<2008-11-02T01:00:00.000-06:00> but was:<2008-11-02T01:00:00.000-05:00>\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.Assert.failNotEquals(Assert.java:329)\nat junit.framework.Assert.assertEquals(Assert.java:78)\nat junit.framework.Assert.assertEquals(Assert.java:86)\nat junit.framework.TestCase.assertEquals(TestCase.java:253)\nat org.joda.time.TestDateTimeZoneCutover.testBug2182444_usCentral(TestDateTimeZoneCutover.java:1166)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.field.OffsetDateTimeField:getLeapDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getLeapDurationField() {\nreturn getWrappedField().getLeapDurationField();\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.joda.time.field.UnsupportedDurationField:getUnitMillis()J",
+            "method_body": "public long getUnitMillis() {\nreturn 0;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getMinYear()I",
+            "method_body": "int getMinYear() {\nreturn MIN_YEAR;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:readFrom(Ljava/io/DataInput;Ljava/lang/String;)Lorg/joda/time/tz/DateTimeZoneBuilder$PrecalculatedZone;",
+            "method_body": "static PrecalculatedZone readFrom(DataInput in, String id) throws IOException {\nint poolSize = in.readUnsignedShort();\nString[] pool = new String[poolSize];\nfor (int i=0; i<poolSize; i++) {\npool[i] = in.readUTF();\nint size = in.readInt();\nlong[] transitions = new long[size];\nint[] wallOffsets = new int[size];\nint[] standardOffsets = new int[size];\nString[] nameKeys = new String[size];\nfor (int i=0; i<size; i++) {\ntransitions[i] = readMillis(in);\nwallOffsets[i] = (int)readMillis(in);\nstandardOffsets[i] = (int)readMillis(in);\nif (poolSize < 256) {\nindex = in.readUnsignedByte();\nnameKeys[i] = pool[index];\n}\nDSTZone tailZone = null;\nif (in.readBoolean()) {\ntailZone = DSTZone.readFrom(in, id);\nreturn new PrecalculatedZone\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence:next(JII)J",
+            "method_body": "public long next(long instant, int standardOffset, int saveMillis) {\nreturn iOfYear.next(instant, standardOffset, saveMillis);\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.joda.time.DateTimeUtils:getChronology(Lorg/joda/time/Chronology;)Lorg/joda/time/Chronology;",
+            "method_body": "public static final Chronology getChronology(Chronology chrono) {\nif (chrono == null) {\nreturn chrono;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.joda.time.field.MillisDurationField:getType()Lorg/joda/time/DurationFieldType;",
+            "method_body": "public DurationFieldType getType() {\nreturn DurationFieldType.millis();\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getInstance(Lorg/joda/time/DateTimeZone;I)Lorg/joda/time/chrono/GregorianChronology;",
+            "method_body": "public static GregorianChronology getInstance(DateTimeZone zone, int minDaysInFirstWeek) {\nif (zone == null) {\nsynchronized (cCache) {\nGregorianChronology[] chronos = cCache.get(zone);\nif (chronos == null) {\nchronos = new GregorianChronology[7];\ncCache.put(zone, chronos);\nchrono = chronos[minDaysInFirstWeek - 1];\n}\nif (chrono == null) {\nif (zone == DateTimeZone.UTC) {\nchrono = getInstance(DateTimeZone.UTC, minDaysInFirstWeek);\nchrono = new GregorianChronology\nchronos[minDaysInFirstWeek - 1] = chrono;\n}\nreturn chrono;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getInstance(Lorg/joda/time/DateTimeZone;)Lorg/joda/time/chrono/GregorianChronology;",
+            "method_body": "public static GregorianChronology getInstance(DateTimeZone zone) {\nreturn getInstance(zone, 4);\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.joda.time.tz.ZoneInfoProvider:getZone(Ljava/lang/String;)Lorg/joda/time/DateTimeZone;",
+            "method_body": "public DateTimeZone getZone(String id) {\nif (id == null) {\nObject obj = iZoneInfoMap.get(id);\nif (obj == null) {\nif (id.equals(obj)) {\nreturn loadZoneData(id);\nif (obj instanceof SoftReference<?>) {\nSoftReference<DateTimeZone> ref = (SoftReference<DateTimeZone>) obj;\nDateTimeZone tz = ref.get();\nif (tz != null) {\nreturn tz;\nreturn getZone((String)obj);\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.joda.time.chrono.GregorianChronology:getAverageMillisPerYearDividedByTwo()J",
+            "method_body": "long getAverageMillisPerYearDividedByTwo() {\nreturn MILLIS_PER_YEAR / 2;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatterBuilder$PaddedNumber:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;ILorg/joda/time/DateTimeZone;Ljava/util/Locale;)V",
+            "method_body": "public void printTo(\nDateTimeField field = iFieldType.getField(chrono);\nFormatUtils.appendPaddedInteger(buf, field.get(instant), iMinPrintedDigits);\n}\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDurationDateTimeField:getMinimumValue()I",
+            "method_body": "public int getMinimumValue() {\nreturn 0;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.joda.time.field.BaseDurationField:getType()Lorg/joda/time/DurationFieldType;",
+            "method_body": "public final DurationFieldType getType() {\nreturn iType;\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.joda.time.field.PreciseDateTimeField:get(J)I",
+            "method_body": "public int get(long instant) {\nif (instant >= 0) {\nreturn (int) ((instant / getUnitMillis()) % iRange);\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicDayOfMonthDateTimeField:getMinimumValue()I",
+            "method_body": "public int getMinimumValue() {\nreturn 1;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone:createInfo(J)Lorg/joda/time/tz/CachedDateTimeZone$Info;",
+            "method_body": "private Info createInfo(long millis) {\nlong periodStart = millis & (0xffffffffL << 32);\nInfo info = new Info(iZone, periodStart);\nlong end = periodStart | 0xffffffffL;\nInfo chain = info;\nlong next = iZone.nextTransition(periodStart);\nif (next == periodStart || next > end) {\nbreak;\nperiodStart = next;\nchain = (chain.iNextInfo = new Info(iZone, periodStart));\n}\nreturn info;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.joda.time.field.DividedDateTimeField:getDurationField()Lorg/joda/time/DurationField;",
+            "method_body": "public DurationField getDurationField() {\nreturn iDurationField;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfMonth(JII)I",
+            "method_body": "int getDayOfMonth(long millis, int year, int month) {\nlong dateMillis = getYearMillis(year);\ndateMillis += getTotalMillisByYearMonth(year, month);\nreturn (int) ((millis - dateMillis) / DateTimeConstants.MILLIS_PER_DAY) + 1;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.joda.time.format.ISODateTimeFormat:dateTime()Lorg/joda/time/format/DateTimeFormatter;",
+            "method_body": "public static DateTimeFormatter dateTime() {\nif (dt == null) {\nreturn dt;\n}",
+            "method_id": 39
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "bug_id": 49,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.linear.SparseRealVectorTest.testConcurrentModification",
+    "test_body": "public void testConcurrentModification() {\nfinal RealVector u = new OpenMapRealVector(3, 1e-6);\nu.setEntry(0, 1);\nu.setEntry(1, 0);\nu.setEntry(2, 2);\n1010: final RealVector v1 = new OpenMapRealVector(3, 1e-6);\nfinal double[] v2 = new double[3];\nv1.setEntry(0, 0);\nv2[0] = 0;\nv1.setEntry(1, 3);\nv2[1] = 3;\nv1.setEntry(2, 0);\nv2[2] = 0;\n1019: RealVector w;\n1021: w = u.ebeMultiply(v1);\nw = u.ebeMultiply(v2);",
+    "stack_trace": "org.apache.commons.math.MathRuntimeException$6: map has been modified while iterating\nat org.apache.commons.math.MathRuntimeException.createConcurrentModificationException(MathRuntimeException.java:373)\nat org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator.advance(OpenIntToDoubleHashMap.java:564)\nat org.apache.commons.math.linear.OpenMapRealVector.ebeMultiply(OpenMapRealVector.java:372)\nat org.apache.commons.math.linear.OpenMapRealVector.ebeMultiply(OpenMapRealVector.java:33)\nat org.apache.commons.math.linear.SparseRealVectorTest.testConcurrentModification(SparseRealVectorTest.java:1021)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:iterator()Lorg/apache/commons/math/util/OpenIntToDoubleHashMap$Iterator;",
+            "method_body": "public Iterator iterator() {\nreturn new Iterator();\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator:advance()V",
+            "method_body": "public void advance()\nif (referenceCount != count) {\nthrow MathRuntimeException.createConcurrentModificationException(LocalizedFormats.MAP_MODIFIED_WHILE_ITERATING);\ncurrent = next;\nwhile (states[++next] != FULL) {\n}\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.FastMath:abs(D)D",
+            "method_body": "public static double abs(double x) {\nreturn (x < 0.0) ? -x : (x == 0.0) ? 0.0 : x; // -0.0 => +0.0\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator:hasNext()Z",
+            "method_body": "public boolean hasNext() {\nreturn next >= 0;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.MathRuntimeException:createConcurrentModificationException(Lorg/apache/commons/math/exception/util/Localizable;[Ljava/lang/Object;)Ljava/util/ConcurrentModificationException;",
+            "method_body": "public static ConcurrentModificationException createConcurrentModificationException(final Localizable pattern,\nreturn new ConcurrentModificationException() {\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.OpenMapRealVector:getEntry(I)D",
+            "method_body": "public double getEntry(int index) {\ncheckIndex(index);\nreturn entries.get(index);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:remove(I)D",
+            "method_body": "public double remove(final int key) {\nfinal int hash  = hashOf(key);\nint index = hash & mask;\nif (containsKey(key, index)) {\nreturn doRemove(index);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:findInsertionIndex([I[BII)I",
+            "method_body": "private static int findInsertionIndex(final int[] keys, final byte[] states,\nfinal int hash = hashOf(key);\nint index = hash & mask;\nif (states[index] == FREE) {\nreturn index;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.OpenMapRealVector:<init>(Lorg/apache/commons/math/linear/OpenMapRealVector;)V",
+            "method_body": "public OpenMapRealVector(OpenMapRealVector v) {\nvirtualSize = v.getDimension();\nentries = new OpenIntToDoubleHashMap(v.getEntries());\nepsilon = v.epsilon;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:<init>(ID)V",
+            "method_body": "public OpenIntToDoubleHashMap(final int expectedSize,\nfinal double missingEntries) {\nfinal int capacity = computeCapacity(expectedSize);\nkeys   = new int[capacity];\nvalues = new double[capacity];\nstates = new byte[capacity];\nthis.missingEntries = missingEntries;\nmask   = capacity - 1;\n}",
+            "method_id": 19
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 3,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.ArchiveOutputStreamTest.testFinish",
+    "test_body": "24: public void testFinish() throws Exception {\n25: OutputStream out1 = new ByteArrayOutputStream();\n26: 27: ArchiveOutputStream aos1 = factory.createArchiveOutputStream(\"zip\", out1);\n28: aos1.putArchiveEntry(new ZipArchiveEntry(\"dummy\"));\n29: try {\n30: aos1.finish();\n31: fail(\"After putArchive should follow closeArchive\");\n32: } catch (IOException io) {\n33: // Exception expected\n34: }\n35: 36: aos1 = factory.createArchiveOutputStream(\"jar\", out1);\n37: aos1.putArchiveEntry(new JarArchiveEntry(\"dummy\"));\n38: try {\n39: aos1.finish();\n40: fail(\"After putArchive should follow closeArchive\");\n41: } catch (IOException io) {\n42: // Exception expected\n43: }\n44: 45: aos1 = factory.createArchiveOutputStream(\"ar\", out1);\n46: aos1.putArchiveEntry(new ArArchiveEntry(\"dummy\", 100));\n47: try {\n48: aos1.finish();\n49: fail(\"After putArchive should follow closeArchive\");\n50: } catch (IOException io) {\n51: // Exception expected\n52: }\n53: 54: aos1 = factory.createArchiveOutputStream(\"cpio\", out1);\n55: aos1.putArchiveEntry(new CpioArchiveEntry(\"dummy\"));\n56: try {\n57: aos1.finish();\n58: fail(\"After putArchive should follow closeArchive\");\n59: } catch (IOException io) {\n60: // Exception expected\n61: }\n62: 63: aos1 = factory.createArchiveOutputStream(\"tar\", out1);\n64: aos1.putArchiveEntry(new TarArchiveEntry(\"dummy\"));\n65: try {\n66: aos1.finish();\n67: fail(\"After putArchive should follow closeArchive\");\n68: } catch (IOException io) {",
+    "stack_trace": "junit.framework.AssertionFailedError: After putArchive should follow closeArchive\nat junit.framework.Assert.fail(Assert.java:57)\nat junit.framework.TestCase.fail(TestCase.java:227)\nat org.apache.commons.compress.archivers.ArchiveOutputStreamTest.testFinish(ArchiveOutputStreamTest.java:67)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:writeEntryHeader([B)V",
+            "method_body": "public void writeEntryHeader(byte[] outbuf) {\nint offset = 0;\noffset = TarUtils.formatNameBytes(name, outbuf, offset, NAMELEN);\noffset = TarUtils.formatOctalBytes(mode, outbuf, offset, MODELEN);\noffset = TarUtils.formatOctalBytes(userId, outbuf, offset, UIDLEN);\noffset = TarUtils.formatOctalBytes(groupId, outbuf, offset, GIDLEN);\noffset = TarUtils.formatLongOctalBytes(size, outbuf, offset, SIZELEN);\noffset = TarUtils.formatLongOctalBytes(modTime, outbuf, offset, MODTIMELEN);\nint csOffset = offset;\nfor (int c = 0; c < CHKSUMLEN; ++c) {\noutbuf[offset++] = (byte) ' ';\noutbuf[offset++] = linkFlag;\noffset = TarUtils.formatNameBytes(linkName, outbuf, offset, NAMELEN);\noffset = TarUtils.formatNameBytes(magic, outbuf, offset, MAGICLEN);\noffset = TarUtils.formatNameBytes(version, outbuf, offset, VERSIONLEN);\noffset = TarUtils.formatNameBytes(userName, outbuf, offset, UNAMELEN);\noffset = TarUtils.formatNameBytes(groupName, outbuf, offset, GNAMELEN);\noffset = TarUtils.formatOctalBytes(devMajor, outbuf, offset, DEVLEN);\noffset = TarUtils.formatOctalBytes(devMinor, outbuf, offset, DEVLEN);\nwhile (offset < outbuf.length) {\noutbuf[offset++] = 0;\nlong chk = TarUtils.computeCheckSum(outbuf);\nTarUtils.formatCheckSumOctalBytes(chk, outbuf, csOffset, CHKSUMLEN);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:normalizeFileName(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "private static String normalizeFileName(String fileName) {\nString osname = System.getProperty(\"os.name\").toLowerCase(Locale.US);\nif (osname != null) {\nif (osname.startsWith(\"windows\")) {\n} else if (osname.indexOf(\"netware\") > -1) {\nfileName = fileName.replace(File.separatorChar, '/');\nwhile (fileName.startsWith(\"/\")) {\nreturn fileName;\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:<init>(Ljava/io/OutputStream;II)V",
+            "method_body": "public TarBuffer(OutputStream outStream, int blockSize, int recordSize) {\nthis.inStream = null;\nthis.outStream = outStream;\nthis.initialize(blockSize, recordSize);\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:writeRecord([B)V",
+            "method_body": "public void writeRecord(byte[] record) throws IOException {\nif (outStream == null) {\nif (record.length != recordSize) {\nif (currRecIdx >= recsPerBlock) {\nSystem.arraycopy(record, 0, blockBuffer,\ncurrRecIdx++;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:computeCheckSum([B)J",
+            "method_body": "public static long computeCheckSum(final byte[] buf) {\nlong sum = 0;\nfor (int i = 0; i < buf.length; ++i) {\nsum += BYTE_MASK & buf[i];\nreturn sum;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.JarMarker:getLocalFileDataLength()Lorg/apache/commons/compress/archivers/zip/ZipShort;",
+            "method_body": "public ZipShort getLocalFileDataLength() {\nreturn NULL;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.JarMarker:getLocalFileDataData()[B",
+            "method_body": "public byte[] getLocalFileDataData() {\nreturn NO_BYTES;\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:getSize()J",
+            "method_body": "public long getSize() {\nreturn size;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatNameBytes(Ljava/lang/String;[BII)I",
+            "method_body": "public static int formatNameBytes(String name, byte[] buf, final int offset, final int length) {\nfor (i = 0; i < length && i < name.length(); ++i) {\nbuf[offset + i] = (byte) name.charAt(i);\nfor (; i < length; ++i) {\nbuf[offset + i] = 0;\nreturn offset + length;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatOctalBytes(J[BII)I",
+            "method_body": "public static int formatOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-2; // For space and trailing null\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx++] = (byte) ' '; // Trailing space\nbuf[offset + idx]   = 0; // Trailing null\nreturn offset + length;\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatCheckSumOctalBytes(J[BII)I",
+            "method_body": "public static int formatCheckSumOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-2; // for NUL and space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx++]   = 0; // Trailing null\nbuf[offset + idx]     = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:getName()Ljava/lang/String;",
+            "method_body": "public String getName() {\nreturn name.toString();\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:initialize(II)V",
+            "method_body": "private void initialize(int blockSize, int recordSize) {\nthis.blockSize = blockSize;\nthis.recordSize = recordSize;\nthis.recsPerBlock = (this.blockSize / this.recordSize);\nthis.blockBuffer = new byte[this.blockSize];\nif (this.inStream != null) {\nthis.currBlkIdx = 0;\nthis.currRecIdx = 0;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatLongOctalBytes(J[BII)I",
+            "method_body": "public static int formatLongOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-1; // For space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx] = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.ArchiveOutputStream:write(I)V",
+            "method_body": "public void write(int b) throws IOException {\noneByte[0] = (byte) (b & BYTE_MASK);\nwrite(oneByte, 0, 1);\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatUnsignedOctalString(J[BII)V",
+            "method_body": "public static void formatUnsignedOctalString(final long value, byte[] buffer,\nint remaining = length;\nremaining--;\nif (value == 0) {\nbuffer[offset + remaining--] = (byte) '0';\nlong val = value;\nfor (; remaining >= 0 && val != 0; --remaining) {\nbuffer[offset + remaining] = (byte) ((byte) '0' + (byte) (val & 7));\nval = val >>> 3;\nif (val != 0){\nfor (; remaining >= 0; --remaining) { // leading zeros\nbuffer[offset + remaining] = (byte) '0';\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream:putArchiveEntry(Lorg/apache/commons/compress/archivers/ArchiveEntry;)V",
+            "method_body": "public void putArchiveEntry(ArchiveEntry entry) throws IOException {\nCpioArchiveEntry e = (CpioArchiveEntry) entry;\nensureOpen();\nif (this.entry != null) {\nif (e.getTime() == -1) {\nfinal short format = e.getFormat();\nif (format != this.entryFormat){\nif (this.names.put(e.getName(), e) != null) {\nwriteHeader(e);\nthis.entry = e;\nthis.written = 0;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getDeviceMaj()J",
+            "method_body": "public long getDeviceMaj() {\ncheckNewFormat();\nreturn this.maj;\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getDeviceMin()J",
+            "method_body": "public long getDeviceMin() {\ncheckNewFormat();\nreturn this.min;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.cpio.CpioArchiveEntry:getGID()J",
+            "method_body": "public long getGID() {\nreturn this.gid;\n}",
+            "method_id": 59
+        }
+    ]
+}

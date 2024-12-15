@@ -1,0 +1,109 @@
+{
+    "bug_id": 27,
+    "test_id": 0,
+    "test_name": "org.mockitousage.bugs.ListenersLostOnResetMockTest.listener",
+    "test_body": "public void listener() throws Exception {\nInvocationListener invocationListener = mock(InvocationListener.class);\n18: List mockedList = mock(List.class, withSettings().invocationListeners(invocationListener));\nreset(mockedList);\n21: mockedList.clear();\n23: verify(invocationListener).reportInvocation(any(MethodInvocationReport.class));\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError:\nWanted but not invoked:\ninvocationListener.reportInvocation(<any>);\n-> at org.mockitousage.bugs.ListenersLostOnResetMockTest.listener(ListenersLostOnResetMockTest.java:23)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:resetMock(Ljava/lang/Object;)V",
+            "method_body": "public <T> void resetMock(T mock) {\nMockHandlerInterface<T> oldMockHandler = getMockHandler(mock);\nMockHandler<T> newMockHandler = new MockHandler<T>(oldMockHandler);\nMethodInterceptorFilter newFilter = new MethodInterceptorFilter(newMockHandler, (MockSettingsImpl) org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.Mockito.RETURNS_DEFAULTS));\n((Factory) mock).setCallback(0, newFilter);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.mockito.Mockito:withSettings()Lorg/mockito/MockSettings;",
+            "method_body": "public static MockSettings withSettings() {\nreturn new MockSettingsImpl().defaultAnswer(RETURNS_DEFAULTS);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.mockito.Mockito:reset([Ljava/lang/Object;)V",
+            "method_body": "public static <T> void reset(T ... mocks) {\nMOCKITO_CORE.reset(mocks);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:reset([Ljava/lang/Object;)V",
+            "method_body": "public <T> void reset(T ... mocks) {\nmockingProgress.validateState();\nmockingProgress.reset();\nmockingProgress.resetOngoingStubbing();\nfor (T m : mocks) {\nmockUtil.resetMock(m);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:getMockHandler(Ljava/lang/Object;)Lorg/mockito/internal/MockHandlerInterface;",
+            "method_body": "public <T> MockHandlerInterface<T> getMockHandler(T mock) {\nif (mock == null) {\nif (isMockitoMock(mock)) {\nreturn (MockHandlerInterface) getInterceptor(mock).getHandler();\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:isMockitoMock(Ljava/lang/Object;)Z",
+            "method_body": "private <T> boolean isMockitoMock(T mock) {\nreturn getInterceptor(mock) != null;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:getInterceptor(Ljava/lang/Object;)Lorg/mockito/internal/creation/MethodInterceptorFilter;",
+            "method_body": "private <T> MethodInterceptorFilter getInterceptor(T mock) {\nif (!(mock instanceof Factory)) {\nFactory factory = (Factory) mock;\nCallback callback = factory.getCallback(0);\nif (callback instanceof MethodInterceptorFilter) {\nreturn (MethodInterceptorFilter) callback;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.mockito.Mockito:verify(Ljava/lang/Object;)Ljava/lang/Object;",
+            "method_body": "public static <T> T verify(T mock) {\nreturn MOCKITO_CORE.verify(mock, times(1));\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.mockito.Mockito:times(I)Lorg/mockito/verification/VerificationMode;",
+            "method_body": "public static VerificationMode times(int wantedNumberOfInvocations) {\nreturn VerificationModeFactory.times(wantedNumberOfInvocations);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.mockito.internal.verification.VerificationModeFactory:times(I)Lorg/mockito/internal/verification/Times;",
+            "method_body": "public static Times times(int wantedNumberOfInvocations) {\nreturn new Times(wantedNumberOfInvocations);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.verification.Times:<init>(I)V",
+            "method_body": "public Times(int wantedNumberOfInvocations) {\nif (wantedNumberOfInvocations < 0) {\nthis.wantedCount = wantedNumberOfInvocations;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.util.StringJoiner:join([Ljava/lang/Object;)Ljava/lang/String;",
+            "method_body": "public static String join(Object ... linesToBreak) {\nStringBuilder out = new StringBuilder(\"\\n\");\nreturn join(out, linesToBreak);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:isMock(Ljava/lang/Object;)Z",
+            "method_body": "public boolean isMock(Object mock) {\nreturn mock != null && isMockitoMock(mock);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.debugging.Location:toString()Ljava/lang/String;",
+            "method_body": "public String toString() {\nStackTraceElement[] filtered = stackTraceFilter.filter(stackTraceHolder.getStackTrace(), false);\nif (filtered.length == 0) {\nreturn \"-> at \" + filtered[0].toString();\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.Invocation:getMethod()Ljava/lang/reflect/Method;",
+            "method_body": "public Method getMethod() {\nreturn method.getJavaMethod();\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:mock(Ljava/lang/Class;Lorg/mockito/MockSettings;)Ljava/lang/Object;",
+            "method_body": "public <T> T mock(Class<T> classToMock, MockSettings mockSettings) {\nT mock = mockUtil.createMock(classToMock, (MockSettingsImpl) mockSettings);\nmockingProgress.mockingStarted(mock, classToMock, mockSettings);\nreturn mock;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.mockito.internal.util.Primitives:isPrimitiveWrapper(Ljava/lang/Class;)Z",
+            "method_body": "public static boolean isPrimitiveWrapper(Class<?> type) {\nreturn wrapperReturnValues.containsKey(type);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.mockito.internal.MockHandler:<init>(Lorg/mockito/internal/creation/MockSettingsImpl;)V",
+            "method_body": "public MockHandler(MockSettingsImpl mockSettings) {\nthis.mockSettings = mockSettings;\nthis.mockingProgress = new ThreadSafeMockingProgress();\nthis.matchersBinder = new MatchersBinder();\nthis.invocationContainerImpl = new InvocationContainerImpl(mockingProgress);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.mockito.internal.util.ListUtil:filter(Ljava/util/Collection;Lorg/mockito/internal/util/ListUtil$Filter;)Ljava/util/LinkedList;",
+            "method_body": "public static <T> LinkedList<T> filter(Collection<T> collection, Filter<T> filter) {\nLinkedList<T> filtered = new LinkedList<T>();\nfor (T t : collection) {\nreturn filtered;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationMatcher:getMethod()Ljava/lang/reflect/Method;",
+            "method_body": "public Method getMethod() {\nreturn invocation.getMethod();\n}",
+            "method_id": 19
+        }
+    ]
+}

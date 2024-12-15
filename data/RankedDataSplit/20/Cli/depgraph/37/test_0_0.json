@@ -1,0 +1,109 @@
+{
+    "bug_id": 37,
+    "test_id": 0,
+    "test_name": "org.apache.commons.cli.bug.BugCLI265Test.shouldParseShortOptionWithoutValue",
+    "test_body": "46: public void shouldParseShortOptionWithoutValue() throws Exception {\n47: String[] twoShortOptions = new String[]{\"-t1\", \"-last\"};\n48: 49: final CommandLine commandLine = parser.parse(options, twoShortOptions);\n50: 51: assertTrue(commandLine.hasOption(\"t1\"));\n52: assertNotEquals(\"Second option has been used as value for first option\", \"-last\", commandLine.getOptionValue(\"t1\"));\n53: assertTrue(\"Second option has not been detected\", commandLine.hasOption(\"last\"));",
+    "stack_trace": "junit.framework.AssertionFailedError: Second option has been used as value for first option. Actual: -last\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failEquals(Assert.java:185)\nat org.junit.Assert.assertNotEquals(Assert.java:161)\nat org.apache.commons.cli.bug.BugCLI265Test.shouldParseShortOptionWithoutValue(BugCLI265Test.java:52)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:handleShortAndLongOption(Ljava/lang/String;)V",
+            "method_body": "private void handleShortAndLongOption(String token) throws ParseException\nString t = Util.stripLeadingHyphens(token);\nint pos = t.indexOf('=');\nif (t.length() == 1)\nelse if (pos == -1)\nif (options.hasShortOption(t))\nhandleOption(options.getOption(t));\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:isLongOption(Ljava/lang/String;)Z",
+            "method_body": "private boolean isLongOption(String token)\nif (!token.startsWith(\"-\") || token.length() == 1)\nint pos = token.indexOf(\"=\");\nString t = pos == -1 ? token : token.substring(0, pos);\nif (!options.getMatchingOptions(t).isEmpty())\nelse if (getLongPrefix(token) != null && !token.startsWith(\"--\"))\nreturn false;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:processValue(Ljava/lang/String;)V",
+            "method_body": "private void processValue(String value)\nif (hasValueSeparator())\nadd(value);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:parse(Lorg/apache/commons/cli/Options;[Ljava/lang/String;Ljava/util/Properties;Z)Lorg/apache/commons/cli/CommandLine;",
+            "method_body": "public CommandLine parse(Options options, String[] arguments, Properties properties, boolean stopAtNonOption)\nthis.options = options;\nthis.stopAtNonOption = stopAtNonOption;\nskipParsing = false;\ncurrentOption = null;\nexpectedOpts = new ArrayList(options.getRequiredOptions());\nfor (OptionGroup group : options.getOptionGroups())\ncmd = new CommandLine();\nif (arguments != null)\nfor (String argument : arguments)\nhandleToken(argument);\ncheckRequiredArgs();\nhandleProperties(properties);\ncheckRequiredOptions();\nreturn cmd;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:handleToken(Ljava/lang/String;)V",
+            "method_body": "private void handleToken(String token) throws ParseException\ncurrentToken = token;\nif (skipParsing)\nelse if (\"--\".equals(token))\nelse if (currentOption != null && currentOption.acceptsArg() && isArgument(token))\ncurrentOption.addValueForProcessing(Util.stripLeadingAndTrailingQuotes(token));\nelse if (token.startsWith(\"--\"))\nelse if (token.startsWith(\"-\") && !\"-\".equals(token))\nhandleShortAndLongOption(token);\nif (currentOption != null && !currentOption.acceptsArg())\ncurrentOption = null;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:addValueForProcessing(Ljava/lang/String;)V",
+            "method_body": "void addValueForProcessing(String value)\nif (numberOfArgs == UNINITIALIZED)\nprocessValue(value);\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:add(Ljava/lang/String;)V",
+            "method_body": "private void add(String value)\nif (!acceptsArg())\nvalues.add(value);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:handleOption(Lorg/apache/commons/cli/Option;)V",
+            "method_body": "private void handleOption(Option option) throws ParseException\ncheckRequiredArgs();\noption = (Option) option.clone();\nupdateRequiredOptions(option);\ncmd.addOption(option);\nif (option.hasArg())\ncurrentOption = option;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:getMatchingOptions(Ljava/lang/String;)Ljava/util/List;",
+            "method_body": "public List<String> getMatchingOptions(String opt)\nopt = Util.stripLeadingHyphens(opt);\nList<String> matchingOpts = new ArrayList<String>();\nif (longOpts.keySet().contains(opt))\nfor (String longOpt : longOpts.keySet())\nreturn matchingOpts;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:getLongPrefix(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "private String getLongPrefix(String token)\nString t = Util.stripLeadingHyphens(token);\nString opt = null;\nfor (i = t.length() - 2; i > 1; i--)\nString prefix = t.substring(0, i);\nif (options.hasLongOption(prefix))\nreturn opt;\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Option:clone()Ljava/lang/Object;",
+            "method_body": "public Object clone()\nOption option = (Option) super.clone();\noption.values = new ArrayList<String>(values);\nreturn option;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:hasShortOption(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasShortOption(String opt)\nopt = Util.stripLeadingHyphens(opt);\nreturn shortOpts.containsKey(opt);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:getOption(Ljava/lang/String;)Lorg/apache/commons/cli/Option;",
+            "method_body": "public Option getOption(String opt)\nopt = Util.stripLeadingHyphens(opt);\nif (shortOpts.containsKey(opt))\nreturn shortOpts.get(opt);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Util:stripLeadingAndTrailingQuotes(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String stripLeadingAndTrailingQuotes(String str)\nint length = str.length();\nif (length > 1 && str.startsWith(\"\\\"\") && str.endsWith(\"\\\"\") && str.substring(1, length - 1).indexOf('\"') == -1)\nreturn str;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.cli.CommandLine:getOptionValue(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String getOptionValue(String opt)\nString[] values = getOptionValues(opt);\nreturn (values == null) ? null : values[0];\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Options:hasLongOption(Ljava/lang/String;)Z",
+            "method_body": "public boolean hasLongOption(String opt)\nopt = Util.stripLeadingHyphens(opt);\nreturn longOpts.containsKey(opt);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.cli.DefaultParser:updateRequiredOptions(Lorg/apache/commons/cli/Option;)V",
+            "method_body": "private void updateRequiredOptions(Option option) throws AlreadySelectedException\nif (option.isRequired())\nif (options.getOptionGroup(option) != null)\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.cli.Util:stripLeadingHyphens(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String stripLeadingHyphens(String str)\nif (str == null)\nif (str.startsWith(\"--\"))\nelse if (str.startsWith(\"-\"))\nreturn str.substring(1, str.length());\nreturn str;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.cli.CommandLine:addOption(Lorg/apache/commons/cli/Option;)V",
+            "method_body": "protected void addOption(Option opt)\noptions.add(opt);\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.cli.CommandLine:getOptionValues(Ljava/lang/String;)[Ljava/lang/String;",
+            "method_body": "public String[] getOptionValues(String opt)\nList<String> values = new ArrayList<String>();\nfor (Option option : options)\nif (opt.equals(option.getOpt()) || opt.equals(option.getLongOpt()))\nvalues.addAll(option.getValuesList());\n}\nreturn values.isEmpty() ? null : values.toArray(new String[values.size()]);\n}",
+            "method_id": 19
+        }
+    ]
+}

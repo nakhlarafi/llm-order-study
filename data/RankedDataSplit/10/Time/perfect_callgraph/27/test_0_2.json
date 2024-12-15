@@ -1,0 +1,59 @@
+{
+    "bug_id": 27,
+    "test_id": 0,
+    "test_name": "org.joda.time.format.TestPeriodFormatterBuilder.testBug2495455",
+    "test_body": "public void testBug2495455() {\nPeriodFormatter pfmt1 = new PeriodFormatterBuilder()\n.appendLiteral(\"P\")\n.appendYears()\n.appendSuffix(\"Y\")\n.appendMonths()\n.appendSuffix(\"M\")\n.appendWeeks()\n.appendSuffix(\"W\")\n.appendDays()\n.appendSuffix(\"D\")\n.appendSeparatorIfFieldsAfter(\"T\")\n.appendHours()\n.appendSuffix(\"H\")\n.appendMinutes()\n.appendSuffix(\"M\")\n.appendSecondsWithOptionalMillis()\n.appendSuffix(\"S\")\n.toFormatter();\nPeriodFormatter pfmt2 = new PeriodFormatterBuilder()\n.append(ISOPeriodFormat.standard())\n.toFormatter();\npfmt1.parsePeriod(\"PT1003199059S\");\npfmt2.parsePeriod(\"PT1003199059S\");\n}\n",
+    "stack_trace": "java.lang.IllegalArgumentException: Invalid format: \"PT1003199059S\" is malformed at \"1003199059S\"\nat org.joda.time.format.PeriodFormatter.parseMutablePeriod(PeriodFormatter.java:326)\nat org.joda.time.format.PeriodFormatter.parsePeriod(PeriodFormatter.java:304)\nat org.joda.time.format.TestPeriodFormatterBuilder.testBug2495455(TestPeriodFormatterBuilder.java:869)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.format.PeriodFormatter:parsePeriod(Ljava/lang/String;)Lorg/joda/time/Period;",
+            "method_body": "public Period parsePeriod(String text) {\ncheckParser();\nreturn parseMutablePeriod(text).toPeriod();\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.joda.time.format.PeriodFormatter:checkParser()V",
+            "method_body": "private void checkParser() {\nif (iParser == null) {\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.joda.time.format.PeriodFormatter:parseMutablePeriod(Ljava/lang/String;)Lorg/joda/time/MutablePeriod;",
+            "method_body": "public MutablePeriod parseMutablePeriod(String text) {\ncheckParser();\nMutablePeriod period = new MutablePeriod(0, iParseType);\nint newPos = getParser().parseInto(period, text, 0, iLocale);\nif (newPos >= 0) {\nif (newPos >= text.length()) {\nreturn period;\nnewPos = ~newPos;\nthrow new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.joda.time.base.AbstractPeriod:<init>()V",
+            "method_body": "protected AbstractPeriod() {\nsuper();\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.joda.time.format.FormatUtils:createErrorMessage(Ljava/lang/String;I)Ljava/lang/String;",
+            "method_body": "static String createErrorMessage(final String text, final int errorPos) {\nint sampleLen = errorPos + 32;\nif (text.length() <= sampleLen + 3) {\nsampleText = text;\nif (errorPos <= 0) {\nif (errorPos >= text.length()) {\nreturn \"Invalid format: \\\"\" + sampleText + \"\\\" is malformed at \\\"\" +\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.joda.time.format.PeriodFormatterBuilder$FieldFormatter:parseInto(Lorg/joda/time/ReadWritablePeriod;Ljava/lang/String;ILjava/util/Locale;)I",
+            "method_body": "public int parseInto(\nboolean mustParse = (iPrintZeroSetting == PRINT_ZERO_ALWAYS);\nif (position >= text.length()) {\nif (iPrefix != null) {\nint suffixPos = -1;\nif (iSuffix != null && !mustParse) {\nsuffixPos = iSuffix.scan(text, position);\nif (suffixPos >= 0) {\nmustParse = true;\nif (!mustParse) {\nreturn ~suffixPos;\nif (!mustParse && !isSupported(period.getPeriodType(), iFieldType)) {\nif (suffixPos > 0) {\nlimit = Math.min(iMaxParsedDigits, suffixPos - position);\nint length = 0;\nint fractPos = -1;\nboolean hasDigits = false;\nwhile (length < limit) {\nchar c = text.charAt(position + length);\nif (length == 0 && (c == '-' || c == '+') && !iRejectSignedValues) {\nif (c >= '0' && c <= '9') {\nhasDigits = true;\nlength++;\n}\nif (!hasDigits) {\nif (suffixPos >= 0 && position + length != suffixPos) {\nif (iFieldType != SECONDS_MILLIS && iFieldType != SECONDS_OPTIONAL_MILLIS) {\n} else if (fractPos < 0) {\nsetFieldValue(period, SECONDS, parseInt(text, position, length));\nsetFieldValue(period, MILLIS, 0);\nposition += length;\nif (position >= 0 && iSuffix != null) {\nposition = iSuffix.parse(text, position);\nreturn position;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.joda.time.PeriodType:getFieldType(I)Lorg/joda/time/DurationFieldType;",
+            "method_body": "public DurationFieldType getFieldType(int index) {\nreturn iTypes[index];\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.joda.time.PeriodType:size()I",
+            "method_body": "public int size() {\nreturn iTypes.length;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.joda.time.base.BasePeriod:getValue(I)I",
+            "method_body": "public int getValue(int index) {\nreturn iValues[index];\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.joda.time.format.PeriodFormatterBuilder:append(Lorg/joda/time/format/PeriodFormatter;)Lorg/joda/time/format/PeriodFormatterBuilder;",
+            "method_body": "public PeriodFormatterBuilder append(PeriodFormatter formatter) {\nif (formatter == null) {\nclearPrefix();\nappend0(formatter.getPrinter(), formatter.getParser());\nreturn this;\n}",
+            "method_id": 29
+        }
+    ]
+}

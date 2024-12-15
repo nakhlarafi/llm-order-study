@@ -1,0 +1,109 @@
+{
+    "bug_id": 20,
+    "test_id": 0,
+    "test_name": "org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class",
+    "test_body": "124: public void should_spy_inner_class() throws Exception {\n125: 126: class WithMockAndSpy {\n127: @Spy private InnerStrength strength;\n128: @Mock private List<String> list;\n129: 130: abstract class InnerStrength {\n131: private final String name;\n132: 133: InnerStrength() {\n134: // Make sure that @Mock fields are always injected before @Spy fields.\n135: assertNotNull(list);\n136: // Make sure constructor is indeed called.\n137: this.name = \"inner\";\n138: }\n139: 140: abstract String strength();\n141: 142: String fullStrength() {\n143: return name + \" \" + strength();\n144: }\n145: }\n146: }\n147: WithMockAndSpy outer = new WithMockAndSpy();\n148: MockitoAnnotations.initMocks(outer);\n149: when(outer.strength.strength()).thenReturn(\"strength\");\n150: assertEquals(\"inner strength\", outer.strength.fullStrength());\n151: }\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<[inner] strength> but was:<[null] strength>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat org.mockitousage.annotation.SpyAnnotationTest.should_spy_inner_class(SpyAnnotationTest.java:150)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.creation.util.SearchingClassLoader:combineLoadersOf(Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/ClassLoader;",
+            "method_body": "private static ClassLoader combineLoadersOf(Class<?> first, Class<?>... others) {\nList<ClassLoader> loaders = new ArrayList<ClassLoader>();\naddIfNewElement(loaders, first.getClassLoader());\nfor (Class<?> c : others) {\naddIfNewElement(loaders, c.getClassLoader());\naddIfNewElement(loaders, SearchingClassLoader.class.getClassLoader());\naddIfNewElement(loaders, currentThread().getContextClassLoader());\nreturn combine(loaders);\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.util.SearchingClassLoader:combine(Ljava/util/List;)Ljava/lang/ClassLoader;",
+            "method_body": "private static ClassLoader combine(List<ClassLoader> parentLoaders) {\nClassLoader loader = parentLoaders.get(parentLoaders.size()-1);\nfor (int i = parentLoaders.size()-2; i >= 0; i--) {\nreturn loader;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.util.SearchingClassLoader:addIfNewElement(Ljava/util/List;Ljava/lang/ClassLoader;)V",
+            "method_body": "private static void addIfNewElement(List<ClassLoader> loaders, ClassLoader c) {\nif (c != null && !loaders.contains(c)) {\nloaders.add(c);\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.GlobalConfiguration:getIt()Lorg/mockito/configuration/IMockitoConfiguration;",
+            "method_body": "IMockitoConfiguration getIt() {\nreturn GLOBAL_CONFIGURATION.get();\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.ThreadSafeMockingProgress:reset()V",
+            "method_body": "public void reset() {\nthreadSafely().reset();\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.MockingProgressImpl:reset()V",
+            "method_body": "public void reset() {\nstubbingInProgress = null;\nverificationMode = null;\ngetArgumentMatcherStorage().reset();\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.ArgumentMatcherStorageImpl:reset()V",
+            "method_body": "public void reset() {\nmatcherStack.clear();\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.ThreadSafeMockingProgress:resetOngoingStubbing()V",
+            "method_body": "public void resetOngoingStubbing() {\nthreadSafely().resetOngoingStubbing();\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.MockingProgressImpl:resetOngoingStubbing()V",
+            "method_body": "public void resetOngoingStubbing() {\niOngoingStubbing = null;\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> clazz, Object testInstance) {\nprocessIndependentAnnotations(testInstance.getClass(), testInstance);\nprocessInjectMocks(testInstance.getClass(), testInstance);\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:processInjectMocks(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "private void processInjectMocks(final Class<?> clazz, final Object testInstance) {\nClass<?> classContext = clazz;\nwhile (classContext != Object.class) {\ninjectMocks(testInstance);\nclassContext = classContext.getSuperclass();\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:processIndependentAnnotations(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "private void processIndependentAnnotations(final Class<?> clazz, final Object testInstance) {\nClass<?> classContext = clazz;\nwhile (classContext != Object.class) {\ndelegate.process(classContext, testInstance);\nspyAnnotationEngine.process(classContext, testInstance);\nclassContext = classContext.getSuperclass();\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.InjectingAnnotationEngine:injectMocks(Ljava/lang/Object;)V",
+            "method_body": "public void injectMocks(final Object testClassInstance) {\nClass<?> clazz = testClassInstance.getClass();\nSet<Field> mockDependentFields = new HashSet<Field>();\nSet<Object> mocks = newMockSafeHashSet();\nwhile (clazz != Object.class) {\nnew InjectMocksScanner(clazz).addTo(mockDependentFields);\nnew MockScanner(testClassInstance, clazz).addPreparedMocks(mocks);\nclazz = clazz.getSuperclass();\nnew DefaultInjectionEngine().injectMocksOnFields(mockDependentFields, mocks, testClassInstance);\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> clazz, Object testInstance) {\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nboolean alreadyAssigned = false;\nfor(Annotation annotation : field.getAnnotations()) {\nObject mock = createMockFor(annotation, field);\nif (mock != null) {\nthrowIfAlreadyAssigned(field, alreadyAssigned);\nalreadyAssigned = true;\nnew FieldSetter(testInstance, field).set(mock);\n}\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.SpyAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> context, Object testInstance) {\nField[] fields = context.getDeclaredFields();\nfor (Field field : fields) {\nif (field.isAnnotationPresent(Spy.class) && !field.isAnnotationPresent(InjectMocks.class)) {\nassertNoIncompatibleAnnotations(Spy.class, field, Mock.class, org.mockito.MockitoAnnotations.Mock.class, Captor.class);\nfield.setAccessible(true);\ninstance = field.get(testInstance);\nassertNotInterface(instance, field.getType());\nif (new MockUtil().isMock(instance)) {\n} else if (instance != null) {\nfield.set(testInstance, Mockito.mock(instance.getClass(), withSettings()\nfield.set(testInstance, newSpyInstance(testInstance, field));\n}\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.InjectMocksScanner:<init>(Ljava/lang/Class;)V",
+            "method_body": "public InjectMocksScanner(Class<?> clazz) {\nthis.clazz = clazz;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.InjectMocksScanner:addTo(Ljava/util/Set;)V",
+            "method_body": "public void addTo(Set<Field> mockDependentFields) {\nmockDependentFields.addAll(scan());\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.InjectMocksScanner:scan()Ljava/util/Set;",
+            "method_body": "private Set<Field> scan() {\nSet<Field> mockDependentFields = new HashSet<Field>();\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nif (null != field.getAnnotation(InjectMocks.class)) {\nreturn mockDependentFields;\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.MockScanner:<init>(Ljava/lang/Object;Ljava/lang/Class;)V",
+            "method_body": "public MockScanner(Object instance, Class<?> clazz) {\nthis.instance = instance;\nthis.clazz = clazz;\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.injection.scanner.MockScanner:addPreparedMocks(Ljava/util/Set;)V",
+            "method_body": "public void addPreparedMocks(Set<Object> mocks) {\nmocks.addAll(scan());\n}",
+            "method_id": 99
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 66,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.ElementTest.testNextElementSiblingAfterClone",
+    "test_body": "public void testNextElementSiblingAfterClone() {\n// via https://github.com/jhy/jsoup/issues/951\nString html = \"<!DOCTYPE html><html lang=\\\"en\\\"><head></head><body><div>Initial element</div></body></html>\";\nString expectedText = \"New element\";\nString cloneExpect = \"New element in clone\";\n1221: Document original = Jsoup.parse(html);\nDocument clone = original.clone();\n1224: Element originalElement = original.body().child(0);\noriginalElement.after(\"<div>\" + expectedText + \"</div>\");\nElement originalNextElementSibling = originalElement.nextElementSibling();\nElement originalNextSibling = (Element) originalElement.nextSibling();\nassertEquals(expectedText, originalNextElementSibling.text());\nassertEquals(expectedText, originalNextSibling.text());\n1231: Element cloneElement = clone.body().child(0);\ncloneElement.after(\"<div>\" + cloneExpect + \"</div>\");\nElement cloneNextElementSibling = cloneElement.nextElementSibling();\nElement cloneNextSibling = (Element) cloneElement.nextSibling();\nassertEquals(cloneExpect, cloneNextElementSibling.text());\nassertEquals(cloneExpect, cloneNextSibling.text());",
+    "stack_trace": "java.lang.NullPointerException\nat org.jsoup.nodes.ElementTest.testNextElementSiblingAfterClone(ElementTest.java:1235)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Node:setParentNode(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void setParentNode(Node parentNode) {\nValidate.notNull(parentNode);\nif (this.parentNode != null)\nthis.parentNode.removeChild(this);\nthis.parentNode = parentNode;\n}",
+            "method_id": 100
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:removeChild(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void removeChild(Node out) {\nValidate.isTrue(out.parentNode == this);\nfinal int index = out.siblingIndex;\nensureChildNodes().remove(index);\nreindexChildren(index);\nout.parentNode = null;\n}",
+            "method_id": 101
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:addChildren(I[Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void addChildren(int index, Node... children) {\nValidate.noNullElements(children);\nfinal List<Node> nodes = ensureChildNodes();\nfor (Node child : children) {\nreparentChild(child);\nnodes.addAll(index, Arrays.asList(children));\nreindexChildren(index);\n}",
+            "method_id": 102
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:reparentChild(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "protected void reparentChild(Node child) {\nchild.setParentNode(this);\n}",
+            "method_id": 103
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:reindexChildren(I)V",
+            "method_body": "private void reindexChildren(int start) {\nfinal List<Node> childNodes = ensureChildNodes();\nfor (int i = start; i < childNodes.size(); i++) {\nchildNodes.get(i).setSiblingIndex(i);\n}",
+            "method_id": 104
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:nextSibling()Lorg/jsoup/nodes/Node;",
+            "method_body": "public Node nextSibling() {\nif (parentNode == null)\nfinal List<Node> siblings = parentNode.ensureChildNodes();\nfinal int index = siblingIndex+1;\nif (siblings.size() > index)\nreturn siblings.get(index);\nreturn null;\n}",
+            "method_id": 105
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:setSiblingIndex(I)V",
+            "method_body": "protected void setSiblingIndex(int siblingIndex) {\nthis.siblingIndex = siblingIndex;\n}",
+            "method_id": 106
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:clone()Lorg/jsoup/nodes/Node;",
+            "method_body": "public Node clone() {\nNode thisClone = doClone(null); // splits for orphan\nfinal LinkedList<Node> nodesToProcess = new LinkedList<>();\nnodesToProcess.add(thisClone);\nwhile (!nodesToProcess.isEmpty()) {\nNode currParent = nodesToProcess.remove();\nfinal int size = currParent.childNodeSize();\nfor (int i = 0; i < size; i++) {\nfinal List<Node> childNodes = currParent.ensureChildNodes();\nNode childClone = childNodes.get(i).doClone(currParent);\nchildNodes.set(i, childClone);\nnodesToProcess.add(childClone);\n}\nreturn thisClone;\n}",
+            "method_id": 107
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:doClone(Lorg/jsoup/nodes/Node;)Lorg/jsoup/nodes/Node;",
+            "method_body": "protected Node doClone(Node parent) {\nclone = (Node) super.clone();\n}\nclone.parentNode = parent; // can be null, to create an orphan split\nclone.siblingIndex = parent == null ? 0 : siblingIndex;\nreturn clone;\n}",
+            "method_id": 108
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;Lorg/jsoup/nodes/Attributes;)V",
+            "method_body": "public Element(Tag tag, String baseUri, Attributes attributes) {\nValidate.notNull(tag);\nValidate.notNull(baseUri);\nchildNodes = EMPTY_NODES;\nthis.baseUri = baseUri;\nthis.attributes = attributes;\nthis.tag = tag;\n}",
+            "method_id": 109
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<init>(Lorg/jsoup/parser/Tag;Ljava/lang/String;)V",
+            "method_body": "public Element(Tag tag, String baseUri) {\nthis(tag, baseUri, null);\n}",
+            "method_id": 110
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:<clinit>()V",
+            "method_body": "private static final List<Node> EMPTY_NODES = Collections.emptyList();\nprivate static final Pattern classSplit = Pattern.compile(\"\\\\s+\");\n}",
+            "method_id": 111
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:ensureChildNodes()Ljava/util/List;",
+            "method_body": "protected List<Node> ensureChildNodes() {\nif (childNodes == EMPTY_NODES) {\nchildNodes = new NodeList(4);\nreturn childNodes;\n}",
+            "method_id": 112
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:baseUri()Ljava/lang/String;",
+            "method_body": "public String baseUri() {\nreturn baseUri;\n}",
+            "method_id": 113
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:childNodeSize()I",
+            "method_body": "public int childNodeSize() {\nreturn childNodes.size();\n}",
+            "method_id": 114
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:nodeName()Ljava/lang/String;",
+            "method_body": "public String nodeName() {\nreturn tag.getName();\n}",
+            "method_id": 115
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:tagName()Ljava/lang/String;",
+            "method_body": "public String tagName() {\nreturn tag.getName();\n}",
+            "method_id": 116
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:tag()Lorg/jsoup/parser/Tag;",
+            "method_body": "public Tag tag() {\nreturn tag;\n}",
+            "method_id": 117
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:parent()Lorg/jsoup/nodes/Element;",
+            "method_body": "public final Element parent() {\nreturn (Element) parentNode;\n}",
+            "method_id": 118
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:parents()Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements parents() {\nElements parents = new Elements();\naccumulateParents(this, parents);\nreturn parents;\n}",
+            "method_id": 119
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 20,
+    "test_id": 2,
+    "test_name": "org.mockitousage.constructor.CreatingMocksWithConstructorTest.can_create_mock_with_constructor",
+    "test_body": "public void can_create_mock_with_constructor() {\nMessage mock = mock(Message.class, withSettings().useConstructor().defaultAnswer(CALLS_REAL_METHODS));\n//the message is a part of state of the mocked type that gets initialized in constructor\nassertEquals(\"hey!\", mock.getMessage());\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<hey!> but was:<null>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat org.mockitousage.constructor.CreatingMocksWithConstructorTest.can_create_mock_with_constructor(CreatingMocksWithConstructorTest.java:34)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.ByteBuddyMockMaker:createMock(Lorg/mockito/mock/MockCreationSettings;Lorg/mockito/invocation/MockHandler;)Ljava/lang/Object;",
+            "method_body": "public <T> T createMock(MockCreationSettings<T> settings, MockHandler handler) {\nif (settings.getSerializableMode() == SerializableMode.ACROSS_CLASSLOADERS) {\nClass<? extends T> mockedProxyType = cachingMockBytecodeGenerator.get(\nT mockInstance = null;\nmockInstance = classInstantiator.instantiate(mockedProxyType);\nMockMethodInterceptor.MockAccess mockAccess = (MockMethodInterceptor.MockAccess) mockInstance;\nmockAccess.setMockitoInterceptor(new MockMethodInterceptor(asInternalMockHandler(handler), settings));\nreturn ensureMockIsAssignableToMockedType(settings, mockInstance);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.mockito.Mockito:withSettings()Lorg/mockito/MockSettings;",
+            "method_body": "public static MockSettings withSettings() {\nreturn new MockSettingsImpl().defaultAnswer(RETURNS_DEFAULTS);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationMatcher:<init>(Lorg/mockito/invocation/Invocation;Ljava/util/List;)V",
+            "method_body": "public InvocationMatcher(Invocation invocation, List<Matcher> matchers) {\nthis.invocation = invocation;\nif (matchers.isEmpty()) {\nthis.matchers = ArgumentsProcessor.argumentsToMatchers(invocation.getArguments());\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.mockito.internal.MockitoCore:mock(Ljava/lang/Class;Lorg/mockito/MockSettings;)Ljava/lang/Object;",
+            "method_body": "public <T> T mock(Class<T> typeToMock, MockSettings settings) {\nif (!MockSettingsImpl.class.isInstance(settings)) {\nMockSettingsImpl impl = MockSettingsImpl.class.cast(settings);\nMockCreationSettings<T> creationSettings = impl.confirm(typeToMock);\nT mock = mockUtil.createMock(creationSettings);\nmockingProgress.mockingStarted(mock, typeToMock);\nreturn mock;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.MockSettingsImpl:prepareExtraInterfaces(Lorg/mockito/internal/creation/settings/CreationSettings;)Ljava/util/Set;",
+            "method_body": "private static Set<Class> prepareExtraInterfaces(CreationSettings settings) {\nSet<Class> interfaces = new HashSet<Class>(settings.getExtraInterfaces());\nif(settings.isSerializable()) {\nreturn interfaces;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.mockito.internal.debugging.LocationImpl:<init>()V",
+            "method_body": "public LocationImpl() {\nthis(new StackTraceFilter());\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:isTypeMockable(Ljava/lang/Class;)Z",
+            "method_body": "public boolean isTypeMockable(Class<?> type) {\nreturn !type.isPrimitive() && !Modifier.isFinal(type.getModifiers());\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> clazz, Object testInstance) {\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nboolean alreadyAssigned = false;\nfor(Annotation annotation : field.getAnnotations()) {\nObject mock = createMockFor(annotation, field);\nif (mock != null) {\nthrowIfAlreadyAssigned(field, alreadyAssigned);\nalreadyAssigned = true;\nnew FieldSetter(testInstance, field).set(mock);\n}\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.MockSettingsImpl:validatedSettings(Ljava/lang/Class;Lorg/mockito/internal/creation/settings/CreationSettings;)Lorg/mockito/internal/creation/settings/CreationSettings;",
+            "method_body": "private static <T> CreationSettings<T> validatedSettings(Class<T> typeToMock, CreationSettings<T> source) {\nMockCreationValidator validator = new MockCreationValidator();\nvalidator.validateType(typeToMock);\nvalidator.validateExtraInterfaces(typeToMock, source.getExtraInterfaces());\nvalidator.validateMockedType(typeToMock, source.getSpiedInstance());\nvalidator.validateSerializable(typeToMock, source.isSerializable());\nvalidator.validateConstructorUse(source.isUsingConstructor(), source.getSerializableMode());\nCreationSettings<T> settings = new CreationSettings<T>(source);\nsettings.setMockName(new MockNameImpl(source.getName(), typeToMock));\nsettings.setTypeToMock(typeToMock);\nsettings.setExtraInterfaces(prepareExtraInterfaces(source));\nreturn settings;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.settings.CreationSettings:getSpiedInstance()Ljava/lang/Object;",
+            "method_body": "public Object getSpiedInstance() {\nreturn spiedInstance;\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.mockito.configuration.DefaultMockitoConfiguration:getAnnotationEngine()Lorg/mockito/configuration/AnnotationEngine;",
+            "method_body": "public AnnotationEngine getAnnotationEngine() {\nreturn new InjectingAnnotationEngine();\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.progress.ThreadSafeMockingProgress:threadSafely()Lorg/mockito/internal/progress/MockingProgress;",
+            "method_body": "static MockingProgress threadSafely() {\nif (mockingProgress.get() == null) {\nreturn mockingProgress.get();\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationMatcher:getInvocation()Lorg/mockito/invocation/Invocation;",
+            "method_body": "public Invocation getInvocation() {\nreturn this.invocation;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.MockMethodInterceptor:interceptSuperCallable(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/util/concurrent/Callable;)Ljava/lang/Object;",
+            "method_body": "public Object interceptSuperCallable(@This Object mock,\nreturn doIntercept(\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.bytebuddy.ByteBuddyMockMaker:ensureMockIsAssignableToMockedType(Lorg/mockito/mock/MockCreationSettings;Ljava/lang/Object;)Ljava/lang/Object;",
+            "method_body": "private <T> T ensureMockIsAssignableToMockedType(MockCreationSettings<T> settings, T mock) {\nClass<T> typeToMock = settings.getTypeToMock();\nreturn typeToMock.cast(mock);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.util.collections.HashCodeAndEqualsSafeSet$1:<init>(Lorg/mockito/internal/util/collections/HashCodeAndEqualsSafeSet;)V",
+            "method_body": "public Iterator<Object> iterator() {\nreturn new Iterator<Object>() {\nprivate final Iterator<HashCodeAndEqualsMockWrapper> iterator = backingHashSet.iterator();\nreturn iterator.hasNext();\nreturn iterator.next().get();\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.GlobalConfiguration:getAnnotationEngine()Lorg/mockito/configuration/AnnotationEngine;",
+            "method_body": "public AnnotationEngine getAnnotationEngine() {\nreturn GLOBAL_CONFIGURATION.get().getAnnotationEngine();\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.mockito.internal.debugging.LocationImpl:<init>(Lorg/mockito/internal/exceptions/stacktrace/StackTraceFilter;)V",
+            "method_body": "public LocationImpl(StackTraceFilter stackTraceFilter) {\nthis.stackTraceFilter = stackTraceFilter;\nstackTraceHolder = new Throwable();\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.settings.CreationSettings:getDefaultAnswer()Lorg/mockito/stubbing/Answer;",
+            "method_body": "public Answer<Object> getDefaultAnswer() {\nreturn defaultAnswer;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.util.SearchingClassLoader:addIfNewElement(Ljava/util/List;Ljava/lang/ClassLoader;)V",
+            "method_body": "private static void addIfNewElement(List<ClassLoader> loaders, ClassLoader c) {\nif (c != null && !loaders.contains(c)) {\nloaders.add(c);\n}",
+            "method_id": 19
+        }
+    ]
+}

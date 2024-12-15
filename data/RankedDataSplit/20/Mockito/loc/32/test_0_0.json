@@ -1,0 +1,129 @@
+{
+    "bug_id": 32,
+    "test_id": 0,
+    "test_name": "org.mockitousage.bugs.SpyShouldHaveNiceNameTest.shouldPrintNiceName",
+    "test_body": "public void shouldPrintNiceName() {\n//when\nveryCoolSpy.add(1);\n27: try {\nverify(veryCoolSpy).add(2);\nfail();",
+    "stack_trace": "junit.framework.AssertionFailedError: <'\nArgument(s) are different! Wanted:\nlinkedList.add(2);\n-> at org.mockitousage.bugs.SpyShouldHaveNiceNameTest.shouldPrintNiceName(SpyShouldHaveNiceNameTest.java:28)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.MockHandler:handle(Lorg/mockito/internal/invocation/Invocation;)Ljava/lang/Object;",
+            "method_body": "public Object handle(Invocation invocation) throws Throwable {\nif (invocationContainerImpl.hasAnswersForStubbing()) {\nVerificationMode verificationMode = mockingProgress.pullVerificationMode();\nInvocationMatcher invocationMatcher = matchersBinder.bindMatchers(mockingProgress.getArgumentMatcherStorage(),\nmockingProgress.validateState();\nif (verificationMode != null) {\nif (((MockAwareVerificationMode) verificationMode).getMock() == invocation.getMock()) {\nVerificationDataImpl data = new VerificationDataImpl(invocationContainerImpl, invocationMatcher);\nverificationMode.verify(data);\nreturn null;\ninvocationContainerImpl.setInvocationForPotentialStubbing(invocationMatcher);\nOngoingStubbingImpl<T> ongoingStubbing = new OngoingStubbingImpl<T>(invocationContainerImpl);\nmockingProgress.reportOngoingStubbing(ongoingStubbing);\nStubbedInvocationMatcher stubbedInvocation = invocationContainerImpl.findAnswerFor(invocation);\nif (stubbedInvocation != null) {\nObject ret = mockSettings.getDefaultAnswer().answer(invocation);\ninvocationContainerImpl.resetInvocationForPotentialStubbing(invocationMatcher);\nreturn ret;\n}",
+            "method_id": 0,
+            "loc": 19
+        },
+        {
+            "method_signature": "org.mockito.internal.exceptions.base.StackTraceFilter:filter([Ljava/lang/StackTraceElement;Z)[Ljava/lang/StackTraceElement;",
+            "method_body": "public StackTraceElement[] filter(StackTraceElement[] target, boolean keepTop) {\nList<StackTraceElement> unfilteredStackTrace = Arrays.asList(target);\nint lastBad = -1;\nint firstBad = -1;\nfor (int i = 0; i < unfilteredStackTrace.size(); i++) {\nif (!this.isBad(unfilteredStackTrace.get(i))) {\ncontinue;\nlastBad = i;\nif (firstBad == -1) {\nfirstBad = i;\nif (keepTop && firstBad != -1) {\ntop = new LinkedList<StackTraceElement>();\nList<StackTraceElement> bottom = unfilteredStackTrace.subList(lastBad + 1, unfilteredStackTrace.size());\nList<StackTraceElement> filtered = new ArrayList<StackTraceElement>(top);\nfiltered.addAll(bottom);\nreturn filtered.toArray(new StackTraceElement[]{});\n}",
+            "method_id": 1,
+            "loc": 17
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:createMock(Ljava/lang/Class;Lorg/mockito/internal/creation/MockSettingsImpl;)Ljava/lang/Object;",
+            "method_body": "public <T> T createMock(Class<T> classToMock, MockSettingsImpl settings) {\ncreationValidator.validateType(classToMock);\ncreationValidator.validateExtraInterfaces(classToMock, settings.getExtraInterfaces());\ncreationValidator.validateMockedType(classToMock, settings.getSpiedInstance());\nsettings.initiateMockName(classToMock);\nMockHandler<T> mockHandler = new MockHandler<T>(settings);\nMethodInterceptorFilter filter = new MethodInterceptorFilter(mockHandler, settings);\nClass<?>[] interfaces = settings.getExtraInterfaces();\nif (settings.isSerializable()) {\nancillaryTypes = interfaces == null ? new Class<?>[0] : interfaces;\nObject spiedInstance = settings.getSpiedInstance();\nT mock = ClassImposterizer.INSTANCE.imposterise(filter, classToMock, ancillaryTypes);\nif (spiedInstance != null) {\nnew LenientCopyTool().copyToMock(spiedInstance, mock);\nreturn mock;\n}",
+            "method_id": 2,
+            "loc": 16
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.SpyAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> context, Object testClass) {\nField[] fields = context.getDeclaredFields();\nfor (Field field : fields) {\nif (field.isAnnotationPresent(Spy.class)) {\nassertNoAnnotations(Spy.class, field, Mock.class, org.mockito.MockitoAnnotations.Mock.class, Captor.class);\nboolean wasAccessible = field.isAccessible();\nfield.setAccessible(true);\nObject instance = field.get(testClass);\nif (instance == null) {\nif (new MockUtil().isMock(instance)) {\nfield.set(testClass, Mockito.spy(instance));\nfield.setAccessible(wasAccessible);\n}\n}",
+            "method_id": 3,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.ClassImposterizer$3:<init>(Lorg/mockito/internal/creation/jmock/ClassImposterizer;)V",
+            "method_body": "private Class<?> createProxyClass(Class<?> mockedType, Class<?>...interfaces) {\nif (mockedType == Object.class) {\nEnhancer enhancer = new Enhancer() {\nenhancer.setClassLoader(SearchingClassLoader.combineLoadersOf(mockedType));\nenhancer.setUseFactory(true);\nif (mockedType.isInterface()) {\nenhancer.setSuperclass(mockedType);\nenhancer.setInterfaces(interfaces);\nenhancer.setCallbackTypes(new Class[]{MethodInterceptor.class, NoOp.class});\nenhancer.setCallbackFilter(IGNORE_BRIDGE_METHODS);\nif (mockedType.getSigners() != null) {\nenhancer.setNamingPolicy(MockitoNamingPolicy.INSTANCE);\nreturn enhancer.createClass();\n}",
+            "method_id": 4,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.ClassImposterizer:createProxyClass(Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/Class;",
+            "method_body": "private Class<?> createProxyClass(Class<?> mockedType, Class<?>...interfaces) {\nif (mockedType == Object.class) {\nEnhancer enhancer = new Enhancer() {\nenhancer.setClassLoader(SearchingClassLoader.combineLoadersOf(mockedType));\nenhancer.setUseFactory(true);\nif (mockedType.isInterface()) {\nenhancer.setSuperclass(mockedType);\nenhancer.setInterfaces(interfaces);\nenhancer.setCallbackTypes(new Class[]{MethodInterceptor.class, NoOp.class});\nenhancer.setCallbackFilter(IGNORE_BRIDGE_METHODS);\nif (mockedType.getSigners() != null) {\nenhancer.setNamingPolicy(MockitoNamingPolicy.INSTANCE);\nreturn enhancer.createClass();\n}",
+            "method_id": 5,
+            "loc": 14
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.LenientCopyTool:copyValues(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Class;)V",
+            "method_body": "private <T> void copyValues(T from, T mock, Class classFrom) {\nField[] fields = classFrom.getDeclaredFields();\nfor (int i = 0; i < fields.length; i++) {\nField field = fields[i];\nif (Modifier.isStatic(field.getModifiers())) {\ncontinue;\nAccessibilityChanger accessibilityChanger = new AccessibilityChanger();\naccessibilityChanger.enableAccess(field);\nfieldCopier.copyValue(from, mock, field);\naccessibilityChanger.safelyDisableAccess(field);\n}\n}",
+            "method_id": 6,
+            "loc": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.cglib.CGLIBHacker:setMockitoNamingPolicy(Lorg/mockito/internal/creation/MockitoMethodProxy;)V",
+            "method_body": "public void setMockitoNamingPolicy(MockitoMethodProxy mockitoMethodProxy) {\nMethodProxy methodProxy = mockitoMethodProxy.getMethodProxy();\nField createInfoField = reflectOnCreateInfo(methodProxy);\ncreateInfoField.setAccessible(true);\nObject createInfo = createInfoField.get(methodProxy);\nField namingPolicyField = createInfo.getClass().getDeclaredField(\"namingPolicy\");\nnamingPolicyField.setAccessible(true);\nif (namingPolicyField.get(createInfo) == null) {\nnamingPolicyField.set(createInfo, MockitoNamingPolicy.INSTANCE);\n}\n}",
+            "method_id": 7,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.verification.checkers.MissingInvocationChecker:check(Ljava/util/List;Lorg/mockito/internal/invocation/InvocationMatcher;)V",
+            "method_body": "public void check(List<Invocation> invocations, InvocationMatcher wanted) {\nList<Invocation> actualInvocations = finder.findInvocations(invocations, wanted);\nif (actualInvocations.isEmpty()) {\nInvocation similar = finder.findSimilarInvocation(invocations, wanted);\nif (similar != null) {\nArgumentMatchingTool argumentMatchingTool = new ArgumentMatchingTool();\nInteger[] indexesOfSuspiciousArgs = argumentMatchingTool.getSuspiciouslyNotMatchingArgsIndexes(wanted.getMatchers(), similar.getArguments());\nSmartPrinter smartPrinter = new SmartPrinter(wanted, similar, indexesOfSuspiciousArgs);\nreporter.argumentsAreDifferent(smartPrinter.getWanted(), smartPrinter.getActual(), similar.getLocation());\n} else {\n}",
+            "method_id": 8,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationMatcher:hasSameMethod(Lorg/mockito/internal/invocation/Invocation;)Z",
+            "method_body": "public boolean hasSameMethod(Invocation candidate) {\nMethod m1 = invocation.getMethod();\nMethod m2 = candidate.getMethod();\nif (m1.getName() != null && m1.getName().equals(m2.getName())) {\nClass[] params1 = m1.getParameterTypes();\nClass[] params2 = m2.getParameterTypes();\nif (params1.length == params2.length) {\nfor (int i = 0; i < params1.length; i++) {\nif (params1[i] != params2[i])\nreturn true;\n}",
+            "method_id": 9,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationMatcher:hasSimilarMethod(Lorg/mockito/internal/invocation/Invocation;)Z",
+            "method_body": "public boolean hasSimilarMethod(Invocation candidate) {\nString wantedMethodName = getMethod().getName();\nString currentMethodName = candidate.getMethod().getName();\nfinal boolean methodNameEquals = wantedMethodName.equals(currentMethodName);\nfinal boolean isUnverified = !candidate.isVerified();\nfinal boolean mockIsTheSame = getInvocation().getMock() == candidate.getMock();\nfinal boolean methodEquals = hasSameMethod(candidate);\nif (!methodNameEquals || !isUnverified || !mockIsTheSame) {\nfinal boolean overloadedButSameArgs = !methodEquals && safelyArgumentsMatch(candidate.getArguments());\nreturn !overloadedButSameArgs;\n}",
+            "method_id": 10,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.MethodInterceptorFilter:intercept(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;Lorg/mockito/cglib/proxy/MethodProxy;)Ljava/lang/Object;",
+            "method_body": "public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)\nif (objectMethodsGuru.isEqualsMethod(method)) {\nreturn proxy == args[0];\n} else if (objectMethodsGuru.isHashCodeMethod(method)) {\nMockitoMethodProxy mockitoMethodProxy = createMockitoMethodProxy(methodProxy);\ncglibHacker.setMockitoNamingPolicy(mockitoMethodProxy);\nMockitoMethod mockitoMethod = createMockitoMethod(method);\nFilteredCGLIBProxyRealMethod realMethod = new FilteredCGLIBProxyRealMethod(mockitoMethodProxy);\nInvocation invocation = new Invocation(proxy, mockitoMethod, args, SequenceNumber.next(), realMethod);\nreturn handler.handle(invocation);\n}",
+            "method_id": 11,
+            "loc": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.matchers.MatchersPrinter:applyPrintSettings(Ljava/util/List;Lorg/mockito/internal/reporting/PrintSettings;)Ljava/util/List;",
+            "method_body": "private List<SelfDescribing> applyPrintSettings(List<Matcher> matchers, PrintSettings printSettings) {\nList<SelfDescribing> withPrintSettings = new LinkedList<SelfDescribing>();\nint i = 0;\nfor (final Matcher matcher : matchers) {\nif (matcher instanceof ContainsExtraTypeInformation && printSettings.extraTypeInfoFor(i)) {\nwithPrintSettings.add(matcher);\ni++;\n}\nreturn withPrintSettings;\n}",
+            "method_id": 12,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.verification.argumentmatching.ArgumentMatchingTool:getSuspiciouslyNotMatchingArgsIndexes(Ljava/util/List;[Ljava/lang/Object;)[Ljava/lang/Integer;",
+            "method_body": "public Integer[] getSuspiciouslyNotMatchingArgsIndexes(List<Matcher> matchers, Object[] arguments) {\nif (matchers.size() != arguments.length) {\nList<Integer> suspicious = new LinkedList<Integer>();\nint i = 0;\nfor (Matcher m : matchers) {\nif (m instanceof ContainsExtraTypeInformation\ni++;\n}\nreturn suspicious.toArray(new Integer[0]);\n}",
+            "method_id": 13,
+            "loc": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.creation.jmock.SearchingClassLoader:combineLoadersOf(Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/ClassLoader;",
+            "method_body": "private static ClassLoader combineLoadersOf(Class<?> first, Class<?>... others) {\nList<ClassLoader> loaders = new ArrayList<ClassLoader>();\naddIfNewElement(loaders, first.getClassLoader());\nfor (Class<?> c : others) {\naddIfNewElement(loaders, c.getClassLoader());\naddIfNewElement(loaders, SearchingClassLoader.class.getClassLoader());\naddIfNewElement(loaders, currentThread().getContextClassLoader());\nreturn combine(loaders);\n}",
+            "method_id": 14,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.InvocationsFinder:findSimilarInvocation(Ljava/util/List;Lorg/mockito/internal/invocation/InvocationMatcher;)Lorg/mockito/internal/invocation/Invocation;",
+            "method_body": "public Invocation findSimilarInvocation(List<Invocation> invocations, InvocationMatcher wanted) {\nInvocation firstSimilar = null;\nfor (Invocation invocation : invocations) {\nif (!wanted.hasSimilarMethod(invocation)) {\nif (firstSimilar == null) {\nfirstSimilar = invocation;\nif (wanted.hasSameMethod(invocation)) {\nreturn invocation;\n}",
+            "method_id": 15,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.invocation.Invocation:<init>(Ljava/lang/Object;Lorg/mockito/internal/invocation/MockitoMethod;[Ljava/lang/Object;ILorg/mockito/internal/invocation/realmethod/RealMethod;)V",
+            "method_body": "public Invocation(Object mock, MockitoMethod mockitoMethod, Object[] args, int sequenceNumber, RealMethod realMethod) {\nthis.method = mockitoMethod;\nthis.mock = mock;\nthis.realMethod = realMethod;\nthis.arguments = expandVarArgs(mockitoMethod.isVarArgs(), args);\nthis.rawArguments = args;\nthis.sequenceNumber = sequenceNumber;\nthis.location = new Location();\n}",
+            "method_id": 16,
+            "loc": 9
+        },
+        {
+            "method_signature": "org.mockito.internal.util.MockUtil:getInterceptor(Ljava/lang/Object;)Lorg/mockito/internal/creation/MethodInterceptorFilter;",
+            "method_body": "private <T> MethodInterceptorFilter getInterceptor(T mock) {\nif (!(mock instanceof Factory)) {\nreturn null;\nFactory factory = (Factory) mock;\nCallback callback = factory.getCallback(0);\nif (callback instanceof MethodInterceptorFilter) {\nreturn (MethodInterceptorFilter) callback;\n}",
+            "method_id": 17,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.mockito.internal.configuration.DefaultAnnotationEngine:process(Ljava/lang/Class;Ljava/lang/Object;)V",
+            "method_body": "public void process(Class<?> clazz, Object testClass) {\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nboolean alreadyAssigned = false;\nfor(Annotation annotation : field.getAnnotations()) {\nObject mock = createMockFor(annotation, field);\nif (mock != null) {\n}",
+            "method_id": 18,
+            "loc": 8
+        },
+        {
+            "method_signature": "org.mockito.MockitoAnnotations:scan(Ljava/lang/Object;Ljava/lang/Class;)V",
+            "method_body": "static void scan(Object testClass, Class<?> clazz) {\nAnnotationEngine annotationEngine = new GlobalConfiguration().getAnnotationEngine();\nField[] fields = clazz.getDeclaredFields();\nfor (Field field : fields) {\nif (annotationEngine.getClass() != new DefaultMockitoConfiguration().getAnnotationEngine().getClass()) {\nprocessAnnotationDeprecatedWay(annotationEngine, testClass, field);\nannotationEngine.process(clazz, testClass);\n}",
+            "method_id": 19,
+            "loc": 8
+        }
+    ]
+}

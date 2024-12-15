@@ -1,0 +1,54 @@
+{
+    "bug_id": 4,
+    "test_id": 9,
+    "test_name": "org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testCP437FileRoundtripImplicitUnicodeExtra",
+    "test_body": "73: public void testCP437FileRoundtripImplicitUnicodeExtra()\n74: throws IOException {\n75: testFileRoundtrip(CP437, false, false);\n76: }\n",
+    "stack_trace": "java.io.IOException: central directory is empty, can't expand corrupt archive.\nat org.apache.commons.compress.archivers.zip.ZipFile.populateFromCentralDirectory(ZipFile.java:318)\nat org.apache.commons.compress.archivers.zip.ZipFile.<init>(ZipFile.java:181)\nat org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testFile(UTF8ZipFilesTest.java:291)\nat org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testFileRoundtrip(UTF8ZipFilesTest.java:202)\nat org.apache.commons.compress.archivers.zip.UTF8ZipFilesTest.testCP437FileRoundtripImplicitUnicodeExtra(UTF8ZipFilesTest.java:75)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding:canEncode(Ljava/lang/String;)Z",
+            "method_body": "public boolean canEncode(String name) {\nfor (int i=0;i<name.length();++i) {\nchar c = name.charAt(i);\nif (!this.canEncodeChar(c)) {\nreturn false;\nreturn true;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding:pushEncodedChar(Ljava/nio/ByteBuffer;C)Z",
+            "method_body": "public boolean pushEncodedChar(ByteBuffer bb, char c) {\nif (c >= 0 && c < 128) {\nbb.put((byte) c);\nreturn true;\nSimple8BitChar r = this.encodeHighChar(c);\nif (r == null) {\nreturn false;\nbb.put(r.code);\nreturn true;\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding:encodeHighChar(C)Lorg/apache/commons/compress/archivers/zip/Simple8BitZipEncoding$Simple8BitChar;",
+            "method_body": "private Simple8BitChar encodeHighChar(char c) {\nint i0 = 0;\nint i1 = this.reverseMapping.size();\nwhile (i1 > i0) {\nint i = i0 + (i1 - i0) / 2;\nSimple8BitChar m = (Simple8BitChar) this.reverseMapping.get(i);\nif (m.unicode == c) {\nreturn m;\nif (m.unicode < c) {\ni0 = i + 1;\ni1 = i;\n}\nif (i0 >= this.reverseMapping.size()) {\nSimple8BitChar r = (Simple8BitChar) this.reverseMapping.get(i0);\nif (r.unicode != c) {\nreturn null;\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding:encode(Ljava/lang/String;)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer encode(String name) {\nByteBuffer out = ByteBuffer.allocate(name.length()\nfor (int i=0;i<name.length();++i) {\nchar c = name.charAt(i);\nif (out.remaining() < 6) {\nif (!this.pushEncodedChar(out,c)) {\nZipEncodingHelper.appendSurrogate(out,c);\nout.limit(out.position());\nout.rewind();\nreturn out;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipEncodingHelper$SimpleEncodingHolder:getEncoding()Lorg/apache/commons/compress/archivers/zip/Simple8BitZipEncoding;",
+            "method_body": "public synchronized Simple8BitZipEncoding getEncoding() {\nif (this.encoding == null) {\nthis.encoding = new Simple8BitZipEncoding(this.highChars);\nreturn this.encoding;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding:<init>([C)V",
+            "method_body": "public Simple8BitZipEncoding(char[] highChars) {\nthis.highChars = (char[]) highChars.clone();\nList temp = new ArrayList(this.highChars.length);\nbyte code = 127;\nfor (int i = 0; i < this.highChars.length; ++i) {\ntemp.add(new Simple8BitChar(++code, this.highChars[i]));\nCollections.sort(temp);\nthis.reverseMapping = Collections.unmodifiableList(temp);\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding$Simple8BitChar:<init>(BC)V",
+            "method_body": "Simple8BitChar(byte code, char unicode) {\nthis.code = code;\nthis.unicode = unicode;\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.Simple8BitZipEncoding$Simple8BitChar:compareTo(Ljava/lang/Object;)I",
+            "method_body": "public int compareTo(Object o) {\nSimple8BitChar a = (Simple8BitChar) o;\nreturn this.unicode - a.unicode;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry:<init>()V",
+            "method_body": "public static final int PLATFORM_UNIX = 3;\nprivate int internalAttributes = 0;\nprivate int platform = PLATFORM_FAT;\nprivate long externalAttributes = 0;\nprivate LinkedHashMap/*<ZipShort, ZipExtraField>*/ extraFields = null;\nprivate String name = null;\nsuper(name);\n}",
+            "method_id": 88
+        }
+    ]
+}

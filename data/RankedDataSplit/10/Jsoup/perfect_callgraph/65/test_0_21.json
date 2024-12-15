@@ -1,0 +1,59 @@
+{
+    "bug_id": 65,
+    "test_id": 0,
+    "test_name": "org.jsoup.parser.HtmlParserTest.testTemplateInsideTable",
+    "test_body": "1038: @Test public void testTemplateInsideTable() throws IOException {\n1039: File in = ParseTest.getFile(\"/htmltests/table-polymer-template.html\");\n1040: Document doc = Jsoup.parse(in, \"UTF-8\");\n1041: doc.outputSettings().prettyPrint(true);\n1042: 1043: Elements templates = doc.body().getElementsByTag(\"template\");\n1044: for (Element template : templates) {\n1045: assertTrue(template.childNodes().size() > 1);\n1046: }\n1047: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$9:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (t.isCharacter()) {\ntb.newPendingTableCharacters();\ntb.markInsertionMode();\ntb.transition(InTableText);\nreturn tb.process(t);\n} else if (t.isComment()) {\n} else if (t.isDoctype()) {\n} else if (t.isStartTag()) {\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.normalName();\nif (name.equals(\"caption\")) {\n} else if (name.equals(\"colgroup\")) {\n} else if (name.equals(\"col\")) {\n} else if (StringUtil.in(name, \"tbody\", \"tfoot\", \"thead\")) {\ntb.clearStackToTableContext();\ntb.insert(startTag);\ntb.transition(InTableBody);\n} else if (StringUtil.in(name, \"td\", \"th\", \"tr\")) {\n} else if (name.equals(\"table\")) {\n} else if (StringUtil.in(name, \"style\", \"script\")) {\n} else if (name.equals(\"input\")) {\n} else if (name.equals(\"form\")) {\nreturn anythingElse(t, tb);\nreturn true; // todo: check if should return processed http://www.whatwg.org/specs/web-apps/current-work/multipage/tree-construction.html#parsing-main-intable\n} else if (t.isEndTag()) {\nToken.EndTag endTag = t.asEndTag();\nString name = endTag.normalName();\nif (name.equals(\"table\")) {\nif (!tb.inTableScope(name)) {\ntb.popStackToClose(\"table\");\ntb.resetInsertionMode();\n} else if (StringUtil.in(name,\nreturn anythingElse(t, tb);\nreturn true; // todo: as above todo\n}",
+            "method_id": 210
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$9:anythingElse(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean anythingElse(Token t, HtmlTreeBuilder tb) {\ntb.error(this);\nif (StringUtil.in(tb.currentElement().nodeName(), \"table\", \"tbody\", \"tfoot\", \"thead\", \"tr\")) {\ntb.setFosterInserts(true);\nprocessed = tb.process(t, InBody);\ntb.setFosterInserts(false);\nreturn processed;\n}",
+            "method_id": 211
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$10:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nswitch (t.type) {\nToken.Character c = t.asCharacter();\nif (c.getData().equals(nullString)) {\ntb.getPendingTableCharacters().add(c.getData());\nbreak;\nif (tb.getPendingTableCharacters().size() > 0) {\nfor (String character : tb.getPendingTableCharacters()) {\nif (!isWhitespace(character)) {\ntb.insert(new Token.Character().data(character));\n}\ntb.newPendingTableCharacters();\ntb.transition(tb.originalState());\nreturn tb.process(t);\nreturn true;\n}",
+            "method_id": 212
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$13:anythingElse(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "private boolean anythingElse(Token t, HtmlTreeBuilder tb) {\nreturn tb.process(t, InTable);\n}",
+            "method_id": 213
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$14:anythingElse(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "private boolean anythingElse(Token t, HtmlTreeBuilder tb) {\nreturn tb.process(t, InTable);\n}",
+            "method_id": 214
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$15:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (t.isEndTag()) {\nToken.EndTag endTag = t.asEndTag();\nString name = endTag.normalName();\nif (StringUtil.in(name, \"td\", \"th\")) {\nif (!tb.inTableScope(name)) {\ntb.generateImpliedEndTags();\nif (!tb.currentElement().nodeName().equals(name))\ntb.popStackToClose(name);\ntb.clearFormattingElementsToLastMarker();\ntb.transition(InRow);\n} else if (StringUtil.in(name, \"body\", \"caption\", \"col\", \"colgroup\", \"html\")) {\n} else if (StringUtil.in(name, \"table\", \"tbody\", \"tfoot\", \"thead\", \"tr\")) {\nreturn anythingElse(t, tb);\n} else if (t.isStartTag() &&\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 215
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$15:anythingElse(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "private boolean anythingElse(Token t, HtmlTreeBuilder tb) {\nreturn tb.process(t, InBody);\n}",
+            "method_id": 216
+        },
+        {
+            "method_signature": "org.jsoup.helper.ChangeNotifyingArrayList:<init>(I)V",
+            "method_body": "public ChangeNotifyingArrayList(int initialCapacity) {\nsuper(initialCapacity);\n}",
+            "method_id": 217
+        },
+        {
+            "method_signature": "org.jsoup.helper.ChangeNotifyingArrayList:add(Ljava/lang/Object;)Z",
+            "method_body": "public boolean add(E e) {\nonContentsChanged();\nreturn super.add(e);\n}",
+            "method_id": 218
+        },
+        {
+            "method_signature": "org.jsoup.helper.ChangeNotifyingArrayList:addAll(ILjava/util/Collection;)Z",
+            "method_body": "public boolean addAll(int index, Collection<? extends E> c) {\nonContentsChanged();\nreturn super.addAll(index, c);\n}",
+            "method_id": 219
+        }
+    ]
+}

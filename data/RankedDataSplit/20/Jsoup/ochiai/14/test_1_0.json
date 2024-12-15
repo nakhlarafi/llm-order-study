@@ -1,0 +1,109 @@
+{
+    "bug_id": 14,
+    "test_id": 1,
+    "test_name": "org.jsoup.parser.ParserTest.handlesUnclosedTitle",
+    "test_body": "@Test public void handlesUnclosedTitle() {\nDocument one = Jsoup.parse(\"<title>One <b>Two <b>Three</TITLE><p>Test</p>\"); // has title, so <b> is plain text\nassertEquals(\"One <b>Two <b>Three\", one.title());\nassertEquals(\"Test\", one.select(\"p\").first().text());\n559: Document two = Jsoup.parse(\"<title>One<b>Two <p>Test</p>\"); // no title, so <b> causes </title> breakout\nassertEquals(\"One\", two.title());\nassertEquals(\"<b>Two <p>Test</p></b>\", two.body().html());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<One[]> but was:<One[<b>Two <p>Test</p]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.jsoup.parser.ParserTest.handlesUnclosedTitle(ParserTest.java:560)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$13:anythingElse(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "private void anythingElse(Tokeniser t, CharacterReader r) {\nt.emit(\"</\" + t.dataBuffer.toString());\nt.transition(Rcdata);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$11:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matches('/')) {\nt.createTempBuffer();\nt.advanceTransition(RCDATAEndTagOpen);\nt.emit(\"<\");\nt.transition(Rcdata);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$3:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(RcdataLessthanSign);\nbreak;\nt.emit(new Token.EOF());\nbreak;\nString data = r.consumeToAny('&', '<', nullChar);\nt.emit(data);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState$8:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/TreeBuilder;)Z",
+            "method_body": "boolean process(Token t, TreeBuilder tb) {\nif (t.isCharacter()) {\ntb.insert(t.asCharacter());\n} else if (t.isEOF()) {\ntb.error(this);\ntb.pop();\ntb.transition(tb.originalState());\nreturn tb.process(t);\n} else if (t.isEndTag()) {\ntb.pop();\ntb.transition(tb.originalState());\nreturn true;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:markInsertionMode()V",
+            "method_body": "void markInsertionMode() {\noriginalState = state;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:originalState()Lorg/jsoup/parser/TreeBuilderState;",
+            "method_body": "TreeBuilderState originalState() {\nreturn originalState;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Document:title()Ljava/lang/String;",
+            "method_body": "public String title() {\nElement titleEl = getElementsByTag(\"title\").first();\nreturn titleEl != null ? titleEl.text().trim() : \"\";\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matches(C)Z",
+            "method_body": "boolean matches(char c) {\nreturn !isEmpty() && input.charAt(pos) == c;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token:isEOF()Z",
+            "method_body": "boolean isEOF() {\nreturn type == TokenType.EOF;\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilder:error(Lorg/jsoup/parser/TreeBuilderState;)V",
+            "method_body": "void error(TreeBuilderState state) {\nif (trackErrors)\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.nodes.TextNode:lastCharIsWhitespace(Ljava/lang/StringBuilder;)Z",
+            "method_body": "static boolean lastCharIsWhitespace(StringBuilder sb) {\nreturn sb.length() != 0 && sb.charAt(sb.length() - 1) == ' ';\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:text()Ljava/lang/String;",
+            "method_body": "public String text() {\nStringBuilder sb = new StringBuilder();\ntext(sb);\nreturn sb.toString().trim();\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:text(Ljava/lang/StringBuilder;)V",
+            "method_body": "private void text(StringBuilder accum) {\nappendWhitespaceIfBr(this, accum);\nfor (Node child : childNodes) {\nif (child instanceof TextNode) {\nTextNode textNode = (TextNode) child;\nappendNormalisedText(accum, textNode);\n} else if (child instanceof Element) {\n}\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendNormalisedText(Ljava/lang/StringBuilder;Lorg/jsoup/nodes/TextNode;)V",
+            "method_body": "private void appendNormalisedText(StringBuilder accum, TextNode textNode) {\nString text = textNode.getWholeText();\nif (!preserveWhitespace()) {\ntext = TextNode.normaliseWhitespace(text);\nif (TextNode.lastCharIsWhitespace(accum))\naccum.append(text);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:appendWhitespaceIfBr(Lorg/jsoup/nodes/Element;Ljava/lang/StringBuilder;)V",
+            "method_body": "private static void appendWhitespaceIfBr(Element element, StringBuilder accum) {\nif (element.tag.getName().equals(\"br\") && !TextNode.lastCharIsWhitespace(accum))\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.TreeBuilderState:handleRcData(Lorg/jsoup/parser/Token$StartTag;Lorg/jsoup/parser/TreeBuilder;)V",
+            "method_body": "private static void handleRcData(Token.StartTag startTag, TreeBuilder tb) {\ntb.insert(startTag);\ntb.tokeniser.transition(TokeniserState.Rcdata);\ntb.markInsertionMode();\ntb.transition(Text);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$12:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nt.createTagPending(false);\nt.tagPending.appendTagName(Character.toLowerCase(r.current()));\nt.dataBuffer.append(Character.toLowerCase(r.current()));\nt.advanceTransition(RCDATAEndTagName);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$13:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nif (r.matchesLetter()) {\nString name = r.consumeLetterSequence();\nt.tagPending.appendTagName(name.toLowerCase());\nt.dataBuffer.append(name);\nreturn;\nchar c = r.consume();\nswitch (c) {\nif (t.isAppropriateEndTagToken()) {\nt.emitTagPending();\nt.transition(Data);\nanythingElse(t, r);\nbreak;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.parser.Token$Tag:appendTagName(C)V",
+            "method_body": "void appendTagName(char append) {\nappendTagName(String.valueOf(append));\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Element:getElementsByTag(Ljava/lang/String;)Lorg/jsoup/select/Elements;",
+            "method_body": "public Elements getElementsByTag(String tagName) {\nValidate.notEmpty(tagName);\ntagName = tagName.toLowerCase().trim();\nreturn Collector.collect(new Evaluator.Tag(tagName), this);\n}",
+            "method_id": 19
+        }
+    ]
+}

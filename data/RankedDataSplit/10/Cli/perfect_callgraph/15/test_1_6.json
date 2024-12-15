@@ -1,0 +1,59 @@
+{
+    "bug_id": 15,
+    "test_id": 1,
+    "test_name": "org.apache.commons.cli2.bug.BugCLI158Test.testSingleOptionMaximumNumberOfArgument",
+    "test_body": "public void testSingleOptionMaximumNumberOfArgument() throws Exception {\nString[] args = new String[]{\"-b\", \"1\", \"2\"};\nfinal ArgumentBuilder abuilder = new ArgumentBuilder();\nfinal DefaultOptionBuilder obuilder = new DefaultOptionBuilder();\nfinal GroupBuilder gbuilder = new GroupBuilder();\n89: DefaultOption bOption = obuilder.withShortName(\"b\")\n.withLongName(\"b\")\n.withArgument(abuilder.withName(\"b\")\n.withMinimum(2)\n.withMaximum(4)\n.withDefault(\"100\")\n.withDefault(\"1000\")\n.withDefault(\"10000\")\n.create())\n.create();\n100: Group options = gbuilder\n.withName(\"options\")\n.withOption(bOption)\n.create();\n105: Parser parser = new Parser();\nparser.setHelpTrigger(\"--help\");\nparser.setGroup(options);\nCommandLine cl = parser.parse(args);\nCommandLine cmd = cl;\nassertNotNull(cmd);\nList b = cmd.getValues(\"-b\");\nassertEquals(\"[1, 2, 10000]\", b + \"\");\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<[1, 2[, 10000]]> but was:<[1, 2[]]>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat junit.framework.TestCase.assertEquals(TestCase.java:269)\nat org.apache.commons.cli2.bug.BugCLI158Test.testSingleOptionMaximumNumberOfArgument(BugCLI158Test.java:112)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.cli2.builder.GroupBuilder:withOption(Lorg/apache/commons/cli2/Option;)Lorg/apache/commons/cli2/builder/GroupBuilder;",
+            "method_body": "public GroupBuilder withOption(final Option option) {\nthis.options.add(option);\nreturn this;\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:<init>(Ljava/util/List;Ljava/lang/String;Ljava/lang/String;II)V",
+            "method_body": "public GroupImpl(final List options,\nsuper(0, false);\nthis.name = name;\nthis.description = description;\nthis.minimum = minimum;\nthis.maximum = maximum;\nthis.options = Collections.unmodifiableList(options);\nfinal List newAnonymous = new ArrayList();\nfinal SortedMap newOptionMap = new TreeMap(ReverseStringComparator.getInstance());\nfinal Set newPrefixes = new HashSet();\nfor (final Iterator i = options.iterator(); i.hasNext();) {\nfinal Option option = (Option) i.next();\nif (option instanceof Argument) {\nfinal Set triggers = option.getTriggers();\nfor (Iterator j = triggers.iterator(); j.hasNext();) {\nnewOptionMap.put(j.next(), option);\nnewPrefixes.addAll(option.getPrefixes());\n}\nthis.anonymous = Collections.unmodifiableList(newAnonymous);\nthis.optionMap = Collections.unmodifiableSortedMap(newOptionMap);\nthis.prefixes = Collections.unmodifiableSet(newPrefixes);\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:canProcess(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/lang/String;)Z",
+            "method_body": "public boolean canProcess(final WriteableCommandLine commandLine,\nif (arg == null) {\nif (optionMap.containsKey(arg)) {\nreturn true;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:getPrefixes()Ljava/util/Set;",
+            "method_body": "public Set getPrefixes() {\nreturn prefixes;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:process(Lorg/apache/commons/cli2/WriteableCommandLine;Ljava/util/ListIterator;)V",
+            "method_body": "public void process(final WriteableCommandLine commandLine,\nString previous = null;\nwhile (arguments.hasNext()) {\nfinal String arg = (String) arguments.next();\nif (arg == previous) {\nprevious = arg;\nfinal Option opt = (Option) optionMap.get(arg);\nif (opt != null) {\narguments.previous();\nopt.process(commandLine, arguments);\n} // [END process each command line token\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:validate(Lorg/apache/commons/cli2/WriteableCommandLine;)V",
+            "method_body": "public void validate(final WriteableCommandLine commandLine)\nint present = 0;\nOption unexpected = null;\nfor (final Iterator i = options.iterator(); i.hasNext();) {\nfinal Option option = (Option) i.next();\nboolean validate = option.isRequired() || option instanceof Group;\nif (commandLine.hasOption(option)) {\nif (++present > maximum) {\nvalidate = true;\nif (validate) {\noption.validate(commandLine);\n}\nif (unexpected != null) {\nif (present < minimum) {\nfor (final Iterator i = anonymous.iterator(); i.hasNext();) {\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.option.GroupImpl:defaults(Lorg/apache/commons/cli2/WriteableCommandLine;)V",
+            "method_body": "public void defaults(final WriteableCommandLine commandLine) {\nsuper.defaults(commandLine);\nfor (final Iterator i = options.iterator(); i.hasNext();) {\nfinal Option option = (Option) i.next();\noption.defaults(commandLine);\n}\nfor (final Iterator i = anonymous.iterator(); i.hasNext();) {\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.Parser:setGroup(Lorg/apache/commons/cli2/Group;)V",
+            "method_body": "public void setGroup(final Group group) {\nthis.group = group;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.Parser:setHelpTrigger(Ljava/lang/String;)V",
+            "method_body": "public void setHelpTrigger(final String helpTrigger) {\nthis.helpTrigger = helpTrigger;\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.cli2.commandline.CommandLineImpl:hasOption(Ljava/lang/String;)Z",
+            "method_body": "public final boolean hasOption(final String trigger) {\nreturn hasOption(getOption(trigger));\n}",
+            "method_id": 69
+        }
+    ]
+}

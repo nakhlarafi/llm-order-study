@@ -1,0 +1,59 @@
+{
+    "bug_id": 54,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.dfp.DfpTest.testIssue567",
+    "test_body": "public void testIssue567() {\nDfpField field = new DfpField(100);\nAssert.assertEquals(0.0, field.getZero().toDouble(), MathUtils.SAFE_MIN);\nAssert.assertEquals(0.0, field.newDfp(0.0).toDouble(), MathUtils.SAFE_MIN);",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<-Infinity>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.dfp.DfpTest.testIssue567(DfpTest.java:1512)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:getTwo()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp getTwo() {\nreturn field.getTwo();\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:<init>(Lorg/apache/commons/math/dfp/DfpField;I)V",
+            "method_body": "protected Dfp(final DfpField field, int x) {\nthis(field, (long) x);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:round(I)I",
+            "method_body": "protected int round(int n) {\nboolean inc = false;\nswitch (field.getRoundingMode()) {\ninc = n > 5000 || (n == 5000 && (mant[0] & 1) == 1);  // round half-even\nbreak;\nif (inc) {\nint rh = 1;\nfor (int i = 0; i < mant.length; i++) {\nfinal int r = mant[i] + rh;\nrh = r / RADIX;\nmant[i] = r - rh * RADIX;\nif (rh != 0) {\nif (exp < MIN_EXP) {\nif (exp > MAX_EXP) {\nif (n != 0) {\nfield.setIEEEFlagsBits(DfpField.FLAG_INEXACT);\nreturn DfpField.FLAG_INEXACT;\nreturn 0;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:newInstance(J)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp newInstance(final long x) {\nreturn new Dfp(getField(), x);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpField:getZero()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp getZero() {\nreturn zero;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:multiply(Lorg/apache/commons/math/dfp/Dfp;)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp multiply(final Dfp x) {\nif (field.getRadixDigits() != x.field.getRadixDigits()) {\nDfp result = newInstance(getZero());\nif (nans != FINITE || x.nans != FINITE) {\nint[] product = new int[mant.length*2];  // Big enough to hold even the largest result\nfor (int i = 0; i < mant.length; i++) {\nint rh = 0;  // acts as a carry\nfor (int j=0; j<mant.length; j++) {\nint r = mant[i] * x.mant[j];    // multiply the 2 digits\nr = r + product[i+j] + rh;  // add to the product digit with carry in\nrh = r / RADIX;\nproduct[i+j] = r - rh * RADIX;\nproduct[i+mant.length] = rh;\nint md = mant.length * 2 - 1;  // default, in case result is zero\nfor (int i = mant.length * 2 - 1; i >= 0; i--) {\nif (product[i] != 0) {\nmd = i;\nbreak;\nfor (int i = 0; i < mant.length; i++) {\nresult.mant[mant.length - i - 1] = product[md - i];\nresult.exp = exp + x.exp + md - 2 * mant.length + 1;\nresult.sign = (byte)((sign == x.sign)?1:-1);\nif (result.mant[mant.length-1] == 0) {\nresult.exp = 0;\nif (md > (mant.length-1)) {\nexcp = result.round(product[md-mant.length]);\nif (excp != 0) {\nresult = dotrap(excp, MULTIPLY_TRAP, x, result);\nreturn result;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:dfp2string()Ljava/lang/String;",
+            "method_body": "protected String dfp2string() {\nchar buffer[] = new char[mant.length*4 + 20];\nint p = 1;\nint e = exp;\nboolean pointInserted = false;\nbuffer[0] = ' ';\nif (e <= 0) {\nbuffer[p++] = '0';\nbuffer[p++] = '.';\npointInserted = true;\nwhile (e < 0) {\nfor (int i = mant.length - 1; i >= 0; i--) {\nbuffer[p++] = (char) ((mant[i] / 1000) + '0');\nbuffer[p++] = (char) (((mant[i] / 100) % 10) + '0');\nbuffer[p++] = (char) (((mant[i] / 10) % 10) + '0');\nbuffer[p++] = (char) (((mant[i]) % 10) + '0');\nif (--e == 0) {\nbuffer[p++] = '.';\npointInserted = true;\nwhile (e > 0) {\nif (!pointInserted) {\nq = 1;\nwhile (buffer[q] == '0') {\nq++;\nif (buffer[q] == '.') {\nq--;\nwhile (buffer[p-1] == '0') {\np--;\nif (sign < 0) {\nbuffer[--q] = '-';\nreturn new String(buffer, q, p - q);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:log10()I",
+            "method_body": "public int log10()  {\nif (mant[mant.length-1] > 1000) {\nif (mant[mant.length-1] > 100) {\nif (mant[mant.length-1] > 10) {\nreturn exp * 4 - 4;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:<init>(Lorg/apache/commons/math/dfp/Dfp;)V",
+            "method_body": "public Dfp(final Dfp d) {\nmant  = d.mant.clone();\nsign  = d.sign;\nexp   = d.exp;\nnans  = d.nans;\nfield = d.field;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpMath:pow(Lorg/apache/commons/math/dfp/Dfp;I)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public static Dfp pow(Dfp base, int a)\nboolean invert = false;\nDfp result = base.getOne();\nif (a == 0) {\nif (a < 0) {\ninvert = true;\na = -a;\nDfp r = new Dfp(base);\nint trial = 1;\nprevr = new Dfp(r);\nprevtrial = trial;\nr = r.multiply(r);\ntrial = trial * 2;\n} while (a>trial);\nr = prevr;\ntrial = prevtrial;\na = a - trial;\nresult = result.multiply(r);\n} while (a >= 1);\nif (invert) {\nresult = base.getOne().divide(result);\nreturn base.newInstance(result);\n}",
+            "method_id": 19
+        }
+    ]
+}

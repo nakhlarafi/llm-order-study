@@ -1,0 +1,109 @@
+{
+    "bug_id": 23,
+    "test_id": 0,
+    "test_name": "org.jsoup.nodes.EntitiesTest.letterDigitEntities",
+    "test_body": "56: @Test public void letterDigitEntities() {\n57: String html = \"<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>\";\n58: Document doc = Jsoup.parse(html);\n59: Element p = doc.select(\"p\").first();\n60: assertEquals(\"&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;\", p.html());\n61: assertEquals(\"\u00c2\u00b9\u00c2\u00b2\u00c2\u00b3\u00c2\u00bc\u00c2\u00bd\u00c2\u00be\", p.text());",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<[&sup1;&sup2;&sup3;&frac14;&frac12;&]frac34;> but was:<[\u22831;\u22832;\u22833;&amp;frac14;&amp;frac12;&amp;]frac34;>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.jsoup.nodes.EntitiesTest.letterDigitEntities(EntitiesTest.java:60)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/String;Ljava/nio/charset/CharsetEncoder;Lorg/jsoup/nodes/Entities$EscapeMode;)Ljava/lang/String;",
+            "method_body": "static String escape(String string, CharsetEncoder encoder, EscapeMode escapeMode) {\nStringBuilder accum = new StringBuilder(string.length() * 2);\nMap<Character, String> map = escapeMode.getMap();\nfor (int pos = 0; pos < string.length(); pos++) {\nCharacter c = string.charAt(pos);\nif (map.containsKey(c))\naccum.append('&').append(map.get(c)).append(';');\nelse if (encoder.canEncode(c))\naccum.append(c.charValue());\nreturn accum.toString();\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:consumeLetterSequence()Ljava/lang/String;",
+            "method_body": "String consumeLetterSequence() {\nint start = pos;\nwhile (!isEmpty()) {\nchar c = input.charAt(pos);\nif ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))\npos++;\n}\nreturn input.substring(start, pos);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:escape(Ljava/lang/String;Lorg/jsoup/nodes/Document$OutputSettings;)Ljava/lang/String;",
+            "method_body": "static String escape(String string, Document.OutputSettings out) {\nreturn escape(string, out.encoder(), out.escapeMode());\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchesLetter()Z",
+            "method_body": "boolean matchesLetter() {\nif (isEmpty())\nchar c = input.charAt(pos);\nreturn (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:isNamedEntity(Ljava/lang/String;)Z",
+            "method_body": "public static boolean isNamedEntity(String name) {\nreturn full.containsKey(name);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities$EscapeMode:<init>(Ljava/lang/String;ILjava/util/Map;)V",
+            "method_body": "EscapeMode(Map<Character, String> map) {\nthis.map = map;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:getCharacterByName(Ljava/lang/String;)Ljava/lang/Character;",
+            "method_body": "public static Character getCharacterByName(String name) {\nreturn full.get(name);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities$EscapeMode:getMap()Ljava/util/Map;",
+            "method_body": "public Map<Character, String> getMap() {\nreturn map;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:consumeCharacterReference(Ljava/lang/Character;Z)Ljava/lang/Character;",
+            "method_body": "Character consumeCharacterReference(Character additionalAllowedCharacter, boolean inAttribute) {\nif (reader.isEmpty())\nif (additionalAllowedCharacter != null && additionalAllowedCharacter == reader.current())\nif (reader.matchesAny('\\t', '\\n', '\\f', ' ', '<', '&'))\nreader.mark();\nif (reader.matchConsume(\"#\")) { // numbered\nString nameRef = reader.consumeLetterSequence();\nString origNameRef = new String(nameRef); // for error reporting. nameRef gets chomped looking for matches\nboolean looksLegit = reader.matches(';');\nboolean found = false;\nwhile (nameRef.length() > 0 && !found) {\nif (Entities.isNamedEntity(nameRef))\nfound = true;\nnameRef = nameRef.substring(0, nameRef.length()-1);\nreader.unconsume();\nif (!found) {\nif (looksLegit) // named with semicolon\nreader.rewindToMark();\nreturn null;\nif (inAttribute && (reader.matchesLetter() || reader.matchesDigit() || reader.matchesAny('=', '-', '_'))) {\nif (!reader.matchConsume(\";\"))\ncharacterReferenceError(\"missing semicolon\"); // missing semi\nreturn Entities.getCharacterByName(nameRef);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$2:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nCharacter c = t.consumeCharacterReference(null, false);\nif (c == null)\nt.emit('&');\nt.emit(c);\nt.transition(Data);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:characterReferenceError(Ljava/lang/String;)V",
+            "method_body": "private void characterReferenceError(String message) {\nif (errors.canAddError())\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$7:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nswitch (t.type) {\nToken.Character c = t.asCharacter();\nif (c.getData().equals(nullString)) {\n} else if (isWhitespace(c)) {\ntb.reconstructFormattingElements();\ntb.insert(c);\ntb.framesetOk(false);\nbreak;\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\", \"meta\", \"noframes\", \"script\", \"style\", \"title\")) {\n} else if (name.equals(\"body\")) {\n} else if (name.equals(\"frameset\")) {\n} else if (StringUtil.in(name,\nif (tb.inButtonScope(\"p\")) {\ntb.insert(startTag);\nToken.EndTag endTag = t.asEndTag();\nname = endTag.name();\nif (name.equals(\"body\")) {\n} else if (name.equals(\"html\")) {\n} else if (StringUtil.in(name,\n} else if (name.equals(\"form\")) {\n} else if (name.equals(\"p\")) {\nif (!tb.inButtonScope(name)) {\ntb.generateImpliedEndTags(name);\nif (!tb.currentElement().nodeName().equals(name))\ntb.popStackToClose(name);\nreturn true;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:matchesAny([C)Z",
+            "method_body": "boolean matchesAny(char... seq) {\nif (isEmpty())\nchar c = input.charAt(pos);\nfor (char seek : seq) {\nif (seek == c)\nreturn false;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:rewindToMark()V",
+            "method_body": "void rewindToMark() {\npos = mark;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$6:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\n} else if (t.isComment()) {\n} else if (t.isDoctype()) {\n} else if (t.isStartTag()) {\nToken.StartTag startTag = t.asStartTag();\nString name = startTag.name();\nif (name.equals(\"html\")) {\n} else if (name.equals(\"body\")) {\ntb.insert(startTag);\ntb.framesetOk(false);\ntb.transition(InBody);\n} else if (name.equals(\"frameset\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"link\", \"meta\", \"noframes\", \"script\", \"style\", \"title\")) {\n} else if (name.equals(\"head\")) {\nanythingElse(t, tb);\n} else if (t.isEndTag()) {\nreturn true;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.parser.HtmlTreeBuilderState$4:process(Lorg/jsoup/parser/Token;Lorg/jsoup/parser/HtmlTreeBuilder;)Z",
+            "method_body": "boolean process(Token t, HtmlTreeBuilder tb) {\nif (isWhitespace(t)) {\nswitch (t.type) {\nToken.StartTag start = t.asStartTag();\nString name = start.name();\nif (name.equals(\"html\")) {\n} else if (StringUtil.in(name, \"base\", \"basefont\", \"bgsound\", \"command\", \"link\")) {\n} else if (name.equals(\"meta\")) {\n} else if (name.equals(\"title\")) {\n} else if (StringUtil.in(name, \"noframes\", \"style\")) {\n} else if (name.equals(\"noscript\")) {\n} else if (name.equals(\"script\")) {\n} else if (name.equals(\"head\")) {\nreturn anythingElse(t, tb);\nToken.EndTag end = t.asEndTag();\nname = end.name();\nif (name.equals(\"head\")) {\ntb.pop();\ntb.transition(AfterHead);\nreturn anythingElse(t, tb);\nreturn true;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tokeniser:emit(C)V",
+            "method_body": "void emit(char c) {\ncharBuffer.append(c);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokeniserState$1:read(Lorg/jsoup/parser/Tokeniser;Lorg/jsoup/parser/CharacterReader;)V",
+            "method_body": "void read(Tokeniser t, CharacterReader r) {\nswitch (r.current()) {\nt.advanceTransition(CharacterReferenceInData);\nbreak;\nt.advanceTransition(TagOpen);\nbreak;\nt.emit(new Token.EOF());\nbreak;\nString data = r.consumeToAny('&', '<', nullChar);\nt.emit(data);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.parser.CharacterReader:mark()V",
+            "method_body": "void mark() {\nmark = pos;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.select.NodeTraversor:traverse(Lorg/jsoup/nodes/Node;)V",
+            "method_body": "public void traverse(Node root) {\nNode node = root;\nint depth = 0;\nwhile (node != null) {\nvisitor.head(node, depth);\nif (node.childNodes().size() > 0) {\nnode = node.childNode(0);\ndepth++;\nwhile (node.nextSibling() == null && depth > 0) {\nvisitor.tail(node, depth);\nnode = node.parent();\ndepth--;\nvisitor.tail(node, depth);\nif (node == root)\nbreak;\nnode = node.nextSibling();\n}",
+            "method_id": 19
+        }
+    ]
+}

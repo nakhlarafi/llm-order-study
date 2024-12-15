@@ -1,0 +1,59 @@
+{
+    "bug_id": 49,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.linear.SparseRealVectorTest.testConcurrentModification",
+    "test_body": "public void testConcurrentModification() {\nfinal RealVector u = new OpenMapRealVector(3, 1e-6);\nu.setEntry(0, 1);\nu.setEntry(1, 0);\nu.setEntry(2, 2);\n1010: final RealVector v1 = new OpenMapRealVector(3, 1e-6);\nfinal double[] v2 = new double[3];\nv1.setEntry(0, 0);\nv2[0] = 0;\nv1.setEntry(1, 3);\nv2[1] = 3;\nv1.setEntry(2, 0);\nv2[2] = 0;\n1019: RealVector w;\n1021: w = u.ebeMultiply(v1);\nw = u.ebeMultiply(v2);",
+    "stack_trace": "org.apache.commons.math.MathRuntimeException$6: map has been modified while iterating\nat org.apache.commons.math.MathRuntimeException.createConcurrentModificationException(MathRuntimeException.java:373)\nat org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator.advance(OpenIntToDoubleHashMap.java:564)\nat org.apache.commons.math.linear.OpenMapRealVector.ebeMultiply(OpenMapRealVector.java:372)\nat org.apache.commons.math.linear.OpenMapRealVector.ebeMultiply(OpenMapRealVector.java:33)\nat org.apache.commons.math.linear.SparseRealVectorTest.testConcurrentModification(SparseRealVectorTest.java:1021)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.OpenMapRealVector:<init>(ID)V",
+            "method_body": "public OpenMapRealVector(int dimension, double epsilon) {\nvirtualSize = dimension;\nentries = new OpenIntToDoubleHashMap(0.0);\nthis.epsilon = epsilon;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator:value()D",
+            "method_body": "public double value()\nif (referenceCount != count) {\nif (current < 0) {\nreturn values[current];\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:put(ID)D",
+            "method_body": "public double put(final int key, final double value) {\nint index = findInsertionIndex(key);\ndouble previous = missingEntries;\nboolean newMapping = true;\nif (index < 0) {\nkeys[index]   = key;\nstates[index] = FULL;\nvalues[index] = value;\nif (newMapping) {\n++size;\nif (shouldGrowTable()) {\n++count;\nreturn previous;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:containsKey(I)Z",
+            "method_body": "public boolean containsKey(final int key) {\nfinal int hash  = hashOf(key);\nint index = hash & mask;\nif (containsKey(key, index)) {\nreturn true;\nif (states[index] == FREE) {\nreturn false;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator:<init>(Lorg/apache/commons/math/util/OpenIntToDoubleHashMap;)V",
+            "method_body": "private Iterator() {\nreferenceCount = count;\nnext = -1;\nadvance();\n}\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.OpenMapRealVector:getDimension()I",
+            "method_body": "public int getDimension() {\nreturn virtualSize;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:computeCapacity(I)I",
+            "method_body": "private static int computeCapacity(final int expectedSize) {\nif (expectedSize == 0) {\nfinal int capacity   = (int) FastMath.ceil(expectedSize / LOAD_FACTOR);\nfinal int powerOfTwo = Integer.highestOneBit(capacity);\nif (powerOfTwo == capacity) {\nreturn capacity;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:shouldGrowTable()Z",
+            "method_body": "private boolean shouldGrowTable() {\nreturn size > (mask + 1) * LOAD_FACTOR;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap$Iterator:key()I",
+            "method_body": "public int key()\nif (referenceCount != count) {\nif (current < 0) {\nreturn keys[current];\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.math.util.OpenIntToDoubleHashMap:findInsertionIndex(I)I",
+            "method_body": "private int findInsertionIndex(final int key) {\nreturn findInsertionIndex(keys, states, key, mask);\n}",
+            "method_id": 29
+        }
+    ]
+}

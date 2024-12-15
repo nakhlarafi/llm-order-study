@@ -1,0 +1,59 @@
+{
+    "bug_id": 7,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling",
+    "test_body": "public void testEventsScheduling() {\n339: FirstOrderDifferentialEquations sincos = new FirstOrderDifferentialEquations() {\n341: public int getDimension() {\nreturn 2;\n}\n345: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] =  y[1];\nyDot[1] = -y[0];\n}\n350: };\n352: SchedulingChecker sinChecker = new SchedulingChecker(0); // events at 0, PI, 2PI ...\nSchedulingChecker cosChecker = new SchedulingChecker(1); // events at PI/2, 3PI/2, 5PI/2 ...\n355: FirstOrderIntegrator integ =\nnew DormandPrince853Integrator(0.001, 1.0, 1.0e-12, 0.0);\ninteg.addEventHandler(sinChecker, 0.01, 1.0e-7, 100);\ninteg.addStepHandler(sinChecker);\ninteg.addEventHandler(cosChecker, 0.01, 1.0e-7, 100);\ninteg.addStepHandler(cosChecker);\ndouble   t0 = 0.5;\ndouble[] y0 = new double[] { FastMath.sin(t0), FastMath.cos(t0) };\ndouble   t  = 10.0;\ndouble[] y  = new double[2];\ninteg.integrate(sincos, t0, y0, t, y);\n367: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest$SchedulingChecker.g(DormandPrince853IntegratorTest.java:389)\nat org.apache.commons.math3.ode.events.EventState.evaluateStep(EventState.java:224)\nat org.apache.commons.math3.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:323)\nat org.apache.commons.math3.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:303)\nat org.apache.commons.math3.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling(DormandPrince853IntegratorTest.java:365)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:acceptStep(Lorg/apache/commons/math3/ode/sampling/AbstractStepInterpolator;[D[DD)D",
+            "method_body": "protected double acceptStep(final AbstractStepInterpolator interpolator,\ndouble previousT = interpolator.getGlobalPreviousTime();\nfinal double currentT = interpolator.getGlobalCurrentTime();\nif (! statesInitialized) {\nfor (EventState state : eventsStates) {\nstate.reinitializeBegin(interpolator);\nstatesInitialized = true;\nfinal int orderingSign = interpolator.isForward() ? +1 : -1;\nSortedSet<EventState> occuringEvents = new TreeSet<EventState>(new Comparator<EventState>() {\nfor (final EventState state : eventsStates) {\nif (state.evaluateStep(interpolator)) {\noccuringEvents.add(state);\nwhile (!occuringEvents.isEmpty()) {\nfinal Iterator<EventState> iterator = occuringEvents.iterator();\nfinal EventState currentEvent = iterator.next();\niterator.remove();\nfinal double eventT = currentEvent.getEventTime();\ninterpolator.setSoftPreviousTime(previousT);\ninterpolator.setSoftCurrentTime(eventT);\ninterpolator.setInterpolatedTime(eventT);\nfinal double[] eventY = interpolator.getInterpolatedState().clone();\ncurrentEvent.stepAccepted(eventT, eventY);\nisLastStep = currentEvent.stop();\nfor (final StepHandler handler : stepHandlers) {\nhandler.handleStep(interpolator, isLastStep);\nif (isLastStep) {\nboolean needReset = currentEvent.reset(eventT, eventY);\nif (needReset) {\nSystem.arraycopy(eventY, 0, y, 0, y.length);\ncomputeDerivatives(eventT, y, yDot);\nresetOccurred = true;\nfor (final EventState remaining : occuringEvents) {\nreturn eventT;\ninterpolator.setInterpolatedTime(currentT);\nfinal double[] currentY = interpolator.getInterpolatedState();\nfor (final EventState state : eventsStates) {\nstate.stepAccepted(currentT, currentY);\nisLastStep = isLastStep || state.stop();\nisLastStep = isLastStep || Precision.equals(currentT, tEnd, 1);\nfor (StepHandler handler : stepHandlers) {\nhandler.handleStep(interpolator, isLastStep);\nreturn currentT;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator:<init>(DDDD)V",
+            "method_body": "public DormandPrince853Integrator(final double minStep, final double maxStep,\nsuper(METHOD_NAME, true, STATIC_C, STATIC_A, STATIC_B,\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.DormandPrince853StepInterpolator:<init>()V",
+            "method_body": "public DormandPrince853StepInterpolator() {\nsuper();\nyDotKLast = null;\nv         = null;\nvectorsInitialized = false;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.RungeKuttaStepInterpolator:<init>()V",
+            "method_body": "protected RungeKuttaStepInterpolator() {\npreviousState = null;\nyDotK         = null;\nintegrator    = null;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:<init>()V",
+            "method_body": "protected AbstractStepInterpolator() {\nglobalPreviousTime = Double.NaN;\nglobalCurrentTime  = Double.NaN;\nsoftPreviousTime   = Double.NaN;\nsoftCurrentTime    = Double.NaN;\nh                  = Double.NaN;\ninterpolatedTime   = Double.NaN;\ncurrentState       = null;\nfinalized          = false;\nthis.forward       = true;\nthis.dirtyState    = true;\nprimaryMapper      = null;\nsecondaryMappers   = null;\nallocateInterpolatedArrays(-1);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:allocateInterpolatedArrays(I)V",
+            "method_body": "private void allocateInterpolatedArrays(final int dimension) {\nif (dimension < 0) {\ninterpolatedState                = null;\ninterpolatedDerivatives          = null;\ninterpolatedPrimaryState         = null;\ninterpolatedPrimaryDerivatives   = null;\ninterpolatedSecondaryState       = null;\ninterpolatedSecondaryDerivatives = null;\ninterpolatedState                = new double[dimension];\ninterpolatedDerivatives          = new double[dimension];\ninterpolatedPrimaryState         = new double[primaryMapper.getDimension()];\ninterpolatedPrimaryDerivatives   = new double[primaryMapper.getDimension()];\nif (secondaryMappers == null) {\ninterpolatedSecondaryState       = new double[secondaryMappers.length][];\ninterpolatedSecondaryDerivatives = new double[secondaryMappers.length][];\nfor (int i = 0; i < secondaryMappers.length; ++i) {\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:<init>(Ljava/lang/String;DDDD)V",
+            "method_body": "public AdaptiveStepsizeIntegrator(final String name,\nsuper(name);\nsetStepSizeControl(minStep, maxStep, scalAbsoluteTolerance, scalRelativeTolerance);\nresetInternalState();\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:<init>(Ljava/lang/String;)V",
+            "method_body": "public AbstractIntegrator(final String name) {\nthis.name = name;\nstepHandlers = new ArrayList<StepHandler>();\nstepStart = Double.NaN;\nstepSize  = Double.NaN;\neventsStates = new ArrayList<EventState>();\nstatesInitialized = false;\nevaluations = new Incrementor();\nsetMaxEvaluations(-1);\nevaluations.resetCount();\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:<init>()V",
+            "method_body": "public Incrementor() {\nthis(0);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.AbstractIntegrator:setMaxEvaluations(I)V",
+            "method_body": "public void setMaxEvaluations(int maxEvaluations) {\nevaluations.setMaximalCount((maxEvaluations < 0) ? Integer.MAX_VALUE : maxEvaluations);\n}",
+            "method_id": 9
+        }
+    ]
+}

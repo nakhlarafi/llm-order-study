@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStreamTest.testWriteNonAsciiDirectoryNamePosixMode",
+    "test_body": "412: public void testWriteNonAsciiDirectoryNamePosixMode() throws Exception {\n413: String n = \"f\\u00f6\\u00f6/\";\n414: TarArchiveEntry t = new TarArchiveEntry(n);\n415: ByteArrayOutputStream bos = new ByteArrayOutputStream();\n416: TarArchiveOutputStream tos = new TarArchiveOutputStream(bos);\n417: tos.setAddPaxHeadersForNonAsciiNames(true);\n418: tos.putArchiveEntry(t);\n419: tos.closeArchiveEntry();\n420: tos.close();\n421: byte[] data = bos.toByteArray();\n422: TarArchiveInputStream tin =\n423: new TarArchiveInputStream(new ByteArrayInputStream(data));\n424: TarArchiveEntry e = tin.getNextTarEntry();\n425: assertEquals(n, e.getName());\n426: assertTrue(e.isDirectory());\n427: tin.close();\n428: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:<init>(Ljava/io/OutputStream;IILjava/lang/String;)V",
+            "method_body": "public TarArchiveOutputStream(OutputStream os, int blockSize,\nint recordSize, String encoding) {\nout = new CountingOutputStream(os);\nthis.encoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.buffer = new TarBuffer(out, blockSize, recordSize);\nthis.assemLen = 0;\nthis.assemBuf = new byte[recordSize];\nthis.recordBuf = new byte[recordSize];\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:<clinit>()V",
+            "method_body": "public static final int LONGFILE_ERROR = 0;\nprivate int       longFileMode = LONGFILE_ERROR;\nprivate int       bigNumberMode = BIGNUMBER_ERROR;\nprivate boolean closed = false;\nprivate boolean haveUnclosedEntry = false;\nprivate boolean finished = false;\nprivate boolean addPaxHeadersForNonAsciiNames = false;\nprivate static final ZipEncoding ASCII =\nthis(os, TarBuffer.DEFAULT_BLKSIZE, TarBuffer.DEFAULT_RCDSIZE);\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:setAddPaxHeadersForNonAsciiNames(Z)V",
+            "method_body": "public void setAddPaxHeadersForNonAsciiNames(boolean b) {\naddPaxHeadersForNonAsciiNames = b;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:putArchiveEntry(Lorg/apache/commons/compress/archivers/ArchiveEntry;)V",
+            "method_body": "public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {\nif(finished) {\nTarArchiveEntry entry = (TarArchiveEntry) archiveEntry;\nMap<String, String> paxHeaders = new HashMap<String, String>();\nfinal String entryName = entry.getName();\nfinal ByteBuffer encodedName = encoding.encode(entryName);\nfinal int nameLen = encodedName.limit() - encodedName.position();\nboolean paxHeaderContainsPath = false;\nif (nameLen >= TarConstants.NAMELEN) {\nif (bigNumberMode == BIGNUMBER_POSIX) {\n} else if (bigNumberMode != BIGNUMBER_STAR) {\nfailForBigNumbers(entry);\nif (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath\npaxHeaders.put(\"path\", entryName);\nif (addPaxHeadersForNonAsciiNames\nif (paxHeaders.size() > 0) {\nwritePaxHeaders(entryName, paxHeaders);\nentry.writeEntryHeader(recordBuf, encoding,\nbuffer.writeRecord(recordBuf);\ncurrBytes = 0;\nif (entry.isDirectory()) {\ncurrSize = 0;\ncurrName = entryName;\nhaveUnclosedEntry = true;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:write([BII)V",
+            "method_body": "public void write(byte[] wBuf, int wOffset, int numToWrite) throws IOException {\nif ((currBytes + numToWrite) > currSize) {\nthrow new IOException(\"request to write '\" + numToWrite\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:failForBigNumbers(Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;)V",
+            "method_body": "private void failForBigNumbers(TarArchiveEntry entry) {\nfailForBigNumber(\"entry size\", entry.getSize(), TarConstants.MAXSIZE);\nfailForBigNumber(\"group id\", entry.getGroupId(), TarConstants.MAXID);\nfailForBigNumber(\"last modification time\",\nfailForBigNumber(\"user id\", entry.getUserId(), TarConstants.MAXID);\nfailForBigNumber(\"mode\", entry.getMode(), TarConstants.MAXID);\nfailForBigNumber(\"major device number\", entry.getDevMajor(),\nfailForBigNumber(\"minor device number\", entry.getDevMinor(),\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:<init>(Ljava/nio/charset/Charset;)V",
+            "method_body": "public NioZipEncoding(Charset charset) {\nthis.charset = charset;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.NioZipEncoding:canEncode(Ljava/lang/String;)Z",
+            "method_body": "public boolean canEncode(String name) {\nCharsetEncoder enc = this.charset.newEncoder();\nenc.onMalformedInput(CodingErrorAction.REPORT);\nenc.onUnmappableCharacter(CodingErrorAction.REPORT);\nreturn enc.canEncode(name);\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.CountingOutputStream:<init>(Ljava/io/OutputStream;)V",
+            "method_body": "public CountingOutputStream(final OutputStream out) {\nsuper(out);\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:<init>(Ljava/io/OutputStream;II)V",
+            "method_body": "public TarBuffer(OutputStream outStream, int blockSize, int recordSize) {\nthis(null, outStream, blockSize, recordSize);\n}",
+            "method_id": 29
+        }
+    ]
+}

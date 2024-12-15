@@ -1,0 +1,59 @@
+{
+    "bug_id": 18,
+    "test_id": 0,
+    "test_name": "com.google.gson.functional.CollectionTest.testIssue1107",
+    "test_body": "public void testIssue1107() {\nString json = \"{\\n\" +\n\"  \\\"inBig\\\": {\\n\" +\n\"    \\\"key\\\": [\\n\" +\n\"      { \\\"inSmall\\\": \\\"hello\\\" }\\n\" +\n\"    ]\\n\" +\n\"  }\\n\" +\n\"}\";\nBigClass bigClass = new Gson().fromJson(json, BigClass.class);\nSmallClass small = bigClass.inBig.get(\"key\").get(0);\nassertNotNull(small);",
+    "stack_trace": "java.lang.ClassCastException: com.google.gson.internal.LinkedTreeMap cannot be cast to com.google.gson.functional.CollectionTest$SmallClass\nat com.google.gson.functional.CollectionTest.testIssue1107(CollectionTest.java:410)",
+    "covered_methods": [
+        {
+            "method_signature": "com.google.gson.Gson:atomicLongArrayAdapter(Lcom/google/gson/TypeAdapter;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "private static TypeAdapter<AtomicLongArray> atomicLongArrayAdapter(final TypeAdapter<Number> longAdapter) {\nreturn new TypeAdapter<AtomicLongArray>() {\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "com.google.gson.Gson:getAdapter(Lcom/google/gson/reflect/TypeToken;)Lcom/google/gson/TypeAdapter;",
+            "method_body": "public <T> TypeAdapter<T> getAdapter(TypeToken<T> type) {\nTypeAdapter<?> cached = typeTokenCache.get(type == null ? NULL_KEY_SURROGATE : type);\nif (cached != null) {\nMap<TypeToken<?>, FutureTypeAdapter<?>> threadCalls = calls.get();\nboolean requiresThreadLocalCleanup = false;\nif (threadCalls == null) {\nthreadCalls = new HashMap<TypeToken<?>, FutureTypeAdapter<?>>();\ncalls.set(threadCalls);\nrequiresThreadLocalCleanup = true;\nFutureTypeAdapter<T> ongoingCall = (FutureTypeAdapter<T>) threadCalls.get(type);\nif (ongoingCall != null) {\nFutureTypeAdapter<T> call = new FutureTypeAdapter<T>();\nthreadCalls.put(type, call);\nfor (TypeAdapterFactory factory : factories) {\nTypeAdapter<T> candidate = factory.create(this, type);\nif (candidate != null) {\ncall.setDelegate(candidate);\ntypeTokenCache.put(type, candidate);\nreturn candidate;\n}\nthreadCalls.remove(type);\nif (requiresThreadLocalCleanup) {\ncalls.remove();\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "com.google.gson.Gson:newJsonReader(Ljava/io/Reader;)Lcom/google/gson/stream/JsonReader;",
+            "method_body": "public JsonReader newJsonReader(Reader reader) {\nJsonReader jsonReader = new JsonReader(reader);\njsonReader.setLenient(lenient);\nreturn jsonReader;\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "com.google.gson.Gson:fromJson(Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;",
+            "method_body": "public <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {\nObject object = fromJson(json, (Type) classOfT);\nreturn Primitives.wrap(classOfT).cast(object);\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "com.google.gson.Gson:fromJson(Ljava/lang/String;Ljava/lang/reflect/Type;)Ljava/lang/Object;",
+            "method_body": "public <T> T fromJson(String json, Type typeOfT) throws JsonSyntaxException {\nif (json == null) {\nStringReader reader = new StringReader(json);\nT target = (T) fromJson(reader, typeOfT);\nreturn target;\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "com.google.gson.Gson:fromJson(Ljava/io/Reader;Ljava/lang/reflect/Type;)Ljava/lang/Object;",
+            "method_body": "public <T> T fromJson(Reader json, Type typeOfT) throws JsonIOException, JsonSyntaxException {\nJsonReader jsonReader = newJsonReader(json);\nT object = (T) fromJson(jsonReader, typeOfT);\nassertFullConsumption(object, jsonReader);\nreturn object;\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "com.google.gson.Gson:assertFullConsumption(Ljava/lang/Object;Lcom/google/gson/stream/JsonReader;)V",
+            "method_body": "private static void assertFullConsumption(Object obj, JsonReader reader) {\nif (obj != null && reader.peek() != JsonToken.END_DOCUMENT) {\n}\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "com.google.gson.Gson:fromJson(Lcom/google/gson/stream/JsonReader;Ljava/lang/reflect/Type;)Ljava/lang/Object;",
+            "method_body": "public <T> T fromJson(JsonReader reader, Type typeOfT) throws JsonIOException, JsonSyntaxException {\nboolean isEmpty = true;\nboolean oldLenient = reader.isLenient();\nreader.setLenient(true);\nreader.peek();\nisEmpty = false;\nTypeToken<T> typeToken = (TypeToken<T>) TypeToken.get(typeOfT);\nTypeAdapter<T> typeAdapter = getAdapter(typeToken);\nT object = typeAdapter.read(reader);\nreturn object;\nreader.setLenient(oldLenient);\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "com.google.gson.internal.Excluder:<init>()V",
+            "method_body": "private static final double IGNORE_VERSIONS = -1.0d;\npublic static final Excluder DEFAULT = new Excluder();\nprivate double version = IGNORE_VERSIONS;\nprivate int modifiers = Modifier.TRANSIENT | Modifier.STATIC;\nprivate boolean serializeInnerClasses = true;\nprivate List<ExclusionStrategy> serializationStrategies = Collections.emptyList();\nprivate List<ExclusionStrategy> deserializationStrategies = Collections.emptyList();\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "com.google.gson.internal.Excluder:<clinit>()V",
+            "method_body": "private static final double IGNORE_VERSIONS = -1.0d;\npublic static final Excluder DEFAULT = new Excluder();\nprivate double version = IGNORE_VERSIONS;\nprivate int modifiers = Modifier.TRANSIENT | Modifier.STATIC;\nprivate boolean serializeInnerClasses = true;\nprivate List<ExclusionStrategy> serializationStrategies = Collections.emptyList();\nprivate List<ExclusionStrategy> deserializationStrategies = Collections.emptyList();\n}",
+            "method_id": 79
+        }
+    ]
+}

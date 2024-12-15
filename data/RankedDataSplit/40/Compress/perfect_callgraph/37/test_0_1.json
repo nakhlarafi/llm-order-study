@@ -1,0 +1,59 @@
+{
+    "bug_id": 37,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.survivesBlankLinesInPaxHeader",
+    "test_body": "305: public void survivesBlankLinesInPaxHeader() throws Exception {\n306: final TarArchiveInputStream is = getTestStream(\"/COMPRESS-355.tar\");\n307: try {\n308: final TarArchiveEntry entry = is.getNextTarEntry();\n309: assertEquals(\"package/package.json\", entry.getName());\n310: assertNull(is.getNextTarEntry());\n311: } finally {\n312: is.close();\n313: }\n314: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctal([BII)J",
+            "method_body": "public static long parseOctal(final byte[] buffer, final int offset, final int length) {\nlong    result = 0;\nint     end = offset + length;\nint     start = offset;\nif (length < 2){\nif (buffer[start] == 0) {\nwhile (start < end){\nif (buffer[start] == ' '){\nbyte trailer = buffer[end - 1];\nwhile (start < end && (trailer == 0 || trailer == ' ')) {\nend--;\ntrailer = buffer[end - 1];\nfor ( ;start < end; start++) {\nfinal byte currentByte = buffer[start];\nif (currentByte < '0' || currentByte > '7'){\nresult = (result << 3) + (currentByte - '0'); // convert from ASCII\nreturn result;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseOctalOrBinary([BII)J",
+            "method_body": "public static long parseOctalOrBinary(final byte[] buffer, final int offset,\nif ((buffer[offset] & 0x80) == 0) {\nreturn parseOctal(buffer, offset, length);\nfinal boolean negative = buffer[offset] == (byte) 0xff;\nif (length < 9) {\nreturn parseBinaryLong(buffer, offset, length, negative);\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseBinaryLong([BIIZ)J",
+            "method_body": "private static long parseBinaryLong(final byte[] buffer, final int offset,\nif (length >= 9) {\nlong val = 0;\nfor (int i = 1; i < length; i++) {\nval = (val << 8) + (buffer[offset + i] & 0xff);\nif (negative) {\nreturn negative ? -val : val;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseName([BII)Ljava/lang/String;",
+            "method_body": "public static String parseName(final byte[] buffer, final int offset, final int length) {\nreturn parseName(buffer, offset, length, DEFAULT_ENCODING);\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:parseName([BIILorg/apache/commons/compress/archivers/zip/ZipEncoding;)Ljava/lang/String;",
+            "method_body": "public static String parseName(final byte[] buffer, final int offset,\nint len = length;\nfor (; len > 0; len--) {\nif (buffer[offset + len - 1] != 0) {\nbreak;\nif (len > 0) {\nfinal byte[] b = new byte[len];\nSystem.arraycopy(buffer, offset, b, 0, len);\nreturn encoding.decode(b);\nreturn \"\";\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;)V",
+            "method_body": "public TarArchiveInputStream(final InputStream is) {\nthis(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE);\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "public TarArchiveInputStream(final InputStream is, final int blockSize, final int recordSize) {\nthis(is, blockSize, recordSize, null);\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;IILjava/lang/String;)V",
+            "method_body": "public TarArchiveInputStream(final InputStream is, final int blockSize, final int recordSize,\nfinal String encoding) {\nthis.is = is;\nthis.hasHitEOF = false;\nthis.encoding = encoding;\nthis.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);\nthis.recordSize = recordSize;\nthis.blockSize = blockSize;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:available()I",
+            "method_body": "public int available() throws IOException {\nif (isDirectory()) {\nif (entrySize - entryOffset > Integer.MAX_VALUE) {\nreturn (int) (entrySize - entryOffset);\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:read([BII)I",
+            "method_body": "public int read(final byte[] buf, final int offset, int numToRead) throws IOException {\nint totalRead = 0;\nif (hasHitEOF || isDirectory() || entryOffset >= entrySize) {\nif (currEntry == null) {\nnumToRead = Math.min(numToRead, available());\ntotalRead = is.read(buf, offset, numToRead);\nif (totalRead == -1) {\ncount(totalRead);\nentryOffset += totalRead;\nreturn totalRead;\n}",
+            "method_id": 49
+        }
+    ]
+}

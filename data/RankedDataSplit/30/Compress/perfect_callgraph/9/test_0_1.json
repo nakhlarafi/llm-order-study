@@ -1,0 +1,39 @@
+{
+    "bug_id": 9,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStreamTest.testCount",
+    "test_body": "31: public void testCount() throws Exception {\n32: File f = File.createTempFile(\"commons-compress-tarcount\", \".tar\");\n33: f.deleteOnExit();\n34: FileOutputStream fos = new FileOutputStream(f);\n35: 36: ArchiveOutputStream tarOut = new ArchiveStreamFactory()\n37: .createArchiveOutputStream(ArchiveStreamFactory.TAR, fos);\n38: 39: File file1 = getFile(\"test1.xml\");\n40: TarArchiveEntry sEntry = new TarArchiveEntry(file1);\n41: tarOut.putArchiveEntry(sEntry);\n42: 43: FileInputStream in = new FileInputStream(file1);\n44: byte[] buf = new byte[8192];\n45: 46: int read = 0;\n47: while ((read = in.read(buf)) > 0) {\n48: tarOut.write(buf, 0, read);\n49: }\n50: 51: in.close();\n52: tarOut.closeArchiveEntry();\n53: tarOut.close();\n54: 55: assertEquals(f.length(), tarOut.getBytesWritten());\n56: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatNameBytes(Ljava/lang/String;[BII)I",
+            "method_body": "public static int formatNameBytes(String name, byte[] buf, final int offset, final int length) {\nfor (i = 0; i < length && i < name.length(); ++i) {\nbuf[offset + i] = (byte) name.charAt(i);\nfor (; i < length; ++i) {\nbuf[offset + i] = 0;\nreturn offset + length;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatUnsignedOctalString(J[BII)V",
+            "method_body": "public static void formatUnsignedOctalString(final long value, byte[] buffer,\nint remaining = length;\nremaining--;\nif (value == 0) {\nbuffer[offset + remaining--] = (byte) '0';\nlong val = value;\nfor (; remaining >= 0 && val != 0; --remaining) {\nbuffer[offset + remaining] = (byte) ((byte) '0' + (byte) (val & 7));\nval = val >>> 3;\nif (val != 0){\nfor (; remaining >= 0; --remaining) { // leading zeros\nbuffer[offset + remaining] = (byte) '0';\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatOctalBytes(J[BII)I",
+            "method_body": "public static int formatOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-2; // For space and trailing null\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx++] = (byte) ' '; // Trailing space\nbuf[offset + idx]   = 0; // Trailing null\nreturn offset + length;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatLongOctalBytes(J[BII)I",
+            "method_body": "public static int formatLongOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-1; // For space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx] = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:formatCheckSumOctalBytes(J[BII)I",
+            "method_body": "public static int formatCheckSumOctalBytes(final long value, byte[] buf, final int offset, final int length) {\nint idx=length-2; // for NUL and space\nformatUnsignedOctalString(value, buf, offset, idx);\nbuf[offset + idx++]   = 0; // Trailing null\nbuf[offset + idx]     = (byte) ' '; // Trailing space\nreturn offset + length;\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarUtils:computeCheckSum([B)J",
+            "method_body": "public static long computeCheckSum(final byte[] buf) {\nlong sum = 0;\nfor (int i = 0; i < buf.length; ++i) {\nsum += BYTE_MASK & buf[i];\nreturn sum;\n}",
+            "method_id": 35
+        }
+    ]
+}

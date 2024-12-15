@@ -1,0 +1,59 @@
+{
+    "bug_id": 32,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveInputStreamTest.shouldReadBigGid",
+    "test_body": "239: public void shouldReadBigGid() throws Exception {\n240: ByteArrayOutputStream bos = new ByteArrayOutputStream();\n241: TarArchiveOutputStream tos = new TarArchiveOutputStream(bos);\n242: tos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);\n243: TarArchiveEntry t = new TarArchiveEntry(\"name\");\n244: t.setGroupId(4294967294l);\n245: t.setSize(1);\n246: tos.putArchiveEntry(t);\n247: tos.write(30);\n248: tos.closeArchiveEntry();\n249: tos.close();\n250: byte[] data = bos.toByteArray();\n251: ByteArrayInputStream bis = new ByteArrayInputStream(data);\n252: TarArchiveInputStream tis =\n253: new TarArchiveInputStream(bis);\n254: t = tis.getNextTarEntry();\n255: assertEquals(4294967294l, t.getLongGroupId());\n256: tis.close();\n257: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:writePaxHeaders(Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;Ljava/lang/String;Ljava/util/Map;)V",
+            "method_body": "void writePaxHeaders(TarArchiveEntry entry,\nString name = \"./PaxHeaders.X/\" + stripTo7Bits(entryName);\nif (name.length() >= TarConstants.NAMELEN) {\nTarArchiveEntry pex = new TarArchiveEntry(name,\ntransferModTime(entry, pex);\nStringWriter w = new StringWriter();\nfor (Map.Entry<String, String> h : headers.entrySet()) {\nString key = h.getKey();\nString value = h.getValue();\nint len = key.length() + value.length()\nString line = len + \" \" + key + \"=\" + value + \"\\n\";\nint actualLength = line.getBytes(CharsetNames.UTF_8).length;\nwhile (len != actualLength) {\nw.write(line);\n}\nbyte[] data = w.toString().getBytes(CharsetNames.UTF_8);\npex.setSize(data.length);\nputArchiveEntry(pex);\nwrite(data);\ncloseArchiveEntry();\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:putArchiveEntry(Lorg/apache/commons/compress/archivers/ArchiveEntry;)V",
+            "method_body": "public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {\nif (finished) {\nTarArchiveEntry entry = (TarArchiveEntry) archiveEntry;\nMap<String, String> paxHeaders = new HashMap<String, String>();\nfinal String entryName = entry.getName();\nboolean paxHeaderContainsPath = handleLongName(entry, entryName, paxHeaders, \"path\",\nfinal String linkName = entry.getLinkName();\nboolean paxHeaderContainsLinkPath = linkName != null && linkName.length() > 0\nif (bigNumberMode == BIGNUMBER_POSIX) {\naddPaxHeadersForBigNumbers(paxHeaders, entry);\nif (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath\nif (addPaxHeadersForNonAsciiNames && !paxHeaderContainsLinkPath\nif (paxHeaders.size() > 0) {\nwritePaxHeaders(entry, entryName, paxHeaders);\nentry.writeEntryHeader(recordBuf, zipEncoding,\nwriteRecord(recordBuf);\ncurrBytes = 0;\nif (entry.isDirectory()) {\ncurrSize = entry.getSize();\ncurrName = entryName;\nhaveUnclosedEntry = true;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:shouldBeReplaced(C)Z",
+            "method_body": "private boolean shouldBeReplaced(char c) {\nreturn c == 0 // would be read as Trailing null\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:<init>(Ljava/io/OutputStream;)V",
+            "method_body": "public TarArchiveOutputStream(OutputStream os) {\nthis(os, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE);\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:addPaxHeadersForBigNumbers(Ljava/util/Map;Lorg/apache/commons/compress/archivers/tar/TarArchiveEntry;)V",
+            "method_body": "private void addPaxHeadersForBigNumbers(Map<String, String> paxHeaders,\naddPaxHeaderForBigNumber(paxHeaders, \"size\", entry.getSize(),\naddPaxHeaderForBigNumber(paxHeaders, \"gid\", entry.getLongGroupId(),\naddPaxHeaderForBigNumber(paxHeaders, \"mtime\",\naddPaxHeaderForBigNumber(paxHeaders, \"uid\", entry.getLongUserId(),\naddPaxHeaderForBigNumber(paxHeaders, \"SCHILY.devmajor\",\naddPaxHeaderForBigNumber(paxHeaders, \"SCHILY.devminor\",\nfailForBigNumber(\"mode\", entry.getMode(), TarConstants.MAXID);\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveInputStream:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "public TarArchiveInputStream(InputStream is, int blockSize, int recordSize) {\nthis(is, blockSize, recordSize, null);\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:isGNULongNameEntry()Z",
+            "method_body": "public boolean isGNULongNameEntry() {\nreturn linkFlag == LF_GNUTYPE_LONGNAME\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveEntry:writeEntryHeaderField(J[BIIZ)I",
+            "method_body": "private int writeEntryHeaderField(long value, byte[] outbuf, int offset,\nif (!starMode && (value < 0\nreturn TarUtils.formatLongOctalBytes(0, outbuf, offset, length);\nreturn TarUtils.formatLongOctalOrBinaryBytes(value, outbuf, offset,\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.FallbackZipEncoding:<init>(Ljava/lang/String;)V",
+            "method_body": "public FallbackZipEncoding(String charsetName) {\nthis.charsetName = charsetName;\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.CountingOutputStream:write([B)V",
+            "method_body": "public void write(byte[] b) throws IOException {\nwrite(b, 0, b.length);\n}",
+            "method_id": 69
+        }
+    ]
+}

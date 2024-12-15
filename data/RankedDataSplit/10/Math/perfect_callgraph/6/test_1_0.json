@@ -1,0 +1,59 @@
+{
+    "bug_id": 6,
+    "test_id": 1,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizerTest.testGetIterations",
+    "test_body": null,
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.vector.jacobian.AbstractLeastSquaresOptimizerAbstractTest.testGetIterations(AbstractLeastSquaresOptimizerAbstractTest.java:131)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseOptimizer:<init>(Lorg/apache/commons/math3/optim/ConvergenceChecker;)V",
+            "method_body": "protected BaseOptimizer(ConvergenceChecker<PAIR> checker) {\nthis.checker = checker;\nevaluations = new Incrementor(0, new MaxEvalCallback());\niterations = new Incrementor(0, new MaxIterCallback());\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer:doOptimize()Lorg/apache/commons/math3/optim/PointVectorValuePair;",
+            "method_body": "protected PointVectorValuePair doOptimize() {\ncheckParameters();\nfinal int nR = getTarget().length; // Number of observed data.\nfinal double[] currentPoint = getStartPoint();\nfinal int nC = currentPoint.length; // Number of parameters.\nsolvedCols  = FastMath.min(nR, nC);\ndiagR       = new double[nC];\njacNorm     = new double[nC];\nbeta        = new double[nC];\npermutation = new int[nC];\nlmDir       = new double[nC];\ndouble   delta   = 0;\ndouble   xNorm   = 0;\ndouble[] diag    = new double[nC];\ndouble[] oldX    = new double[nC];\ndouble[] oldRes  = new double[nR];\ndouble[] oldObj  = new double[nR];\ndouble[] qtf     = new double[nR];\ndouble[] work1   = new double[nC];\ndouble[] work2   = new double[nC];\ndouble[] work3   = new double[nC];\nfinal RealMatrix weightMatrixSqrt = getWeightSquareRoot();\ndouble[] currentObjective = computeObjectiveValue(currentPoint);\ndouble[] currentResiduals = computeResiduals(currentObjective);\nPointVectorValuePair current = new PointVectorValuePair(currentPoint, currentObjective);\ndouble currentCost = computeCost(currentResiduals);\nlmPar = 0;\nboolean firstIteration = true;\nint iter = 0;\nfinal ConvergenceChecker<PointVectorValuePair> checker = getConvergenceChecker();\n++iter;\nfinal PointVectorValuePair previous = current;\nqrDecomposition(computeWeightedJacobian(currentPoint));\nweightedResidual = weightMatrixSqrt.operate(currentResiduals);\nfor (int i = 0; i < nR; i++) {\nqtf[i] = weightedResidual[i];\nqTy(qtf);\nfor (int k = 0; k < solvedCols; ++k) {\nint pk = permutation[k];\nweightedJacobian[k][pk] = diagR[pk];\nif (firstIteration) {\nxNorm = 0;\nfor (int k = 0; k < nC; ++k) {\ndouble dk = jacNorm[k];\nif (dk == 0) {\ndouble xk = dk * currentPoint[k];\nxNorm  += xk * xk;\ndiag[k] = dk;\nxNorm = FastMath.sqrt(xNorm);\ndelta = (xNorm == 0) ? initialStepBoundFactor : (initialStepBoundFactor * xNorm);\ndouble maxCosine = 0;\nif (currentCost != 0) {\nfor (int j = 0; j < solvedCols; ++j) {\nint    pj = permutation[j];\ndouble s  = jacNorm[pj];\nif (s != 0) {\ndouble sum = 0;\nfor (int i = 0; i <= j; ++i) {\nsum += weightedJacobian[i][pj] * qtf[i];\nmaxCosine = FastMath.max(maxCosine, FastMath.abs(sum) / (s * currentCost));\nif (maxCosine <= orthoTolerance) {\nfor (int j = 0; j < nC; ++j) {\ndiag[j] = FastMath.max(diag[j], jacNorm[j]);\nfor (double ratio = 0; ratio < 1.0e-4;) {\nfor (int j = 0; j < solvedCols; ++j) {\nint pj = permutation[j];\noldX[pj] = currentPoint[pj];\nfinal double previousCost = currentCost;\ndouble[] tmpVec = weightedResidual;\nweightedResidual = oldRes;\noldRes    = tmpVec;\ntmpVec    = currentObjective;\ncurrentObjective = oldObj;\noldObj    = tmpVec;\ndetermineLMParameter(qtf, delta, diag, work1, work2, work3);\ndouble lmNorm = 0;\nfor (int j = 0; j < solvedCols; ++j) {\nint pj = permutation[j];\nlmDir[pj] = -lmDir[pj];\ncurrentPoint[pj] = oldX[pj] + lmDir[pj];\ndouble s = diag[pj] * lmDir[pj];\nlmNorm  += s * s;\nlmNorm = FastMath.sqrt(lmNorm);\nif (firstIteration) {\ndelta = FastMath.min(delta, lmNorm);\ncurrentObjective = computeObjectiveValue(currentPoint);\ncurrentResiduals = computeResiduals(currentObjective);\ncurrent = new PointVectorValuePair(currentPoint, currentObjective);\ncurrentCost = computeCost(currentResiduals);\ndouble actRed = -1.0;\nif (0.1 * currentCost < previousCost) {\ndouble r = currentCost / previousCost;\nactRed = 1.0 - r * r;\nfor (int j = 0; j < solvedCols; ++j) {\nint pj = permutation[j];\ndouble dirJ = lmDir[pj];\nwork1[j] = 0;\nfor (int i = 0; i <= j; ++i) {\nwork1[i] += weightedJacobian[i][pj] * dirJ;\ndouble coeff1 = 0;\nfor (int j = 0; j < solvedCols; ++j) {\ncoeff1 += work1[j] * work1[j];\ndouble pc2 = previousCost * previousCost;\ncoeff1 = coeff1 / pc2;\ndouble coeff2 = lmPar * lmNorm * lmNorm / pc2;\ndouble preRed = coeff1 + 2 * coeff2;\ndouble dirDer = -(coeff1 + coeff2);\nratio = (preRed == 0) ? 0 : (actRed / preRed);\nif (ratio <= 0.25) {\ndouble tmp =\nif ((0.1 * currentCost >= previousCost) || (tmp < 0.1)) {\ntmp = 0.1;\ndelta = tmp * FastMath.min(delta, 10.0 * lmNorm);\nlmPar /= tmp;\n} else if ((lmPar == 0) || (ratio >= 0.75)) {\ndelta = 2 * lmNorm;\nlmPar *= 0.5;\nif (ratio >= 1.0e-4) {\nfirstIteration = false;\nxNorm = 0;\nfor (int k = 0; k < nC; ++k) {\ndouble xK = diag[k] * currentPoint[k];\nxNorm += xK * xK;\nxNorm = FastMath.sqrt(xNorm);\nif (checker != null) {\ncurrentCost = previousCost;\nfor (int j = 0; j < solvedCols; ++j) {\nint pj = permutation[j];\ncurrentPoint[pj] = oldX[pj];\ntmpVec    = weightedResidual;\nweightedResidual = oldRes;\noldRes    = tmpVec;\ntmpVec    = currentObjective;\ncurrentObjective = oldObj;\noldObj    = tmpVec;\ncurrent = new PointVectorValuePair(currentPoint, currentObjective);\nif ((FastMath.abs(actRed) <= costRelativeTolerance &&\nsetCost(currentCost);\nreturn current;\nif ((FastMath.abs(actRed) <= 2.2204e-16) && (preRed <= 2.2204e-16) && (ratio <= 2.0)) {\n} else if (delta <= 2.2204e-16 * xNorm) {\n} else if (maxCosine <= 2.2204e-16)  {\n}\n}\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.MultivariateVectorOptimizer:getTarget()[D",
+            "method_body": "public double[] getTarget() {\nreturn target.clone();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:getCount()I",
+            "method_body": "public int getCount() {\nreturn count;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.Array2DRowRealMatrix:<init>([[D)V",
+            "method_body": "public Array2DRowRealMatrix(final double[][] d)\nthrows DimensionMismatchException, NoDataException, NullArgumentException {\ncopyIn(d);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:setMaximalCount(I)V",
+            "method_body": "public void setMaximalCount(int max) {\nmaximalCount = max;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.AbstractLeastSquaresOptimizer:setCost(D)V",
+            "method_body": "protected void setCost(double cost) {\nthis.cost = cost;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Incrementor:incrementCount()V",
+            "method_body": "public void incrementCount() throws MaxCountExceededException {\nif (++count > maximalCount) {\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.InitialGuess:getInitialGuess()[D",
+            "method_body": "public double[] getInitialGuess() {\nreturn init.clone();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer:qTy([D)V",
+            "method_body": "private void qTy(double[] y) {\nfinal int nR = weightedJacobian.length;\nfinal int nC = weightedJacobian[0].length;\nfor (int k = 0; k < nC; ++k) {\nint pk = permutation[k];\ndouble gamma = 0;\nfor (int i = k; i < nR; ++i) {\ngamma += weightedJacobian[i][pk] * y[i];\ngamma *= beta[pk];\nfor (int i = k; i < nR; ++i) {\ny[i] -= gamma * weightedJacobian[i][pk];\n}",
+            "method_id": 9
+        }
+    ]
+}

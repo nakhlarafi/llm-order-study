@@ -1,0 +1,59 @@
+{
+    "bug_id": 9,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStreamTest.testCount",
+    "test_body": "31: public void testCount() throws Exception {\n32: File f = File.createTempFile(\"commons-compress-tarcount\", \".tar\");\n33: f.deleteOnExit();\n34: FileOutputStream fos = new FileOutputStream(f);\n35: 36: ArchiveOutputStream tarOut = new ArchiveStreamFactory()\n37: .createArchiveOutputStream(ArchiveStreamFactory.TAR, fos);\n38: 39: File file1 = getFile(\"test1.xml\");\n40: TarArchiveEntry sEntry = new TarArchiveEntry(file1);\n41: tarOut.putArchiveEntry(sEntry);\n42: 43: FileInputStream in = new FileInputStream(file1);\n44: byte[] buf = new byte[8192];\n45: 46: int read = 0;\n47: while ((read = in.read(buf)) > 0) {\n48: tarOut.write(buf, 0, read);\n49: }\n50: 51: in.close();\n52: tarOut.closeArchiveEntry();\n53: tarOut.close();\n54: 55: assertEquals(f.length(), tarOut.getBytesWritten());\n56: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:close()V",
+            "method_body": "public void close() throws IOException {\nif(!finished) {\nfinish();\nif (!closed) {\nbuffer.close();\nout.close();\nclosed = true;\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:putArchiveEntry(Lorg/apache/commons/compress/archivers/ArchiveEntry;)V",
+            "method_body": "public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {\nif(finished) {\nTarArchiveEntry entry = (TarArchiveEntry) archiveEntry;\nif (entry.getName().length() >= TarConstants.NAMELEN) {\nentry.writeEntryHeader(recordBuf);\nbuffer.writeRecord(recordBuf);\ncurrBytes = 0;\nif (entry.isDirectory()) {\ncurrSize = entry.getSize();\ncurrName = entry.getName();\nhaveUnclosedEntry = true;\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:closeArchiveEntry()V",
+            "method_body": "public void closeArchiveEntry() throws IOException {\nif(finished) {\nif (!haveUnclosedEntry){\nif (assemLen > 0) {\nfor (int i = assemLen; i < assemBuf.length; ++i) {\nassemBuf[i] = 0;\nbuffer.writeRecord(assemBuf);\ncurrBytes += assemLen;\nassemLen = 0;\nif (currBytes < currSize) {\nhaveUnclosedEntry = false;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarArchiveOutputStream:writeEOFRecord()V",
+            "method_body": "private void writeEOFRecord() throws IOException {\nfor (int i = 0; i < recordBuf.length; ++i) {\nrecordBuf[i] = 0;\nbuffer.writeRecord(recordBuf);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.CountingOutputStream:<init>(Ljava/io/OutputStream;)V",
+            "method_body": "private final AtomicLong bytesWritten = new AtomicLong();\nsuper(out);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.CountingOutputStream:write([BII)V",
+            "method_body": "public void write(byte[] b, int off, int len) throws IOException {\nout.write(b, off, len);\ncount(len);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.compress.utils.CountingOutputStream:count(J)V",
+            "method_body": "protected void count(long written) {\nif (written != -1) {\nbytesWritten.addAndGet(written);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:<init>(Ljava/io/OutputStream;II)V",
+            "method_body": "public TarBuffer(OutputStream outStream, int blockSize, int recordSize) {\nthis.inStream = null;\nthis.outStream = outStream;\nthis.initialize(blockSize, recordSize);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:initialize(II)V",
+            "method_body": "private void initialize(int blockSize, int recordSize) {\nthis.blockSize = blockSize;\nthis.recordSize = recordSize;\nthis.recsPerBlock = (this.blockSize / this.recordSize);\nthis.blockBuffer = new byte[this.blockSize];\nif (this.inStream != null) {\nthis.currBlkIdx = 0;\nthis.currRecIdx = 0;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.tar.TarBuffer:writeRecord([B)V",
+            "method_body": "public void writeRecord(byte[] record) throws IOException {\nif (outStream == null) {\nif (record.length != recordSize) {\nif (currRecIdx >= recsPerBlock) {\nSystem.arraycopy(record, 0, blockBuffer,\ncurrRecIdx++;\n}",
+            "method_id": 19
+        }
+    ]
+}

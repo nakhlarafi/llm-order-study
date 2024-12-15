@@ -1,0 +1,34 @@
+{
+    "bug_id": 8,
+    "test_id": 0,
+    "test_name": "org.mockito.internal.util.reflection.GenericMetadataSupportTest.typeVariable_of_self_type",
+    "test_body": "public void typeVariable_of_self_type() {\nGenericMetadataSupport genericMetadata = inferFrom(GenericsSelfReference.class).resolveGenericReturnType(firstNamedMethod(\"self\", GenericsSelfReference.class));\n54: assertThat(genericMetadata.rawType()).isEqualTo(GenericsSelfReference.class);\n}\n",
+    "stack_trace": "java.lang.StackOverflowError\nat sun.reflect.generics.reflectiveObjects.TypeVariableImpl.hashCode(TypeVariableImpl.java:201)\nat java.util.HashMap.hash(HashMap.java:339)\nat java.util.HashMap.get(HashMap.java:557)\nat org.mockito.internal.util.reflection.GenericMetadataSupport.getActualTypeArgumentFor(GenericMetadataSupport.java:182)\nat org.mockito.internal.util.reflection.GenericMetadataSupport.getActualTypeArgumentFor(GenericMetadataSupport.java:185)",
+    "covered_methods": [
+        {
+            "method_signature": "org.mockito.internal.util.reflection.GenericMetadataSupport:inferFrom(Ljava/lang/reflect/Type;)Lorg/mockito/internal/util/reflection/GenericMetadataSupport;",
+            "method_body": "public static GenericMetadataSupport inferFrom(Type type) {\nChecks.checkNotNull(type, \"type\");\nif (type instanceof Class) {\nreturn new FromClassGenericMetadataSupport((Class<?>) type);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.GenericMetadataSupport:resolveGenericReturnType(Ljava/lang/reflect/Method;)Lorg/mockito/internal/util/reflection/GenericMetadataSupport;",
+            "method_body": "public GenericMetadataSupport resolveGenericReturnType(Method method) {\nType genericReturnType = method.getGenericReturnType();\nif (genericReturnType instanceof Class) {\nif (genericReturnType instanceof ParameterizedType) {\nif (genericReturnType instanceof TypeVariable) {\nreturn new TypeVariableReturnType(this, method.getTypeParameters(), (TypeVariable) genericReturnType);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.GenericMetadataSupport$TypeVariableReturnType:readTypeParameters()V",
+            "method_body": "private void readTypeParameters() {\nregisterTypeParametersOn(typeParameters);\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.GenericMetadataSupport$TypeVariableReturnType:readTypeVariables()V",
+            "method_body": "private void readTypeVariables() {\nfor (Type type : typeVariable.getBounds()) {\nregisterTypeVariablesOn(type);\nregisterTypeVariablesOn(getActualTypeArgumentFor(typeVariable));\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.mockito.internal.util.reflection.GenericMetadataSupport:registerTypeVariablesOn(Ljava/lang/reflect/Type;)V",
+            "method_body": "protected void registerTypeVariablesOn(Type classType) {\nif (!(classType instanceof ParameterizedType)) {\nreturn;\nParameterizedType parameterizedType = (ParameterizedType) classType;\nTypeVariable[] typeParameters = ((Class<?>) parameterizedType.getRawType()).getTypeParameters();\nType[] actualTypeArguments = parameterizedType.getActualTypeArguments();\nfor (int i = 0; i < actualTypeArguments.length; i++) {\nTypeVariable typeParameter = typeParameters[i];\nType actualTypeArgument = actualTypeArguments[i];\nif (actualTypeArgument instanceof WildcardType) {\ncontextualActualTypeParameters.put(typeParameter, actualTypeArgument);\n}",
+            "method_id": 14
+        }
+    ]
+}

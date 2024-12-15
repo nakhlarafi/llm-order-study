@@ -1,0 +1,59 @@
+{
+    "bug_id": 25,
+    "test_id": 0,
+    "test_name": "org.joda.time.TestDateTimeZoneCutover.test_DateTime_constructor_Moscow_Autumn",
+    "test_body": "public void test_DateTime_constructor_Moscow_Autumn() {\nDateTime dt = new DateTime(2007, 10, 28, 2, 30, ZONE_MOSCOW);\nassertEquals(\"2007-10-28T02:30:00.000+04:00\", dt.toString());\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<...10-28T02:30:00.000+0[4]:00> but was:<...10-28T02:30:00.000+0[3]:00>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat junit.framework.TestCase.assertEquals(TestCase.java:269)\nat org.joda.time.TestDateTimeZoneCutover.test_DateTime_constructor_Moscow_Autumn(TestDateTimeZoneCutover.java:922)",
+    "covered_methods": [
+        {
+            "method_signature": "org.joda.time.tz.CachedDateTimeZone:createInfo(J)Lorg/joda/time/tz/CachedDateTimeZone$Info;",
+            "method_body": "private Info createInfo(long millis) {\nlong periodStart = millis & (0xffffffffL << 32);\nInfo info = new Info(iZone, periodStart);\nlong end = periodStart | 0xffffffffL;\nInfo chain = info;\nlong next = iZone.nextTransition(periodStart);\nif (next == periodStart || next > end) {\nbreak;\nperiodStart = next;\nchain = (chain.iNextInfo = new Info(iZone, periodStart));\n}\nreturn info;\n}",
+            "method_id": 170
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:dayOfYear()Lorg/joda/time/DateTimeField;",
+            "method_body": "public final DateTimeField dayOfYear() {\nreturn iDayOfYear;\n}",
+            "method_id": 171
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology:useTimeArithmetic(Lorg/joda/time/DurationField;)Z",
+            "method_body": "static boolean useTimeArithmetic(DurationField field) {\nreturn field != null && field.getUnitMillis() < DateTimeConstants.MILLIS_PER_HOUR * 12;\n}",
+            "method_id": 172
+        },
+        {
+            "method_signature": "org.joda.time.format.DateTimeFormatter:printTo(Ljava/lang/StringBuffer;JLorg/joda/time/Chronology;)V",
+            "method_body": "private void printTo(StringBuffer buf, long instant, Chronology chrono) {\nDateTimePrinter printer = requirePrinter();\nchrono = selectChronology(chrono);\nDateTimeZone zone = chrono.getZone();\nint offset = zone.getOffset(instant);\nlong adjustedInstant = instant + offset;\nif ((instant ^ adjustedInstant) < 0 && (instant ^ offset) >= 0) {\nprinter.printTo(buf, adjustedInstant, chrono.withUTC(), offset, zone, iLocale);\n}",
+            "method_id": 173
+        },
+        {
+            "method_signature": "org.joda.time.chrono.AssembledChronology:yearOfCentury()Lorg/joda/time/DateTimeField;",
+            "method_body": "public final DateTimeField yearOfCentury() {\nreturn iYearOfCentury;\n}",
+            "method_id": 174
+        },
+        {
+            "method_signature": "org.joda.time.tz.DateTimeZoneBuilder$OfYear:next(JII)J",
+            "method_body": "public long next(long instant, int standardOffset, int saveMillis) {\nif (iMode == 'w') {\n} else if (iMode == 's') {\noffset = standardOffset;\ninstant += offset;\nChronology chrono = ISOChronology.getInstanceUTC();\nlong next = chrono.monthOfYear().set(instant, iMonthOfYear);\nnext = chrono.millisOfDay().set(next, 0);\nnext = chrono.millisOfDay().add(next, iMillisOfDay);\nnext = setDayOfMonthNext(chrono, next);\nif (iDayOfWeek == 0) {\nnext = setDayOfWeek(chrono, next);\nif (next <= instant) {\nnext = chrono.year().add(next, 1);\nnext = chrono.monthOfYear().set(next, iMonthOfYear);\nnext = setDayOfMonthNext(chrono, next);\nnext = setDayOfWeek(chrono, next);\nreturn next - offset;\n}",
+            "method_id": 175
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getYear(J)I",
+            "method_body": "int getYear(long instant) {\nlong unitMillis = getAverageMillisPerYearDividedByTwo();\nlong i2 = (instant >> 1) + getApproxMillisAtEpochDividedByTwo();\nif (i2 < 0) {\nint year = (int) (i2 / unitMillis);\nlong yearStart = getYearMillis(year);\nlong diff = instant - yearStart;\nif (diff < 0) {\n} else if (diff >= DateTimeConstants.MILLIS_PER_DAY * 365L) {\nreturn year;\n}",
+            "method_id": 176
+        },
+        {
+            "method_signature": "org.joda.time.chrono.ZonedChronology:assemble(Lorg/joda/time/chrono/AssembledChronology$Fields;)V",
+            "method_body": "protected void assemble(Fields fields) {\nHashMap<Object, Object> converted = new HashMap<Object, Object>();\nfields.eras = convertField(fields.eras, converted);\nfields.centuries = convertField(fields.centuries, converted);\nfields.years = convertField(fields.years, converted);\nfields.months = convertField(fields.months, converted);\nfields.weekyears = convertField(fields.weekyears, converted);\nfields.weeks = convertField(fields.weeks, converted);\nfields.days = convertField(fields.days, converted);\nfields.halfdays = convertField(fields.halfdays, converted);\nfields.hours = convertField(fields.hours, converted);\nfields.minutes = convertField(fields.minutes, converted);\nfields.seconds = convertField(fields.seconds, converted);\nfields.millis = convertField(fields.millis, converted);\nfields.year = convertField(fields.year, converted);\nfields.yearOfEra = convertField(fields.yearOfEra, converted);\nfields.yearOfCentury = convertField(fields.yearOfCentury, converted);\nfields.centuryOfEra = convertField(fields.centuryOfEra, converted);\nfields.era = convertField(fields.era, converted);\nfields.dayOfWeek = convertField(fields.dayOfWeek, converted);\nfields.dayOfMonth = convertField(fields.dayOfMonth, converted);\nfields.dayOfYear = convertField(fields.dayOfYear, converted);\nfields.monthOfYear = convertField(fields.monthOfYear, converted);\nfields.weekOfWeekyear = convertField(fields.weekOfWeekyear, converted);\nfields.weekyear = convertField(fields.weekyear, converted);\nfields.weekyearOfCentury = convertField(fields.weekyearOfCentury, converted);\nfields.millisOfSecond = convertField(fields.millisOfSecond, converted);\nfields.millisOfDay = convertField(fields.millisOfDay, converted);\nfields.secondOfMinute = convertField(fields.secondOfMinute, converted);\nfields.secondOfDay = convertField(fields.secondOfDay, converted);\nfields.minuteOfHour = convertField(fields.minuteOfHour, converted);\nfields.minuteOfDay = convertField(fields.minuteOfDay, converted);\nfields.hourOfDay = convertField(fields.hourOfDay, converted);\nfields.hourOfHalfday = convertField(fields.hourOfHalfday, converted);\nfields.clockhourOfDay = convertField(fields.clockhourOfDay, converted);\nfields.clockhourOfHalfday = convertField(fields.clockhourOfHalfday, converted);\nfields.halfdayOfDay = convertField(fields.halfdayOfDay, converted);\n}",
+            "method_id": 177
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDateTimeMillis(IIIIIII)J",
+            "method_body": "public long getDateTimeMillis(\nif ((base = getBase()) != null) {\nFieldUtils.verifyValueBounds(DateTimeFieldType.hourOfDay(), hourOfDay, 0, 23);\nFieldUtils.verifyValueBounds(DateTimeFieldType.minuteOfHour(), minuteOfHour, 0, 59);\nFieldUtils.verifyValueBounds(DateTimeFieldType.secondOfMinute(), secondOfMinute, 0, 59);\nFieldUtils.verifyValueBounds(DateTimeFieldType.millisOfSecond(), millisOfSecond, 0, 999);\nreturn getDateMidnightMillis(year, monthOfYear, dayOfMonth)\n}",
+            "method_id": 178
+        },
+        {
+            "method_signature": "org.joda.time.chrono.BasicChronology:getDayOfWeek(J)I",
+            "method_body": "int getDayOfWeek(long instant) {\nif (instant >= 0) {\ndaysSince19700101 = instant / DateTimeConstants.MILLIS_PER_DAY;\nreturn 1 + (int) ((daysSince19700101 + 3) % 7);\n}",
+            "method_id": 179
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "bug_id": 44,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.ode.events.EventStateTest.testIssue695",
+    "test_body": "public void testIssue695() {\n82: FirstOrderDifferentialEquations equation = new FirstOrderDifferentialEquations() {\n84: public int getDimension() {\nreturn 1;\n}\n88: public void computeDerivatives(double t, double[] y, double[] yDot) {\nyDot[0] = 1.0;\n}\n};\n93: DormandPrince853Integrator integrator = new DormandPrince853Integrator(0.001, 1000, 1.0e-14, 1.0e-14);\nintegrator.addEventHandler(new ResettingEvent(10.99), 0.1, 1.0e-9, 1000);\nintegrator.addEventHandler(new ResettingEvent(11.01), 0.1, 1.0e-9, 1000);\nintegrator.setInitialStepSize(3.0);\n98: double target = 30.0;\ndouble[] y = new double[1];\ndouble tEnd = integrator.integrate(equation, 0.0, y, target, y);\nAssert.assertEquals(target, tEnd, 1.0e-10);",
+    "stack_trace": "junit.framework.AssertionFailedError: going backard in time! (7.796578226186635 < 10.99)\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.apache.commons.math.ode.events.EventStateTest$ResettingEvent.g(EventStateTest.java:120)\nat org.apache.commons.math.ode.events.EventState.evaluateStep(EventState.java:214)\nat org.apache.commons.math.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:302)\nat org.apache.commons.math.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:296)\nat org.apache.commons.math.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:213)\nat org.apache.commons.math.ode.events.EventStateTest.testIssue695(EventStateTest.java:100)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:reinitialize([DZLorg/apache/commons/math/ode/EquationsMapper;[Lorg/apache/commons/math/ode/EquationsMapper;)V",
+            "method_body": "protected void reinitialize(final double[] y, final boolean isForward,\nglobalPreviousTime    = Double.NaN;\nglobalCurrentTime     = Double.NaN;\nsoftPreviousTime      = Double.NaN;\nsoftCurrentTime       = Double.NaN;\nh                     = Double.NaN;\ninterpolatedTime      = Double.NaN;\ncurrentState          = y;\nfinalized             = false;\nthis.forward          = isForward;\nthis.dirtyState       = true;\nthis.primaryMapper    = primary;\nthis.secondaryMappers = secondary.clone();\nallocateInterpolatedArrays(y.length);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:copy()Lorg/apache/commons/math/ode/sampling/StepInterpolator;",
+            "method_body": "public StepInterpolator copy() {\nfinalizeStep();\nreturn doCopy();\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.RungeKuttaStepInterpolator:reinitialize(Lorg/apache/commons/math/ode/AbstractIntegrator;[D[[DZLorg/apache/commons/math/ode/EquationsMapper;[Lorg/apache/commons/math/ode/EquationsMapper;)V",
+            "method_body": "public void reinitialize(final AbstractIntegrator rkIntegrator,\nreinitialize(y, forward, primaryMapper, secondaryMappers);\nthis.yDotK = yDotArray;\nthis.integrator = rkIntegrator;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:finalizeStep()V",
+            "method_body": "public final void finalizeStep() {\nif (! finalized) {\ndoFinalize();\nfinalized = true;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.AdaptiveStepsizeIntegrator:resetInternalState()V",
+            "method_body": "protected void resetInternalState() {\nstepStart = Double.NaN;\nstepSize  = FastMath.sqrt(minStep * maxStep);\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.nonstiff.RungeKuttaStepInterpolator:<init>()V",
+            "method_body": "protected RungeKuttaStepInterpolator() {\nsuper();\nyDotK      = null;\nintegrator = null;\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:<init>()V",
+            "method_body": "protected AbstractStepInterpolator() {\nglobalPreviousTime = Double.NaN;\nglobalCurrentTime  = Double.NaN;\nsoftPreviousTime   = Double.NaN;\nsoftCurrentTime    = Double.NaN;\nh                  = Double.NaN;\ninterpolatedTime   = Double.NaN;\ncurrentState       = null;\nfinalized          = false;\nthis.forward       = true;\nthis.dirtyState    = true;\nprimaryMapper      = null;\nsecondaryMappers   = null;\nallocateInterpolatedArrays(-1);\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getPreviousTime()D",
+            "method_body": "public double getPreviousTime() {\nreturn softPreviousTime;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getCurrentTime()D",
+            "method_body": "public double getCurrentTime() {\nreturn softCurrentTime;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:acceptStep(Lorg/apache/commons/math/ode/sampling/AbstractStepInterpolator;[D[DD)D",
+            "method_body": "protected double acceptStep(final AbstractStepInterpolator interpolator,\ndouble previousT = interpolator.getGlobalPreviousTime();\nfinal double currentT = interpolator.getGlobalCurrentTime();\nresetOccurred = false;\nif (! statesInitialized) {\nfor (EventState state : eventsStates) {\nstate.reinitializeBegin(interpolator);\nstatesInitialized = true;\nfinal int orderingSign = interpolator.isForward() ? +1 : -1;\nSortedSet<EventState> occuringEvents = new TreeSet<EventState>(new Comparator<EventState>() {\nreturn orderingSign * Double.compare(es0.getEventTime(), es1.getEventTime());\nfor (final EventState state : eventsStates) {\nif (state.evaluateStep(interpolator)) {\noccuringEvents.add(state);\nwhile (!occuringEvents.isEmpty()) {\nfinal Iterator<EventState> iterator = occuringEvents.iterator();\nfinal EventState currentEvent = iterator.next();\niterator.remove();\nfinal double eventT = currentEvent.getEventTime();\ninterpolator.setSoftPreviousTime(previousT);\ninterpolator.setSoftCurrentTime(eventT);\ninterpolator.setInterpolatedTime(eventT);\nfinal double[] eventY = interpolator.getInterpolatedState();\ncurrentEvent.stepAccepted(eventT, eventY);\nisLastStep = currentEvent.stop();\nfor (final StepHandler handler : stepHandlers) {\nif (isLastStep) {\nif (currentEvent.reset(eventT, eventY)) {\nSystem.arraycopy(eventY, 0, y, 0, y.length);\ncomputeDerivatives(eventT, y, yDot);\nresetOccurred = true;\nreturn eventT;\ninterpolator.setInterpolatedTime(currentT);\nfinal double[] currentY = interpolator.getInterpolatedState();\nfor (final EventState state : eventsStates) {\nstate.stepAccepted(currentT, currentY);\nisLastStep = isLastStep || state.stop();\nisLastStep = isLastStep || Precision.equals(currentT, tEnd, 1);\nfor (StepHandler handler : stepHandlers) {\nreturn currentT;\n}",
+            "method_id": 49
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getGlobalPreviousTime()D",
+            "method_body": "public double getGlobalPreviousTime() {\nreturn globalPreviousTime;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:getGlobalCurrentTime()D",
+            "method_body": "public double getGlobalCurrentTime() {\nreturn globalCurrentTime;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:verifySequence(DDD)V",
+            "method_body": "protected void verifySequence(final double lower,\nUnivariateRealSolverUtils.verifySequence(lower, initial, upper);\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.sampling.AbstractStepInterpolator:isForward()Z",
+            "method_body": "public boolean isForward() {\nreturn forward;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.BaseAbstractUnivariateRealSolver:getStartValue()D",
+            "method_body": "public double getStartValue() {\nreturn searchStart;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.math.analysis.solvers.UnivariateRealSolverUtils:verifySequence(DDD)V",
+            "method_body": "public static void verifySequence(final double lower,\nverifyInterval(lower, initial);\nverifyInterval(initial, upper);\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:setEquations(Lorg/apache/commons/math/ode/ExpandableStatefulODE;)V",
+            "method_body": "protected void setEquations(final ExpandableStatefulODE equations) {\nthis.expandable = equations;\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:computeDerivatives(D[D[D)V",
+            "method_body": "public abstract void integrate(ExpandableStatefulODE equations, double t)\nevaluations.incrementCount();\nexpandable.computeDerivatives(t, y, yDot);\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.AbstractIntegrator:setStateInitialized(Z)V",
+            "method_body": "protected void setStateInitialized(final boolean stateInitialized) {\nthis.statesInitialized = stateInitialized;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.math.ode.ExpandableStatefulODE:getTotalDimension()I",
+            "method_body": "public int getTotalDimension() {\nif (components.isEmpty()) {\nreturn primaryMapper.getDimension();\n}",
+            "method_id": 59
+        }
+    ]
+}

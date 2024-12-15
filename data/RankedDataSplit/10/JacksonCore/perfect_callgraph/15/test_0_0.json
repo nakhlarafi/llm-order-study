@@ -1,0 +1,59 @@
+{
+    "bug_id": 15,
+    "test_id": 0,
+    "test_name": "com.fasterxml.jackson.core.filter.BasicParserFilteringTest.testNotAllowMultipleMatches",
+    "test_body": "public void testNotAllowMultipleMatches() throws Exception\n{\nString jsonString = aposToQuotes(\"{'a':123,'array':[1,2],'ob':{'value0':2,'value':3,'value2':4},'value':4,'b':true}\");\nJsonParser p0 = JSON_F.createParser(jsonString);\nJsonParser p = new FilteringParserDelegate(p0,\nnew NameMatchFilter(\"value\"),\nfalse, // includePath\nfalse // multipleMatches -false\n);\nString result = readAndWrite(JSON_F, p);\nassertEquals(aposToQuotes(\"3\"), result);\n}\n",
+    "stack_trace": "junit.framework.ComparisonFailure: expected:<3[]> but was:<3[ 4]>\nat junit.framework.Assert.assertEquals(Assert.java:100)\nat junit.framework.Assert.assertEquals(Assert.java:107)\nat junit.framework.TestCase.assertEquals(TestCase.java:269)\nat com.fasterxml.jackson.core.filter.BasicParserFilteringTest.testNotAllowMultipleMatches(BasicParserFilteringTest.java:118)",
+    "covered_methods": [
+        {
+            "method_signature": "com.fasterxml.jackson.core.filter.FilteringParserDelegate:nextToken()Lcom/fasterxml/jackson/core/JsonToken;",
+            "method_body": "public JsonToken nextToken() throws IOException\nTokenFilterContext ctxt = _exposedContext;\nif (ctxt != null) {\nJsonToken t = delegate.nextToken();\nif (t == null) {\nswitch (t.id()) {\nf = _itemFilter;\nif (f == TokenFilter.INCLUDE_ALL) {\nif (f == null) { // does this occur?\nf = _headContext.checkValue(f);\nif (f == null) {\nif (f != TokenFilter.INCLUDE_ALL) {\nf = f.filterStartObject();\n_itemFilter = f;\nif (f == TokenFilter.INCLUDE_ALL) {\n_headContext = _headContext.createChildObjectContext(f, false);\nif (_includePath) {\nfinal String name = delegate.getCurrentName();\nf = _headContext.setFieldName(name);\nif (f == TokenFilter.INCLUDE_ALL) {\nif (f == null) {\nf = f.includeProperty(name);\nif (f == null) {\n_itemFilter = f;\nif (f == TokenFilter.INCLUDE_ALL) {\nif (_includePath) {\nreturn _nextToken2();\nJsonToken t = delegate.nextToken();\nif (t == null) { // is this even legal?\nreturn (_currToken = t);\nswitch (t.id()) {\nf = _itemFilter;\nif (f == TokenFilter.INCLUDE_ALL) {\nif (f == null) { // does this occur?\nf = _headContext.checkValue(f);\nif (f == null) {\nif (f != TokenFilter.INCLUDE_ALL) {\nf = f.filterStartArray();\n_itemFilter = f;\nif (f == TokenFilter.INCLUDE_ALL) {\n_headContext = _headContext.createChildArrayContext(f, false);\nif (_includePath) {\nf = _itemFilter;\nif (f == TokenFilter.INCLUDE_ALL) {\nif (f == null) { // does this occur?\nf = _headContext.checkValue(f);\nif (f == null) {\nif (f != TokenFilter.INCLUDE_ALL) {\nf = f.filterStartObject();\n_itemFilter = f;\nif (f == TokenFilter.INCLUDE_ALL) {\n_headContext = _headContext.createChildObjectContext(f, false);\nif (_includePath) {\nboolean returnEnd = _headContext.isStartHandled();\nf = _headContext.getFilter();\nif ((f != null) && (f != TokenFilter.INCLUDE_ALL)) {\nf.filterFinishArray();\n_headContext = _headContext.getParent();\n_itemFilter = _headContext.getFilter();\nif (returnEnd) {\ncontinue main_loop;\nfinal String name = delegate.getCurrentName();\nf = _headContext.setFieldName(name);\nif (f == TokenFilter.INCLUDE_ALL) {\nif (f == null) { // filter out the value\nf = f.includeProperty(name);\nif (f == null) { // filter out the value\n_itemFilter = f;\nif (f == TokenFilter.INCLUDE_ALL) {\nif (_includePath) {\nif (_includePath) {\ncontinue main_loop;\nf = _itemFilter;\nif (f == TokenFilter.INCLUDE_ALL) {\nreturn (_currToken = t);\nif (f != null) {\nf = _headContext.checkValue(f);\nif ((f == TokenFilter.INCLUDE_ALL)\n}\npublic int getIntValue() throws IOException { return delegate.getIntValue(); }\npublic NumberType getNumberType() throws IOException { return delegate.getNumberType(); }\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:createParser(Ljava/lang/String;)Lcom/fasterxml/jackson/core/JsonParser;",
+            "method_body": "public JsonParser createParser(String content) throws IOException, JsonParseException {\nfinal int strLen = content.length();\nif (_inputDecorator != null || strLen > 0x8000 || !canUseCharArrays()) {\nIOContext ctxt = _createContext(content, true);\nchar[] buf = ctxt.allocTokenBuffer(strLen);\ncontent.getChars(0, strLen, buf, 0);\nreturn _createParser(buf, 0, strLen, ctxt, true);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory:_getBufferRecycler()Lcom/fasterxml/jackson/core/util/BufferRecycler;",
+            "method_body": "public BufferRecycler _getBufferRecycler()\nif (isEnabled(Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)) {\nSoftReference<BufferRecycler> ref = _recyclerRef.get();\nbr = (ref == null) ? null : ref.get();\nif (br == null) {\nbr = new BufferRecycler();\n_recyclerRef.set(new SoftReference<BufferRecycler>(br));\n} else {\nreturn br;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:<init>()V",
+            "method_body": "public BufferRecycler() {\nthis(4, 4);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.sym.CharsToNameCanonicalizer:makeChild(I)Lcom/fasterxml/jackson/core/sym/CharsToNameCanonicalizer;",
+            "method_body": "public CharsToNameCanonicalizer makeChild(int flags) {\nsynchronized (this) {\nsymbols = _symbols;\nbuckets = _buckets;\nsize = _size;\nhashSeed = _hashSeed;\nlongestCollisionList = _longestCollisionList;\n}\nreturn new CharsToNameCanonicalizer(this, flags,\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.JsonFactory$Feature:getMask()I",
+            "method_body": "public int getMask() { return (1 << ordinal()); }\npublic int getMask() { return (1 << ordinal()); }",
+            "method_id": 5
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:<init>(II)V",
+            "method_body": "protected BufferRecycler(int bbCount, int cbCount) {\n_byteBuffers = new byte[bbCount][];\n_charBuffers = new char[cbCount][];\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:allocTokenBuffer(I)[C",
+            "method_body": "public char[] allocTokenBuffer(int minSize) {\n_verifyAlloc(_tokenCBuffer);\nreturn (_tokenCBuffer = _bufferRecycler.allocCharBuffer(BufferRecycler.CHAR_TOKEN_BUFFER, minSize));\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.io.IOContext:_verifyAlloc(Ljava/lang/Object;)V",
+            "method_body": "protected final void _verifyAlloc(Object buffer) {\nif (buffer != null) { throw new IllegalStateException(\"Trying to call same allocXxx() method second time\"); }\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "com.fasterxml.jackson.core.util.BufferRecycler:allocCharBuffer(II)[C",
+            "method_body": "public char[] allocCharBuffer(int ix, int minSize) {\nfinal int DEF_SIZE = charBufferLength(ix);\nif (minSize < DEF_SIZE) {\nminSize = DEF_SIZE;\nchar[] buffer = _charBuffers[ix];\nif (buffer == null || buffer.length < minSize) {\nbuffer = calloc(minSize);\nreturn buffer;\n}",
+            "method_id": 9
+        }
+    ]
+}

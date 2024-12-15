@@ -1,0 +1,59 @@
+{
+    "bug_id": 76,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.linear.SingularValueSolverTest.testMath320B",
+    "test_body": "public void testMath320B() {\nRealMatrix rm = new Array2DRowRealMatrix(new double[][] {\n{ 1.0, 2.0 }, { 1.0, 2.0 }\n});\nSingularValueDecomposition svd =\nnew SingularValueDecompositionImpl(rm);\nRealMatrix recomposed = svd.getU().multiply(svd.getS()).multiply(svd.getVT());\nAssert.assertEquals(0.0, recomposed.subtract(rm).getNorm(), 2.0e-15);\n}\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<3.2>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.linear.SingularValueSolverTest.testMath320B(SingularValueSolverTest.java:219)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getS()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getS()\nif (cachedS == null) {\ncachedS = MatrixUtils.createRealDiagonalMatrix(singularValues);\nreturn cachedS;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:<init>(Lorg/apache/commons/math/linear/RealMatrix;I)V",
+            "method_body": "public SingularValueDecompositionImpl(final RealMatrix matrix, final int max)\nthrows InvalidMatrixException {\nm = matrix.getRowDimension();\nn = matrix.getColumnDimension();\ncachedU  = null;\ncachedS  = null;\ncachedV  = null;\ncachedVt = null;\ntransformer         = new BiDiagonalTransformer(matrix);\nmainBidiagonal      = transformer.getMainDiagonalRef();\nsecondaryBidiagonal = transformer.getSecondaryDiagonalRef();\nmainTridiagonal      = new double[mainBidiagonal.length];\nsecondaryTridiagonal = new double[mainBidiagonal.length - 1];\ndouble a = mainBidiagonal[0];\nmainTridiagonal[0] = a * a;\nfor (int i = 1; i < mainBidiagonal.length; ++i) {\nfinal double b  = secondaryBidiagonal[i - 1];\nsecondaryTridiagonal[i - 1] = a * b;\na = mainBidiagonal[i];\nmainTridiagonal[i] = a * a + b * b;\neigenDecomposition =\nfinal double[] eigenValues = eigenDecomposition.getRealEigenvalues();\nint p = Math.min(max, eigenValues.length);\nwhile ((p > 0) && (eigenValues[p - 1] <= 0)) {\n--p;\nsingularValues = new double[p];\nfor (int i = 0; i < p; ++i) {\nsingularValues[i] = Math.sqrt(eigenValues[i]);\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.ArrayRealVector:getDimension()I",
+            "method_body": "public int getDimension() {\nreturn data.length;\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix$1:end()D",
+            "method_body": "public double getNorm() {\nreturn walkInColumnOrder(new RealMatrixPreservingVisitor() {\nthis.endRow = endRow;\ncolumnSum   = 0;\nmaxColSum   = 0;\n}\ncolumnSum += Math.abs(value);\nif (row == endRow) {\nmaxColSum = Math.max(maxColSum, columnSum);\ncolumnSum = 0;\n}\nreturn maxColSum;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:<init>(Lorg/apache/commons/math/linear/RealMatrix;)V",
+            "method_body": "public SingularValueDecompositionImpl(final RealMatrix matrix)\nthis(matrix, Math.min(matrix.getRowDimension(), matrix.getColumnDimension()));\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.AbstractRealMatrix:transpose()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix transpose() {\nfinal int nRows = getRowDimension();\nfinal int nCols = getColumnDimension();\nfinal RealMatrix out = createMatrix(nCols, nRows);\nwalkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {\nout.setEntry(column, row, value);\n}\nreturn out;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.Array2DRowRealMatrix:<init>(II)V",
+            "method_body": "public Array2DRowRealMatrix(final int rowDimension, final int columnDimension)\nsuper(rowDimension, columnDimension);\ndata = new double[rowDimension][columnDimension];\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:findEigenVectors()V",
+            "method_body": "private void findEigenVectors() {\nfinal int m = main.length;\neigenvectors = new ArrayRealVector[m];\nfinal double[] d = new double[m];\nfinal double[] l = new double[m - 1];\nfinal double mu = realEigenvalues[m-1] <= 0 && realEigenvalues[0] > 0 ? 0.5-realEigenvalues[m-1] : 0;\ndouble di = main[0]+mu;\nd[0] = di;\nfor (int i = 1; i < m; ++i) {\nfinal double eiM1  = secondary[i - 1];\nfinal double ratio = eiM1 / di;\ndi       = main[i] - eiM1 * ratio + mu;\nl[i - 1] = ratio;\nd[i]     = di;\nfor (int i = 0; i < m; ++i) {\neigenvectors[i] = findEigenvector(realEigenvalues[i]+mu, d, l);\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.SingularValueDecompositionImpl:getVT()Lorg/apache/commons/math/linear/RealMatrix;",
+            "method_body": "public RealMatrix getVT()\nif (cachedVt == null) {\ncachedVt = getV().transpose();\nreturn cachedVt;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.math.linear.EigenDecompositionImpl:process2RowsBlock(I)V",
+            "method_body": "private void process2RowsBlock(final int index)\nfinal double q0   = main[index];\nfinal double q1   = main[index + 1];\nfinal double e12  = squaredSecondary[index];\nfinal double s     = q0 + q1;\nfinal double p     = q0 * q1 - e12;\nfinal double delta = s * s - 4 * p;\nif (delta < 0) {\nfinal double largestRoot = 0.5 * (s + Math.sqrt(delta));\nrealEigenvalues[index]     = largestRoot;\nrealEigenvalues[index + 1] = p / largestRoot;\n}",
+            "method_id": 29
+        }
+    ]
+}

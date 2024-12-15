@@ -1,0 +1,59 @@
+{
+    "bug_id": 43,
+    "test_id": 0,
+    "test_name": "org.apache.commons.compress.archivers.zip.DataDescriptorTest.doesntWriteDataDescriptorWhenAddingRawEntries",
+    "test_body": "135: public void doesntWriteDataDescriptorWhenAddingRawEntries() throws IOException {\n136: ByteArrayOutputStream init = new ByteArrayOutputStream();\n137: try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(init)) {\n138: zos.putArchiveEntry(new ZipArchiveEntry(\"test1.txt\"));\n139: zos.write(\"foo\".getBytes(\"UTF-8\"));\n140: zos.closeArchiveEntry();\n141: }\n142: 143: File f = new File(dir, \"test.zip\");\n144: try (FileOutputStream fos = new FileOutputStream(f)) {\n145: fos.write(init.toByteArray());\n146: }\n147: 148: ByteArrayOutputStream o = new ByteArrayOutputStream();\n149: ZipArchiveEntry zae;\n150: try (ZipFile zf = new ZipFile(f);\n151: ZipArchiveOutputStream zos = new ZipArchiveOutputStream(o)) {\n152: zae = zf.getEntry(\"test1.txt\");\n153: zos.addRawArchiveEntry(zae, zf.getRawInputStream(zae));\n154: }\n155: 156: byte[] data = o.toByteArray();\n157: byte[] versionInLFH = Arrays.copyOfRange(data, 4, 6);\n158: // still 2.0 because of Deflate\n159: assertArrayEquals(new byte[] { 20, 0 }, versionInLFH);\n160: byte[] gpbInLFH = Arrays.copyOfRange(data, 6, 8);\n161: // no DD but EFS flag\n162: assertArrayEquals(new byte[] { 0, 8 }, gpbInLFH);\n163: 164: int cdhStart = findCentralDirectory(data);\n165: byte[] versionInCDH = Arrays.copyOfRange(data, cdhStart + 6, cdhStart + 8);\n166: assertArrayEquals(new byte[] { 20, 0 }, versionInCDH);\n167: byte[] gpbInCDH = Arrays.copyOfRange(data, cdhStart + 8, cdhStart + 10);\n168: assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);\n169: 170: int ddStart = cdhStart - 16;\n171: assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));\n172: long crcFromLFH = ZipLong.getValue(data, 14);\n173: long cSizeFromLFH = ZipLong.getValue(data, 18);\n174: long sizeFromLFH = ZipLong.getValue(data, 22);\n175: assertEquals(3, sizeFromLFH);\n176: 177: long crcFromCDH = ZipLong.getValue(data, cdhStart + 16);\n178: assertEquals(crcFromLFH, crcFromCDH);\n179: long cSizeFromCDH = ZipLong.getValue(data, cdhStart + 20);\n180: assertEquals(cSizeFromLFH, cSizeFromCDH);\n181: long sizeFromCDH = ZipLong.getValue(data, cdhStart + 24);\n182: assertEquals(sizeFromLFH, sizeFromCDH);\n183: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:close()V",
+            "method_body": "public void close() throws IOException {\nif (!finished) {\nfinish();\ndestroy();\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:finish()V",
+            "method_body": "public void finish() throws IOException {\nif (finished) {\nif (entry != null) {\ncdOffset = streamCompressor.getTotalBytesWritten();\nwriteCentralDirectoryInChunks();\ncdLength = streamCompressor.getTotalBytesWritten() - cdOffset;\nwriteZip64CentralDirectory();\nwriteCentralDirectoryEnd();\nmetaData.clear();\nentries.clear();\nstreamCompressor.close();\nfinished = true;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeCentralDirectoryInChunks()V",
+            "method_body": "private void writeCentralDirectoryInChunks() throws IOException {\nfinal int NUM_PER_WRITE = 1000;\nfinal ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(70 * NUM_PER_WRITE);\nint count = 0;\nfor (final ZipArchiveEntry ze : entries) {\nbyteArrayOutputStream.write(createCentralFileHeader(ze));\nif (++count > NUM_PER_WRITE){\n}\nwriteCounted(byteArrayOutputStream.toByteArray());\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeZip64CentralDirectory()V",
+            "method_body": "protected void writeZip64CentralDirectory() throws IOException {\nif (zip64Mode == Zip64Mode.Never) {\nif (!hasUsedZip64\nif (!hasUsedZip64) {\nreturn;\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:writeCentralDirectoryEnd()V",
+            "method_body": "protected void writeCentralDirectoryEnd() throws IOException {\nwriteCounted(EOCD_SIG);\nwriteCounted(ZERO);\nwriteCounted(ZERO);\nfinal int numberOfEntries = entries.size();\nif (numberOfEntries > ZIP64_MAGIC_SHORT\nif (cdOffset > ZIP64_MAGIC && zip64Mode == Zip64Mode.Never) {\nfinal byte[] num = ZipShort.getBytes(Math.min(numberOfEntries,\nwriteCounted(num);\nwriteCounted(num);\nwriteCounted(ZipLong.getBytes(Math.min(cdLength, ZIP64_MAGIC)));\nwriteCounted(ZipLong.getBytes(Math.min(cdOffset, ZIP64_MAGIC)));\nfinal ByteBuffer data = this.zipEncoding.encode(comment);\nfinal int dataLen = data.limit() - data.position();\nwriteCounted(ZipShort.getBytes(dataLen));\nstreamCompressor.writeCounted(data.array(), data.arrayOffset(), dataLen);\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.StreamCompressor:close()V",
+            "method_body": "public void close() throws IOException {\ndef.end();\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream:destroy()V",
+            "method_body": "void destroy() throws IOException {\nif (channel != null) {\nif (out != null) {\nout.close();\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:populateFromCentralDirectory()Ljava/util/Map;",
+            "method_body": "private Map<ZipArchiveEntry, NameAndComment> populateFromCentralDirectory()\nfinal HashMap<ZipArchiveEntry, NameAndComment> noUTF8Flag =\npositionAtCentralDirectory();\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nlong sig = ZipLong.getValue(wordBuf);\nif (sig != CFH_SIG && startsWithLocalFileHeader()) {\nwhile (sig == CFH_SIG) {\nreadCentralDirectoryEntry(noUTF8Flag);\nwordBbuf.rewind();\nIOUtils.readFully(archive, wordBbuf);\nsig = ZipLong.getValue(wordBuf);\nreturn noUTF8Flag;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:getEntry(Ljava/lang/String;)Lorg/apache/commons/compress/archivers/zip/ZipArchiveEntry;",
+            "method_body": "public ZipArchiveEntry getEntry(final String name) {\nfinal LinkedList<ZipArchiveEntry> entriesOfThatName = nameMap.get(name);\nreturn entriesOfThatName != null ? entriesOfThatName.getFirst() : null;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.compress.archivers.zip.ZipFile:createBoundedInputStream(JJ)Lorg/apache/commons/compress/archivers/zip/ZipFile$BoundedInputStream;",
+            "method_body": "private BoundedInputStream createBoundedInputStream(long start, long remaining) {\nreturn archive instanceof FileChannel ?\n}",
+            "method_id": 39
+        }
+    ]
+}

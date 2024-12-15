@@ -1,0 +1,109 @@
+{
+    "bug_id": 11,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.distribution.MultivariateNormalDistributionTest.testUnivariateDistribution",
+    "test_body": "public void testUnivariateDistribution() {\nfinal double[] mu = { -1.5 };\nfinal double[][] sigma = { { 1 } };\n143: final MultivariateNormalDistribution multi = new MultivariateNormalDistribution(mu, sigma);\n145: final NormalDistribution uni = new NormalDistribution(mu[0], sigma[0][0]);\nfinal Random rng = new Random();\nfinal int numCases = 100;\nfinal double tol = Math.ulp(1d);\nfor (int i = 0; i < numCases; i++) {\nfinal double v = rng.nextDouble() * 10 - 5;\nAssert.assertEquals(uni.density(v), multi.density(new double[] { v }), tol);\n}",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.23644016090654427> but was:<0.5926675925866471>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math3.distribution.MultivariateNormalDistributionTest.testUnivariateDistribution(MultivariateNormalDistributionTest.java:151)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.distribution.MultivariateNormalDistribution:<init>(Lorg/apache/commons/math3/random/RandomGenerator;[D[[D)V",
+            "method_body": "public MultivariateNormalDistribution(RandomGenerator rng,\nsuper(rng, means.length);\nfinal int dim = means.length;\nif (covariances.length != dim) {\nfor (int i = 0; i < dim; i++) {\nif (dim != covariances[i].length) {\nthis.means = MathArrays.copyOf(means);\ncovarianceMatrix = new Array2DRowRealMatrix(covariances);\nfinal EigenDecomposition covMatDec = new EigenDecomposition(covarianceMatrix);\ncovarianceMatrixInverse = covMatDec.getSolver().getInverse();\ncovarianceMatrixDeterminant = covMatDec.getDeterminant();\nfinal double[] covMatEigenvalues = covMatDec.getRealEigenvalues();\nfor (int i = 0; i < covMatEigenvalues.length; i++) {\nif (covMatEigenvalues[i] < 0) {\nfinal Array2DRowRealMatrix covMatEigenvectors = new Array2DRowRealMatrix(dim, dim);\nfor (int v = 0; v < dim; v++) {\nfinal double[] evec = covMatDec.getEigenvector(v).toArray();\ncovMatEigenvectors.setColumn(v, evec);\nfinal RealMatrix tmpMatrix = covMatEigenvectors.transpose();\nfor (int row = 0; row < dim; row++) {\nfinal double factor = FastMath.sqrt(covMatEigenvalues[row]);\nfor (int col = 0; col < dim; col++) {\ntmpMatrix.multiplyEntry(row, col, factor);\nsamplingMatrix = covMatEigenvectors.multiply(tmpMatrix);\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.EigenDecomposition:getDeterminant()D",
+            "method_body": "public double getDeterminant() {\ndouble determinant = 1;\nfor (double lambda : realEigenvalues) {\ndeterminant *= lambda;\nreturn determinant;\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.MathArrays:copyOf([DI)[D",
+            "method_body": "public static double[] copyOf(double[] source, int len) {\nfinal double[] output = new double[len];\nSystem.arraycopy(source, 0, output, 0, FastMath.min(len, source.length));\nreturn output;\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.TriDiagonalTransformer:getMainDiagonalRef()[D",
+            "method_body": "double[] getMainDiagonalRef() {\nreturn main;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.math3.distribution.AbstractMultivariateRealDistribution:getDimension()I",
+            "method_body": "public int getDimension() {\nreturn dimension;\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.EigenDecomposition:<init>(Lorg/apache/commons/math3/linear/RealMatrix;)V",
+            "method_body": "public EigenDecomposition(final RealMatrix matrix)\nthrows MathArithmeticException {\nfinal double symTol = 10 * matrix.getRowDimension() * matrix.getColumnDimension() * Precision.EPSILON;\nisSymmetric = MatrixUtils.isSymmetric(matrix, symTol);\nif (isSymmetric) {\ntransformToTridiagonal(matrix);\nfindEigenVectors(transformer.getQ().getData());\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:min(II)I",
+            "method_body": "public static int min(final int a, final int b) {\nreturn (a <= b) ? a : b;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.Precision:equals(DDI)Z",
+            "method_body": "public static boolean equals(double x, double y, int maxUlps) {\nlong xInt = Double.doubleToLongBits(x);\nlong yInt = Double.doubleToLongBits(y);\nif (xInt < 0) {\nif (yInt < 0) {\nfinal boolean isEqual = FastMath.abs(xInt - yInt) <= maxUlps;\nreturn isEqual && !Double.isNaN(x) && !Double.isNaN(y);\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.FastMath:abs(J)J",
+            "method_body": "public static long abs(final long x) {\nreturn (x < 0l) ? -x : x;\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.AbstractRealMatrix:multiply(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public RealMatrix multiply(final RealMatrix m)\nMatrixUtils.checkMultiplicationCompatible(this, m);\nfinal int nRows = getRowDimension();\nfinal int nCols = m.getColumnDimension();\nfinal int nSum  = getColumnDimension();\nfinal RealMatrix out = createMatrix(nRows, nCols);\nfor (int row = 0; row < nRows; ++row) {\nfor (int col = 0; col < nCols; ++col) {\ndouble sum = 0;\nfor (int i = 0; i < nSum; ++i) {\nsum += getEntry(row, i) * m.getEntry(i, col);\nout.setEntry(row, col, sum);\nreturn out;\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.ArrayRealVector:toArray()[D",
+            "method_body": "public double[] toArray(){\nreturn data.clone();\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.DefaultRealMatrixPreservingVisitor:end()D",
+            "method_body": "public double end() {\nreturn 0;\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.Array2DRowRealMatrix:getData()[[D",
+            "method_body": "public double[][] getData() {\nreturn copyOut();\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.Array2DRowRealMatrix:getRowDimension()I",
+            "method_body": "public int getRowDimension() {\nreturn (data == null) ? 0 : data.length;\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.Array2DRowRealMatrix:getColumnDimension()I",
+            "method_body": "public int getColumnDimension() {\nreturn ((data == null) || (data[0] == null)) ? 0 : data[0].length;\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.apache.commons.math3.util.MathUtils:checkNotNull(Ljava/lang/Object;)V",
+            "method_body": "public static void checkNotNull(Object o)\nif (o == null) {\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.MatrixUtils:isSymmetricInternal(Lorg/apache/commons/math3/linear/RealMatrix;DZ)Z",
+            "method_body": "private static boolean isSymmetricInternal(RealMatrix matrix,\nfinal int rows = matrix.getRowDimension();\nif (rows != matrix.getColumnDimension()) {\nfor (int i = 0; i < rows; i++) {\nfor (int j = i + 1; j < rows; j++) {\nreturn true;\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.TriDiagonalTransformer:getSecondaryDiagonalRef()[D",
+            "method_body": "double[] getSecondaryDiagonalRef() {\nreturn secondary;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.MatrixUtils:createRealMatrix([[D)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createRealMatrix(double[][] data)\nif (data == null ||\nreturn (data.length * data[0].length <= 4096) ?\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.apache.commons.math3.distribution.AbstractRealDistribution:<init>(Lorg/apache/commons/math3/random/RandomGenerator;)V",
+            "method_body": "protected AbstractRealDistribution(RandomGenerator rng) {\nrandom = rng;\n}",
+            "method_id": 79
+        }
+    ]
+}

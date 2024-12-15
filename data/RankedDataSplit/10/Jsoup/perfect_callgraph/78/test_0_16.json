@@ -1,0 +1,59 @@
+{
+    "bug_id": 78,
+    "test_id": 0,
+    "test_name": "org.jsoup.integration.ConnectTest.handlesEmptyStreamDuringParseRead",
+    "test_body": "391: public void handlesEmptyStreamDuringParseRead() throws IOException {\n392: // this handles situations where the remote server sets a content length greater than it actually writes\n393: 394: Connection.Response res = Jsoup.connect(InterruptedServlet.Url)\n395: .timeout(200)\n396: .execute();\n397: 398: boolean threw = false;\n399: try {\n400: Document document = res.parse();\n401: assertEquals(\"Something\", document.title());\n402: } catch (IOException e) {\n403: threw = true;\n404: }\n405: assertEquals(true, threw);\n406: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:detectCharsetFromBom(Ljava/nio/ByteBuffer;)Lorg/jsoup/helper/DataUtil$BomCharset;",
+            "method_body": "private static BomCharset detectCharsetFromBom(final ByteBuffer byteData) {\nfinal Buffer buffer = byteData; // .mark and rewind used to return Buffer, now ByteBuffer, so cast for backward compat\nbuffer.mark();\nbyte[] bom = new byte[4];\nif (byteData.remaining() >= bom.length) {\nbyteData.get(bom);\nbuffer.rewind();\nif (bom[0] == 0x00 && bom[1] == 0x00 && bom[2] == (byte) 0xFE && bom[3] == (byte) 0xFF || // BE\n} else if (bom[0] == (byte) 0xFE && bom[1] == (byte) 0xFF || // BE\n} else if (bom[0] == (byte) 0xEF && bom[1] == (byte) 0xBB && bom[2] == (byte) 0xBF) {\nreturn null;\n}",
+            "method_id": 160
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:<init>(Ljava/io/InputStream;II)V",
+            "method_body": "private ConstrainableInputStream(InputStream in, int bufferSize, int maxSize) {\nsuper(in, bufferSize);\nValidate.isTrue(maxSize >= 0);\nthis.maxSize = maxSize;\nremaining = maxSize;\ncapped = maxSize != 0;\nstartTime = System.nanoTime();\n}",
+            "method_id": 161
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:wrap(Ljava/io/InputStream;II)Lorg/jsoup/internal/ConstrainableInputStream;",
+            "method_body": "public static ConstrainableInputStream wrap(InputStream in, int bufferSize, int maxSize) {\nreturn in instanceof ConstrainableInputStream\n}",
+            "method_id": 162
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:read([BII)I",
+            "method_body": "public int read(byte[] b, int off, int len) throws IOException {\nif (interrupted || capped && remaining <= 0)\nif (Thread.interrupted()) {\nif (expired())\nif (capped && len > remaining)\nfinal int read = super.read(b, off, len);\nremaining -= read;\nreturn read;\n} catch (SocketTimeoutException e) {\nreturn 0;\n}",
+            "method_id": 163
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:readToByteBuffer(I)Ljava/nio/ByteBuffer;",
+            "method_body": "public ByteBuffer readToByteBuffer(int max) throws IOException {\nValidate.isTrue(max >= 0, \"maxSize must be 0 (unlimited) or larger\");\nfinal boolean localCapped = max > 0; // still possibly capped in total stream\nfinal int bufferSize = localCapped && max < DefaultSize ? max : DefaultSize;\nfinal byte[] readBuffer = new byte[bufferSize];\nfinal ByteArrayOutputStream outStream = new ByteArrayOutputStream(bufferSize);\nint remaining = max;\nread = read(readBuffer);\nif (read == -1) break;\nif (localCapped) { // this local byteBuffer cap may be smaller than the overall maxSize (like when reading first bytes)\nif (read >= remaining) {\noutStream.write(readBuffer, 0, remaining);\nbreak;\nreturn ByteBuffer.wrap(outStream.toByteArray());\n}",
+            "method_id": 164
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:reset()V",
+            "method_body": "public void reset() throws IOException {\nsuper.reset();\nremaining = maxSize - markpos;\n}",
+            "method_id": 165
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:timeout(JJ)Lorg/jsoup/internal/ConstrainableInputStream;",
+            "method_body": "public ConstrainableInputStream timeout(long startTimeNanos, long timeoutMillis) {\nthis.startTime = startTimeNanos;\nthis.timeout = timeoutMillis * 1000000;\nreturn this;\n}",
+            "method_id": 166
+        },
+        {
+            "method_signature": "org.jsoup.internal.ConstrainableInputStream:expired()Z",
+            "method_body": "private boolean expired() {\nif (timeout == 0)\nfinal long now = System.nanoTime();\nfinal long dur = now - startTime;\nreturn (dur > timeout);\n}",
+            "method_id": 167
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:encodeUrl(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "private static String encodeUrl(String url) {\nURL u = new URL(url);\nreturn encodeUrl(u).toExternalForm();\n}",
+            "method_id": 168
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:encodeUrl(Ljava/net/URL;)Ljava/net/URL;",
+            "method_body": "static URL encodeUrl(URL u) {\nString urlS = u.toExternalForm(); // URL external form may have spaces which is illegal in new URL() (odd asymmetry)\nurlS = urlS.replaceAll(\" \", \"%20\");\nfinal URI uri = new URI(urlS);\nreturn new URL(uri.toASCIIString());\n}",
+            "method_id": 169
+        }
+    ]
+}

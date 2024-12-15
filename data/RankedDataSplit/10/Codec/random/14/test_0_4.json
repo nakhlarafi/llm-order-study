@@ -1,0 +1,59 @@
+{
+    "bug_id": 14,
+    "test_id": 0,
+    "test_name": "org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest.testCompatibilityWithOriginalVersion",
+    "test_body": "public void testCompatibilityWithOriginalVersion() {\n// see CODEC-187\n// comparison: http://stevemorse.org/census/soundex.html\n185: Map<String, String> args = new TreeMap<String, String>();\nargs.put(\"nameType\", \"GENERIC\");\nargs.put(\"ruleType\", \"APPROX\");\n189: assertEquals(encode(args, true, \"abram\"), \"Ybram|Ybrom|abram|abran|abrom|abron|avram|avrom|obram|obran|obrom|obron|ovram|ovrom\");\nassertEquals(encode(args, true, \"Bendzin\"), \"bndzn|bntsn|bnzn|vndzn|vntsn\");\n192: args.put(\"nameType\", \"ASHKENAZI\");\nargs.put(\"ruleType\", \"APPROX\");\n195: assertEquals(encode(args, true, \"abram\"), \"Ybram|Ybrom|abram|abrom|avram|avrom|imbram|imbrom|obram|obrom|ombram|ombrom|ovram|ovrom\");\nassertEquals(encode(args, true, \"Halpern\"), \"YlpYrn|Ylpirn|alpYrn|alpirn|olpYrn|olpirn|xalpirn|xolpirn\");\n198: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<...dzn|bntsn|bnzn|vndzn[]> but was:<...dzn|bntsn|bnzn|vndzn[|vntsn]>\nat org.junit.Assert.assertEquals(Assert.java:115)\nat org.junit.Assert.assertEquals(Assert.java:144)\nat org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest.testCompatibilityWithOriginalVersion(PhoneticEngineRegressionTest.java:190)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.NameType:<init>(Ljava/lang/String;ILjava/lang/String;)V",
+            "method_body": "NameType(final String name) {\nthis.name = name;\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Rule:parsePhoneme(Ljava/lang/String;)Lorg/apache/commons/codec/language/bm/Rule$Phoneme;",
+            "method_body": "private static Phoneme parsePhoneme(final String ph) {\nfinal int open = ph.indexOf(\"[\");\nif (open >= 0) {\nif (!ph.endsWith(\"]\")) {\nfinal String before = ph.substring(0, open);\nfinal String in = ph.substring(open + 1, ph.length() - 1);\nfinal Set<String> langs = new HashSet<String>(Arrays.asList(in.split(\"[+]\")));\nreturn new Phoneme(before, Languages.LanguageSet.from(langs));\nreturn new Phoneme(ph, Languages.ANY_LANGUAGE);\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Lang:<clinit>()V",
+            "method_body": "private static final Map<NameType, Lang> Langs = new EnumMap<NameType, Lang>(NameType.class);\nfor (final NameType s : NameType.values()) {\nLangs.put(s, loadFromResource(LANGUAGE_RULES_RN, Languages.getInstance(s)));\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Rule:createScanner(Ljava/lang/String;)Ljava/util/Scanner;",
+            "method_body": "private static Scanner createScanner(final String lang) {\nfinal String resName = String.format(\"org/apache/commons/codec/language/bm/%s.txt\", lang);\nfinal InputStream rulesIS = Languages.class.getClassLoader().getResourceAsStream(resName);\nif (rulesIS == null) {\nreturn new Scanner(rulesIS, ResourceConstants.ENCODING);\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Rule$Phoneme$1:compare(Lorg/apache/commons/codec/language/bm/Rule$Phoneme;Lorg/apache/commons/codec/language/bm/Rule$Phoneme;)I",
+            "method_body": "public int compare(final Phoneme o1, final Phoneme o2) {\nfor (int i = 0; i < o1.phonemeText.length(); i++) {\nif (i >= o2.phonemeText.length()) {\nfinal int c = o1.phonemeText.charAt(i) - o2.phonemeText.charAt(i);\nif (c != 0) {\nreturn c;\nif (o1.phonemeText.length() < o2.phonemeText.length()) {\nreturn 0;\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Languages$LanguageSet:from(Ljava/util/Set;)Lorg/apache/commons/codec/language/bm/Languages$LanguageSet;",
+            "method_body": "public static LanguageSet from(final Set<String> langs) {\nreturn langs.isEmpty() ? NO_LANGUAGES : new SomeLanguages(langs);\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Languages$SomeLanguages:isEmpty()Z",
+            "method_body": "public abstract boolean contains(String language);\nprivate SomeLanguages(final Set<String> languages) {\nthis.languages = Collections.unmodifiableSet(languages);\n}\nreturn this.languages.isEmpty();\nreturn this.languages.size() == 1;\nif (other == NO_LANGUAGES) {\n} else if (other == ANY_LANGUAGE) {\nreturn this;\nfinal SomeLanguages sl = (SomeLanguages) other;\nfinal Set<String> ls = new HashSet<String>(Math.min(languages.size(), sl.languages.size()));\nfor (String lang : languages) {\nif (sl.languages.contains(lang)) {\nls.add(lang);\n}\nreturn from(ls);\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.PhoneticEngine$1:<clinit>()V",
+            "method_body": "public String encode(String input, final Languages.LanguageSet languageSet) {\nfinal Map<String, List<Rule>> rules = Rule.getInstanceMap(this.nameType, RuleType.RULES, languageSet);\nfinal Map<String, List<Rule>> finalRules1 = Rule.getInstanceMap(this.nameType, this.ruleType, \"common\");\nfinal Map<String, List<Rule>> finalRules2 = Rule.getInstanceMap(this.nameType, this.ruleType, languageSet);\ninput = input.toLowerCase(Locale.ENGLISH).replace('-', ' ').trim();\nif (this.nameType == NameType.GENERIC) {\nif (input.length() >= 2 && input.substring(0, 2).equals(\"d'\")) { // check for d'\nfor (final String l : NAME_PREFIXES.get(this.nameType)) {\nif (input.startsWith(l + \" \")) {\n}\nfinal List<String> words = Arrays.asList(input.split(\"\\\\s+\"));\nfinal List<String> words2 = new ArrayList<String>();\nswitch (this.nameType) {\nwords2.addAll(words);\nbreak;\nif (this.concat) {\ninput = join(words2, \" \");\nPhonemeBuilder phonemeBuilder = PhonemeBuilder.empty(languageSet);\nfor (int i = 0; i < input.length();) {\nfinal RulesApplication rulesApplication =\ni = rulesApplication.getI();\nphonemeBuilder = rulesApplication.getPhonemeBuilder();\n}\nphonemeBuilder = applyFinalRules(phonemeBuilder, finalRules1);\nphonemeBuilder = applyFinalRules(phonemeBuilder, finalRules2);\nreturn phonemeBuilder.makeString();\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Languages:getInstance(Lorg/apache/commons/codec/language/bm/NameType;)Lorg/apache/commons/codec/language/bm/Languages;",
+            "method_body": "public static Languages getInstance(final NameType nameType) {\nreturn LANGUAGES.get(nameType);\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.codec.language.bm.Rule$9:isMatch(Ljava/lang/CharSequence;)Z",
+            "method_body": "private static RPattern pattern(final String regex) {\nfinal boolean startsWith = regex.startsWith(\"^\");\nfinal boolean endsWith = regex.endsWith(\"$\");\nfinal String content = regex.substring(startsWith ? 1 : 0, endsWith ? regex.length() - 1 : regex.length());\nfinal boolean boxes = content.contains(\"[\");\nif (!boxes) {\nif (startsWith && endsWith) {\nif (content.length() == 0) {\nreturn new RPattern() {\nreturn input.length() == 0;\nreturn new RPattern() {\nreturn input.equals(content);\n} else if ((startsWith || endsWith) && content.length() == 0) {\nreturn ALL_STRINGS_RMATCHER;\n} else if (startsWith) {\nreturn new RPattern() {\nreturn startsWith(input, content);\n} else if (endsWith) {\nreturn new RPattern() {\nfinal boolean startsWithBox = content.startsWith(\"[\");\nfinal boolean endsWithBox = content.endsWith(\"]\");\nif (startsWithBox && endsWithBox) {\nString boxContent = content.substring(1, content.length() - 1);\nif (!boxContent.contains(\"[\")) {\nfinal boolean negate = boxContent.startsWith(\"^\");\nif (negate) {\nboxContent = boxContent.substring(1);\nfinal String bContent = boxContent;\nfinal boolean shouldMatch = !negate;\nif (startsWith && endsWith) {\nreturn new RPattern() {\nreturn input.length() == 1 && contains(bContent, input.charAt(0)) == shouldMatch;\n} else if (startsWith) {\nreturn new RPattern() {\nreturn input.length() > 0 && contains(bContent, input.charAt(0)) == shouldMatch;\n} else if (endsWith) {\nreturn new RPattern() {\nreturn input.length() > 0 &&\nreturn new RPattern() {\nfinal Matcher matcher = pattern.matcher(input);\nreturn matcher.find();\n}",
+            "method_id": 49
+        }
+    ]
+}

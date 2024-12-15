@@ -1,0 +1,259 @@
+{
+    "bug_id": 6,
+    "test_id": 8,
+    "test_name": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.testMaximize",
+    "test_body": "public void testMaximize() {\ndouble[] startPoint = point(DIM,1.0);\ndouble[] insigma = point(DIM,0.1);\ndouble[][] boundaries = null;\nPointValuePair expected =\nnew PointValuePair(point(DIM,0.0),1.0);\ndoTest(new MinusElli(), startPoint, insigma, boundaries,\nGoalType.MAXIMIZE, LAMBDA, true, 0, 1.0-1e-13,",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.doTest(CMAESOptimizerTest.java:514)\nat org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizerTest.testMaximize(CMAESOptimizerTest.java:148)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.optim.BaseOptimizer:getIterations()I",
+            "method_body": "public int getIterations() {\nreturn iterations.getCount();\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:doOptimize()Lorg/apache/commons/math3/optim/PointValuePair;",
+            "method_body": "protected PointValuePair doOptimize() {\nisMinimize = getGoalType().equals(GoalType.MINIMIZE);\nfinal FitnessFunction fitfun = new FitnessFunction();\nfinal double[] guess = getStartPoint();\ndimension = guess.length;\ninitializeCMA(guess);\niterations = 0;\ndouble bestValue = fitfun.value(guess);\npush(fitnessHistory, bestValue);\nPointValuePair optimum\nPointValuePair lastResult = null;\nfor (iterations = 1; iterations <= maxIterations; iterations++) {\nfinal RealMatrix arz = randn1(dimension, lambda);\nfinal RealMatrix arx = zeros(dimension, lambda);\nfinal double[] fitness = new double[lambda];\nfor (int k = 0; k < lambda; k++) {\nRealMatrix arxk = null;\nfor (int i = 0; i < checkFeasableCount + 1; i++) {\nif (diagonalOnly <= 0) {\narxk = xmean.add(BD.multiply(arz.getColumnMatrix(k))\narxk = xmean.add(times(diagD,arz.getColumnMatrix(k))\nif (i >= checkFeasableCount ||\ncopyColumn(arxk, 0, arx, k);\nfitness[k] = fitfun.value(arx.getColumn(k)); // compute fitness\n}\nfinal int[] arindex = sortedIndices(fitness);\nfinal RealMatrix xold = xmean; // for speed up of Eq. (2) and (3)\nfinal RealMatrix bestArx = selectColumns(arx, MathArrays.copyOf(arindex, mu));\nxmean = bestArx.multiply(weights);\nfinal RealMatrix bestArz = selectColumns(arz, MathArrays.copyOf(arindex, mu));\nfinal RealMatrix zmean = bestArz.multiply(weights);\nfinal boolean hsig = updateEvolutionPaths(zmean, xold);\nif (diagonalOnly <= 0) {\nupdateCovariance(hsig, bestArx, arz, arindex, xold);\nupdateCovarianceDiagonalOnly(hsig, bestArz);\nsigma *= Math.exp(Math.min(1, (normps/chiN - 1) * cs / damps));\nfinal double bestFitness = fitness[arindex[0]];\nfinal double worstFitness = fitness[arindex[arindex.length - 1]];\nif (bestValue > bestFitness) {\nbestValue = bestFitness;\nlastResult = optimum;\noptimum = new PointValuePair(fitfun.repair(bestArx.getColumn(0)),\nif (getConvergenceChecker() != null &&\nif (stopFitness != 0) { // only if stopFitness is defined\nif (bestFitness < (isMinimize ? stopFitness : -stopFitness)) {\nbreak generationLoop;\nfinal double[] sqrtDiagC = sqrt(diagC).getColumn(0);\nfinal double[] pcCol = pc.getColumn(0);\nfor (int i = 0; i < dimension; i++) {\nif (sigma * Math.max(Math.abs(pcCol[i]), sqrtDiagC[i]) > stopTolX) {\nbreak;\nif (i >= dimension - 1) {\nbreak generationLoop;\nfor (int i = 0; i < dimension; i++) {\nif (sigma * sqrtDiagC[i] > stopTolUpX) {\nfinal double historyBest = min(fitnessHistory);\nfinal double historyWorst = max(fitnessHistory);\nif (iterations > 2 &&\nbreak generationLoop;\nif (iterations > fitnessHistory.length &&\nif (max(diagD) / min(diagD) > 1e7) {\nbreak generationLoop;\nif (getConvergenceChecker() != null) {\nif (bestValue == fitness[arindex[(int)(0.1+lambda/4.)]]) {\nif (iterations > 2 && Math.max(historyWorst, bestFitness) -\npush(fitnessHistory,bestFitness);\nfitfun.setValueRange(worstFitness-bestFitness);\nif (generateStatistics) {\nreturn optimum;\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:initializeCMA([D)V",
+            "method_body": "private void initializeCMA(double[] guess) {\nif (lambda <= 0) {\nfinal double[][] sigmaArray = new double[guess.length][1];\nfor (int i = 0; i < guess.length; i++) {\nsigmaArray[i][0] = inputSigma[i];\nfinal RealMatrix insigma = new Array2DRowRealMatrix(sigmaArray, false);\nsigma = max(insigma); // overall standard deviation\nstopTolUpX = 1e3 * max(insigma);\nstopTolX = 1e-11 * max(insigma);\nstopTolFun = 1e-12;\nstopTolHistFun = 1e-13;\nmu = lambda / 2; // number of parents/points for recombination\nlogMu2 = Math.log(mu + 0.5);\nweights = log(sequence(1, mu, 1)).scalarMultiply(-1).scalarAdd(logMu2);\ndouble sumw = 0;\ndouble sumwq = 0;\nfor (int i = 0; i < mu; i++) {\ndouble w = weights.getEntry(i, 0);\nsumw += w;\nsumwq += w * w;\nweights = weights.scalarMultiply(1 / sumw);\nmueff = sumw * sumw / sumwq; // variance-effectiveness of sum w_i x_i\ncc = (4 + mueff / dimension) /\ncs = (mueff + 2) / (dimension + mueff + 3.);\ndamps = (1 + 2 * Math.max(0, Math.sqrt((mueff - 1) /\nccov1 = 2 / ((dimension + 1.3) * (dimension + 1.3) + mueff);\nccovmu = Math.min(1 - ccov1, 2 * (mueff - 2 + 1 / mueff) /\nccov1Sep = Math.min(1, ccov1 * (dimension + 1.5) / 3);\nccovmuSep = Math.min(1 - ccov1, ccovmu * (dimension + 1.5) / 3);\nchiN = Math.sqrt(dimension) *\nxmean = MatrixUtils.createColumnRealMatrix(guess); // objective variables\ndiagD = insigma.scalarMultiply(1 / sigma);\ndiagC = square(diagD);\npc = zeros(dimension, 1); // evolution paths for C and sigma\nps = zeros(dimension, 1); // B defines the coordinate system\nnormps = ps.getFrobeniusNorm();\nB = eye(dimension, dimension);\nD = ones(dimension, 1); // diagonal D defines the scaling\nBD = times(B, repmat(diagD.transpose(), dimension, 1));\nC = B.multiply(diag(square(D)).multiply(B.transpose())); // covariance\nhistorySize = 10 + (int) (3 * 10 * dimension / (double) lambda);\nfitnessHistory = new double[historySize]; // history of fitness values\nfor (int i = 0; i < historySize; i++) {\nfitnessHistory[i] = Double.MAX_VALUE;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:updateEvolutionPaths(Lorg/apache/commons/math3/linear/RealMatrix;Lorg/apache/commons/math3/linear/RealMatrix;)Z",
+            "method_body": "private boolean updateEvolutionPaths(RealMatrix zmean, RealMatrix xold) {\nps = ps.scalarMultiply(1 - cs).add(\nnormps = ps.getFrobeniusNorm();\nfinal boolean hsig = normps /\npc = pc.scalarMultiply(1 - cc);\nif (hsig) {\npc = pc.add(xmean.subtract(xold).scalarMultiply(Math.sqrt(cc * (2 - cc) * mueff) / sigma));\nreturn hsig;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:push([DD)V",
+            "method_body": "private static void push(double[] vals, double val) {\nfor (int i = vals.length-1; i > 0; i--) {\nvals[i] = vals[i-1];\nvals[0] = val;\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:sortedIndices([D)[I",
+            "method_body": "private int[] sortedIndices(final double[] doubles) {\nfinal DoubleIndex[] dis = new DoubleIndex[doubles.length];\nfor (int i = 0; i < doubles.length; i++) {\ndis[i] = new DoubleIndex(doubles[i], i);\nArrays.sort(dis);\nfinal int[] indices = new int[doubles.length];\nfor (int i = 0; i < doubles.length; i++) {\nindices[i] = dis[i].index;\nreturn indices;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:log(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix log(final RealMatrix m) {\nfinal double[][] d = new double[m.getRowDimension()][m.getColumnDimension()];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\nd[r][c] = Math.log(m.getEntry(r, c));\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:sqrt(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix sqrt(final RealMatrix m) {\nfinal double[][] d = new double[m.getRowDimension()][m.getColumnDimension()];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\nd[r][c] = Math.sqrt(m.getEntry(r, c));\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:square(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix square(final RealMatrix m) {\nfinal double[][] d = new double[m.getRowDimension()][m.getColumnDimension()];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\ndouble e = m.getEntry(r, c);\nd[r][c] = e * e;\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:times(Lorg/apache/commons/math3/linear/RealMatrix;Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix times(final RealMatrix m, final RealMatrix n) {\nfinal double[][] d = new double[m.getRowDimension()][m.getColumnDimension()];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\nd[r][c] = m.getEntry(r, c) * n.getEntry(r, c);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:selectColumns(Lorg/apache/commons/math3/linear/RealMatrix;[I)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix selectColumns(final RealMatrix m, final int[] cols) {\nfinal double[][] d = new double[m.getRowDimension()][cols.length];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < cols.length; c++) {\nd[r][c] = m.getEntry(r, cols[c]);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:diag(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix diag(final RealMatrix m) {\nif (m.getColumnDimension() == 1) {\nfinal double[][] d = new double[m.getRowDimension()][m.getRowDimension()];\nfor (int i = 0; i < m.getRowDimension(); i++) {\nd[i][i] = m.getEntry(i, 0);\nreturn new Array2DRowRealMatrix(d, false);\nfinal double[][] d = new double[m.getRowDimension()][1];\nfor (int i = 0; i < m.getColumnDimension(); i++) {\nd[i][0] = m.getEntry(i, i);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:copyColumn(Lorg/apache/commons/math3/linear/RealMatrix;ILorg/apache/commons/math3/linear/RealMatrix;I)V",
+            "method_body": "private static void copyColumn(final RealMatrix m1, int col1,\nfor (int i = 0; i < m1.getRowDimension(); i++) {\nm2.setEntry(i, col2, m1.getEntry(i, col1));\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:ones(II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix ones(int n, int m) {\nfinal double[][] d = new double[n][m];\nfor (int r = 0; r < n; r++) {\nArrays.fill(d[r], 1);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:eye(II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix eye(int n, int m) {\nfinal double[][] d = new double[n][m];\nfor (int r = 0; r < n; r++) {\nif (r < m) {\nd[r][r] = 1;\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:zeros(II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix zeros(int n, int m) {\nreturn new Array2DRowRealMatrix(n, m);\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:repmat(Lorg/apache/commons/math3/linear/RealMatrix;II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix repmat(final RealMatrix mat, int n, int m) {\nfinal int rd = mat.getRowDimension();\nfinal int cd = mat.getColumnDimension();\nfinal double[][] d = new double[n * rd][m * cd];\nfor (int r = 0; r < n * rd; r++) {\nfor (int c = 0; c < m * cd; c++) {\nd[r][c] = mat.getEntry(r % rd, c % cd);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:sequence(DDD)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix sequence(double start, double end, double step) {\nfinal int size = (int) ((end - start) / step + 1);\nfinal double[][] d = new double[size][1];\ndouble value = start;\nfor (int r = 0; r < size; r++) {\nd[r][0] = value;\nvalue += step;\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:max(Lorg/apache/commons/math3/linear/RealMatrix;)D",
+            "method_body": "private static double max(final RealMatrix m) {\ndouble max = -Double.MAX_VALUE;\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\ndouble e = m.getEntry(r, c);\nif (max < e) {\nmax = e;\nreturn max;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:min(Lorg/apache/commons/math3/linear/RealMatrix;)D",
+            "method_body": "private static double min(final RealMatrix m) {\ndouble min = Double.MAX_VALUE;\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\ndouble e = m.getEntry(r, c);\nif (min > e) {\nmin = e;\nreturn min;\n}",
+            "method_id": 19
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:max([D)D",
+            "method_body": "private static double max(final double[] m) {\ndouble max = -Double.MAX_VALUE;\nfor (int r = 0; r < m.length; r++) {\nif (max < m[r]) {\nmax = m[r];\nreturn max;\n}",
+            "method_id": 20
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:min([D)D",
+            "method_body": "private static double min(final double[] m) {\ndouble min = Double.MAX_VALUE;\nfor (int r = 0; r < m.length; r++) {\nif (min > m[r]) {\nmin = m[r];\nreturn min;\n}",
+            "method_id": 21
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:randn1(II)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private RealMatrix randn1(int size, int popSize) {\nfinal double[][] d = new double[size][popSize];\nfor (int r = 0; r < size; r++) {\nfor (int c = 0; c < popSize; c++) {\nd[r][c] = random.nextGaussian();\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 22
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$FitnessFunction:<init>(Lorg/apache/commons/math3/optim/nonlinear/scalar/noderiv/CMAESOptimizer;)V",
+            "method_body": "public FitnessFunction() {\nvalueRange = 1;\nisRepairMode = true;\n}",
+            "method_id": 23
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$FitnessFunction:value([D)D",
+            "method_body": "public double value(final double[] point) {\nif (isRepairMode) {\ndouble[] repaired = repair(point);\nvalue = CMAESOptimizer.this.computeObjectiveValue(repaired) +\n} else {\nreturn isMinimize ? value : -value;\n}",
+            "method_id": 24
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$FitnessFunction:setValueRange(D)V",
+            "method_body": "public void setValueRange(double valueRange) {\nthis.valueRange = valueRange;\n}",
+            "method_id": 25
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$FitnessFunction:repair([D)[D",
+            "method_body": "private double[] repair(final double[] x) {\nfinal double[] lB = CMAESOptimizer.this.getLowerBound();\nfinal double[] uB = CMAESOptimizer.this.getUpperBound();\nfinal double[] repaired = new double[x.length];\nfor (int i = 0; i < x.length; i++) {\nif (x[i] < lB[i]) {\n} else if (x[i] > uB[i]) {\nrepaired[i] = x[i];\nreturn repaired;\n}",
+            "method_id": 26
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$FitnessFunction:penalty([D[D)D",
+            "method_body": "private double penalty(final double[] x, final double[] repaired) {\ndouble penalty = 0;\nfor (int i = 0; i < x.length; i++) {\ndouble diff = Math.abs(x[i] - repaired[i]);\npenalty += diff * valueRange;\nreturn isMinimize ? penalty : -penalty;\n}",
+            "method_id": 27
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$DoubleIndex:<init>(DI)V",
+            "method_body": "DoubleIndex(double value, int index) {\nthis.value = value;\nthis.index = index;\n}",
+            "method_id": 28
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$DoubleIndex:compareTo(Lorg/apache/commons/math3/optim/nonlinear/scalar/noderiv/CMAESOptimizer$DoubleIndex;)I",
+            "method_body": "public int compareTo(DoubleIndex o) {\nreturn Double.compare(value, o.value);\n}",
+            "method_id": 29
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:updateCovariance(ZLorg/apache/commons/math3/linear/RealMatrix;Lorg/apache/commons/math3/linear/RealMatrix;[ILorg/apache/commons/math3/linear/RealMatrix;)V",
+            "method_body": "private void updateCovariance(boolean hsig, final RealMatrix bestArx,\ndouble negccov = 0;\nif (ccov1 + ccovmu > 0) {\nfinal RealMatrix arpos = bestArx.subtract(repmat(xold, 1, mu))\nfinal RealMatrix roneu = pc.multiply(pc.transpose())\ndouble oldFac = hsig ? 0 : ccov1 * cc * (2 - cc);\noldFac += 1 - ccov1 - ccovmu;\nif (isActiveCMA) {\nnegccov = (1 - ccovmu) * 0.25 * mueff /\nfinal double negminresidualvariance = 0.66;\nfinal double negalphaold = 0.5;\nfinal int[] arReverseIndex = reverse(arindex);\nRealMatrix arzneg = selectColumns(arz, MathArrays.copyOf(arReverseIndex, mu));\nRealMatrix arnorms = sqrt(sumRows(square(arzneg)));\nfinal int[] idxnorms = sortedIndices(arnorms.getRow(0));\nfinal RealMatrix arnormsSorted = selectColumns(arnorms, idxnorms);\nfinal int[] idxReverse = reverse(idxnorms);\nfinal RealMatrix arnormsReverse = selectColumns(arnorms, idxReverse);\narnorms = divide(arnormsReverse, arnormsSorted);\nfinal int[] idxInv = inverse(idxnorms);\nfinal RealMatrix arnormsInv = selectColumns(arnorms, idxInv);\nfinal double negcovMax = (1 - negminresidualvariance) /\nif (negccov > negcovMax) {\narzneg = times(arzneg, repmat(arnormsInv, dimension, 1));\nfinal RealMatrix artmp = BD.multiply(arzneg);\nfinal RealMatrix Cneg = artmp.multiply(diag(weights)).multiply(artmp.transpose());\noldFac += negalphaold * negccov;\nC = C.scalarMultiply(oldFac)\n} else {\nupdateBD(negccov);\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:updateBD(D)V",
+            "method_body": "private void updateBD(double negccov) {\nif (ccov1 + ccovmu + negccov > 0 &&\nC = triu(C, 0).add(triu(C, 1).transpose());\nfinal EigenDecomposition eig = new EigenDecomposition(C);\nB = eig.getV(); // eigen decomposition, B==normalized eigenvectors\nD = eig.getD();\ndiagD = diag(D);\nif (min(diagD) <= 0) {\nif (max(diagD) > 1e14 * min(diagD)) {\nfinal double tfac = max(diagD) / 1e14 - min(diagD);\nC = C.add(eye(dimension, dimension).scalarMultiply(tfac));\ndiagD = diagD.add(ones(dimension, 1).scalarMultiply(tfac));\ndiagC = diag(C);\ndiagD = sqrt(diagD); // D contains standard deviations now\nBD = times(B, repmat(diagD.transpose(), dimension, 1)); // O(n^2)\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:divide(Lorg/apache/commons/math3/linear/RealMatrix;Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix divide(final RealMatrix m, final RealMatrix n) {\nfinal double[][] d = new double[m.getRowDimension()][m.getColumnDimension()];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\nd[r][c] = m.getEntry(r, c) / n.getEntry(r, c);\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:triu(Lorg/apache/commons/math3/linear/RealMatrix;I)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix triu(final RealMatrix m, int k) {\nfinal double[][] d = new double[m.getRowDimension()][m.getColumnDimension()];\nfor (int r = 0; r < m.getRowDimension(); r++) {\nfor (int c = 0; c < m.getColumnDimension(); c++) {\nd[r][c] = r <= c - k ? m.getEntry(r, c) : 0;\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:sumRows(Lorg/apache/commons/math3/linear/RealMatrix;)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "private static RealMatrix sumRows(final RealMatrix m) {\nfinal double[][] d = new double[1][m.getColumnDimension()];\nfor (int c = 0; c < m.getColumnDimension(); c++) {\ndouble sum = 0;\nfor (int r = 0; r < m.getRowDimension(); r++) {\nsum += m.getEntry(r, c);\nd[0][c] = sum;\nreturn new Array2DRowRealMatrix(d, false);\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:inverse([I)[I",
+            "method_body": "private static int[] inverse(final int[] indices) {\nfinal int[] inverse = new int[indices.length];\nfor (int i = 0; i < indices.length; i++) {\ninverse[indices[i]] = i;\nreturn inverse;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:reverse([I)[I",
+            "method_body": "private static int[] reverse(final int[] indices) {\nfinal int[] reverse = new int[indices.length];\nfor (int i = 0; i < indices.length; i++) {\nreverse[i] = indices[indices.length - i - 1];\nreturn reverse;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:checkParameters()V",
+            "method_body": "private void checkParameters() {\nfinal double[] init = getStartPoint();\nfinal double[] lB = getLowerBound();\nfinal double[] uB = getUpperBound();\nif (inputSigma != null) {\nif (inputSigma.length != init.length) {\nfor (int i = 0; i < init.length; i++) {\nif (inputSigma[i] > uB[i] - lB[i]) {\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$Sigma:getSigma()[D",
+            "method_body": "public double[] getSigma() {\nreturn sigma.clone();\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$PopulationSize:getPopulationSize()I",
+            "method_body": "public int getPopulationSize() {\nreturn lambda;\n}",
+            "method_id": 39
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:optimize([Lorg/apache/commons/math3/optim/OptimizationData;)Lorg/apache/commons/math3/optim/PointValuePair;",
+            "method_body": "public PointValuePair optimize(OptimizationData... optData)\nreturn super.optimize(optData);\n}",
+            "method_id": 40
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:parseOptimizationData([Lorg/apache/commons/math3/optim/OptimizationData;)V",
+            "method_body": "protected void parseOptimizationData(OptimizationData... optData) {\nsuper.parseOptimizationData(optData);\nfor (OptimizationData data : optData) {\nif (data instanceof Sigma) {\ninputSigma = ((Sigma) data).getSigma();\ncontinue;\nif (data instanceof PopulationSize) {\nlambda = ((PopulationSize) data).getPopulationSize();\ncontinue;\ncheckParameters();\n}",
+            "method_id": 41
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$PopulationSize:<init>(I)V",
+            "method_body": "public PopulationSize(int size)\nthrows NotStrictlyPositiveException {\nif (size <= 0) {\nlambda = size;\n}",
+            "method_id": 42
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer:<init>(IDZIILorg/apache/commons/math3/random/RandomGenerator;ZLorg/apache/commons/math3/optim/ConvergenceChecker;)V",
+            "method_body": "public CMAESOptimizer(int maxIterations,\nsuper(checker);\nthis.maxIterations = maxIterations;\nthis.stopFitness = stopFitness;\nthis.isActiveCMA = isActiveCMA;\nthis.diagonalOnly = diagonalOnly;\nthis.checkFeasableCount = checkFeasableCount;\nthis.random = random;\nthis.generateStatistics = generateStatistics;\n}",
+            "method_id": 43
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer$Sigma:<init>([D)V",
+            "method_body": "public Sigma(double[] s)\nthrows NotPositiveException {\nfor (int i = 0; i < s.length; i++) {\nif (s[i] < 0) {\nsigma = s.clone();\n}",
+            "method_id": 44
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer:computeObjectiveValue([D)D",
+            "method_body": "protected double computeObjectiveValue(double[] params) {\nsuper.incrementEvaluationCount();\nreturn function.value(params);\n}",
+            "method_id": 45
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.PointValuePair:getPoint()[D",
+            "method_body": "public double[] getPoint() {\nfinal double[] p = getKey();\nreturn p == null ? null : p.clone();\n}",
+            "method_id": 46
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction:getObjectiveFunction()Lorg/apache/commons/math3/analysis/MultivariateFunction;",
+            "method_body": "public MultivariateFunction getObjectiveFunction() {\nreturn function;\n}",
+            "method_id": 47
+        },
+        {
+            "method_signature": "org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction:<init>(Lorg/apache/commons/math3/analysis/MultivariateFunction;)V",
+            "method_body": "public ObjectiveFunction(MultivariateFunction f) {\nfunction = f;\n}",
+            "method_id": 48
+        },
+        {
+            "method_signature": "org.apache.commons.math3.linear.MatrixUtils:createColumnRealMatrix([D)Lorg/apache/commons/math3/linear/RealMatrix;",
+            "method_body": "public static RealMatrix createColumnRealMatrix(double[] columnData)\nif (columnData == null) {\nfinal int nRows = columnData.length;\nfinal RealMatrix m = createRealMatrix(nRows, 1);\nfor (int i = 0; i < nRows; ++i) {\nm.setEntry(i, 0, columnData[i]);\nreturn m;\n}",
+            "method_id": 49
+        }
+    ]
+}

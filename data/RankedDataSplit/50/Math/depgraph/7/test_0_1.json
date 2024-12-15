@@ -1,0 +1,259 @@
+{
+    "bug_id": 7,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling",
+    "test_body": "337: public void testEventsScheduling() {\n338: 339: FirstOrderDifferentialEquations sincos = new FirstOrderDifferentialEquations() {\n340: 341: public int getDimension() {\n342: return 2;\n343: }\n344: 345: public void computeDerivatives(double t, double[] y, double[] yDot) {\n346: yDot[0] =  y[1];\n347: yDot[1] = -y[0];\n348: }\n349: 350: };\n351: 352: SchedulingChecker sinChecker = new SchedulingChecker(0); // events at 0, PI, 2PI ...\n353: SchedulingChecker cosChecker = new SchedulingChecker(1); // events at PI/2, 3PI/2, 5PI/2 ...\n354: 355: FirstOrderIntegrator integ =\n356: new DormandPrince853Integrator(0.001, 1.0, 1.0e-12, 0.0);\n357: integ.addEventHandler(sinChecker, 0.01, 1.0e-7, 100);\n358: integ.addStepHandler(sinChecker);\n359: integ.addEventHandler(cosChecker, 0.01, 1.0e-7, 100);\n360: integ.addStepHandler(cosChecker);\n361: double   t0 = 0.5;\n362: double[] y0 = new double[] { FastMath.sin(t0), FastMath.cos(t0) };\n363: double   t  = 10.0;\n364: double[] y  = new double[2];\n365: integ.integrate(sincos, t0, y0, t, y);\n366: 367: }\n",
+    "stack_trace": "junit.framework.AssertionFailedError\nat org.junit.Assert.fail(Assert.java:86)\nat org.junit.Assert.assertTrue(Assert.java:41)\nat org.junit.Assert.assertTrue(Assert.java:52)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest$SchedulingChecker.g(DormandPrince853IntegratorTest.java:389)\nat org.apache.commons.math3.ode.events.EventState.evaluateStep(EventState.java:224)\nat org.apache.commons.math3.ode.AbstractIntegrator.acceptStep(AbstractIntegrator.java:323)\nat org.apache.commons.math3.ode.nonstiff.EmbeddedRungeKuttaIntegrator.integrate(EmbeddedRungeKuttaIntegrator.java:303)\nat org.apache.commons.math3.ode.AbstractIntegrator.integrate(AbstractIntegrator.java:228)\nat org.apache.commons.math3.ode.nonstiff.DormandPrince853IntegratorTest.testEventsScheduling(DormandPrince853IntegratorTest.java:365)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:getMinStep()D",
+            "method_body": "public double getMinStep() {\nreturn minStep;\n}",
+            "method_id": 50
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:getMaxStep()D",
+            "method_body": "public double getMaxStep() {\nreturn maxStep;\n}",
+            "method_id": 51
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.RungeKuttaStepInterpolator:<init>(Lorg/apache/commons/math3/ode/nonstiff/RungeKuttaStepInterpolator;)V",
+            "method_body": "public RungeKuttaStepInterpolator(final RungeKuttaStepInterpolator interpolator) {\nsuper(interpolator);\nif (interpolator.currentState != null) {\npreviousState = null;\nyDotK = null;\nintegrator = null;\n}",
+            "method_id": 52
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:filterStep(DZZ)D",
+            "method_body": "protected double filterStep(final double h, final boolean forward, final boolean acceptSmall)\ndouble filteredH = h;\nif (FastMath.abs(h) < minStep) {\nif (filteredH > maxStep) {\n} else if (filteredH < -maxStep) {\nreturn filteredH;\n}",
+            "method_id": 53
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:initializeStep(ZI[DD[D[D[D[D)D",
+            "method_body": "public double initializeStep(final boolean forward, final int order, final double[] scale,\nif (initialStep > 0) {\ndouble yOnScale2 = 0;\ndouble yDotOnScale2 = 0;\nfor (int j = 0; j < scale.length; ++j) {\nratio         = y0[j] / scale[j];\nyOnScale2    += ratio * ratio;\nratio         = yDot0[j] / scale[j];\nyDotOnScale2 += ratio * ratio;\ndouble h = ((yOnScale2 < 1.0e-10) || (yDotOnScale2 < 1.0e-10)) ?\nif (! forward) {\nfor (int j = 0; j < y0.length; ++j) {\ny1[j] = y0[j] + h * yDot0[j];\ncomputeDerivatives(t0 + h, y1, yDot1);\ndouble yDDotOnScale = 0;\nfor (int j = 0; j < scale.length; ++j) {\nratio         = (yDot1[j] - yDot0[j]) / scale[j];\nyDDotOnScale += ratio * ratio;\nyDDotOnScale = FastMath.sqrt(yDDotOnScale) / h;\nfinal double maxInv2 = FastMath.max(FastMath.sqrt(yDotOnScale2), yDDotOnScale);\nfinal double h1 = (maxInv2 < 1.0e-15) ?\nh = FastMath.min(100.0 * FastMath.abs(h), h1);\nh = FastMath.max(h, 1.0e-12 * FastMath.abs(t0));  // avoids cancellation when computing t1 - t0\nif (h < getMinStep()) {\nif (h > getMaxStep()) {\nif (! forward) {\nreturn h;\n}",
+            "method_id": 54
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:<init>(Lorg/apache/commons/math3/ode/sampling/AbstractStepInterpolator;)V",
+            "method_body": "protected AbstractStepInterpolator(final AbstractStepInterpolator interpolator) {\nglobalPreviousTime = interpolator.globalPreviousTime;\nglobalCurrentTime  = interpolator.globalCurrentTime;\nsoftPreviousTime   = interpolator.softPreviousTime;\nsoftCurrentTime    = interpolator.softCurrentTime;\nh                  = interpolator.h;\ninterpolatedTime   = interpolator.interpolatedTime;\nif (interpolator.currentState == null) {\ncurrentState     = null;\nprimaryMapper    = null;\nsecondaryMappers = null;\nallocateInterpolatedArrays(-1);\nfinalized        = interpolator.finalized;\nforward          = interpolator.forward;\ndirtyState       = interpolator.dirtyState;\nprimaryMapper    = interpolator.primaryMapper;\nsecondaryMappers = (interpolator.secondaryMappers == null) ?\n}",
+            "method_id": 55
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:reinitialize([DZLorg/apache/commons/math3/ode/EquationsMapper;[Lorg/apache/commons/math3/ode/EquationsMapper;)V",
+            "method_body": "protected void reinitialize(final double[] y, final boolean isForward,\nglobalPreviousTime    = Double.NaN;\nglobalCurrentTime     = Double.NaN;\nsoftPreviousTime      = Double.NaN;\nsoftCurrentTime       = Double.NaN;\nh                     = Double.NaN;\ninterpolatedTime      = Double.NaN;\ncurrentState          = y;\nfinalized             = false;\nthis.forward          = isForward;\nthis.dirtyState       = true;\nthis.primaryMapper    = primary;\nthis.secondaryMappers = secondary.clone();\nallocateInterpolatedArrays(y.length);\n}",
+            "method_id": 56
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:copy()Lorg/apache/commons/math3/ode/sampling/StepInterpolator;",
+            "method_body": "public StepInterpolator copy() throws MaxCountExceededException {\nfinalizeStep();\nreturn doCopy();\n}",
+            "method_id": 57
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.RungeKuttaStepInterpolator:reinitialize(Lorg/apache/commons/math3/ode/AbstractIntegrator;[D[[DZLorg/apache/commons/math3/ode/EquationsMapper;[Lorg/apache/commons/math3/ode/EquationsMapper;)V",
+            "method_body": "public void reinitialize(final AbstractIntegrator rkIntegrator,\nreinitialize(y, forward, primaryMapper, secondaryMappers);\nthis.previousState = null;\nthis.yDotK = yDotArray;\nthis.integrator = rkIntegrator;\n}",
+            "method_id": 58
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.RungeKuttaStepInterpolator:shift()V",
+            "method_body": "public void shift() {\npreviousState = currentState.clone();\nsuper.shift();\n}",
+            "method_id": 59
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:finalizeStep()V",
+            "method_body": "public final void finalizeStep() throws MaxCountExceededException {\nif (! finalized) {\ndoFinalize();\nfinalized = true;\n}",
+            "method_id": 60
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:sanityChecks(Lorg/apache/commons/math3/ode/ExpandableStatefulODE;D)V",
+            "method_body": "protected void sanityChecks(final ExpandableStatefulODE equations, final double t)\nsuper.sanityChecks(equations, t);\nmainSetDimension = equations.getPrimaryMapper().getDimension();\nif ((vecAbsoluteTolerance != null) && (vecAbsoluteTolerance.length != mainSetDimension)) {\nif ((vecRelativeTolerance != null) && (vecRelativeTolerance.length != mainSetDimension)) {\n}",
+            "method_id": 61
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator:resetInternalState()V",
+            "method_body": "protected void resetInternalState() {\nstepStart = Double.NaN;\nstepSize  = FastMath.sqrt(minStep * maxStep);\n}",
+            "method_id": 62
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.nonstiff.RungeKuttaStepInterpolator:<init>()V",
+            "method_body": "protected RungeKuttaStepInterpolator() {\npreviousState = null;\nyDotK         = null;\nintegrator    = null;\n}",
+            "method_id": 63
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:<init>()V",
+            "method_body": "protected AbstractStepInterpolator() {\nglobalPreviousTime = Double.NaN;\nglobalCurrentTime  = Double.NaN;\nsoftPreviousTime   = Double.NaN;\nsoftCurrentTime    = Double.NaN;\nh                  = Double.NaN;\ninterpolatedTime   = Double.NaN;\ncurrentState       = null;\nfinalized          = false;\nthis.forward       = true;\nthis.dirtyState    = true;\nprimaryMapper      = null;\nsecondaryMappers   = null;\nallocateInterpolatedArrays(-1);\n}",
+            "method_id": 64
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:getPreviousTime()D",
+            "method_body": "public double getPreviousTime() {\nreturn softPreviousTime;\n}",
+            "method_id": 65
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:getCurrentTime()D",
+            "method_body": "public double getCurrentTime() {\nreturn softCurrentTime;\n}",
+            "method_id": 66
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:getGlobalPreviousTime()D",
+            "method_body": "public double getGlobalPreviousTime() {\nreturn globalPreviousTime;\n}",
+            "method_id": 67
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:getGlobalCurrentTime()D",
+            "method_body": "public double getGlobalCurrentTime() {\nreturn globalCurrentTime;\n}",
+            "method_id": 68
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:isForward()Z",
+            "method_body": "public boolean isForward() {\nreturn forward;\n}",
+            "method_id": 69
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getTotalDimension()I",
+            "method_body": "public int getTotalDimension() {\nif (components.isEmpty()) {\nreturn primaryMapper.getDimension();\n}",
+            "method_id": 70
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:computeDerivatives(D[D[D)V",
+            "method_body": "public void computeDerivatives(final double t, final double[] y, final double[] yDot)\nprimaryMapper.extractEquationData(y, primaryState);\nprimary.computeDerivatives(t, primaryState, primaryStateDot);\nprimaryMapper.insertEquationData(primaryStateDot, yDot);\nfor (final SecondaryComponent component : components) {\n}",
+            "method_id": 71
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getSecondaryMappers()[Lorg/apache/commons/math3/ode/EquationsMapper;",
+            "method_body": "public EquationsMapper[] getSecondaryMappers() {\nfinal EquationsMapper[] mappers = new EquationsMapper[components.size()];\nfor (int i = 0; i < mappers.length; ++i) {\nreturn mappers;\n}",
+            "method_id": 72
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getCompleteState()[D",
+            "method_body": "public double[] getCompleteState() throws DimensionMismatchException {\ndouble[] completeState = new double[getTotalDimension()];\nprimaryMapper.insertEquationData(primaryState, completeState);\nfor (final SecondaryComponent component : components) {\nreturn completeState;\n}",
+            "method_id": 73
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:insertEquationData([D[D)V",
+            "method_body": "public void insertEquationData(double[] equationData, double[] complete)\nif (equationData.length != dimension) {\nSystem.arraycopy(equationData, 0, complete, firstIndex, dimension);\n}",
+            "method_id": 74
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getPrimaryMapper()Lorg/apache/commons/math3/ode/EquationsMapper;",
+            "method_body": "public EquationsMapper getPrimaryMapper() {\nreturn primaryMapper;\n}",
+            "method_id": 75
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:evaluateCompleteInterpolatedState()V",
+            "method_body": "protected abstract void computeInterpolatedStateAndDerivatives(double theta,\nif (dirtyState) {\nfinal double oneMinusThetaH = globalCurrentTime - interpolatedTime;\nfinal double theta = (h == 0) ? 0 : (h - oneMinusThetaH) / h;\ncomputeInterpolatedStateAndDerivatives(theta, oneMinusThetaH);\ndirtyState = false;\n}",
+            "method_id": 76
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:getInterpolatedState()[D",
+            "method_body": "public double[] getInterpolatedState() throws MaxCountExceededException {\nevaluateCompleteInterpolatedState();\nprimaryMapper.extractEquationData(interpolatedState,\nreturn interpolatedPrimaryState;\n}",
+            "method_id": 77
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:<init>(Lorg/apache/commons/math3/ode/FirstOrderDifferentialEquations;)V",
+            "method_body": "public ExpandableStatefulODE(final FirstOrderDifferentialEquations primary) {\nfinal int n          = primary.getDimension();\nthis.primary         = primary;\nthis.primaryMapper   = new EquationsMapper(0, n);\nthis.time            = Double.NaN;\nthis.primaryState    = new double[n];\nthis.primaryStateDot = new double[n];\nthis.components      = new ArrayList<ExpandableStatefulODE.SecondaryComponent>();\n}",
+            "method_id": 78
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:setTime(D)V",
+            "method_body": "public void setTime(final double time) {\nthis.time = time;\n}",
+            "method_id": 79
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:getTime()D",
+            "method_body": "public double getTime() {\nreturn time;\n}",
+            "method_id": 80
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.ExpandableStatefulODE:setPrimaryState([D)V",
+            "method_body": "public void setPrimaryState(final double[] primaryState) throws DimensionMismatchException {\nif (primaryState.length != this.primaryState.length) {\nSystem.arraycopy(primaryState, 0, this.primaryState, 0, primaryState.length);\n}",
+            "method_id": 81
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:extractEquationData([D[D)V",
+            "method_body": "public void extractEquationData(double[] complete, double[] equationData)\nif (equationData.length != dimension) {\nSystem.arraycopy(complete, firstIndex, equationData, 0, dimension);\n}",
+            "method_id": 82
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:shift()V",
+            "method_body": "public void shift() {\nglobalPreviousTime = globalCurrentTime;\nsoftPreviousTime   = globalPreviousTime;\nsoftCurrentTime    = globalCurrentTime;\n}",
+            "method_id": 83
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:storeTime(D)V",
+            "method_body": "public void storeTime(final double t) {\nglobalCurrentTime = t;\nsoftCurrentTime   = globalCurrentTime;\nh                 = globalCurrentTime - globalPreviousTime;\nsetInterpolatedTime(t);\nfinalized  = false;\n}",
+            "method_id": 84
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:setInterpolatedTime(D)V",
+            "method_body": "public void setInterpolatedTime(final double time) {\ninterpolatedTime = time;\ndirtyState       = true;\n}",
+            "method_id": 85
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:getDimension()I",
+            "method_body": "public int getDimension() {\nreturn dimension;\n}",
+            "method_id": 86
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.EquationsMapper:<init>(II)V",
+            "method_body": "public EquationsMapper(final int firstIndex, final int dimension) {\nthis.firstIndex = firstIndex;\nthis.dimension  = dimension;\n}",
+            "method_id": 87
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:verifySequence(DDD)V",
+            "method_body": "protected void verifySequence(final double lower,\nUnivariateSolverUtils.verifySequence(lower, initial, upper);\n}",
+            "method_id": 88
+        },
+        {
+            "method_signature": "org.apache.commons.math3.ode.sampling.AbstractStepInterpolator:allocateInterpolatedArrays(I)V",
+            "method_body": "private void allocateInterpolatedArrays(final int dimension) {\nif (dimension < 0) {\ninterpolatedState                = null;\ninterpolatedDerivatives          = null;\ninterpolatedPrimaryState         = null;\ninterpolatedPrimaryDerivatives   = null;\ninterpolatedSecondaryState       = null;\ninterpolatedSecondaryDerivatives = null;\ninterpolatedState                = new double[dimension];\ninterpolatedDerivatives          = new double[dimension];\ninterpolatedPrimaryState         = new double[primaryMapper.getDimension()];\ninterpolatedPrimaryDerivatives   = new double[primaryMapper.getDimension()];\nif (secondaryMappers == null) {\ninterpolatedSecondaryState       = new double[secondaryMappers.length][];\ninterpolatedSecondaryDerivatives = new double[secondaryMappers.length][];\nfor (int i = 0; i < secondaryMappers.length; ++i) {\n}",
+            "method_id": 89
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:solve(ILorg/apache/commons/math3/analysis/UnivariateFunction;DD)D",
+            "method_body": "public double solve(int maxEval, FUNC f, double min, double max) {\nreturn solve(maxEval, f, min, max, min + 0.5 * (max - min));\n}",
+            "method_id": 90
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.UnivariateSolverUtils:verifySequence(DDD)V",
+            "method_body": "public static void verifySequence(final double lower,\nverifyInterval(lower, initial);\nverifyInterval(initial, upper);\n}",
+            "method_id": 91
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getStartValue()D",
+            "method_body": "public double getStartValue() {\nreturn searchStart;\n}",
+            "method_id": 92
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getRelativeAccuracy()D",
+            "method_body": "public double getRelativeAccuracy() {\nreturn relativeAccuracy;\n}",
+            "method_id": 93
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getFunctionValueAccuracy()D",
+            "method_body": "public double getFunctionValueAccuracy() {\nreturn functionValueAccuracy;\n}",
+            "method_id": 94
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getAbsoluteAccuracy()D",
+            "method_body": "public double getAbsoluteAccuracy() {\nreturn absoluteAccuracy;\n}",
+            "method_id": 95
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.AbstractUnivariateSolver:<init>(D)V",
+            "method_body": "protected AbstractUnivariateSolver(final double absoluteAccuracy) {\nsuper(absoluteAccuracy);\n}",
+            "method_id": 96
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getMin()D",
+            "method_body": "public double getMin() {\nreturn searchMin;\n}",
+            "method_id": 97
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:getMax()D",
+            "method_body": "public double getMax() {\nreturn searchMax;\n}",
+            "method_id": 98
+        },
+        {
+            "method_signature": "org.apache.commons.math3.analysis.solvers.BaseAbstractUnivariateSolver:<init>(D)V",
+            "method_body": "protected BaseAbstractUnivariateSolver(final double absoluteAccuracy) {\nthis(DEFAULT_RELATIVE_ACCURACY,\n}",
+            "method_id": 99
+        }
+    ]
+}

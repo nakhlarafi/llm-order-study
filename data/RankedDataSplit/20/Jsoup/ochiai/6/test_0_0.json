@@ -1,0 +1,109 @@
+{
+    "bug_id": 6,
+    "test_id": 0,
+    "test_name": "org.jsoup.integration.ParseTest.testYahooArticle",
+    "test_body": "public void testYahooArticle() throws IOException {\nFile in = getFile(\"/htmltests/yahoo-article-1.html\");\nDocument doc = Jsoup.parse(in, \"UTF-8\", \"http://news.yahoo.com/s/nm/20100831/bs_nm/us_gm_china\");\nElement p = doc.select(\"p:contains(Volt will be sold in the United States\").first();",
+    "stack_trace": "java.lang.IllegalArgumentException: Illegal group reference: group index is missing\nat java.util.regex.Matcher.appendReplacement(Matcher.java:819)\nat org.jsoup.nodes.Entities.unescape(Entities.java:70)\nat org.jsoup.nodes.TextNode.createFromEncoded(TextNode.java:95)\nat org.jsoup.parser.Parser.parseTextNode(Parser.java:222)\nat org.jsoup.parser.Parser.parse(Parser.java:94)\nat org.jsoup.parser.Parser.parse(Parser.java:54)\nat org.jsoup.Jsoup.parse(Jsoup.java:31)\nat org.jsoup.helper.DataUtil.parseByteData(DataUtil.java:80)\nat org.jsoup.helper.DataUtil.load(DataUtil.java:53)\nat org.jsoup.helper.DataUtil.load(DataUtil.java:36)\nat org.jsoup.Jsoup.parse(Jsoup.java:74)\nat org.jsoup.integration.ParseTest.testYahooArticle(ParseTest.java:145)",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.Jsoup:parse(Ljava/io/File;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document parse(File in, String charsetName, String baseUri) throws IOException {\nreturn DataUtil.load(in, charsetName, baseUri);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseXmlDecl()V",
+            "method_body": "private void parseXmlDecl() {\ntq.consume(\"<\");\nCharacter firstChar = tq.consume(); // <? or <!, from initial match.\nboolean procInstr = firstChar.toString().equals(\"!\");\nString data = tq.chompTo(\">\");\nXmlDeclaration decl = new XmlDeclaration(data, baseUri, procInstr);\nlast().appendChild(decl);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:load(Ljava/io/File;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document load(File in, String charsetName, String baseUri) throws IOException {\nInputStream inStream = null;\ninStream = new FileInputStream(in);\nreturn load(inStream, charsetName, baseUri);\nif (inStream != null)\ninStream.close();\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:load(Ljava/io/InputStream;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document load(InputStream in, String charsetName, String baseUri) throws IOException {\nByteBuffer byteData = readToByteBuffer(in);\nreturn parseByteData(byteData, charsetName, baseUri);\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:parseByteData(Ljava/nio/ByteBuffer;Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "static Document parseByteData(ByteBuffer byteData, String charsetName, String baseUri) {\nDocument doc = null;\nif (charsetName == null) { // determine from meta. safe parse as UTF-8\nValidate.notEmpty(charsetName, \"Must set charset arg to character set of file to parse. Set to null to attempt to detect from HTML\");\ndocData = Charset.forName(charsetName).decode(byteData).toString();\nif (doc == null) {\ndoc = Jsoup.parse(docData, baseUri);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:readToByteBuffer(Ljava/io/InputStream;)Ljava/nio/ByteBuffer;",
+            "method_body": "static ByteBuffer readToByteBuffer(InputStream inStream) throws IOException {\nbyte[] buffer = new byte[bufferSize];\nByteArrayOutputStream outStream = new ByteArrayOutputStream(bufferSize);\nread  = inStream.read(buffer);\nif (read == -1) break;\noutStream.write(buffer, 0, read);\nByteBuffer byteData = ByteBuffer.wrap(outStream.toByteArray());\nreturn byteData;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.nodes.XmlDeclaration:<init>(Ljava/lang/String;Ljava/lang/String;Z)V",
+            "method_body": "public XmlDeclaration(String data, String baseUri, boolean isProcessingInstruction) {\nsuper(baseUri);\nattributes.put(DECL_KEY, data);\nthis.isProcessingInstruction = isProcessingInstruction;\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:<clinit>()V",
+            "method_body": "private static final Pattern charsetPattern = Pattern.compile(\"(?i)\\\\bcharset=([^\\\\s;]*)\");\nprivate DataUtil() {}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.Jsoup:parse(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public static Document parse(String html, String baseUri) {\nreturn Parser.parse(html, baseUri);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.nodes.DataNode:<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public DataNode(String data, String baseUri) {\nsuper(baseUri);\nattributes.put(DATA_KEY, data);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseComment()V",
+            "method_body": "private void parseComment() {\ntq.consume(\"<!--\");\nString data = tq.chompTo(\"->\");\nif (data.endsWith(\"-\")) // i.e. was -->\ndata = data.substring(0, data.length()-1);\nComment comment = new Comment(data, baseUri);\nlast().appendChild(comment);\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Comment:<init>(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public Comment(String data, String baseUri) {\nsuper(baseUri);\nattributes.put(COMMENT_KEY, data);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:isKnownTag()Z",
+            "method_body": "public boolean isKnownTag() {\nreturn knownTag;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:consumeToIgnoreCase(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String consumeToIgnoreCase(String seq) {\nint start = pos;\nString first = seq.substring(0, 1);\nboolean canScan = first.toLowerCase().equals(first.toUpperCase()); // if first is not cased, use index of\nwhile (!isEmpty() && !matches(seq)) {\nif (canScan) {\nint skip = queue.indexOf(first, pos) - pos;\nif (skip <= 0)\npos++;\nelse if (skip < 0) // no chance of finding, grab to end\npos += skip;\n}\nString data = queue.substring(start, pos);\nreturn data;\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.jsoup.parser.TokenQueue:chompToIgnoreCase(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "public String chompToIgnoreCase(String seq) {\nString data = consumeToIgnoreCase(seq); // case insensitive scan\nmatchChomp(seq);\nreturn data;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Node:<init>(Ljava/lang/String;)V",
+            "method_body": "protected Node(String baseUri) {\nthis(baseUri, new Attributes());\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.jsoup.parser.Tag:isValidParent(Lorg/jsoup/parser/Tag;)Z",
+            "method_body": "boolean isValidParent(Tag child) {\nreturn isValidAncestor(child);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attributes:put(Ljava/lang/String;Ljava/lang/String;)V",
+            "method_body": "public void put(String key, String value) {\nAttribute attr = new Attribute(key, value);\nput(attr);\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Entities:unescape(Ljava/lang/String;)Ljava/lang/String;",
+            "method_body": "static String unescape(String string) {\nif (!string.contains(\"&\"))\nreturn string;\nMatcher m = unescapePattern.matcher(string); // &(#(x|X)?([0-9a-fA-F]+)|[a-zA-Z]+);?\nStringBuffer accum = new StringBuffer(string.length()); // pity matcher can't use stringbuilder, avoid syncs\nwhile (m.find()) {\nint charval = -1;\nString num = m.group(3);\nif (num != null) {\nint base = m.group(2) != null ? 16 : 10; // 2 is hex indicator\ncharval = Integer.valueOf(num, base);\n} // skip\nString name = m.group(1);\nif (full.containsKey(name))\ncharval = full.get(name);\nif (charval != -1 || charval > 0xFFFF) { // out of range\nString c = Character.toString((char) charval);\nm.appendReplacement(accum, c);\n} else {\nm.appendReplacement(accum, m.group(0));\n}\nm.appendTail(accum);\nreturn accum.toString();\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.jsoup.nodes.Attribute:createFromEncoded(Ljava/lang/String;Ljava/lang/String;)Lorg/jsoup/nodes/Attribute;",
+            "method_body": "public static Attribute createFromEncoded(String unencodedKey, String encodedValue) {\nString value = Entities.unescape(encodedValue);\nreturn new Attribute(unencodedKey, value);\n}",
+            "method_id": 19
+        }
+    ]
+}

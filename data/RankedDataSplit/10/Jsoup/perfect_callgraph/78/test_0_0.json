@@ -1,0 +1,59 @@
+{
+    "bug_id": 78,
+    "test_id": 0,
+    "test_name": "org.jsoup.integration.ConnectTest.handlesEmptyStreamDuringParseRead",
+    "test_body": "391: public void handlesEmptyStreamDuringParseRead() throws IOException {\n392: // this handles situations where the remote server sets a content length greater than it actually writes\n393: 394: Connection.Response res = Jsoup.connect(InterruptedServlet.Url)\n395: .timeout(200)\n396: .execute();\n397: 398: boolean threw = false;\n399: try {\n400: Document document = res.parse();\n401: assertEquals(\"Something\", document.title());\n402: } catch (IOException e) {\n403: threw = true;\n404: }\n405: assertEquals(true, threw);\n406: }\n",
+    "stack_trace": "",
+    "covered_methods": [
+        {
+            "method_signature": "org.jsoup.helper.DataUtil:parseInputStream(Ljava/io/InputStream;Ljava/lang/String;Ljava/lang/String;Lorg/jsoup/parser/Parser;)Lorg/jsoup/nodes/Document;",
+            "method_body": "static Document parseInputStream(InputStream input, String charsetName, String baseUri, Parser parser) throws IOException  {\nif (input == null) // empty body\ninput = ConstrainableInputStream.wrap(input, bufferSize, 0);\nDocument doc = null;\nboolean fullyRead = false;\ninput.mark(bufferSize);\nByteBuffer firstBytes = readToByteBuffer(input, firstReadBufferSize - 1); // -1 because we read one more to see if completed. First read is < buffer size, so can't be invalid.\nfullyRead = input.read() == -1;\ninput.reset();\nBomCharset bomCharset = detectCharsetFromBom(firstBytes);\nif (bomCharset != null) {\nif (charsetName == null) { // determine from meta. safe first parse as UTF-8\nValidate.notEmpty(charsetName, \"Must set charset arg to character set of file to parse. Set to null to attempt to detect from HTML\");\nif (doc == null) {\nif (charsetName == null)\nBufferedReader reader = new BufferedReader(new InputStreamReader(input, charsetName), bufferSize);\ndoc = parser.parseInput(reader, baseUri);\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.jsoup.Jsoup:connect(Ljava/lang/String;)Lorg/jsoup/Connection;",
+            "method_body": "public static Connection connect(String url) {\nreturn HttpConnection.connect(url);\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:connect(Ljava/lang/String;)Lorg/jsoup/Connection;",
+            "method_body": "public static Connection connect(String url) {\nConnection con = new HttpConnection();\ncon.url(url);\nreturn con;\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection:<init>()V",
+            "method_body": "private HttpConnection() {\nreq = new Request();\nres = new Response();\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Request:<init>()V",
+            "method_body": "Request() {\ntimeoutMilliseconds = 30000; // 30 seconds\nmaxBodySizeBytes = 1024 * 1024; // 1MB\nfollowRedirects = true;\ndata = new ArrayList<>();\nmethod = Method.GET;\naddHeader(\"Accept-Encoding\", \"gzip\");\naddHeader(USER_AGENT, DEFAULT_UA);\nparser = Parser.htmlParser();\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:htmlParser()Lorg/jsoup/parser/Parser;",
+            "method_body": "public static Parser htmlParser() {\nreturn new Parser(new HtmlTreeBuilder());\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.jsoup.helper.HttpConnection$Response:<init>()V",
+            "method_body": "Response() {\nsuper();\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:<init>(Lorg/jsoup/parser/TreeBuilder;)V",
+            "method_body": "public Parser(TreeBuilder treeBuilder) {\nthis.treeBuilder = treeBuilder;\nsettings = treeBuilder.defaultSettings();\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:parseInput(Ljava/io/Reader;Ljava/lang/String;)Lorg/jsoup/nodes/Document;",
+            "method_body": "public Document parseInput(Reader inputHtml, String baseUri) {\nerrors = isTrackErrors() ? ParseErrorList.tracking(maxErrors) : ParseErrorList.noTracking();\nreturn treeBuilder.parse(inputHtml, baseUri, errors, settings);\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.jsoup.parser.Parser:isTrackErrors()Z",
+            "method_body": "public boolean isTrackErrors() {\nreturn maxErrors > 0;\n}",
+            "method_id": 9
+        }
+    ]
+}

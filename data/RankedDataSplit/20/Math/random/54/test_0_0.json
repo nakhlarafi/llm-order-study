@@ -1,0 +1,109 @@
+{
+    "bug_id": 54,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.dfp.DfpTest.testIssue567",
+    "test_body": "public void testIssue567() {\nDfpField field = new DfpField(100);\nAssert.assertEquals(0.0, field.getZero().toDouble(), MathUtils.SAFE_MIN);\nAssert.assertEquals(0.0, field.newDfp(0.0).toDouble(), MathUtils.SAFE_MIN);",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<0.0> but was:<-Infinity>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.dfp.DfpTest.testIssue567(DfpTest.java:1512)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:getField()Lorg/apache/commons/math/dfp/DfpField;",
+            "method_body": "public DfpField getField() {\nreturn field;\n}",
+            "method_id": 0
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:getOne()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp getOne() {\nreturn field.getOne();\n}",
+            "method_id": 1
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:rint()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp rint() {\nreturn trunc(DfpField.RoundingMode.ROUND_HALF_EVEN);\n}",
+            "method_id": 2
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:sqrt()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp sqrt() {\nif (nans == FINITE && mant[mant.length-1] == 0) {\nif (nans != FINITE) {\nif (sign == -1) {\nDfp x = newInstance(this);\nif (x.exp < -1 || x.exp > 1) {\nswitch (x.mant[mant.length-1] / 2000) {\nx.mant[mant.length-1] = x.mant[mant.length-1]/2+1;\nbreak;\nx.mant[mant.length-1] = 3000;\nDfp dx = newInstance(x);\nDfp px  = getZero();\nDfp ppx = getZero();\nwhile (x.unequal(px)) {\ndx = newInstance(x);\ndx.sign = -1;\ndx = dx.add(this.divide(x));\ndx = dx.divide(2);\nppx = px;\npx = x;\nx = x.add(dx);\nif (x.equals(ppx)) {\nif (dx.mant[mant.length-1] == 0) {\nbreak;\nreturn x;\n}",
+            "method_id": 3
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:<init>(Lorg/apache/commons/math/dfp/DfpField;Ljava/lang/String;)V",
+            "method_body": "protected Dfp(final DfpField field, final String s) {\nmant = new int[field.getRadixDigits()];\nsign = 1;\nexp = 0;\nnans = FINITE;\nthis.field = field;\nboolean decimalFound = false;\nfinal int rsize = 4;   // size of radix in decimal digits\nfinal int offset = 4;  // Starting offset into Striped\nfinal char[] striped = new char[getRadixDigits() * rsize + offset * 2];\nif (s.equals(POS_INFINITY_STRING)) {\nif (s.equals(NEG_INFINITY_STRING)) {\nif (s.equals(NAN_STRING)) {\nint p = s.indexOf(\"e\");\nif (p == -1) { // try upper case?\np = s.indexOf(\"E\");\nint sciexp = 0;\nif (p != -1) {\nfpdecimal = s;\nif (fpdecimal.indexOf(\"-\") !=  -1) {\nsign = -1;\np = 0;\nint decimalPos = 0;\nif (fpdecimal.charAt(p) >= '1' && fpdecimal.charAt(p) <= '9') {\nbreak;\nif (decimalFound && fpdecimal.charAt(p) == '0') {\ndecimalPos--;\nif (fpdecimal.charAt(p) == '.') {\ndecimalFound = true;\np++;\nif (p == fpdecimal.length()) {\nbreak;\nint q = offset;\nstriped[0] = '0';\nstriped[1] = '0';\nstriped[2] = '0';\nstriped[3] = '0';\nint significantDigits=0;\nif (p == (fpdecimal.length())) {\nbreak;\nif (q == mant.length*rsize+offset+1) {\nbreak;\nif (fpdecimal.charAt(p) == '.') {\ndecimalFound = true;\ndecimalPos = significantDigits;\np++;\ncontinue;\nif (fpdecimal.charAt(p) < '0' || fpdecimal.charAt(p) > '9') {\nstriped[q] = fpdecimal.charAt(p);\nq++;\np++;\nsignificantDigits++;\nif (decimalFound && q != offset) {\nq--;\nif (q == offset) {\nif (striped[q] == '0') {\nsignificantDigits--;\nif (decimalFound && significantDigits == 0) {\nif (!decimalFound) {\ndecimalPos = q-offset;\nq = offset;  // set q to point to first sig digit\np = significantDigits-1+offset;\nint trailingZeros = 0;\nwhile (p > q) {\nif (striped[p] != '0') {\nbreak;\nint i = ((rsize * 100) - decimalPos - sciexp % rsize) % rsize;\nq -= i;\ndecimalPos += i;\nwhile ((p - q) < (mant.length * rsize)) {\nfor (i = 0; i < rsize; i++) {\nstriped[++p] = '0';\nfor (i = mant.length - 1; i >= 0; i--) {\nmant[i] = (striped[q]   - '0') * 1000 +\nq += 4;\nexp = (decimalPos+sciexp) / rsize;\nif (q < striped.length) {\nround((striped[q] - '0')*1000);\n}",
+            "method_id": 4
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpField:clearIEEEFlags()V",
+            "method_body": "public void clearIEEEFlags() {\nieeeFlags = 0;\n}",
+            "method_id": 5
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:unequal(Lorg/apache/commons/math/dfp/Dfp;)Z",
+            "method_body": "public boolean unequal(final Dfp x) {\nif (isNaN() || x.isNaN() || field.getRadixDigits() != x.field.getRadixDigits()) {\nreturn greaterThan(x) || lessThan(x);\n}",
+            "method_id": 6
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:<init>(Lorg/apache/commons/math/dfp/DfpField;BB)V",
+            "method_body": "protected Dfp(final DfpField field, final byte sign, final byte nans) {\nthis.field = field;\nthis.mant    = new int[field.getRadixDigits()];\nthis.sign    = sign;\nthis.exp     = 0;\nthis.nans    = nans;\n}",
+            "method_id": 7
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:toString()Ljava/lang/String;",
+            "method_body": "public String toString() {\nif (nans != FINITE) {\nif (exp > mant.length || exp < -1) {\nreturn dfp2string();\n}",
+            "method_id": 8
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpField:newDfp(BB)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp newDfp(final byte sign, final byte nans) {\nreturn new Dfp(this, sign, nans);\n}",
+            "method_id": 9
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:getTwo()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp getTwo() {\nreturn field.getTwo();\n}",
+            "method_id": 10
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:<init>(Lorg/apache/commons/math/dfp/DfpField;I)V",
+            "method_body": "protected Dfp(final DfpField field, int x) {\nthis(field, (long) x);\n}",
+            "method_id": 11
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:round(I)I",
+            "method_body": "protected int round(int n) {\nboolean inc = false;\nswitch (field.getRoundingMode()) {\ninc = n > 5000 || (n == 5000 && (mant[0] & 1) == 1);  // round half-even\nbreak;\nif (inc) {\nint rh = 1;\nfor (int i = 0; i < mant.length; i++) {\nfinal int r = mant[i] + rh;\nrh = r / RADIX;\nmant[i] = r - rh * RADIX;\nif (rh != 0) {\nif (exp < MIN_EXP) {\nif (exp > MAX_EXP) {\nif (n != 0) {\nfield.setIEEEFlagsBits(DfpField.FLAG_INEXACT);\nreturn DfpField.FLAG_INEXACT;\nreturn 0;\n}",
+            "method_id": 12
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:newInstance(J)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp newInstance(final long x) {\nreturn new Dfp(getField(), x);\n}",
+            "method_id": 13
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpField:getZero()Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp getZero() {\nreturn zero;\n}",
+            "method_id": 14
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:multiply(Lorg/apache/commons/math/dfp/Dfp;)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public Dfp multiply(final Dfp x) {\nif (field.getRadixDigits() != x.field.getRadixDigits()) {\nDfp result = newInstance(getZero());\nif (nans != FINITE || x.nans != FINITE) {\nint[] product = new int[mant.length*2];  // Big enough to hold even the largest result\nfor (int i = 0; i < mant.length; i++) {\nint rh = 0;  // acts as a carry\nfor (int j=0; j<mant.length; j++) {\nint r = mant[i] * x.mant[j];    // multiply the 2 digits\nr = r + product[i+j] + rh;  // add to the product digit with carry in\nrh = r / RADIX;\nproduct[i+j] = r - rh * RADIX;\nproduct[i+mant.length] = rh;\nint md = mant.length * 2 - 1;  // default, in case result is zero\nfor (int i = mant.length * 2 - 1; i >= 0; i--) {\nif (product[i] != 0) {\nmd = i;\nbreak;\nfor (int i = 0; i < mant.length; i++) {\nresult.mant[mant.length - i - 1] = product[md - i];\nresult.exp = exp + x.exp + md - 2 * mant.length + 1;\nresult.sign = (byte)((sign == x.sign)?1:-1);\nif (result.mant[mant.length-1] == 0) {\nresult.exp = 0;\nif (md > (mant.length-1)) {\nexcp = result.round(product[md-mant.length]);\nif (excp != 0) {\nresult = dotrap(excp, MULTIPLY_TRAP, x, result);\nreturn result;\n}",
+            "method_id": 15
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:dfp2string()Ljava/lang/String;",
+            "method_body": "protected String dfp2string() {\nchar buffer[] = new char[mant.length*4 + 20];\nint p = 1;\nint e = exp;\nboolean pointInserted = false;\nbuffer[0] = ' ';\nif (e <= 0) {\nbuffer[p++] = '0';\nbuffer[p++] = '.';\npointInserted = true;\nwhile (e < 0) {\nfor (int i = mant.length - 1; i >= 0; i--) {\nbuffer[p++] = (char) ((mant[i] / 1000) + '0');\nbuffer[p++] = (char) (((mant[i] / 100) % 10) + '0');\nbuffer[p++] = (char) (((mant[i] / 10) % 10) + '0');\nbuffer[p++] = (char) (((mant[i]) % 10) + '0');\nif (--e == 0) {\nbuffer[p++] = '.';\npointInserted = true;\nwhile (e > 0) {\nif (!pointInserted) {\nq = 1;\nwhile (buffer[q] == '0') {\nq++;\nif (buffer[q] == '.') {\nq--;\nwhile (buffer[p-1] == '0') {\np--;\nif (sign < 0) {\nbuffer[--q] = '-';\nreturn new String(buffer, q, p - q);\n}",
+            "method_id": 16
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:log10()I",
+            "method_body": "public int log10()  {\nif (mant[mant.length-1] > 1000) {\nif (mant[mant.length-1] > 100) {\nif (mant[mant.length-1] > 10) {\nreturn exp * 4 - 4;\n}",
+            "method_id": 17
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.Dfp:<init>(Lorg/apache/commons/math/dfp/Dfp;)V",
+            "method_body": "public Dfp(final Dfp d) {\nmant  = d.mant.clone();\nsign  = d.sign;\nexp   = d.exp;\nnans  = d.nans;\nfield = d.field;\n}",
+            "method_id": 18
+        },
+        {
+            "method_signature": "org.apache.commons.math.dfp.DfpMath:pow(Lorg/apache/commons/math/dfp/Dfp;I)Lorg/apache/commons/math/dfp/Dfp;",
+            "method_body": "public static Dfp pow(Dfp base, int a)\nboolean invert = false;\nDfp result = base.getOne();\nif (a == 0) {\nif (a < 0) {\ninvert = true;\na = -a;\nDfp r = new Dfp(base);\nint trial = 1;\nprevr = new Dfp(r);\nprevtrial = trial;\nr = r.multiply(r);\ntrial = trial * 2;\n} while (a>trial);\nr = prevr;\ntrial = prevtrial;\na = a - trial;\nresult = result.multiply(r);\n} while (a >= 1);\nif (invert) {\nresult = base.getOne().divide(result);\nreturn base.newInstance(result);\n}",
+            "method_id": 19
+        }
+    ]
+}

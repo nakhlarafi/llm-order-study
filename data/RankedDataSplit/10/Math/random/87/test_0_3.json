@@ -1,0 +1,59 @@
+{
+    "bug_id": 87,
+    "test_id": 0,
+    "test_name": "org.apache.commons.math.optimization.linear.SimplexSolverTest.testSingleVariableAndConstraint",
+    "test_body": "public void testSingleVariableAndConstraint() throws OptimizationException {\nLinearObjectiveFunction f = new LinearObjectiveFunction(new double[] { 3 }, 0);\nCollection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();\nconstraints.add(new LinearConstraint(new double[] { 1 }, Relationship.LEQ, 10));\n73: SimplexSolver solver = new SimplexSolver();\nRealPointValuePair solution = solver.optimize(f, constraints, GoalType.MAXIMIZE, false);\nassertEquals(10.0, solution.getPoint()[0], 0.0);\nassertEquals(30.0, solution.getValue(), 0.0);",
+    "stack_trace": "junit.framework.AssertionFailedError: expected:<10.0> but was:<0.0>\nat org.junit.Assert.fail(Assert.java:88)\nat org.junit.Assert.failNotEquals(Assert.java:743)\nat org.junit.Assert.assertEquals(Assert.java:494)\nat org.junit.Assert.assertEquals(Assert.java:592)\nat org.apache.commons.math.optimization.linear.SimplexSolverTest.testSingleVariableAndConstraint(SimplexSolverTest.java:75)",
+    "covered_methods": [
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.LinearConstraint:<init>(Lorg/apache/commons/math/linear/RealVector;Lorg/apache/commons/math/optimization/linear/Relationship;D)V",
+            "method_body": "public LinearConstraint(final RealVector coefficients, final Relationship relationship,\nfinal double value) {\nthis.coefficients = coefficients;\nthis.relationship = relationship;\nthis.value        = value;\n}",
+            "method_id": 30
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.SimplexSolver:getPivotColumn(Lorg/apache/commons/math/optimization/linear/SimplexTableau;)Ljava/lang/Integer;",
+            "method_body": "private Integer getPivotColumn(SimplexTableau tableau) {\ndouble minValue = 0;\nInteger minPos = null;\nfor (int i = tableau.getNumObjectiveFunctions(); i < tableau.getWidth() - 1; i++) {\nif (MathUtils.compareTo(tableau.getEntry(0, i), minValue, epsilon) < 0) {\nminValue = tableau.getEntry(0, i);\nminPos = i;\nreturn minPos;\n}",
+            "method_id": 31
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.AbstractLinearOptimizer:setMaxIterations(I)V",
+            "method_body": "public void setMaxIterations(int maxIterations) {\nthis.maxIterations = maxIterations;\n}",
+            "method_id": 32
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.AbstractLinearOptimizer:optimize(Lorg/apache/commons/math/optimization/linear/LinearObjectiveFunction;Ljava/util/Collection;Lorg/apache/commons/math/optimization/GoalType;Z)Lorg/apache/commons/math/optimization/RealPointValuePair;",
+            "method_body": "public RealPointValuePair optimize(final LinearObjectiveFunction f,\nthis.f                     = f;\nthis.constraints           = constraints;\nthis.goalType              = goalType;\nthis.restrictToNonNegative = restrictToNonNegative;\niterations = 0;\nreturn doOptimize();\n}",
+            "method_id": 33
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.SimplexTableau:getHeight()I",
+            "method_body": "protected final int getHeight() {\nreturn tableau.getRowDimension();\n}",
+            "method_id": 34
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.SimplexTableau:createTableau(Z)[[D",
+            "method_body": "protected double[][] createTableau(final boolean maximize) {\nList<LinearConstraint> constraints = getNormalizedConstraints();\nint width = numDecisionVariables + numSlackVariables +\nint height = constraints.size() + getNumObjectiveFunctions();\ndouble[][] matrix = new double[height][width];\nif (getNumObjectiveFunctions() == 2) {\nint zIndex = (getNumObjectiveFunctions() == 1) ? 0 : 1;\nmatrix[zIndex][zIndex] = maximize ? 1 : -1;\nRealVector objectiveCoefficients =\ncopyArray(objectiveCoefficients.getData(), matrix[zIndex], getNumObjectiveFunctions());\nmatrix[zIndex][width - 1] =\nif (!restrictToNonNegative) {\nmatrix[zIndex][getSlackVariableOffset() - 1] =\nint slackVar = 0;\nint artificialVar = 0;\nfor (int i = 0; i < constraints.size(); i++) {\nLinearConstraint constraint = constraints.get(i);\nint row = getNumObjectiveFunctions() + i;\ncopyArray(constraint.getCoefficients().getData(), matrix[row], 1);\nif (!restrictToNonNegative) {\nmatrix[row][getSlackVariableOffset() - 1] =\nmatrix[row][width - 1] = constraint.getValue();\nif (constraint.getRelationship() == Relationship.LEQ) {\nmatrix[row][getSlackVariableOffset() + slackVar++] = 1;  // slack\nif ((constraint.getRelationship() == Relationship.EQ) ||\nreturn matrix;\n}",
+            "method_id": 35
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.SimplexTableau:getSlackVariableOffset()I",
+            "method_body": "protected final int getSlackVariableOffset() {\nreturn getNumObjectiveFunctions() + numDecisionVariables;\n}",
+            "method_id": 36
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.SimplexTableau:getInvertedCoeffiecientSum(Lorg/apache/commons/math/linear/RealVector;)D",
+            "method_body": "protected static double getInvertedCoeffiecientSum(final RealVector coefficients) {\ndouble sum = 0;\nfor (double coefficient : coefficients.getData()) {\nsum -= coefficient;\nreturn sum;\n}",
+            "method_id": 37
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.LinearObjectiveFunction:getConstantTerm()D",
+            "method_body": "public double getConstantTerm() {\nreturn constantTerm;\n}",
+            "method_id": 38
+        },
+        {
+            "method_signature": "org.apache.commons.math.optimization.linear.LinearObjectiveFunction:getValue([D)D",
+            "method_body": "public double getValue(final double[] point) {\nreturn coefficients.dotProduct(point) + constantTerm;\n}",
+            "method_id": 39
+        }
+    ]
+}
