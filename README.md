@@ -7,6 +7,9 @@ This project explores how the order of code impacts the performance of Large Lan
 - **OpenAI API**: Ensure you have access and a valid API key.
 - **LangChain**: Install it via `pip install langchain`.
 
+## All data and results related to this work can be found here
+https://zenodo.org/records/14498019
+
 ## How to Run
 
 ### 1. **Run Experiments**
